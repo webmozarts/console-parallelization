@@ -1,0 +1,28 @@
+{
+    "name": "webmozarts/console-parallelization",
+    "description": "Enables parallelization of Symfony Console commands",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bernhard Schussek",
+            "email": "bernhard.schussek@webmozarts.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "symfony/console": "^3.0 || ^4.0",
+        "symfony/dependency-injection": "^3.0 || ^4.0",
+        "symfony/process": "^3.0 || ^4.0",
+        "webmozart/assert": "^1.5",
+        "psr/log": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webmozarts\\Console\\Parallelization\\": "src/"
+        }
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.15"
+    }
+}
