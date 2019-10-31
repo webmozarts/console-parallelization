@@ -7,8 +7,8 @@ How it works
 ------------
 
 When you launch a command with multi-processing enabled (`--processes 2`), a 
-master process fetches *tasks* and distributes them across the given number of 
-child processes. Child processes are killed after a fixed number of tasks 
+master process fetches *items* and distributes them across the given number of
+child processes. Child processes are killed after a fixed number of items
 (a *segment*) in order to prevent them from slowing down over time.
 
 Optionally, the work of child processes can be split down into further chunks
@@ -46,11 +46,11 @@ class ImportMoviesCommand extends ContainerAwareCommand
         self::configureParallelization($this);
     }
 
-    protected function fetchTasks(InputInterface $input): array
+    protected function fetchItems(InputInterface $input): array
     {
         // open up the file and read movie data...
 
-        // return tasks as strings
+        // return items as strings
         return [
             '{"id": 1, "name": "Star Wars"}',
             '{"id": 2, "name": "Django Unchained"}',
@@ -58,19 +58,19 @@ class ImportMoviesCommand extends ContainerAwareCommand
         ];
     }
 
-    protected function runSingleCommand(string $task, InputInterface $input, OutputInterface $output): void
+    protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
     {
-        $movieData = unserialize($task);
+        $movieData = unserialize($item);
    
         // insert into the database
     }
 
-    protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $tasks): void
+    protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $items): void
     {
         // flush the database and clear the entity manager
     }
 
-    protected function getTaskName(int $count): string
+    protected function getItemName(int $count): string
     {
         return 1 === $count ? 'movie' : 'movies';
     }
@@ -99,18 +99,18 @@ Processing 2768 movies in segments of 50, batches of 50, 56 rounds, 56 batches i
 Processed 2768 movies.
 ```
 
-Tasks
+Items
 -----
 
-The master process fetches all the tasks that need to be processed and passes
-them to the child processes through their Standard Input. Hence tasks must 
+The master process fetches all the items that need to be processed and passes
+them to the child processes through their Standard Input. Hence items must 
 fulfill two requirements:
 
-* Tasks must be strings
-* Tasks must not contain newlines
+* Items must be strings
+* Items must not contain newlines
 
-Typically, you want to keep tasks small in order to offload processing from the
-master process to the child process. Some typical examples for tasks:
+Typically, you want to keep items small in order to offload processing from the
+master process to the child process. Some typical examples for items:
 
 * The master process reads a file and passes the lines to the child processes
 * The master processes fetches IDs of database rows that need to be updated and passes them to the child processes
@@ -118,8 +118,8 @@ master process to the child process. Some typical examples for tasks:
 Segments
 --------
 
-When you run a command with multi-processing enabled, the tasks returned by
-`fetchTasks()` are split into segments of a fixed size. Each child processes
+When you run a command with multi-processing enabled, the items returned by
+`fetchItems()` are split into segments of a fixed size. Each child processes
 processes a single segment and kills itself after that.
 
 By default, the segment size is the same as the batch size (see below), but you 
@@ -146,12 +146,12 @@ To run code before/after each batch, override the hooks `runBeforeBatch()` and
 `runAfterBatch()`:
 
 ```php
-protected function runBeforeBatch(InputInterface $input, OutputInterface $output, array $tasks): void
+protected function runBeforeBatch(InputInterface $input, OutputInterface $output, array $items): void
 {
     // e.g. fetch needed resources collectively
 }
 
-protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $tasks): void
+protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $items): void
 {
     // e.g. flush database changes and free resources
 }
@@ -177,8 +177,8 @@ Method                                      | Scope             | Description
 ------------------------------------------- | ----------------- | ---------------------------------------------
 `runBeforeFirstCommand($input, $output)`    | Master process    | Run before any child process is spawned
 `runAfterLastCommand($input, $output)`      | Master process    | Run after all child processes have completed
-`runBeforeBatch($input, $output, $tasks)`   | Child process     | Run before each batch in the child process
-`runAfterBatch($input, $output, $tasks)`    | Child process     | Run after each batch in the child process
+`runBeforeBatch($input, $output, $items)`   | Child process     | Run before each batch in the child process
+`runAfterBatch($input, $output, $items)`    | Child process     | Run after each batch in the child process
 
 Authors
 -------

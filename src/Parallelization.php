@@ -41,22 +41,22 @@ use const STDIN;
  *
  * You must implement the following methods in your command:
  *
- *  * fetchTasks(): Returns all the tasks that you want to process as
+ *  * fetchItems(): Returns all the items that you want to process as
  *    strings. Typically, you will return IDs of database objects here.
- *  * runSingleCommand(): Executes the command for a single task.
- *  * getTaskName(): Returns a human readable name of the processed tasks.
+ *  * runSingleCommand(): Executes the command for a single item.
+ *  * getItemName(): Returns a human readable name of the processed items.
  *
  * You can improve the performance of your command by making use of batching.
- * Batching allows you to process multiple tasks together, for example to
+ * Batching allows you to process multiple items together, for example to
  * persist them in a batch to reduce the number of I/O operations.
  *
  * To enable batching, you will typically implement runAfterBatch() and persist
  * the changes done in multiple calls of runSingleCommand().
  *
  * The batch size is determined by getBatchSize() and defaults to the segment
- * size. The segment size is the number of tasks a worker (child) process
+ * size. The segment size is the number of items a worker (child) process
  * consumes before it dies. This means that, by default, a child process will
- * process all its tasks, persist them in a batch and then die. If you want
+ * process all its items, persist them in a batch and then die. If you want
  * to improve the performance of your command, try to tweak getSegmentSize()
  * first. Optionally, you can tweak getBatchSize() to process multiple batches
  * in each child process.
@@ -126,9 +126,9 @@ trait Parallelization
     {
         $command
             ->addArgument(
-                'task',
+                'item',
                 InputArgument::OPTIONAL,
-                'The task to process'
+                'The item to process'
             )
             ->addOption(
                 'processes',
@@ -168,39 +168,39 @@ trait Parallelization
     abstract protected function getApplication();
 
     /**
-     * Fetches the tasks that should be processed.
+     * Fetches the items that should be processed.
      *
-     * Typically, you will fetch all the tasks of the database objects that
+     * Typically, you will fetch all the items of the database objects that
      * you want to process here. These will be passed to runSingleCommand().
      *
      * This method is called exactly once in the master process.
      *
      * @param InputInterface $input The console input
      *
-     * @return string[] The tasks to process
+     * @return string[] The items to process
      */
-    abstract protected function fetchTasks(InputInterface $input): array;
+    abstract protected function fetchItems(InputInterface $input): array;
 
     /**
-     * Processes an task in the child process.
+     * Processes an item in the child process.
      */
     abstract protected function runSingleCommand(
-        string $task,
+        string $item,
         InputInterface $input,
         OutputInterface $output
     ): void;
 
     /**
-     * Returns the name of each task in lowercase letters.
+     * Returns the name of each item in lowercase letters.
      *
      * For example, this method could return "contact" if the count is one and
      * "contacts" otherwise.
      *
-     * @param int $count The number of tasks
+     * @param int $count The number of items
      *
-     * @return string The name of the task in the correct plurality
+     * @return string The name of the item in the correct plurality
      */
-    abstract protected function getTaskName(int $count): string;
+    abstract protected function getItemName(int $count): string;
 
     /**
      * Method executed at the very beginning of the master process.
@@ -221,33 +221,33 @@ trait Parallelization
     }
 
     /**
-     * Method executed before executing all the tasks of the current batch.
+     * Method executed before executing all the items of the current batch.
      * This method is executed in both the master and child process.
      *
-     * @param string[] $tasks
+     * @param string[] $items
      */
     protected function runBeforeBatch(
         InputInterface $input,
         OutputInterface $output,
-        array $tasks
+        array $items
     ): void {
     }
 
     /**
-     * Method executed after executing all the tasks of the current batch.
+     * Method executed after executing all the items of the current batch.
      * This method is executed in both the master and child process.
      *
-     * @param string[] $tasks
+     * @param string[] $items
      */
     protected function runAfterBatch(
         InputInterface $input,
         OutputInterface $output,
-        array $tasks
+        array $items
     ): void {
     }
 
     /**
-     * Returns the number of tasks to process per child process. This is
+     * Returns the number of items to process per child process. This is
      * done in order to circumvent some issues recurring to long living
      * processes such as memory leaks.
      *
@@ -259,7 +259,7 @@ trait Parallelization
     }
 
     /**
-     * Returns the number of tasks to process in a batch. Multiple batches
+     * Returns the number of items to process in a batch. Multiple batches
      * can be executed within the master and child processes. This allows to
      * early fetch aggregates or persist aggregates in batches for performance
      * optimizations.
@@ -296,9 +296,9 @@ trait Parallelization
         $this->runBeforeFirstCommand($input, $output);
 
         $numberOfProcesses = (int) $input->getOption('processes');
-        $hasTask = (bool) $input->getArgument('task');
-        $tasks = $hasTask ? [$input->getArgument('task')] : $this->fetchTasks($input);
-        $count = count($tasks);
+        $hasItem = (bool) $input->getArgument('item');
+        $items = $hasItem ? [$input->getArgument('item')] : $this->fetchItems($input);
+        $count = count($items);
         $segmentSize = 1 === $numberOfProcesses ? $count : $this->getSegmentSize();
         $batchSize = $this->getBatchSize();
         $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
@@ -313,8 +313,8 @@ trait Parallelization
             )
         );
 
-        if (!$hasTask && 1 !== $numberOfProcesses) {
-            // Shouldn't check this when only one task has been specified or
+        if (!$hasItem && 1 !== $numberOfProcesses) {
+            // Shouldn't check this when only one item has been specified or
             // when no child processes is used
             Assert::greaterThanEq(
                 $segmentSize,
@@ -331,7 +331,7 @@ trait Parallelization
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
             $count,
-            $this->getTaskName($count),
+            $this->getItemName($count),
             $segmentSize,
             $batchSize,
             $rounds,
@@ -350,22 +350,22 @@ trait Parallelization
         if ($count <= $segmentSize || 1 === $numberOfProcesses) {
             // Run in the master process
 
-            $tasksChunks = array_chunk(
-                $tasks,
+            $itemsChunks = array_chunk(
+                $items,
                 $this->getBatchSize(),
                 false
             );
 
-            foreach ($tasksChunks as $tasks) {
-                $this->runBeforeBatch($input, $output, $tasks);
+            foreach ($itemsChunks as $items) {
+                $this->runBeforeBatch($input, $output, $items);
 
-                foreach ($tasks as $task) {
-                    $this->runTolerantSingleCommand((string) $task, $input, $output);
+                foreach ($items as $item) {
+                    $this->runTolerantSingleCommand((string) $item, $input, $output);
 
                     $progressBar->advance();
                 }
 
-                $this->runAfterBatch($input, $output, $tasks);
+                $this->runAfterBatch($input, $output, $items);
             }
         } else {
             // Distribute if we have multiple segments
@@ -395,7 +395,7 @@ trait Parallelization
                 }
             );
 
-            $processLauncher->run($tasks);
+            $processLauncher->run($items);
         }
 
         $progressBar->finish();
@@ -405,7 +405,7 @@ trait Parallelization
         $output->writeln(sprintf(
             'Processed %d %s.',
             $count,
-            $this->getTaskName($count)
+            $this->getItemName($count)
         ));
 
         $this->runAfterLastCommand($input, $output);
@@ -414,8 +414,8 @@ trait Parallelization
     /**
      * Executes the child process.
      *
-     * This method reads the tasks from the standard input that the master process
-     * piped into the process. These tasks are passed to runSingleCommand() one
+     * This method reads the items from the standard input that the master process
+     * piped into the process. These items are passed to runSingleCommand() one
      * by one.
      */
     protected function executeChildProcess(
@@ -424,7 +424,7 @@ trait Parallelization
     ): void {
         $advancementChar = self::getProgressSymbol();
 
-        $tasksChunks = array_chunk(
+        $itemsChunks = array_chunk(
             array_filter(
                 explode(
                     PHP_EOL,
@@ -434,16 +434,16 @@ trait Parallelization
             $this->getBatchSize()
         );
 
-        foreach ($tasksChunks as $tasks) {
-            $this->runBeforeBatch($input, $output, $tasks);
+        foreach ($itemsChunks as $items) {
+            $this->runBeforeBatch($input, $output, $items);
 
-            foreach ($tasks as $task) {
-                $this->runTolerantSingleCommand($task, $input, $output);
+            foreach ($items as $item) {
+                $this->runTolerantSingleCommand($item, $input, $output);
 
                 $output->write($advancementChar);
             }
 
-            $this->runAfterBatch($input, $output, $tasks);
+            $this->runAfterBatch($input, $output, $items);
         }
     }
 
@@ -480,17 +480,17 @@ trait Parallelization
     }
 
     private function runTolerantSingleCommand(
-        string $task,
+        string $item,
         InputInterface $input,
         OutputInterface $output
     ): void {
         try {
-            $this->runSingleCommand(trim($task), $input, $output);
+            $this->runSingleCommand(trim($item), $input, $output);
         } catch (Throwable $exception) {
             if ($this->logError) {
                 $output->writeln(sprintf(
                     "Failed to process \"%s\": %s\n%s",
-                    trim($task),
+                    trim($item),
                     $exception->getMessage(),
                     $exception->getTraceAsString()
                 ));

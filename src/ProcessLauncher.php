@@ -67,24 +67,24 @@ class ProcessLauncher
     }
 
     /**
-     * Runs child processes to process the given tasks.
+     * Runs child processes to process the given items.
      *
-     * @param string[] $tasks The tasks to process. None of the tasks must
+     * @param string[] $items The items to process. None of the items must
      *                        contain newlines
      */
-    public function run(array $tasks): void
+    public function run(array $items): void
     {
         /** @var InputStream|null $currentInputStream */
         $currentInputStream = null;
-        $numberOfStreamedTasks = 0;
+        $numberOfStreamedItems = 0;
 
-        foreach ($tasks as $task) {
+        foreach ($items as $item) {
             // Close the input stream if the segment is full
-            if (null !== $currentInputStream && $numberOfStreamedTasks >= $this->segmentSize) {
+            if (null !== $currentInputStream && $numberOfStreamedItems >= $this->segmentSize) {
                 $currentInputStream->close();
 
                 $currentInputStream = null;
-                $numberOfStreamedTasks = 0;
+                $numberOfStreamedItems = 0;
             }
 
             // Wait until we can launch a new process
@@ -94,7 +94,7 @@ class ProcessLauncher
                 if (count($this->runningProcesses) < $this->processLimit) {
                     // Start a new process
                     $currentInputStream = new InputStream();
-                    $numberOfStreamedTasks = 0;
+                    $numberOfStreamedItems = 0;
 
                     $this->startProcess($currentInputStream);
 
@@ -106,9 +106,9 @@ class ProcessLauncher
             }
 
             // Stream the data segment to the process' input stream
-            $currentInputStream->write($task."\n");
+            $currentInputStream->write($item."\n");
 
-            ++$numberOfStreamedTasks;
+            ++$numberOfStreamedItems;
         }
 
         if (null !== $currentInputStream) {
