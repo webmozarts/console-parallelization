@@ -369,11 +369,17 @@ trait Parallelization
             }
         } else {
             // Distribute if we have multiple segments
+            $consolePath = realpath(getcwd().'/bin/console');
+            Assert::fileExists(
+                $consolePath,
+                sprintf('The bin/console file could not be found at %s', getcwd()))
+            ;
+
             $commandTemplate = implode(
                 ' ',
                 array_filter([
                     self::detectPhpExecutable(),
-                    realpath(getcwd().'/bin/console'),
+                    $consolePath,
                     $this->getName(),
                     implode(' ', array_slice($input->getArguments(), 1)),
                     '--child',
