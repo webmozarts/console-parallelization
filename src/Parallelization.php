@@ -373,7 +373,7 @@ trait Parallelization
                 ' ',
                 array_filter([
                     self::detectPhpExecutable(),
-                    'bin/console',
+                    realpath(getcwd().'/bin/console'),
                     $this->getName(),
                     implode(' ', array_slice($input->getArguments(), 1)),
                     '--child',
