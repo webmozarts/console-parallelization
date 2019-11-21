@@ -7,8 +7,13 @@
         {
             "name": "Bernhard Schussek",
             "email": "bernhard.schussek@webmozarts.com"
+        },
+        {
+            "name": "Théo Fidry",
+            "email": "theo.fidry@webmozarts.com"
         }
     ],
+
     "require": {
         "php": "^7.1",
         "symfony/console": "^3.0 || ^4.0",
@@ -17,12 +22,17 @@
         "webmozart/assert": "^1.5",
         "psr/log": "^1.1"
     },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.15"
+    },
+
     "autoload": {
         "psr-4": {
             "Webmozarts\\Console\\Parallelization\\": "src/"
         }
     },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.15"
+
+    "config": {
+        "sort-packages": true
     }
 }
