@@ -13,7 +13,12 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function array_filter;
+use function array_slice;
+use function implode;
 use RuntimeException;
+use function sprintf;
+use const STDIN;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -26,13 +31,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Throwable;
-use Webmozart\Assert\Assert;
-use function array_filter;
-use function array_slice;
-use function implode;
-use function sprintf;
 use function trim;
-use const STDIN;
+use Webmozart\Assert\Assert;
 
 /**
  * Adds parallelization capabilities to console commands.
