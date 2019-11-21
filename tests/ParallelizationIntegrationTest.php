@@ -17,7 +17,7 @@ use function preg_replace;
 use function rewind;
 use function str_replace;
 
-class TestTest extends TestCase
+class ParallelizationIntegrationTest extends TestCase
 {
     /**
      * @var Application
