@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function json_decode;
 use function unserialize;
 
 final class ImportMoviesCommand extends ContainerAwareCommand
@@ -47,8 +48,6 @@ final class ImportMoviesCommand extends ContainerAwareCommand
      */
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
     {
-        $movieData = unserialize($item);
-
         // insert into the database
     }
 

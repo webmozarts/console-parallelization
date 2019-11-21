@@ -59,7 +59,7 @@ class TestTest extends TestCase
         $this->commandTester = new CommandTester($command);
     }
 
-    public function test_it_can_run_the_command_without_parallel(): void
+    public function test_it_can_run_the_command_without_sub_processes(): void
     {
         $this->commandTester->execute(
             ['command' => 'import:movies'],
@@ -68,8 +68,47 @@ class TestTest extends TestCase
 
         $actual = $this->commandTester->getDisplay(true);
 
-        $this->assertSame('', $actual, 'Expected logs to be identical');
-    }
+        $this->assertSame(
+            <<<'EOF'
+Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
+
+ 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
+ 2/2 [============================] 100% < 1 sec/< 1 sec 8.0 MiB
+
+Processed 2 movies.
+
+EOF
+            ,
+            $actual,
+            'Expected logs to be identical'
+        );
+    }public function test_it_can_run_the_command_with_multiple_processes(): void
+{
+    $this->commandTester->execute(
+        [
+            'command' => 'import:movies',
+            '--processes' => 2,
+        ],
+        ['interactive' => true]
+    );
+
+    $actual = $this->commandTester->getDisplay(true);
+
+    $this->assertSame(
+        <<<'EOF'
+Processing 2 movies in segments of 50, batches of 50, 1 rounds, 1 batches in 2 processes
+
+ 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
+ 2/2 [============================] 100% < 1 sec/< 1 sec 8.0 MiB
+
+Processed 2 movies.
+
+EOF
+        ,
+        $actual,
+        'Expected logs to be identical'
+    );
+}
 
     /**
      * Returns the output for the tester.
