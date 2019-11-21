@@ -1,21 +1,29 @@
 <?php
 
+/*
+ * This file is part of the Webmozarts Console Parallelization package.
+ *
+ * (c) Webmozarts GmbH <office@webmozarts.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function feof;
+use function fgets;
 use PHPUnit\Framework\TestCase;
+use function preg_replace;
+use function rewind;
+use function str_replace;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\Kernel;
-use function feof;
-use function fgets;
-use function preg_replace;
-use function rewind;
-use function str_replace;
 
 class ParallelizationIntegrationTest extends TestCase
 {
@@ -82,9 +90,11 @@ EOF
             $actual,
             'Expected logs to be identical'
         );
-    }public function test_it_can_run_the_command_with_multiple_processes(): void
-{
-    $this->commandTester->execute(
+    }
+
+    public function test_it_can_run_the_command_with_multiple_processes(): void
+    {
+        $this->commandTester->execute(
         [
             'command' => 'import:movies',
             '--processes' => 2,
@@ -92,9 +102,9 @@ EOF
         ['interactive' => true]
     );
 
-    $actual = $this->commandTester->getDisplay(true);
+        $actual = $this->commandTester->getDisplay(true);
 
-    $this->assertSame(
+        $this->assertSame(
         <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 rounds, 1 batches in 2 processes
 
@@ -108,7 +118,7 @@ EOF
         $actual,
         'Expected logs to be identical'
     );
-}
+    }
 
     /**
      * Returns the output for the tester.
