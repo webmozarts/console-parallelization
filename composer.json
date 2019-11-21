@@ -16,19 +16,29 @@
 
     "require": {
         "php": "^7.1",
-        "symfony/console": "^3.0 || ^4.0",
         "symfony/dependency-injection": "^3.0 || ^4.0",
         "symfony/process": "^3.0 || ^4.0",
         "webmozart/assert": "^1.5",
         "psr/log": "^1.1"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.15"
+        "friendsofphp/php-cs-fixer": "^2.15",
+        "phpunit/phpunit": "^8.4",
+        "symfony/console": "^4.1",
+        "symfony/framework-bundle": "^4.1"
     },
 
     "autoload": {
         "psr-4": {
-            "Webmozarts\\Console\\Parallelization\\": "src/"
+            "Webmozarts\\Console\\Parallelization\\": [
+                "fixtures/",
+                "src/"
+            ]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webmozarts\\Console\\Parallelization\\": "tests/"
         }
     },
 

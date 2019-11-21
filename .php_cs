@@ -10,7 +10,11 @@
  */
 
 $finder = PhpCsFixer\Finder::create()
-    ->in([__DIR__.'/src', __DIR__.'/tests'])
+    ->in([
+        __DIR__.'/fixtures',
+        __DIR__.'/src',
+        __DIR__.'/tests'
+    ])
 ;
 
 return PhpCsFixer\Config::create()
@@ -20,7 +24,7 @@ return PhpCsFixer\Config::create()
         '@Symfony' => true,
         'declare_strict_types' => true,
         'header_comment' => [
-            'header' => <<<EOF
+            'header' => <<<'EOF'
 This file is part of the Webmozarts Console Parallelization package.
 
 (c) Webmozarts GmbH <office@webmozarts.com>

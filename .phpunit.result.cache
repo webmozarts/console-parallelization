@@ -1,0 +1,1 @@
+C:37:"PHPUnit\Runner\DefaultTestResultCache":250:{a:2:{s:7:"defects";a:1:{s:89:"Webmozarts\Console\Parallelization\TestTest::test_it_can_run_the_command_without_parallel";i:3;}s:5:"times";a:1:{s:89:"Webmozarts\Console\Parallelization\TestTest::test_it_can_run_the_command_without_parallel";d:0.076;}}}
