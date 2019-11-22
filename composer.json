@@ -31,10 +31,7 @@
 
     "autoload": {
         "psr-4": {
-            "Webmozarts\\Console\\Parallelization\\": [
-                "fixtures/",
-                "src/"
-            ]
+            "Webmozarts\\Console\\Parallelization\\": "src/"
         }
     },
     "autoload-dev": {

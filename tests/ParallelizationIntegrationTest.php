@@ -25,6 +25,9 @@ use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\HttpKernel\Kernel;
 
+/**
+ * @coversNothing
+ */
 class ParallelizationIntegrationTest extends TestCase
 {
     /**

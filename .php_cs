@@ -11,7 +11,6 @@
 
 $finder = PhpCsFixer\Finder::create()
     ->in([
-        __DIR__.'/fixtures',
         __DIR__.'/src',
         __DIR__.'/tests'
     ])
