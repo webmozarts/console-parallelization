@@ -20,6 +20,7 @@ PHP_CS_FIXER=vendor/bin/php-cs-fixer
 cs:	## Fixes CS
 cs: $(PHP_CS_FIXER)
 	$(PHPNOGC) $(PHP_CS_FIXER) fix
+	LC_ALL=C sort -u .gitignore -o .gitignore
 
 
 #
