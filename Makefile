@@ -26,6 +26,11 @@ cs: $(PHP_CS_FIXER)
 # Tests
 #---------------------------------------------------------------------------
 
+PHPUNIT=vendor/bin/phpunit
+test:	## Runs the tests
+test: $(PHPUNIT)
+	$(PHPUNIT)
+
 
 #
 # Rules from files
@@ -40,4 +45,7 @@ vendor: composer.lock
 	touch $@
 
 $(PHP_CS_FIXER): vendor
+	touch $@
+
+$(PHPUNIT): vendor
 	touch $@

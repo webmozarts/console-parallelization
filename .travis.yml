@@ -26,7 +26,8 @@ before_install:
 install:
     - composer install $COMPOSER_FLAGS
 
-script: []
+script:
+    - make test
 
 notifications:
     email: false
