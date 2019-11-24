@@ -13,15 +13,11 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function feof;
-use function fgets;
 use PHPUnit\Framework\TestCase;
 use function preg_replace;
-use function rewind;
 use function str_replace;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\HttpKernel\Kernel;
 
@@ -77,14 +73,14 @@ class ParallelizationIntegrationTest extends TestCase
             ['interactive' => true]
         );
 
-        $actual = $this->commandTester->getDisplay(true);
+        $actual = $this->getOutput();
 
         $this->assertSame(
             <<<'EOF'
 Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
 
- 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
- 2/2 [============================] 100% < 1 sec/< 1 sec 8.0 MiB
+ 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
+ 2/2 [============================] 100% < 1 sec/< 1 sec 10.0 MiB
 
 Processed 2 movies.
 
@@ -105,49 +101,34 @@ EOF
         ['interactive' => true]
     );
 
-        $actual = $this->commandTester->getDisplay(true);
+        $actual = $this->getOutput();
 
         $this->assertSame(
         <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 rounds, 1 batches in 2 processes
 
- 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
- 2/2 [============================] 100% < 1 sec/< 1 sec 8.0 MiB
+ 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
+ 2/2 [============================] 100% < 1 sec/< 1 sec 10.0 MiB
 
 Processed 2 movies.
 
 EOF
-        ,
-        $actual,
-        'Expected logs to be identical'
-    );
+            ,
+            $actual,
+            'Expected logs to be identical'
+        );
     }
 
-    /**
-     * Returns the output for the tester.
-     */
-    protected function getOutput(CommandTester $tester): string
+    private function getOutput(): string
     {
-        /** @var StreamOutput $output */
-        $output = $tester->getOutput();
-        $stream = $output->getStream();
-        $string = '';
+        $output = $this->commandTester->getDisplay(true);
 
-        rewind($stream);
-
-        while (false === feof($stream)) {
-            $string .= fgets($stream);
-        }
-
-        $string = preg_replace(
-            [
-                '/\x1b(\[|\(|\))[;?0-9]*[0-9A-Za-z]/',
-                '/[\x03|\x1a]/',
-            ],
-            ['', '', ''],
-            $string
+        $output = preg_replace(
+            '/\d+(\.\d+)? ([A-Z]i)?B/',
+            '10.0 MiB',
+            $output
         );
 
-        return str_replace(PHP_EOL, "\n", $string);
+        return str_replace(PHP_EOL, "\n", $output);
     }
 }
