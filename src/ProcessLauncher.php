@@ -101,8 +101,8 @@ class ProcessLauncher
                     break;
                 }
 
-                // 100ms
-                usleep(100000);
+                // 1ms
+                usleep(1000);
             }
 
             // Stream the data segment to the process' input stream
@@ -118,8 +118,8 @@ class ProcessLauncher
         while (count($this->runningProcesses) > 0) {
             $this->freeTerminatedProcesses();
 
-            // 100ms
-            usleep(100000);
+            // 1ms
+            usleep(1000);
         }
     }
 
