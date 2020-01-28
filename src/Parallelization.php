@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Symfony\Contracts\Service\ResetInterface;
 use function array_filter;
 use function array_slice;
 use function implode;
@@ -272,15 +273,17 @@ trait Parallelization
     /**
      * Executes the parallelized command.
      */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($input->getOption('child')) {
             $this->executeChildProcess($input, $output);
 
-            return;
+            return 0;
         }
 
         $this->executeMasterProcess($input, $output);
+
+        return 0;
     }
 
     /**
@@ -505,7 +508,10 @@ trait Parallelization
 
             $container = $this->getContainer();
 
-            if ($container instanceof ResettableContainerInterface) {
+            if (
+                (class_exists(ResetInterface::class) && $container instanceof ResetInterface)
+                || (class_exists(ResettableContainerInterface::class) && $container instanceof ResettableContainerInterface)
+            ) {
                 $container->reset();
             }
         }
