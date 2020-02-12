@@ -119,6 +119,34 @@ EOF
         );
     }
 
+    public function test_it_can_run_the_command_with_one_process_as_child_process(): void
+    {
+        $this->commandTester->execute(
+            [
+                'command' => 'import:movies',
+                '--processes' => 1,
+            ],
+            ['interactive' => true]
+        );
+
+        $actual = $this->getOutput();
+
+        $this->assertSame(
+            <<<'EOF'
+Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
+
+ 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
+ 2/2 [============================] 100% < 1 sec/< 1 sec 10.0 MiB
+
+Processed 2 movies.
+
+EOF
+            ,
+            $actual,
+            'Expected logs to be identical'
+        );
+    }
+
     private function getOutput(): string
     {
         $output = $this->commandTester->getDisplay(true);
