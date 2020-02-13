@@ -300,7 +300,7 @@ trait Parallelization
         $hasItem = (bool) $input->getArgument('item');
         $items = $hasItem ? [$input->getArgument('item')] : $this->fetchItems($input);
         $count = count($items);
-        $segmentSize = 1 === $numberOfProcesses ? $count : $this->getSegmentSize();
+        $segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined ? $count : $this->getSegmentSize();
         $batchSize = $this->getBatchSize();
         $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
         $batches = ceil($segmentSize * 1.0 / $batchSize) * $rounds;
