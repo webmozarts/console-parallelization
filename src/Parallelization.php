@@ -295,11 +295,12 @@ trait Parallelization
     {
         $this->runBeforeFirstCommand($input, $output);
 
+        $numberOfProcessesDefined = null !== $input->getOption('processes');
         $numberOfProcesses = (int) $input->getOption('processes');
         $hasItem = (bool) $input->getArgument('item');
         $items = $hasItem ? [$input->getArgument('item')] : $this->fetchItems($input);
         $count = count($items);
-        $segmentSize = 1 === $numberOfProcesses ? $count : $this->getSegmentSize();
+        $segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined ? $count : $this->getSegmentSize();
         $batchSize = $this->getBatchSize();
         $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
         $batches = ceil($segmentSize * 1.0 / $batchSize) * $rounds;
@@ -347,7 +348,7 @@ trait Parallelization
         $progressBar->setFormat('debug');
         $progressBar->start();
 
-        if ($count <= $segmentSize || 1 === $numberOfProcesses) {
+        if ($count <= $segmentSize || (1 === $numberOfProcesses && !$numberOfProcessesDefined)) {
             // Run in the master process
 
             $itemsChunks = array_chunk(
