@@ -13,7 +13,7 @@ env:
 matrix:
     include:
         - php: '7.2'
-          env: PREFER_LOWEST='true'
+          env: PREFER_LOWEST='--prefer-lowest'
         - php: '7.3'
     fast_finish: true
 
@@ -24,7 +24,7 @@ before_install:
     - composer validate --strict
 
 install:
-    - composer install $COMPOSER_FLAGS
+    - composer update $COMPOSER_FLAGS $PREFER_LOWEST
 
 script:
     - make test
