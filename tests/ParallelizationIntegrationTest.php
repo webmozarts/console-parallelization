@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function method_exists;
 use PHPUnit\Framework\TestCase;
 use function preg_replace;
 use function str_replace;
@@ -263,6 +262,6 @@ EOF
 
     private function isSymfony3(): bool
     {
-        return method_exists(Application::class, 'getTerminalDimensions');
+        return Kernel::VERSION_ID < 40000;
     }
 }

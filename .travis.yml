@@ -7,8 +7,7 @@ cache:
         - $HOME/.composer/cache/files
 
 env:
-    matrix:
-        - COMPOSER_FLAGS='--no-interaction --no-progress --no-suggest --prefer-dist'
+    - COMPOSER_FLAGS='--no-interaction --no-progress --no-suggest --prefer-dist'
 
 matrix:
     include:
