@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use LogicException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Webmozart\Assert\Assert;
 
 abstract class ContainerAwareCommand extends Command implements ContainerAwareInterface
 {
@@ -25,22 +25,24 @@ abstract class ContainerAwareCommand extends Command implements ContainerAwareIn
      */
     private $container;
 
-    protected function getContainer(): ContainerInterface
-    {
-        if (null === $this->container) {
-            $application = $this->getApplication();
-            if (null === $application) {
-                throw new LogicException('The container cannot be retrieved as the application instance is not yet set.');
-            }
-
-            $this->container = $application->getKernel()->getContainer();
-        }
-
-        return $this->container;
-    }
-
     public function setContainer(ContainerInterface $container = null): void
     {
         $this->container = $container;
+    }
+
+    protected function getContainer(): ContainerInterface
+    {
+        if (null !== $this->container) {
+            return $this->container;
+        }
+
+        $application = $this->getApplication();
+
+        Assert::notNull(
+            $application,
+            'The container cannot be retrieved as the application instance is not yet set'
+        );
+
+        return $this->container = $application->getKernel()->getContainer();
     }
 }
