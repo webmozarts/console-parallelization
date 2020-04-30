@@ -30,6 +30,7 @@ use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use function trim;
 use Webmozart\Assert\Assert;
@@ -272,15 +273,17 @@ trait Parallelization
     /**
      * Executes the parallelized command.
      */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($input->getOption('child')) {
             $this->executeChildProcess($input, $output);
 
-            return;
+            return 0;
         }
 
         $this->executeMasterProcess($input, $output);
+
+        return 0;
     }
 
     /**
@@ -505,7 +508,10 @@ trait Parallelization
 
             $container = $this->getContainer();
 
-            if ($container instanceof ResettableContainerInterface) {
+            if (
+                (class_exists(ResetInterface::class) && $container instanceof ResetInterface)
+                || (class_exists(ResettableContainerInterface::class) && $container instanceof ResettableContainerInterface)
+            ) {
                 $container->reset();
             }
         }

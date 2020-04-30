@@ -7,14 +7,17 @@ cache:
         - $HOME/.composer/cache/files
 
 env:
-    matrix:
-        - COMPOSER_FLAGS='--no-interaction --no-progress --no-suggest --prefer-dist'
+    - COMPOSER_FLAGS='--no-interaction --no-progress --no-suggest --prefer-dist'
 
 matrix:
     include:
         - php: '7.2'
           env: PREFER_LOWEST='--prefer-lowest'
         - php: '7.3'
+        - php: '7.4'
+          env: SYMFONY_VERSION='~4.4.0'
+        - php: '7.4'
+          env: SYMFONY_VERSION='~5.0.0'
     fast_finish: true
 
 before_install:
@@ -22,6 +25,10 @@ before_install:
     - set -eo pipefail
     - echo "memory_limit=-1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
     - composer validate --strict
+    - |
+        if [ -n "$SYMFONY_VERSION" ]; then
+            composer require --no-update "symfony/console:${SYMFONY_VERSION}" "symfony/dependency-injection:${SYMFONY_VERSION}" "symfony/process:${SYMFONY_VERSION}" "symfony/framework-bundle:${SYMFONY_VERSION}";
+        fi
 
 install:
     - composer update $COMPOSER_FLAGS $PREFER_LOWEST
