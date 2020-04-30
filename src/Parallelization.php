@@ -136,7 +136,7 @@ trait Parallelization
                 'p',
                 InputOption::VALUE_OPTIONAL,
                 'The number of parallel processes to run',
-                1
+                null
             )
             ->addOption(
                 'child',
@@ -299,7 +299,7 @@ trait Parallelization
         $this->runBeforeFirstCommand($input, $output);
 
         $numberOfProcessesDefined = null !== $input->getOption('processes');
-        $numberOfProcesses = (int) $input->getOption('processes');
+        $numberOfProcesses = $numberOfProcessesDefined ? (int) $input->getOption('processes') : 1;
         $hasItem = (bool) $input->getArgument('item');
         $items = $hasItem ? [$input->getArgument('item')] : $this->fetchItems($input);
         $count = count($items);
