@@ -106,7 +106,7 @@ class ProcessLauncher
             }
 
             // Stream the data segment to the process' input stream
-            $currentInputStream->write($item."\n");
+            $currentInputStream->write($item.PHP_EOL);
 
             ++$numberOfStreamedItems;
         }
