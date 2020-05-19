@@ -389,6 +389,7 @@ trait Parallelization
                     '--child',
                     '--env='.$input->getOption('env'),
                     $input->getOption('no-debug') ? '--no-debug' : '',
+                    $this->serializeInputOptions($input, ['child','env','no-debug', 'processes']),
                 ])
             );
             $terminalWidth = (new Terminal())->getWidth();
@@ -515,5 +516,28 @@ trait Parallelization
                 $container->reset();
             }
         }
+    }
+    
+        private function serializeInputOptions(InputInterface $input, array $blackListParams) : string {
+        $options = array_diff_key(
+            array_filter($input->getOptions()),
+            array_fill_keys($blackListParams, '')
+        );
+
+        $optionString = "";
+        foreach ($options as $name => $value) {
+            $definition = $this->getDefinition();
+            $option = $definition->getOption($name);
+            if (!$option->acceptValue()) {
+                $optionString .= ' --' . $name;
+            } elseif ($option->isArray()) {
+                foreach ($value as $arrayValue) {
+                    $optionString .= ' --'.$name.'='.$arrayValue;
+                }
+            } else {
+                $optionString .= ' --'.$name.'='.$value;
+            }
+        }
+        return $optionString;
     }
 }
