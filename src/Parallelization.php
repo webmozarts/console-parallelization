@@ -518,7 +518,10 @@ trait Parallelization
         }
     }
     
-        private function serializeInputOptions(InputInterface $input, array $blackListParams) : string {
+    /**
+     * @param string[] $blacklistParams
+     */
+    private function serializeInputOptions(InputInterface $input, array $blacklistParams) : string {
         $options = array_diff_key(
             array_filter($input->getOptions()),
             array_fill_keys($blackListParams, '')
