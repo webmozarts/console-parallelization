@@ -68,11 +68,7 @@ final class ParallelizationInputTest extends TestCase
         int $expectedRounds,
         int $expectedBatches
     ): void {
-        $command = new Command();
-
-        ParallelizationInput::configureParallelization($command);
-
-        $input->bind($command->getDefinition());
+        self::bindInput($input);
 
         $parallelizationInput = new ParallelizationInput(
             $input,
@@ -101,11 +97,7 @@ final class ParallelizationInputTest extends TestCase
         InputInterface $input,
         string $expectedErrorMessage
     ): void {
-        $command = new Command();
-
-        ParallelizationInput::configureParallelization($command);
-
-        $input->bind($command->getDefinition());
+        self::bindInput($input);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
@@ -125,12 +117,9 @@ final class ParallelizationInputTest extends TestCase
         Closure $itemsFetcher,
         string $expectedErrorMessage
     ): void {
-        $command = new Command();
-
-        ParallelizationInput::configureParallelization($command);
-
         $input = new StringInput('');
-        $input->bind($command->getDefinition());
+
+        self::bindInput($input);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
@@ -152,12 +141,9 @@ final class ParallelizationInputTest extends TestCase
         Closure $itemsFetcher,
         array $expectedItems
     ): void {
-        $command = new Command();
-
-        ParallelizationInput::configureParallelization($command);
-
         $input = new StringInput('');
-        $input->bind($command->getDefinition());
+
+        self::bindInput($input);
 
         $parallelizationInput = new ParallelizationInput(
             $input,
@@ -544,5 +530,14 @@ final class ParallelizationInputTest extends TestCase
         int $expectedBatches
     ): array {
         return func_get_args();
+    }
+
+    private static function bindInput(InputInterface $input): void
+    {
+        $command = new Command();
+
+        ParallelizationInput::configureParallelization($command);
+
+        $input->bind($command->getDefinition());
     }
 }

@@ -486,12 +486,14 @@ trait Parallelization
             }
         }
     }
-    
+
     /**
      * @param string[] $blackListParams
+     *
      * @return string[]
      */
-    private function serializeInputOptions(InputInterface $input, array $blackListParams) : array {
+    private function serializeInputOptions(InputInterface $input, array $blackListParams): array
+    {
         $options = array_diff_key(
             array_filter($input->getOptions()),
             array_fill_keys($blackListParams, '')
@@ -502,9 +504,9 @@ trait Parallelization
             $definition = $this->getDefinition();
             $option = $definition->getOption($name);
 
-            $optionString  = "";
+            $optionString = '';
             if (!$option->acceptValue()) {
-                $optionString .= ' --' . $name;
+                $optionString .= ' --'.$name;
             } elseif ($option->isArray()) {
                 foreach ($value as $arrayValue) {
                     $optionString .= ' --'.$name.'='.$arrayValue;
@@ -515,6 +517,7 @@ trait Parallelization
 
             $preparedOptionList[] = $optionString;
         }
+
         return $preparedOptionList;
     }
 }
