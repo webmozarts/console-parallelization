@@ -155,6 +155,29 @@ final class ParallelizationInputTest extends TestCase
         $this->assertSame($expectedItems, $parallelizationInput->getItems());
     }
 
+    /**
+     * @dataProvider invalidSegmentAndBatchSizeProvider
+     */
+    public function test_it_cannot_accept_invalid_segment_or_batch_sizes(
+        int $segmentSize,
+        int $batchSize,
+        string $errorMessage
+    ): void {
+        $input = new StringInput('');
+
+        self::bindInput($input);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage($errorMessage);
+
+        new ParallelizationInput(
+            $input,
+            $this->createFakeClosure(),
+            $segmentSize,
+            $batchSize
+        );
+    }
+
     public static function inputProvider(): iterable
     {
         yield 'empty input' => self::createInputArgs(
@@ -263,13 +286,13 @@ final class ParallelizationInputTest extends TestCase
                 return ['item0', 'item1', 'item2', 'item3'];
             },
             1,
-            5,
+            1,
             false,
             1,
             ['item0', 'item1', 'item2', 'item3'],
             4,
             4,
-            5,
+            1,
             1,
             1
         );
@@ -297,13 +320,13 @@ final class ParallelizationInputTest extends TestCase
                 return ['item0', 'item1', 'item2', 'item3'];
             },
             1,
-            5,
+            1,
             false,
             1,
             ['item0', 'item1', 'item2', 'item3'],
             4,
             4,
-            5,
+            1,
             1,
             1
         );
@@ -505,6 +528,27 @@ final class ParallelizationInputTest extends TestCase
                 return ['foo' => 1.5, 'bar' => 5];
             },
             ['1.5', '5'],
+        ];
+    }
+
+    public static function invalidSegmentAndBatchSizeProvider(): iterable
+    {
+        yield 'segment size smaller than batch size' => [
+            10,
+            50,
+            'The segment size ("10") should always be greater or equal to the batch size ("50")',
+        ];
+
+        yield 'invalid segment size' => [
+            0,
+            0,
+            'Expected the segment size should allow at least 1 item. Got "0"',
+        ];
+
+        yield 'invalid batch size' => [
+            10,
+            0,
+            'Expected the batch size should allow at least 1 item. Got "0"',
         ];
     }
 

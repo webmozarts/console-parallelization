@@ -80,6 +80,34 @@ final class ParallelizationInput
         int $segmentSize,
         int $batchSize
     ) {
+        Assert::greaterThan(
+            $segmentSize,
+            0,
+            sprintf(
+                'Expected the segment size should allow at least 1 item. Got "%s"',
+                $segmentSize
+            )
+        );
+        Assert::greaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size should allow at least 1 item. Got "%s"',
+                $batchSize
+            )
+        );
+        // We always check those (and not the calculated ones) since they come from the command
+        // configuration so an issue there hints on a misconfiguration which should be fixed.
+        Assert::greaterThanEq(
+            $segmentSize,
+            $batchSize,
+            sprintf(
+                'The segment size ("%s") should always be greater or equal to the batch size ("%s")',
+                $segmentSize,
+                $batchSize
+            )
+        );
+
         /** @var string|null $processes */
         $processes = $input->getOption(self::PROCESSES);
 
@@ -140,20 +168,6 @@ final class ParallelizationInput
         $this->batchSize = $batchSize;
         $this->rounds = (int) (1 === $this->numberOfProcesses ? 1 : ceil($this->itemsCount / $segmentSize));
         $this->batches = (int) (ceil($segmentSize / $batchSize) * $this->rounds);
-
-        if (!$hasItem && 1 !== $this->numberOfProcesses) {
-            // Shouldn't check this when only one item has been specified or
-            // when no child processes is used
-            Assert::greaterThanEq(
-                $segmentSize,
-                $batchSize,
-                sprintf(
-                    'The segment size ("%s") should always be greater or equal to the batch size ("%s")',
-                    $segmentSize,
-                    $batchSize
-                )
-            );
-        }
     }
 
     public function isNumberOfProcessesDefined(): bool
