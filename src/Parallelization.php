@@ -392,7 +392,7 @@ trait Parallelization
                         implode(' ', array_slice($input->getArguments(), 1)),
                         '--child',
                     ]),
-                    $this->serializeInputOptions($input, ['child', 'processes']))
+                    $this->serializeInputOptions($input, ['child', 'processes'])
                 )
             );
             $terminalWidth = (new Terminal())->getWidth();
