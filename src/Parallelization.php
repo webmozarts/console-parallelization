@@ -22,9 +22,7 @@ use const STDIN;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -125,26 +123,7 @@ trait Parallelization
      */
     protected static function configureParallelization(Command $command): void
     {
-        $command
-            ->addArgument(
-                'item',
-                InputArgument::OPTIONAL,
-                'The item to process'
-            )
-            ->addOption(
-                'processes',
-                'p',
-                InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
-                null
-            )
-            ->addOption(
-                'child',
-                null,
-                InputOption::VALUE_NONE,
-                'Set on child processes'
-            )
-        ;
+        ParallelizationInput::configureParallelization($command);
     }
 
     /**
@@ -281,7 +260,16 @@ trait Parallelization
             return 0;
         }
 
-        $this->executeMasterProcess($input, $output);
+        $parallelizationInput = new ParallelizationInput(
+            $input,
+            function (InputInterface $input): array {
+                return $this->fetchItems($input);
+            },
+            $this->getSegmentSize(),
+            $this->getBatchSize()
+        );
+
+        $this->executeMasterProcess($parallelizationInput, $input, $output);
 
         return 0;
     }
@@ -294,43 +282,21 @@ trait Parallelization
      * items of the processed data set and terminates. As long as there is data
      * left to process, new child processes are spawned automatically.
      */
-    protected function executeMasterProcess(InputInterface $input, OutputInterface $output): void
-    {
+    protected function executeMasterProcess(
+        ParallelizationInput $parallelizationInput,
+        InputInterface $input,
+        OutputInterface $output
+    ): void {
         $this->runBeforeFirstCommand($input, $output);
 
-        $numberOfProcessesDefined = null !== $input->getOption('processes');
-        $numberOfProcesses = $numberOfProcessesDefined ? (int) $input->getOption('processes') : 1;
-        $hasItem = (bool) $input->getArgument('item');
-        $items = $hasItem ? [$input->getArgument('item')] : $this->fetchItems($input);
-        $count = count($items);
-        $segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined ? $count : $this->getSegmentSize();
-        $batchSize = $this->getBatchSize();
-        $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
-        $batches = ceil($segmentSize * 1.0 / $batchSize) * $rounds;
-
-        Assert::greaterThan(
-            $numberOfProcesses,
-            0,
-            sprintf(
-                'Requires at least one process. Got "%s"',
-                $input->getOption('processes')
-            )
-        );
-
-        if (!$hasItem && 1 !== $numberOfProcesses) {
-            // Shouldn't check this when only one item has been specified or
-            // when no child processes is used
-            Assert::greaterThanEq(
-                $segmentSize,
-                $batchSize,
-                sprintf(
-                    'The segment size should always be greater or equal to '
-                    .'the batch size. Got respectively "%d" and "%d"',
-                    $segmentSize,
-                    $batchSize
-                )
-            );
-        }
+        $numberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
+        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
+        $segmentSize = $parallelizationInput->getSegmentSize();
+        $batchSize = $parallelizationInput->getBatchSize();
+        $count = $parallelizationInput->getItemsCount();
+        $rounds = $parallelizationInput->getRounds();
+        $batches = $parallelizationInput->getBatches();
+        $items = $parallelizationInput->getItems();
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
