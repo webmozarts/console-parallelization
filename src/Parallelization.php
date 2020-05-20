@@ -389,7 +389,7 @@ trait Parallelization
                     '--child',
                     '--env='.$input->getOption('env'),
                     $input->getOption('no-debug') ? '--no-debug' : '',
-                    $this->serializeInputOptions($input, ['child','env','no-debug', 'processes']),
+                    implode(" ", $this->serializeInputOptions($input, ['child','env','no-debug', 'processes'])),
                 ])
             );
             $terminalWidth = (new Terminal())->getWidth();
@@ -518,19 +518,23 @@ trait Parallelization
         }
     }
     
-    /**
-     * @param string[] $blacklistParams
+/**
+     * @param InputInterface $input
+     * @param string[] $blackListParams
+     * @return string[]
      */
-    private function serializeInputOptions(InputInterface $input, array $blacklistParams) : string {
+    private function serializeInputOptions(InputInterface $input, array $blackListParams) : array {
         $options = array_diff_key(
             array_filter($input->getOptions()),
             array_fill_keys($blackListParams, '')
         );
 
-        $optionString = "";
+        $preparedOptionList = [];
         foreach ($options as $name => $value) {
             $definition = $this->getDefinition();
             $option = $definition->getOption($name);
+
+            $optionString  = "";
             if (!$option->acceptValue()) {
                 $optionString .= ' --' . $name;
             } elseif ($option->isArray()) {
@@ -540,7 +544,9 @@ trait Parallelization
             } else {
                 $optionString .= ' --'.$name.'='.$value;
             }
+
+            $preparedOptionList[] = $optionString;
         }
-        return $optionString;
+        return $preparedOptionList;
     }
 }
