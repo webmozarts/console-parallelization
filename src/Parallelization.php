@@ -13,7 +13,10 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function array_diff_key;
+use function array_fill_keys;
 use function array_filter;
+use function array_merge;
 use function array_slice;
 use function implode;
 use RuntimeException;
@@ -381,16 +384,16 @@ trait Parallelization
 
             $commandTemplate = implode(
                 ' ',
-                array_filter([
-                    self::detectPhpExecutable(),
-                    $consolePath,
-                    $this->getName(),
-                    implode(' ', array_slice($input->getArguments(), 1)),
-                    '--child',
-                    '--env='.$input->getOption('env'),
-                    $input->getOption('no-debug') ? '--no-debug' : '',
-                    implode(" ", $this->serializeInputOptions($input, ['child','env','no-debug', 'processes'])),
-                ])
+                array_merge(
+                    array_filter([
+                        self::detectPhpExecutable(),
+                        $consolePath,
+                        $this->getName(),
+                        implode(' ', array_slice($input->getArguments(), 1)),
+                        '--child',
+                    ]),
+                    $this->serializeInputOptions($input, ['child', 'processes']))
+                )
             );
             $terminalWidth = (new Terminal())->getWidth();
 
@@ -518,8 +521,7 @@ trait Parallelization
         }
     }
     
-/**
-     * @param InputInterface $input
+    /**
      * @param string[] $blackListParams
      * @return string[]
      */
