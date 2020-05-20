@@ -292,10 +292,8 @@ trait Parallelization
     ): void {
         $this->runBeforeFirstCommand($input, $output);
 
-        $numberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
         $segmentSize = $parallelizationInput->getSegmentSize();
-        $batchSize = $parallelizationInput->getBatchSize();
         $count = $parallelizationInput->getItemsCount();
         $rounds = $parallelizationInput->getRounds();
         $batches = $parallelizationInput->getBatches();
@@ -306,7 +304,7 @@ trait Parallelization
             $count,
             $this->getItemName($count),
             $segmentSize,
-            $batchSize,
+            $parallelizationInput->getBatchSize(),
             $rounds,
             1 === $rounds ? 'round' : 'rounds',
             $batches,
@@ -320,7 +318,9 @@ trait Parallelization
         $progressBar->setFormat('debug');
         $progressBar->start();
 
-        if ($count <= $segmentSize || (1 === $numberOfProcesses && !$numberOfProcessesDefined)) {
+        if ($count <= $segmentSize
+            || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
+        ) {
             // Run in the master process
 
             $itemsChunks = array_chunk(
