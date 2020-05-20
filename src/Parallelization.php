@@ -13,7 +13,10 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function array_diff_key;
+use function array_fill_keys;
 use function array_filter;
+use function array_merge;
 use function array_slice;
 use function implode;
 use RuntimeException;
@@ -381,15 +384,16 @@ trait Parallelization
 
             $commandTemplate = implode(
                 ' ',
-                array_filter([
-                    self::detectPhpExecutable(),
-                    $consolePath,
-                    $this->getName(),
-                    implode(' ', array_slice($input->getArguments(), 1)),
-                    '--child',
-                    '--env='.$input->getOption('env'),
-                    $input->getOption('no-debug') ? '--no-debug' : '',
-                ])
+                array_merge(
+                    array_filter([
+                        self::detectPhpExecutable(),
+                        $consolePath,
+                        $this->getName(),
+                        implode(' ', array_slice($input->getArguments(), 1)),
+                        '--child',
+                    ]),
+                    $this->serializeInputOptions($input, ['child', 'processes'])
+                )
             );
             $terminalWidth = (new Terminal())->getWidth();
 
@@ -515,5 +519,36 @@ trait Parallelization
                 $container->reset();
             }
         }
+    }
+    
+    /**
+     * @param string[] $blackListParams
+     * @return string[]
+     */
+    private function serializeInputOptions(InputInterface $input, array $blackListParams) : array {
+        $options = array_diff_key(
+            array_filter($input->getOptions()),
+            array_fill_keys($blackListParams, '')
+        );
+
+        $preparedOptionList = [];
+        foreach ($options as $name => $value) {
+            $definition = $this->getDefinition();
+            $option = $definition->getOption($name);
+
+            $optionString  = "";
+            if (!$option->acceptValue()) {
+                $optionString .= ' --' . $name;
+            } elseif ($option->isArray()) {
+                foreach ($value as $arrayValue) {
+                    $optionString .= ' --'.$name.'='.$arrayValue;
+                }
+            } else {
+                $optionString .= ' --'.$name.'='.$value;
+            }
+
+            $preparedOptionList[] = $optionString;
+        }
+        return $preparedOptionList;
     }
 }
