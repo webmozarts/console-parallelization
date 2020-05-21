@@ -13,13 +13,18 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function array_chunk;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_filter;
 use function array_merge;
 use function array_slice;
+use function ceil;
+use function count;
+use function getcwd;
 use function implode;
 use RuntimeException;
+use function realpath;
 use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Application;
@@ -257,20 +262,13 @@ trait Parallelization
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if ($input->getOption('child')) {
+        $parallelizationInput = new ParallelizationInput($input);
+
+        if ($parallelizationInput->isChildProcess()) {
             $this->executeChildProcess($input, $output);
 
             return 0;
         }
-
-        $parallelizationInput = new ParallelizationInput(
-            $input,
-            function (InputInterface $input): array {
-                return $this->fetchItems($input);
-            },
-            $this->getSegmentSize(),
-            $this->getBatchSize()
-        );
 
         $this->executeMasterProcess($parallelizationInput, $input, $output);
 
@@ -292,19 +290,46 @@ trait Parallelization
     ): void {
         $this->runBeforeFirstCommand($input, $output);
 
+        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-        $segmentSize = $parallelizationInput->getSegmentSize();
-        $numberOfItems = $parallelizationInput->getNumberOfItems();
-        $rounds = $parallelizationInput->getRounds();
-        $batches = $parallelizationInput->getBatches();
-        $items = $parallelizationInput->getItems();
+        $hasItem = null !== $parallelizationInput->getItem();
+        $items = $hasItem ? [$parallelizationInput->getItem()] : $this->fetchItems($input);
+        $count = count($items);
+        $segmentSize = 1 === $numberOfProcesses && !$isNumberOfProcessesDefined ? $count : $this->getSegmentSize();
+        $batchSize = $this->getBatchSize();
+        $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
+        $batches = ceil($segmentSize * 1.0 / $batchSize) * $rounds;
+
+        Assert::greaterThan(
+            $numberOfProcesses,
+            0,
+            sprintf(
+                'Requires at least one process. Got "%s"',
+                $input->getOption('processes')
+            )
+        );
+
+        if (!$hasItem && 1 !== $numberOfProcesses) {
+            // Shouldn't check this when only one item has been specified or
+            // when no child processes is used
+            Assert::greaterThanEq(
+                $segmentSize,
+                $batchSize,
+                sprintf(
+                    'The segment size should always be greater or equal to '
+                    .'the batch size. Got respectively "%d" and "%d"',
+                    $segmentSize,
+                    $batchSize
+                )
+            );
+        }
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
-            $numberOfItems,
-            $this->getItemName($numberOfItems),
+            $count,
+            $this->getItemName($count),
             $segmentSize,
-            $parallelizationInput->getBatchSize(),
+            $batchSize,
             $rounds,
             1 === $rounds ? 'round' : 'rounds',
             $batches,
@@ -314,13 +339,11 @@ trait Parallelization
         ));
         $output->writeln('');
 
-        $progressBar = new ProgressBar($output, $numberOfItems);
+        $progressBar = new ProgressBar($output, $count);
         $progressBar->setFormat('debug');
         $progressBar->start();
 
-        if ($numberOfItems <= $segmentSize
-            || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
-        ) {
+        if ($count <= $segmentSize || (1 === $numberOfProcesses && !$isNumberOfProcessesDefined)) {
             // Run in the master process
 
             $itemsChunks = array_chunk(
@@ -384,8 +407,8 @@ trait Parallelization
         $output->writeln('');
         $output->writeln(sprintf(
             'Processed %d %s.',
-            $numberOfItems,
-            $this->getItemName($numberOfItems)
+            $count,
+            $this->getItemName($count)
         ));
 
         $this->runAfterLastCommand($input, $output);
