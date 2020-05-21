@@ -21,7 +21,7 @@ use Webmozart\Assert\Assert;
 use function is_numeric;
 use function sprintf;
 
-final class Configuration
+final class ParallelizationInput
 {
     private const ITEM_ARGUMENT = 'item';
     private const PROCESSES_OPTION = 'processes';
