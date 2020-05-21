@@ -126,7 +126,7 @@ trait Parallelization
      */
     protected static function configureParallelization(Command $command): void
     {
-        ParallelizationInput::configureParallelization($command);
+        Configuration::configureParallelization($command);
     }
 
     /**
@@ -263,7 +263,7 @@ trait Parallelization
             return 0;
         }
 
-        $parallelizationInput = new ParallelizationInput(
+        $parallelizationInput = new Configuration(
             $input,
             function (InputInterface $input): array {
                 return $this->fetchItems($input);
@@ -286,7 +286,7 @@ trait Parallelization
      * left to process, new child processes are spawned automatically.
      */
     protected function executeMasterProcess(
-        ParallelizationInput $parallelizationInput,
+        Configuration $parallelizationInput,
         InputInterface $input,
         OutputInterface $output
     ): void {

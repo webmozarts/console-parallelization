@@ -27,7 +27,7 @@ use function is_int;
 use function is_numeric;
 use function sprintf;
 
-final class ParallelizationInput
+final class Configuration
 {
     private const ITEM_ARGUMENT = 'item';
     private const PROCESSES_OPTION = 'processes';

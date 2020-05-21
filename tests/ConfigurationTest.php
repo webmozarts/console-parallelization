@@ -24,9 +24,9 @@ use Symfony\Component\Console\Input\StringInput;
 use function func_get_args;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ParallelizationInput
+ * @covers \Webmozarts\Console\Parallelization\Configuration
  */
-final class ParallelizationInputTest extends TestCase
+final class ConfigurationTest extends TestCase
 {
     public function test_it_can_configure_a_command(): void
     {
@@ -39,7 +39,7 @@ final class ParallelizationInputTest extends TestCase
         $this->assertFalse($initialDefinition->hasOption('processes'));
         $this->assertFalse($initialDefinition->hasOption('child'));
 
-        ParallelizationInput::configureParallelization($command);
+        Configuration::configureParallelization($command);
 
         $configuredDefinition = $command->getDefinition();
 
@@ -70,7 +70,7 @@ final class ParallelizationInputTest extends TestCase
     ): void {
         self::bindInput($input);
 
-        $parallelizationInput = new ParallelizationInput(
+        $parallelizationInput = new Configuration(
             $input,
             $itemsFetcher,
             $segmentSize,
@@ -102,7 +102,7 @@ final class ParallelizationInputTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        new ParallelizationInput(
+        new Configuration(
             $input,
             self::createFakeClosure(),
             1,
@@ -124,7 +124,7 @@ final class ParallelizationInputTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        new ParallelizationInput(
+        new Configuration(
             $input,
             $itemsFetcher,
             1,
@@ -145,7 +145,7 @@ final class ParallelizationInputTest extends TestCase
 
         self::bindInput($input);
 
-        $parallelizationInput = new ParallelizationInput(
+        $parallelizationInput = new Configuration(
             $input,
             $itemsFetcher,
             1,
@@ -170,7 +170,7 @@ final class ParallelizationInputTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($errorMessage);
 
-        new ParallelizationInput(
+        new Configuration(
             $input,
             $this->createFakeClosure(),
             $segmentSize,
@@ -580,7 +580,7 @@ final class ParallelizationInputTest extends TestCase
     {
         $command = new Command();
 
-        ParallelizationInput::configureParallelization($command);
+        Configuration::configureParallelization($command);
 
         $input->bind($command->getDefinition());
     }
