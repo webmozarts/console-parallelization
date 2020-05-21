@@ -294,15 +294,15 @@ trait Parallelization
 
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
         $segmentSize = $parallelizationInput->getSegmentSize();
-        $count = $parallelizationInput->getItemsCount();
+        $numberOfItems = $parallelizationInput->getNumberOfItems();
         $rounds = $parallelizationInput->getRounds();
         $batches = $parallelizationInput->getBatches();
         $items = $parallelizationInput->getItems();
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
-            $count,
-            $this->getItemName($count),
+            $numberOfItems,
+            $this->getItemName($numberOfItems),
             $segmentSize,
             $parallelizationInput->getBatchSize(),
             $rounds,
@@ -314,11 +314,11 @@ trait Parallelization
         ));
         $output->writeln('');
 
-        $progressBar = new ProgressBar($output, $count);
+        $progressBar = new ProgressBar($output, $numberOfItems);
         $progressBar->setFormat('debug');
         $progressBar->start();
 
-        if ($count <= $segmentSize
+        if ($numberOfItems <= $segmentSize
             || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
         ) {
             // Run in the master process
@@ -384,8 +384,8 @@ trait Parallelization
         $output->writeln('');
         $output->writeln(sprintf(
             'Processed %d %s.',
-            $count,
-            $this->getItemName($count)
+            $numberOfItems,
+            $this->getItemName($numberOfItems)
         ));
 
         $this->runAfterLastCommand($input, $output);

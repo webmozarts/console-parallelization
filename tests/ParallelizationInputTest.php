@@ -62,7 +62,7 @@ final class ParallelizationInputTest extends TestCase
         bool $expectedIsNumberOfProcessesDefined,
         int $expectedNumberOfProcesses,
         array $expectedItems,
-        int $expectedItemsCount,
+        int $expectedNumberOfItems,
         int $expectedSegmentSize,
         int $expectedBatchSize,
         int $expectedRounds,
@@ -83,7 +83,7 @@ final class ParallelizationInputTest extends TestCase
         );
         $this->assertSame($expectedNumberOfProcesses, $parallelizationInput->getNumberOfProcesses());
         $this->assertSame($expectedItems, $parallelizationInput->getItems());
-        $this->assertSame($expectedItemsCount, $parallelizationInput->getItemsCount());
+        $this->assertSame($expectedNumberOfItems, $parallelizationInput->getNumberOfItems());
         $this->assertSame($expectedSegmentSize, $parallelizationInput->getSegmentSize());
         $this->assertSame($expectedBatchSize, $parallelizationInput->getBatchSize());
         $this->assertSame($expectedRounds, $parallelizationInput->getRounds());
@@ -567,7 +567,7 @@ final class ParallelizationInputTest extends TestCase
         bool $expectedIsNumberOfProcessesDefined,
         int $expectedNumberOfProcesses,
         array $expectedItems,
-        int $expectedItemsCount,
+        int $expectedNumberOfItemsCount,
         int $expectedSegmentSize,
         int $expectedBatchSize,
         int $expectedRounds,
