@@ -13,13 +13,17 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function array_chunk;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_filter;
 use function array_merge;
 use function array_slice;
+use function count;
+use function getcwd;
 use function implode;
 use RuntimeException;
+use function realpath;
 use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Application;
@@ -126,7 +130,7 @@ trait Parallelization
      */
     protected static function configureParallelization(Command $command): void
     {
-        Configuration::configureParallelization($command);
+        ParallelizationInput::configureParallelization($command);
     }
 
     /**
@@ -257,20 +261,13 @@ trait Parallelization
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if ($input->getOption('child')) {
+        $parallelizationInput = new ParallelizationInput($input);
+
+        if ($parallelizationInput->isChildProcess()) {
             $this->executeChildProcess($input, $output);
 
             return 0;
         }
-
-        $parallelizationInput = new Configuration(
-            $input,
-            function (InputInterface $input): array {
-                return $this->fetchItems($input);
-            },
-            $this->getSegmentSize(),
-            $this->getBatchSize()
-        );
 
         $this->executeMasterProcess($parallelizationInput, $input, $output);
 
@@ -286,25 +283,37 @@ trait Parallelization
      * left to process, new child processes are spawned automatically.
      */
     protected function executeMasterProcess(
-        Configuration $parallelizationInput,
+        ParallelizationInput $parallelizationInput,
         InputInterface $input,
         OutputInterface $output
     ): void {
         $this->runBeforeFirstCommand($input, $output);
 
+        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-        $segmentSize = $parallelizationInput->getSegmentSize();
-        $numberOfItems = $parallelizationInput->getNumberOfItems();
-        $rounds = $parallelizationInput->getRounds();
-        $batches = $parallelizationInput->getBatches();
-        $items = $parallelizationInput->getItems();
+        $hasItem = null !== $parallelizationInput->getItem();
+        $items = $hasItem ? [$parallelizationInput->getItem()] : $this->fetchItems($input);
+        $numberOfItems = count($items);
+
+        $config = new Configuration(
+            $isNumberOfProcessesDefined,
+            $numberOfProcesses,
+            $numberOfItems,
+            $this->getSegmentSize(),
+            $this->getBatchSize()
+        );
+
+        $segmentSize = $config->getSegmentSize();
+        $rounds = $config->getRounds();
+        $batches = $config->getBatches();
+        $batchSize = $config->getBatchSize();
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
             $numberOfItems,
             $this->getItemName($numberOfItems),
             $segmentSize,
-            $parallelizationInput->getBatchSize(),
+            $batchSize,
             $rounds,
             1 === $rounds ? 'round' : 'rounds',
             $batches,
@@ -325,7 +334,7 @@ trait Parallelization
 
             $itemsChunks = array_chunk(
                 $items,
-                $this->getBatchSize(),
+                $batchSize,
                 false
             );
 

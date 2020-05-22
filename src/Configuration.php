@@ -14,116 +14,94 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
-use function is_numeric;
+use function ceil;
 use function sprintf;
 
 final class Configuration
 {
-    private const ITEM_ARGUMENT = 'item';
-    private const PROCESSES_OPTION = 'processes';
-    private const CHILD_OPTION = 'child';
+    private $segmentSize;
+    private $rounds;
+    private $batchSize;
+    private $batches;
 
-    private $numberOfProcessesDefined;
-    private $numberOfProcesses = 1;
-    private $item;
-    private $childProcess;
+    public function __construct(
+        bool $numberOfProcessesDefined,
+        int $numberOfProcesses,
+        int $numberOfItems,
+        int $segmentSize,
+        int $batchSize
+    ) {
+        Assert::greaterThan(
+            $numberOfProcesses,
+            0,
+            sprintf(
+                'Expected the number of processes to be 1 or greater. Got "%s"',
+                $numberOfProcesses
+            )
+        );
+        Assert::natural(
+            $numberOfItems,
+            sprintf(
+                'Expected the number of items to be 0 or greater. Got "%s"',
+                $numberOfItems
+            )
+        );
+        Assert::greaterThan(
+            $segmentSize,
+            0,
+            sprintf(
+                'Expected the segment size to be 1 or greater. Got "%s"',
+                $segmentSize
+            )
+        );
+        Assert::greaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size to be 1 or greater. Got "%s"',
+                $batchSize
+            )
+        );
 
-    /**
-     * Adds the command configuration specific to parallelization.
-     *
-     * Call this method in your configure() method.
-     */
-    public static function configureParallelization(Command $command): void
-    {
-        $command
-            ->addArgument(
-                self::ITEM_ARGUMENT,
-                InputArgument::OPTIONAL,
-                'The item to process'
+        // We always check those (and not the calculated ones) since they come from the command
+        // configuration so an issue there hints on a misconfiguration which should be fixed.
+        Assert::greaterThanEq(
+            $segmentSize,
+            $batchSize,
+            sprintf(
+                'Expected the segment size ("%s") to be greater or equal to the batch size ("%s")',
+                $segmentSize,
+                $batchSize
             )
-            ->addOption(
-                self::PROCESSES_OPTION,
-                'p',
-                InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
-                null
-            )
-            ->addOption(
-                self::CHILD_OPTION,
-                null,
-                InputOption::VALUE_NONE,
-                'Set on child processes'
-            )
+        );
+
+        $this->segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined
+            ? $numberOfItems
+            : $segmentSize
         ;
+        $this->rounds = (int) (1 === $numberOfProcesses ? 1 : ceil($numberOfItems / $segmentSize));
+        $this->batchSize = $batchSize;
+        $this->batches = (int) (ceil($segmentSize / $batchSize) * $this->rounds);
     }
 
-    public function __construct(InputInterface $input)
+    public function getSegmentSize(): int
     {
-        /** @var string|null $processes */
-        $processes = $input->getOption(self::PROCESSES_OPTION);
-
-        $this->numberOfProcessesDefined = null !== $processes;
-
-        if ($this->numberOfProcessesDefined) {
-            Assert::numeric(
-                $processes,
-                sprintf(
-                    'Expected the number of process defined to be a valid numeric value. Got "%s"',
-                    $processes
-                )
-            );
-
-            $this->numberOfProcesses = (int) $processes;
-
-            Assert::same(
-                // We cast it again in string to make sure since it is more convenient to pass an
-                // int in the tests or when calling the command directly without passing by the CLI
-                (string) $processes,
-                (string) $this->numberOfProcesses,
-                sprintf(
-                    'Expected the number of process defined to be an integer. Got "%s"',
-                    $processes
-                )
-            );
-        }
-
-        /** @var string|null $item */
-        $item = $input->getArgument(self::ITEM_ARGUMENT);
-
-        $hasItem = null !== $item;
-
-        if ($hasItem && !is_numeric($item)) {
-            // Safeguard in case an invalid type is accidentally passed in tests when invoking the
-            // command directly
-            Assert::string($item);
-        }
-
-        $this->item = $hasItem ? (string) $item : null;
-
-        $this->childProcess = (bool) $input->getOption('child');
+        return $this->segmentSize;
     }
 
-    public function isNumberOfProcessesDefined(): bool
+    public function getRounds(): int
     {
-        return $this->numberOfProcessesDefined;
+        return $this->rounds;
     }
 
-    public function getNumberOfProcesses(): int
+    public function getBatchSize(): int
     {
-        return $this->numberOfProcesses;
+        return $this->batchSize;
     }
 
-    public function getItem(): ?string
+    public function getBatches(): int
     {
-        return $this->item;
-    }
-
-    public function isChildProcess(): bool
-    {
-        return $this->childProcess;
+        return $this->batches;
     }
 }

@@ -13,14 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Closure;
 use InvalidArgumentException;
-use LogicException;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\StringInput;
 use function func_get_args;
 
 /**
@@ -28,560 +22,326 @@ use function func_get_args;
  */
 final class ConfigurationTest extends TestCase
 {
-    public function test_it_can_configure_a_command(): void
-    {
-        $command = new Command();
-
-        $initialDefinition = $command->getDefinition();
-
-        // Sanity check
-        $this->assertFalse($initialDefinition->hasArgument('item'));
-        $this->assertFalse($initialDefinition->hasOption('processes'));
-        $this->assertFalse($initialDefinition->hasOption('child'));
-
-        Configuration::configureParallelization($command);
-
-        $configuredDefinition = $command->getDefinition();
-
-        $this->assertTrue($configuredDefinition->hasArgument('item'));
-        $this->assertTrue($configuredDefinition->hasOption('processes'));
-        $this->assertTrue($configuredDefinition->hasOption('child'));
-    }
-
     /**
-     * @dataProvider inputProvider
-     *
-     * @param Closure(InputInterface): string[] $itemsFetcher
-     * @param string[]                          $expectedItems
+     * @dataProvider valuesProvider
      */
     public function test_it_can_be_instantiated(
-        InputInterface $input,
-        Closure $itemsFetcher,
+        bool $numberOfProcessesDefined,
+        int $numberOfProcesses,
+        int $numberOfItems,
         int $segmentSize,
         int $batchSize,
-        bool $expectedIsNumberOfProcessesDefined,
-        int $expectedNumberOfProcesses,
-        array $expectedItems,
-        int $expectedNumberOfItems,
         int $expectedSegmentSize,
         int $expectedBatchSize,
         int $expectedRounds,
         int $expectedBatches
     ): void {
-        self::bindInput($input);
-
-        $parallelizationInput = new Configuration(
-            $input,
-            $itemsFetcher,
+        $config = new Configuration(
+            $numberOfProcessesDefined,
+            $numberOfProcesses,
+            $numberOfItems,
             $segmentSize,
             $batchSize
         );
 
-        $this->assertSame(
-            $expectedIsNumberOfProcessesDefined,
-            $parallelizationInput->isNumberOfProcessesDefined()
-        );
-        $this->assertSame($expectedNumberOfProcesses, $parallelizationInput->getNumberOfProcesses());
-        $this->assertSame($expectedItems, $parallelizationInput->getItems());
-        $this->assertSame($expectedNumberOfItems, $parallelizationInput->getNumberOfItems());
-        $this->assertSame($expectedSegmentSize, $parallelizationInput->getSegmentSize());
-        $this->assertSame($expectedBatchSize, $parallelizationInput->getBatchSize());
-        $this->assertSame($expectedRounds, $parallelizationInput->getRounds());
-        $this->assertSame($expectedBatches, $parallelizationInput->getBatches());
+        $this->assertSame($expectedSegmentSize, $config->getSegmentSize());
+        $this->assertSame($expectedBatchSize, $config->getBatchSize());
+        $this->assertSame($expectedRounds, $config->getRounds());
+        $this->assertSame($expectedBatches, $config->getBatches());
     }
 
     /**
-     * @dataProvider invalidNumberOfProcessesProvider
+     * @dataProvider invalidValuesProvider
      */
-    public function test_it_cannot_pass_an_invalid_number_of_processes(
-        InputInterface $input,
-        string $expectedErrorMessage
-    ): void {
-        self::bindInput($input);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($expectedErrorMessage);
-
-        new Configuration(
-            $input,
-            self::createFakeClosure(),
-            1,
-            1
-        );
-    }
-
-    /**
-     * @dataProvider invalidItemsFetcherProvider
-     */
-    public function test_it_expects_the_items_fetcher_to_return_serialized_items(
-        Closure $itemsFetcher,
-        string $expectedErrorMessage
-    ): void {
-        $input = new StringInput('');
-
-        self::bindInput($input);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($expectedErrorMessage);
-
-        new Configuration(
-            $input,
-            $itemsFetcher,
-            1,
-            1
-        );
-    }
-
-    /**
-     * @dataProvider itemsFetcherProvider
-     *
-     * @param list<string> $expectedItems
-     */
-    public function test_it_normalizes_the_fetched_items(
-        Closure $itemsFetcher,
-        array $expectedItems
-    ): void {
-        $input = new StringInput('');
-
-        self::bindInput($input);
-
-        $parallelizationInput = new Configuration(
-            $input,
-            $itemsFetcher,
-            1,
-            1
-        );
-
-        $this->assertSame($expectedItems, $parallelizationInput->getItems());
-    }
-
-    /**
-     * @dataProvider invalidSegmentAndBatchSizeProvider
-     */
-    public function test_it_cannot_accept_invalid_segment_or_batch_sizes(
+    public function test_it_cannot_be_instantiated_with_invalid_values(
+        int $numberOfProcesses,
+        int $numberOfItems,
         int $segmentSize,
         int $batchSize,
-        string $errorMessage
+        string $expectedErrorMessage
     ): void {
-        $input = new StringInput('');
-
-        self::bindInput($input);
-
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($errorMessage);
+        $this->expectExceptionMessage($expectedErrorMessage);
 
         new Configuration(
-            $input,
-            $this->createFakeClosure(),
+            true,
+            $numberOfProcesses,
+            $numberOfItems,
             $segmentSize,
             $batchSize
         );
     }
 
-    public static function inputProvider(): iterable
+    public static function valuesProvider(): iterable
     {
-        yield 'empty input' => self::createInputArgs(
-            new StringInput(''),
-            static function (): array {
-                return ['item0', 'item1'];
-            },
-            10,
-            5,
+        yield 'empty' => self::createInputArgs(
             false,
             1,
-            ['item0', 'item1'],
-            2,
-            2,
-            5,
-            1,
-            2
-        );
-
-        yield 'number of process defined: 1' => self::createInputArgs(
-            new StringInput('--processes=1'),
-            static function (): array {
-                return ['item0', 'item1'];
-            },
-            10,
-            5,
-            true,
-            1,
-            ['item0', 'item1'],
-            2,
-            10,
-            5,
-            1,
-            2
-        );
-
-        yield 'number of process defined: 4' => self::createInputArgs(
-            new StringInput('--processes=4'),
-            static function (): array {
-                return ['item0', 'item1'];
-            },
-            10,
-            5,
-            true,
-            4,
-            ['item0', 'item1'],
-            2,
-            10,
-            5,
-            1,
-            2
-        );
-
-        yield 'one item passed – items fetched not called' => self::createInputArgs(
-            new StringInput('item15'),
-            self::createFakeClosure(),
-            10,
-            5,
-            false,
-            1,
-            ['item15'],
+            0,
             1,
             1,
-            5,
-            1,
-            2
-        );
-
-        yield 'empty input with string items' => self::createInputArgs(
-            new StringInput(''),
-            static function (): array {
-                return ['item0', 'item1'];
-            },
-            10,
-            5,
-            false,
-            1,
-            ['item0', 'item1'],
-            2,
-            2,
-            5,
-            1,
-            2
-        );
-
-        yield 'empty input with integer items – items are "serialized"' => self::createInputArgs(
-            new StringInput(''),
-            static function (): array {
-                return [1000, 1001];
-            },
-            10,
-            5,
-            false,
-            1,
-            ['1000', '1001'],
-            2,
-            2,
-            5,
-            1,
-            2
-        );
-
-        yield 'segment size with no process defined: takes the item count' => self::createInputArgs(
-            new StringInput(''),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3'];
-            },
-            1,
-            1,
-            false,
-            1,
-            ['item0', 'item1', 'item2', 'item3'],
-            4,
-            4,
+            0,
             1,
             1,
             1
         );
 
-        yield 'segment size with no process defined: takes the given segment size' => self::createInputArgs(
-            new StringInput('--processes=7'),
-            static function (): array {
-                return ['item0', 'item1'];
-            },
-            7,
-            5,
-            true,
-            7,
-            ['item0', 'item1'],
-            2,
-            7,
-            5,
-            1,
-            2
-        );
-
-        yield 'number of rounds: 1 process = 1 round' => self::createInputArgs(
-            new StringInput(''),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3'];
-            },
-            1,
-            1,
+        yield 'only one default process: the segment size is the number of items' => self::createInputArgs(
             false,
             1,
-            ['item0', 'item1', 'item2', 'item3'],
-            4,
-            4,
+            50,
+            1,
+            1,
+            50,
             1,
             1,
             1
         );
 
-        yield 'number of rounds: 2 process just enough for the number of items' => self::createInputArgs(
-            new StringInput('--processes=2'),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3'];
-            },
-            2,
-            1,
+        yield 'an arbitrary number of processes given: the segment size is the segment size given' => self::createInputArgs(
             true,
-            2,
-            ['item0', 'item1', 'item2', 'item3'],
-            4,
-            2,
-            1,
-            2,
-            4
-        );
-
-        yield 'number of rounds: 2 process - half' => self::createInputArgs(
-            new StringInput('--processes=2'),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3', 'item4'];
-            },
-            2,
-            1,
-            true,
-            2,
-            ['item0', 'item1', 'item2', 'item3', 'item4'],
-            5,
-            2,
-            1,
-            3,
-            6
-        );
-
-        yield 'number of rounds: 2 process - under' => [
-            new StringInput('--processes=2'),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3', 'item4'];
-            },
-            4,
-            1,
-            true,
-            2,
-            ['item0', 'item1', 'item2', 'item3', 'item4'],
-            5,
-            4,
-            1,
-            2,
-            8,
-        ];
-
-        yield 'number of rounds: 2 process - up' => [
-            new StringInput('--processes=2'),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
-            },
-            4,
-            1,
-            true,
-            2,
-            ['item0', 'item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'],
-            8,
-            4,
-            1,
-            2,
-            8,
-        ];
-
-        yield 'number of batches: 2 process - half' => self::createInputArgs(
-            new StringInput('--processes=2'),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3', 'item4'];
-            },
-            3,
-            2,
-            true,
-            2,
-            ['item0', 'item1', 'item2', 'item3', 'item4'],
-            5,
-            3,
-            2,
-            2,
-            4
-        );
-
-        yield 'number of batches: 2 process - under' => self::createInputArgs(
-            new StringInput('--processes=2'),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3', 'item4'];
-            },
-            5,
-            4,
-            true,
-            2,
-            ['item0', 'item1', 'item2', 'item3', 'item4'],
-            5,
-            5,
-            4,
-            1,
-            2
-        );
-
-        yield 'number of batches: 2 process - up' => self::createInputArgs(
-            new StringInput('--processes=2'),
-            static function (): array {
-                return ['item0', 'item1', 'item2', 'item3', 'item4'];
-            },
             7,
+            50,
             3,
+            1,
+            3,
+            1,
+            17,
+            51
+        );
+
+        yield 'one process given: the segment size is the segment size given' => self::createInputArgs(
             true,
-            2,
-            ['item0', 'item1', 'item2', 'item3', 'item4'],
-            5,
-            7,
+            1,
+            50,
             3,
+            1,
+            3,
+            1,
             1,
             3
         );
-    }
 
-    public static function invalidNumberOfProcessesProvider(): iterable
-    {
-        yield 'non numeric value' => [
-            new StringInput('--processes foo'),
-            'Expected the number of process defined to be a valid numeric value. Got "foo"',
-        ];
-
-        yield 'non integer value' => [
-            new StringInput('--processes 1.5'),
-            'Expected the number of process defined to be an integer. Got "1.5"',
-        ];
-
-        yield 'non >=1 value' => [
-            new StringInput('--processes 0'),
-            'Requires at least one process. Got "0"',
-        ];
-    }
-
-    public static function invalidItemsFetcherProvider(): iterable
-    {
-        yield 'non array' => [
-            static function () {
-                return new stdClass();
-            },
-            'Expected the fetched items to be a list of strings. Got "object"',
-        ];
-
-        yield 'array with object item' => [
-            static function () {
-                return [new stdClass()];
-            },
-            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "object" for the item "0"',
-        ];
-
-        yield 'array with object item with index' => [
-            static function () {
-                return ['foo' => new stdClass()];
-            },
-            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "object" for the item "foo"',
-        ];
-    }
-
-    public static function itemsFetcherProvider(): iterable
-    {
-        yield 'empty array' => [
-            static function () {
-                return [];
-            },
-            [],
-        ];
-
-        yield 'string values' => [
-            static function () {
-                return ['item0', 'item1'];
-            },
-            ['item0', 'item1'],
-        ];
-
-        yield 'string values with keys' => [
-            static function () {
-                return ['foo' => 'item0', 'bar' => 'item1'];
-            },
-            ['item0', 'item1'],
-        ];
-
-        yield 'numeric values' => [
-            static function () {
-                return [1.5, 5];
-            },
-            ['1.5', '5'],
-        ];
-
-        yield 'numeric values with keys' => [
-            static function () {
-                return ['foo' => 1.5, 'bar' => 5];
-            },
-            ['1.5', '5'],
-        ];
-    }
-
-    public static function invalidSegmentAndBatchSizeProvider(): iterable
-    {
-        yield 'segment size smaller than batch size' => [
-            10,
+        // Invalid domain case but we add this test to capture this behaviour nonetheless
+        yield 'multiple default processes: the segment size is the segment size given' => self::createInputArgs(
+            true,
+            7,
             50,
-            'The segment size ("10") should always be greater or equal to the batch size ("50")',
+            3,
+            1,
+            3,
+            1,
+            17,
+            51
+        );
+
+        yield 'there is no rounds if there is no items' => self::createInputArgs(
+            false,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1
+        );
+
+        yield 'there is only one round if only one process (default)' => self::createInputArgs(
+            false,
+            1,
+            50,
+            1,
+            1,
+            50,
+            1,
+            1,
+            1
+        );
+
+        yield 'there is only one round if only one process (arbitrary)' => self::createInputArgs(
+            true,
+            1,
+            50,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        );
+
+        yield 'there is enough rounds to reach the number of items with the given segment size (half)' => self::createInputArgs(
+            true,
+            2,
+            50,
+            25,
+            1,
+            25,
+            1,
+            2,
+            50
+        );
+
+        yield 'there is enough rounds to reach the number of items with the given segment size (upper)' => self::createInputArgs(
+            true,
+            2,
+            50,
+            15,
+            1,
+            15,
+            1,
+            4,
+            60
+        );
+
+        yield 'there is enough rounds to reach the number of items with the given segment size (lower)' => self::createInputArgs(
+            true,
+            2,
+            50,
+            40,
+            1,
+            40,
+            1,
+            2,
+            80
+        );
+
+        yield 'the batch size used is the batch size given' => self::createInputArgs(
+            false,
+            1,
+            0,
+            10,
+            7,
+            0,
+            7,
+            1,
+            2
+        );
+
+        yield 'there is enough batches to process all the items of a given segment (half)' => self::createInputArgs(
+            true,
+            2,
+            50,
+            30,
+            15,
+            30,
+            15,
+            2,
+            4
+        );
+
+        yield 'there is enough batches to process all the items of a given segment (upper)' => self::createInputArgs(
+            true,
+            2,
+            50,
+            30,
+            10,
+            30,
+            10,
+            2,
+            6
+        );
+
+        yield 'there is enough batches to process all the items of a given segment (lower)' => self::createInputArgs(
+            true,
+            2,
+            50,
+            30,
+            25,
+            30,
+            25,
+            2,
+            4
+        );
+    }
+
+    public static function invalidValuesProvider(): iterable
+    {
+        yield 'invalid number of processes (limit)' => [
+            0,
+            0,
+            1,
+            1,
+            'Expected the number of processes to be 1 or greater. Got "0"',
+        ];
+
+        yield 'invalid number of processes' => [
+            -1,
+            0,
+            1,
+            1,
+            'Expected the number of processes to be 1 or greater. Got "-1"',
+        ];
+
+        yield 'invalid number of items (limit)' => [
+            1,
+            -1,
+            1,
+            1,
+            'Expected the number of items to be 0 or greater. Got "-1"',
+        ];
+
+        yield 'invalid number of items' => [
+            1,
+            -10,
+            1,
+            1,
+            'Expected the number of items to be 0 or greater. Got "-10"',
+        ];
+
+        yield 'invalid segment size (limit)' => [
+            1,
+            0,
+            0,
+            1,
+            'Expected the segment size to be 1 or greater. Got "0"',
         ];
 
         yield 'invalid segment size' => [
+            1,
             0,
+            -1,
+            1,
+            'Expected the segment size to be 1 or greater. Got "-1"',
+        ];
+
+        yield 'invalid batch size (limit)' => [
+            1,
             0,
-            'Expected the segment size should allow at least 1 item. Got "0"',
+            1,
+            0,
+            'Expected the batch size to be 1 or greater. Got "0"',
         ];
 
         yield 'invalid batch size' => [
-            10,
+            1,
             0,
-            'Expected the batch size should allow at least 1 item. Got "0"',
+            1,
+            -1,
+            'Expected the batch size to be 1 or greater. Got "-1"',
+        ];
+
+        yield 'segment size lower than batch size' => [
+            1,
+            0,
+            1,
+            10,
+            'Expected the segment size ("1") to be greater or equal to the batch size ("10")',
         ];
     }
 
-    private static function createFakeClosure(): Closure
-    {
-        return static function () {
-            throw new LogicException('Did not expect to be called');
-        };
-    }
-
     private static function createInputArgs(
-        InputInterface $input,
-        Closure $itemsFetcher,
+        bool $numberOfProcessesDefined,
+        int $numberOfProcesses,
+        int $numberOfItems,
         int $segmentSize,
         int $batchSize,
-        bool $expectedIsNumberOfProcessesDefined,
-        int $expectedNumberOfProcesses,
-        array $expectedItems,
-        int $expectedNumberOfItemsCount,
         int $expectedSegmentSize,
         int $expectedBatchSize,
         int $expectedRounds,
         int $expectedBatches
     ): array {
         return func_get_args();
-    }
-
-    private static function bindInput(InputInterface $input): void
-    {
-        $command = new Command();
-
-        Configuration::configureParallelization($command);
-
-        $input->bind($command->getDefinition());
     }
 }
