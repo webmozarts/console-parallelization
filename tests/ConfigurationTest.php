@@ -32,7 +32,6 @@ final class ConfigurationTest extends TestCase
         int $segmentSize,
         int $batchSize,
         int $expectedSegmentSize,
-        int $expectedBatchSize,
         int $expectedRounds,
         int $expectedBatches
     ): void {
@@ -45,7 +44,6 @@ final class ConfigurationTest extends TestCase
         );
 
         $this->assertSame($expectedSegmentSize, $config->getSegmentSize());
-        $this->assertSame($expectedBatchSize, $config->getBatchSize());
         $this->assertSame($expectedRounds, $config->getRounds());
         $this->assertSame($expectedBatches, $config->getBatches());
     }
@@ -82,7 +80,6 @@ final class ConfigurationTest extends TestCase
             1,
             0,
             1,
-            1,
             1
         );
 
@@ -94,7 +91,6 @@ final class ConfigurationTest extends TestCase
             1,
             50,
             1,
-            1,
             1
         );
 
@@ -105,7 +101,6 @@ final class ConfigurationTest extends TestCase
             3,
             1,
             3,
-            1,
             17,
             51
         );
@@ -118,7 +113,6 @@ final class ConfigurationTest extends TestCase
             1,
             3,
             1,
-            1,
             3
         );
 
@@ -130,7 +124,6 @@ final class ConfigurationTest extends TestCase
             3,
             1,
             3,
-            1,
             17,
             51
         );
@@ -143,7 +136,6 @@ final class ConfigurationTest extends TestCase
             1,
             0,
             1,
-            1,
             1
         );
 
@@ -155,7 +147,6 @@ final class ConfigurationTest extends TestCase
             1,
             50,
             1,
-            1,
             1
         );
 
@@ -163,7 +154,6 @@ final class ConfigurationTest extends TestCase
             true,
             1,
             50,
-            1,
             1,
             1,
             1,
@@ -178,7 +168,6 @@ final class ConfigurationTest extends TestCase
             25,
             1,
             25,
-            1,
             2,
             50
         );
@@ -190,7 +179,6 @@ final class ConfigurationTest extends TestCase
             15,
             1,
             15,
-            1,
             4,
             60
         );
@@ -202,7 +190,6 @@ final class ConfigurationTest extends TestCase
             40,
             1,
             40,
-            1,
             2,
             80
         );
@@ -214,7 +201,6 @@ final class ConfigurationTest extends TestCase
             10,
             7,
             0,
-            7,
             1,
             2
         );
@@ -226,7 +212,6 @@ final class ConfigurationTest extends TestCase
             30,
             15,
             30,
-            15,
             2,
             4
         );
@@ -238,7 +223,6 @@ final class ConfigurationTest extends TestCase
             30,
             10,
             30,
-            10,
             2,
             6
         );
@@ -250,7 +234,6 @@ final class ConfigurationTest extends TestCase
             30,
             25,
             30,
-            25,
             2,
             4
         );
@@ -338,7 +321,6 @@ final class ConfigurationTest extends TestCase
         int $segmentSize,
         int $batchSize,
         int $expectedSegmentSize,
-        int $expectedBatchSize,
         int $expectedRounds,
         int $expectedBatches
     ): array {

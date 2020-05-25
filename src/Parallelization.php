@@ -13,18 +13,20 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function array_chunk;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_filter;
 use function array_merge;
 use function array_slice;
 use function count;
+use function explode;
 use function getcwd;
 use function implode;
 use RuntimeException;
 use function realpath;
 use function sprintf;
+use function stream_get_contents;
+use const PHP_EOL;
 use const STDIN;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -291,22 +293,29 @@ trait Parallelization
 
         $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-        $hasItem = null !== $parallelizationInput->getItem();
-        $items = $hasItem ? [$parallelizationInput->getItem()] : $this->fetchItems($input);
-        $numberOfItems = count($items);
+
+        $itemBatchIterator = ItemBatchIterator::create(
+            $parallelizationInput->getItem(),
+            function () use ($input) {
+                return $this->fetchItems($input);
+            },
+            $this->getBatchSize()
+        );
+
+        $numberOfItems = $itemBatchIterator->getNumberOfItems();
+        $batchSize = $itemBatchIterator->getBatchSize();
 
         $config = new Configuration(
             $isNumberOfProcessesDefined,
             $numberOfProcesses,
             $numberOfItems,
             $this->getSegmentSize(),
-            $this->getBatchSize()
+            $batchSize
         );
 
         $segmentSize = $config->getSegmentSize();
         $rounds = $config->getRounds();
         $batches = $config->getBatches();
-        $batchSize = $config->getBatchSize();
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
@@ -332,13 +341,7 @@ trait Parallelization
         ) {
             // Run in the master process
 
-            $itemsChunks = array_chunk(
-                $items,
-                $batchSize,
-                false
-            );
-
-            foreach ($itemsChunks as $items) {
+            foreach ($itemBatchIterator->getItemBatches() as $items) {
                 $this->runBeforeBatch($input, $output, $items);
 
                 foreach ($items as $item) {
@@ -384,7 +387,7 @@ trait Parallelization
                 }
             );
 
-            $processLauncher->run($items);
+            $processLauncher->run($itemBatchIterator->getItems());
         }
 
         $progressBar->finish();
@@ -413,7 +416,7 @@ trait Parallelization
     ): void {
         $advancementChar = self::getProgressSymbol();
 
-        $itemsChunks = array_chunk(
+        $itemBatchIterator = new ItemBatchIterator(
             array_filter(
                 explode(
                     PHP_EOL,
@@ -423,7 +426,7 @@ trait Parallelization
             $this->getBatchSize()
         );
 
-        foreach ($itemsChunks as $items) {
+        foreach ($itemBatchIterator->getItemBatches() as $items) {
             $this->runBeforeBatch($input, $output, $items);
 
             foreach ($items as $item) {

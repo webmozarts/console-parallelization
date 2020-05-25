@@ -22,7 +22,6 @@ final class Configuration
 {
     private $segmentSize;
     private $rounds;
-    private $batchSize;
     private $batches;
 
     public function __construct(
@@ -81,7 +80,6 @@ final class Configuration
             : $segmentSize
         ;
         $this->rounds = (int) (1 === $numberOfProcesses ? 1 : ceil($numberOfItems / $segmentSize));
-        $this->batchSize = $batchSize;
         $this->batches = (int) (ceil($segmentSize / $batchSize) * $this->rounds);
     }
 
@@ -93,11 +91,6 @@ final class Configuration
     public function getRounds(): int
     {
         return $this->rounds;
-    }
-
-    public function getBatchSize(): int
-    {
-        return $this->batchSize;
     }
 
     public function getBatches(): int
