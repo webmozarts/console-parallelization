@@ -19,7 +19,6 @@ use function array_fill_keys;
 use function array_filter;
 use function array_merge;
 use function array_slice;
-use function ceil;
 use function count;
 use function getcwd;
 use function implode;
@@ -294,40 +293,25 @@ trait Parallelization
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
         $hasItem = null !== $parallelizationInput->getItem();
         $items = $hasItem ? [$parallelizationInput->getItem()] : $this->fetchItems($input);
-        $count = count($items);
-        $segmentSize = 1 === $numberOfProcesses && !$isNumberOfProcessesDefined ? $count : $this->getSegmentSize();
-        $batchSize = $this->getBatchSize();
-        $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
-        $batches = ceil($segmentSize * 1.0 / $batchSize) * $rounds;
+        $numberOfItems = count($items);
 
-        Assert::greaterThan(
+        $config = new Configuration(
+            $isNumberOfProcessesDefined,
             $numberOfProcesses,
-            0,
-            sprintf(
-                'Requires at least one process. Got "%s"',
-                $input->getOption('processes')
-            )
+            $numberOfItems,
+            $this->getSegmentSize(),
+            $this->getBatchSize()
         );
 
-        if (!$hasItem && 1 !== $numberOfProcesses) {
-            // Shouldn't check this when only one item has been specified or
-            // when no child processes is used
-            Assert::greaterThanEq(
-                $segmentSize,
-                $batchSize,
-                sprintf(
-                    'The segment size should always be greater or equal to '
-                    .'the batch size. Got respectively "%d" and "%d"',
-                    $segmentSize,
-                    $batchSize
-                )
-            );
-        }
+        $segmentSize = $config->getSegmentSize();
+        $rounds = $config->getRounds();
+        $batches = $config->getBatches();
+        $batchSize = $config->getBatchSize();
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
-            $count,
-            $this->getItemName($count),
+            $numberOfItems,
+            $this->getItemName($numberOfItems),
             $segmentSize,
             $batchSize,
             $rounds,
@@ -339,16 +323,18 @@ trait Parallelization
         ));
         $output->writeln('');
 
-        $progressBar = new ProgressBar($output, $count);
+        $progressBar = new ProgressBar($output, $numberOfItems);
         $progressBar->setFormat('debug');
         $progressBar->start();
 
-        if ($count <= $segmentSize || (1 === $numberOfProcesses && !$isNumberOfProcessesDefined)) {
+        if ($numberOfItems <= $segmentSize
+            || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
+        ) {
             // Run in the master process
 
             $itemsChunks = array_chunk(
                 $items,
-                $this->getBatchSize(),
+                $batchSize,
                 false
             );
 
@@ -407,8 +393,8 @@ trait Parallelization
         $output->writeln('');
         $output->writeln(sprintf(
             'Processed %d %s.',
-            $count,
-            $this->getItemName($count)
+            $numberOfItems,
+            $this->getItemName($numberOfItems)
         ));
 
         $this->runAfterLastCommand($input, $output);
