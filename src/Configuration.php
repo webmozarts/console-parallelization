@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Symfony\Component\Console\Command\Command;
 use Webmozart\Assert\Assert;
 use function ceil;
 use function sprintf;
@@ -88,12 +87,12 @@ final class Configuration
         return $this->segmentSize;
     }
 
-    public function getRounds(): int
+    public function getNumberOfSegments(): int
     {
         return $this->rounds;
     }
 
-    public function getBatches(): int
+    public function getNumberOfBatches(): int
     {
         return $this->batches;
     }
