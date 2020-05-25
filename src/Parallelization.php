@@ -18,7 +18,6 @@ use function array_fill_keys;
 use function array_filter;
 use function array_merge;
 use function array_slice;
-use function count;
 use function explode;
 use function getcwd;
 use function implode;
@@ -314,8 +313,8 @@ trait Parallelization
         );
 
         $segmentSize = $config->getSegmentSize();
-        $rounds = $config->getRounds();
-        $batches = $config->getBatches();
+        $numberOfSegments = $config->getNumberOfSegments();
+        $numberOfBatches = $config->getNumberOfBatches();
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
@@ -323,10 +322,10 @@ trait Parallelization
             $this->getItemName($numberOfItems),
             $segmentSize,
             $batchSize,
-            $rounds,
-            1 === $rounds ? 'round' : 'rounds',
-            $batches,
-            1 === $batches ? 'batch' : 'batches',
+            $numberOfSegments,
+            1 === $numberOfSegments ? 'round' : 'rounds',
+            $numberOfBatches,
+            1 === $numberOfBatches ? 'batch' : 'batches',
             $numberOfProcesses,
             1 === $numberOfProcesses ? 'process' : 'processes'
         ));

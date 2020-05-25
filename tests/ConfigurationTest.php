@@ -32,8 +32,8 @@ final class ConfigurationTest extends TestCase
         int $segmentSize,
         int $batchSize,
         int $expectedSegmentSize,
-        int $expectedRounds,
-        int $expectedBatches
+        int $expectedNumberOfSegments,
+        int $expectedNumberOfBatches
     ): void {
         $config = new Configuration(
             $numberOfProcessesDefined,
@@ -44,8 +44,8 @@ final class ConfigurationTest extends TestCase
         );
 
         $this->assertSame($expectedSegmentSize, $config->getSegmentSize());
-        $this->assertSame($expectedRounds, $config->getRounds());
-        $this->assertSame($expectedBatches, $config->getBatches());
+        $this->assertSame($expectedNumberOfSegments, $config->getNumberOfSegments());
+        $this->assertSame($expectedNumberOfBatches, $config->getNumberOfBatches());
     }
 
     /**
@@ -321,8 +321,8 @@ final class ConfigurationTest extends TestCase
         int $segmentSize,
         int $batchSize,
         int $expectedSegmentSize,
-        int $expectedRounds,
-        int $expectedBatches
+        int $expectedNumberOfSegments,
+        int $expectedNumberOfBatches
     ): array {
         return func_get_args();
     }
