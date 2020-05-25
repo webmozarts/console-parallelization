@@ -13,21 +13,24 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function array_chunk;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_filter;
 use function array_merge;
 use function array_slice;
+use function ceil;
+use function count;
+use function getcwd;
 use function implode;
 use RuntimeException;
+use function realpath;
 use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -128,26 +131,7 @@ trait Parallelization
      */
     protected static function configureParallelization(Command $command): void
     {
-        $command
-            ->addArgument(
-                'item',
-                InputArgument::OPTIONAL,
-                'The item to process'
-            )
-            ->addOption(
-                'processes',
-                'p',
-                InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
-                null
-            )
-            ->addOption(
-                'child',
-                null,
-                InputOption::VALUE_NONE,
-                'Set on child processes'
-            )
-        ;
+        ParallelizationInput::configureParallelization($command);
     }
 
     /**
@@ -278,13 +262,15 @@ trait Parallelization
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if ($input->getOption('child')) {
+        $parallelizationInput = new ParallelizationInput($input);
+
+        if ($parallelizationInput->isChildProcess()) {
             $this->executeChildProcess($input, $output);
 
             return 0;
         }
 
-        $this->executeMasterProcess($input, $output);
+        $this->executeMasterProcess($parallelizationInput, $input, $output);
 
         return 0;
     }
@@ -297,16 +283,19 @@ trait Parallelization
      * items of the processed data set and terminates. As long as there is data
      * left to process, new child processes are spawned automatically.
      */
-    protected function executeMasterProcess(InputInterface $input, OutputInterface $output): void
-    {
+    protected function executeMasterProcess(
+        ParallelizationInput $parallelizationInput,
+        InputInterface $input,
+        OutputInterface $output
+    ): void {
         $this->runBeforeFirstCommand($input, $output);
 
-        $numberOfProcessesDefined = null !== $input->getOption('processes');
-        $numberOfProcesses = $numberOfProcessesDefined ? (int) $input->getOption('processes') : 1;
-        $hasItem = (bool) $input->getArgument('item');
-        $items = $hasItem ? [$input->getArgument('item')] : $this->fetchItems($input);
+        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
+        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
+        $hasItem = null !== $parallelizationInput->getItem();
+        $items = $hasItem ? [$parallelizationInput->getItem()] : $this->fetchItems($input);
         $count = count($items);
-        $segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined ? $count : $this->getSegmentSize();
+        $segmentSize = 1 === $numberOfProcesses && !$isNumberOfProcessesDefined ? $count : $this->getSegmentSize();
         $batchSize = $this->getBatchSize();
         $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
         $batches = ceil($segmentSize * 1.0 / $batchSize) * $rounds;
@@ -354,7 +343,7 @@ trait Parallelization
         $progressBar->setFormat('debug');
         $progressBar->start();
 
-        if ($count <= $segmentSize || (1 === $numberOfProcesses && !$numberOfProcessesDefined)) {
+        if ($count <= $segmentSize || (1 === $numberOfProcesses && !$isNumberOfProcessesDefined)) {
             // Run in the master process
 
             $itemsChunks = array_chunk(
@@ -520,12 +509,14 @@ trait Parallelization
             }
         }
     }
-    
+
     /**
      * @param string[] $blackListParams
+     *
      * @return string[]
      */
-    private function serializeInputOptions(InputInterface $input, array $blackListParams) : array {
+    private function serializeInputOptions(InputInterface $input, array $blackListParams): array
+    {
         $options = array_diff_key(
             array_filter($input->getOptions()),
             array_fill_keys($blackListParams, '')
@@ -536,9 +527,9 @@ trait Parallelization
             $definition = $this->getDefinition();
             $option = $definition->getOption($name);
 
-            $optionString  = "";
+            $optionString = '';
             if (!$option->acceptValue()) {
-                $optionString .= ' --' . $name;
+                $optionString .= ' --'.$name;
             } elseif ($option->isArray()) {
                 foreach ($value as $arrayValue) {
                     $optionString .= ' --'.$name.'='.$arrayValue;
@@ -549,6 +540,7 @@ trait Parallelization
 
             $preparedOptionList[] = $optionString;
         }
+
         return $preparedOptionList;
     }
 }
