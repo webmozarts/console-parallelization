@@ -555,7 +555,7 @@ trait Parallelization
     /**
      * Ensure that an option value is quoted correctly, before it is passed to a child process.
      * @param mixed $value the input option value, which is typically a string but can be of any other primitive type.
-     * @return mixed
+     * @return mixed the replaced and quoted value, if $value contained a character that required quoting.
      */
     protected function quoteOptionValue($value) {
 
@@ -568,7 +568,6 @@ trait Parallelization
 
     /**
      * Validate whether a command option requires quoting or not, depending on its content.
-     * @param mixed $value
      */
     protected function isValueRequiresQuoting($value) : bool {
         return 0 < preg_match('/[ \s \\ \' " \: \{ \} \[ \] , & \* \# \? \- ? | < > = ! % @ ` ]/x', $value);
