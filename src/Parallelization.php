@@ -376,7 +376,7 @@ trait Parallelization
             }
         } else {
             // Distribute if we have multiple segments
-            $consolePath = realpath(getcwd().'/bin/console');
+            $consolePath = $this->getConsolePath();
             Assert::fileExists(
                 $consolePath,
                 sprintf('The bin/console file could not be found at %s', getcwd()))
@@ -423,6 +423,14 @@ trait Parallelization
         ));
 
         $this->runAfterLastCommand($input, $output);
+    }
+    
+    /**
+     * Get the path of the executable Symfony bin console.
+    **/
+    protected function getConsolePath() : string {
+        $consolePath = realpath(getcwd().'/bin/console');
+        return $consolePath;
     }
 
     /**
