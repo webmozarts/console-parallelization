@@ -427,7 +427,7 @@ trait Parallelization
     
     /**
      * Get the path of the executable Symfony bin console.
-    **/
+     */
     protected function getConsolePath() : string {
         $consolePath = realpath(getcwd().'/bin/console');
         return $consolePath;
