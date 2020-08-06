@@ -96,23 +96,6 @@ trait Parallelization
     }
 
     /**
-     * Returns the environment variables that are passed to the child processes.
-     *
-     * @param ContainerInterface $container The service containers
-     *
-     * @return string[] A list of environment variable names and values
-     */
-    private static function getEnvironmentVariables(ContainerInterface $container): array
-    {
-        return [
-            'PATH' => getenv('PATH'),
-            'HOME' => getenv('HOME'),
-            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
-            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
-        ];
-    }
-
-    /**
      * Returns the working directory for the child process.
      *
      * @param ContainerInterface $container The service container
@@ -189,6 +172,23 @@ trait Parallelization
      * @return string The name of the item in the correct plurality
      */
     abstract protected function getItemName(int $count): string;
+
+    /**
+     * Returns the environment variables that are passed to the child processes.
+     *
+     * @param ContainerInterface $container The service containers
+     *
+     * @return string[] A list of environment variable names and values
+     */
+    protected function getEnvironmentVariables(ContainerInterface $container): array
+    {
+        return [
+            'PATH' => getenv('PATH'),
+            'HOME' => getenv('HOME'),
+            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
+            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
+        ];
+    }
 
     /**
      * Method executed at the very beginning of the master process.
@@ -377,7 +377,7 @@ trait Parallelization
             $processLauncher = new ProcessLauncher(
                 $commandTemplate,
                 self::getWorkingDirectory($this->getContainer()),
-                self::getEnvironmentVariables($this->getContainer()),
+                $this->getEnvironmentVariables($this->getContainer()),
                 $numberOfProcesses,
                 $segmentSize,
                 $this->getContainer()->get('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
