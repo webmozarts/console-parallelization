@@ -104,7 +104,7 @@ trait Parallelization
      */
     private static function getWorkingDirectory(ContainerInterface $container): string
     {
-        return dirname($container->getParameter('kernel.root_dir'));
+        return dirname($container->getParameter('kernel.project_dir'));
     }
 
     /**
