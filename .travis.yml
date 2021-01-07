@@ -32,7 +32,7 @@ before_install:
         fi
 
 install:
-    - composer update --ignore-platform-req=php $COMPOSER_FLAGS $PREFER_LOWEST
+    - composer update $COMPOSER_FLAGS $PREFER_LOWEST
 
 script:
     - make test
