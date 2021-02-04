@@ -359,19 +359,17 @@ trait Parallelization
                 sprintf('The bin/console file could not be found at %s', getcwd()))
             ;
 
-            $commandTemplate = implode(
-                ' ',
-                array_merge(
-                    array_filter([
-                        self::detectPhpExecutable(),
-                        $consolePath,
-                        $this->getName(),
-                        implode(' ', array_slice($input->getArguments(), 1)),
-                        '--child',
-                    ]),
-                    $this->serializeInputOptions($input, ['child', 'processes'])
-                )
+            $commandTemplate = array_merge(
+                array_filter([
+                    self::detectPhpExecutable(),
+                    $consolePath,
+                    $this->getName(),
+                    implode(' ', array_slice($input->getArguments(), 1)),
+                    '--child',
+                ]),
+                $this->serializeInputOptions($input, ['child', 'processes'])
             );
+
             $terminalWidth = (new Terminal())->getWidth();
 
             $processLauncher = new ProcessLauncher(

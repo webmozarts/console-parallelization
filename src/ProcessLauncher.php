@@ -29,6 +29,9 @@ use Symfony\Component\Process\Process;
  */
 class ProcessLauncher
 {
+    /**
+     * @var array
+     */
     private $command;
 
     private $workingDirectory;
@@ -49,7 +52,7 @@ class ProcessLauncher
     private $runningProcesses = [];
 
     public function __construct(
-        string $command,
+        array $command,
         string $workingDirectory,
         array $environmentVariables,
         int $processLimit,
@@ -140,7 +143,7 @@ class ProcessLauncher
         $process->inheritEnvironmentVariables(true);
         $process->start($this->callback);
 
-        $this->logger->debug('Command started: '.$this->command);
+        $this->logger->debug('Command started: '. implode(' ', $this->command));
 
         $this->runningProcesses[] = $process;
     }
