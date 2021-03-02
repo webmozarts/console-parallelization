@@ -515,13 +515,13 @@ trait Parallelization
 
             $optionString = '';
             if (!$option->acceptValue()) {
-                $optionString .= ' --'.$name;
+                $optionString .= '--'.$name;
             } elseif ($option->isArray()) {
                 foreach ($value as $arrayValue) {
-                    $optionString .= ' --'.$name.'='.$arrayValue;
+                    $optionString .= '--'.$name.'='.$arrayValue;
                 }
             } else {
-                $optionString .= ' --'.$name.'='.$value;
+                $optionString .= '--'.$name.'='.$value;
             }
 
             $preparedOptionList[] = $optionString;
