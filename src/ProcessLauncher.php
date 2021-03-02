@@ -140,7 +140,9 @@ class ProcessLauncher
         );
 
         $process->setInput($inputStream);
-        $process->inheritEnvironmentVariables(true);
+        if(method_exists($process, 'inheritEnvironmentVariables')) {
+            $process->inheritEnvironmentVariables(true);
+        }
         $process->start($this->callback);
 
         $this->logger->debug('Command started: '. implode(' ', $this->command));
