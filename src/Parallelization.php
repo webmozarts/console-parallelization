@@ -37,6 +37,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Contracts\Service\ResetInterface;
+use Symfony\Component\Process\Process;
 use Throwable;
 use function trim;
 use Webmozart\Assert\Assert;
@@ -359,23 +360,25 @@ trait Parallelization
                 sprintf('The bin/console file could not be found at %s', getcwd()))
             ;
 
-            $commandTemplate = implode(
-                ' ',
-                array_merge(
-                    array_filter([
-                        self::detectPhpExecutable(),
-                        $consolePath,
-                        $this->getName(),
-                        implode(' ', array_slice($input->getArguments(), 1)),
-                        '--child',
-                    ]),
-                    $this->serializeInputOptions($input, ['child', 'processes'])
-                )
+            $commandTemplate = array_merge(
+                array_filter([
+                    self::detectPhpExecutable(),
+                    $consolePath,
+                    $this->getName(),
+                    implode(' ', array_slice($input->getArguments(), 1)),
+                    '--child',
+                ]),
+                $this->serializeInputOptions($input, ['child', 'processes'])
             );
+
             $terminalWidth = (new Terminal())->getWidth();
 
+            // @TODO: can be removed once ProcessLauncher accepts command arrays
+            $tempProcess = new Process($commandTemplate);
+            $commandString = $tempProcess->getCommandLine();
+
             $processLauncher = new ProcessLauncher(
-                $commandTemplate,
+                $commandString,
                 self::getWorkingDirectory($this->getContainer()),
                 $this->getEnvironmentVariables($this->getContainer()),
                 $numberOfProcesses,
@@ -517,13 +520,13 @@ trait Parallelization
 
             $optionString = '';
             if (!$option->acceptValue()) {
-                $optionString .= ' --'.$name;
+                $optionString .= '--'.$name;
             } elseif ($option->isArray()) {
                 foreach ($value as $arrayValue) {
-                    $optionString .= ' --'.$name.'='.$arrayValue;
+                    $optionString .= '--'.$name.'='.$arrayValue;
                 }
             } else {
-                $optionString .= ' --'.$name.'='.$value;
+                $optionString .= '--'.$name.'='.$value;
             }
 
             $preparedOptionList[] = $optionString;
