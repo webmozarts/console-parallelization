@@ -18,22 +18,26 @@ use function array_fill_keys;
 use function array_filter;
 use function array_merge;
 use function array_slice;
+use function explode;
+use function getcwd;
 use function implode;
 use RuntimeException;
+use function realpath;
 use function sprintf;
+use function stream_get_contents;
+use const PHP_EOL;
 use const STDIN;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Contracts\Service\ResetInterface;
+use Symfony\Component\Process\Process;
 use Throwable;
 use function trim;
 use Webmozart\Assert\Assert;
@@ -93,23 +97,6 @@ trait Parallelization
     }
 
     /**
-     * Returns the environment variables that are passed to the child processes.
-     *
-     * @param ContainerInterface $container The service containers
-     *
-     * @return string[] A list of environment variable names and values
-     */
-    private static function getEnvironmentVariables(ContainerInterface $container): array
-    {
-        return [
-            'PATH' => getenv('PATH'),
-            'HOME' => getenv('HOME'),
-            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
-            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
-        ];
-    }
-
-    /**
      * Returns the working directory for the child process.
      *
      * @param ContainerInterface $container The service container
@@ -118,7 +105,7 @@ trait Parallelization
      */
     private static function getWorkingDirectory(ContainerInterface $container): string
     {
-        return dirname($container->getParameter('kernel.root_dir'));
+        return dirname($container->getParameter('kernel.project_dir'));
     }
 
     /**
@@ -128,26 +115,7 @@ trait Parallelization
      */
     protected static function configureParallelization(Command $command): void
     {
-        $command
-            ->addArgument(
-                'item',
-                InputArgument::OPTIONAL,
-                'The item to process'
-            )
-            ->addOption(
-                'processes',
-                'p',
-                InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
-                null
-            )
-            ->addOption(
-                'child',
-                null,
-                InputOption::VALUE_NONE,
-                'Set on child processes'
-            )
-        ;
+        ParallelizationInput::configureParallelization($command);
     }
 
     /**
@@ -205,6 +173,23 @@ trait Parallelization
      * @return string The name of the item in the correct plurality
      */
     abstract protected function getItemName(int $count): string;
+
+    /**
+     * Returns the environment variables that are passed to the child processes.
+     *
+     * @param ContainerInterface $container The service containers
+     *
+     * @return string[] A list of environment variable names and values
+     */
+    protected function getEnvironmentVariables(ContainerInterface $container): array
+    {
+        return [
+            'PATH' => getenv('PATH'),
+            'HOME' => getenv('HOME'),
+            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
+            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
+        ];
+    }
 
     /**
      * Method executed at the very beginning of the master process.
@@ -278,13 +263,15 @@ trait Parallelization
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if ($input->getOption('child')) {
+        $parallelizationInput = new ParallelizationInput($input);
+
+        if ($parallelizationInput->isChildProcess()) {
             $this->executeChildProcess($input, $output);
 
             return 0;
         }
 
-        $this->executeMasterProcess($input, $output);
+        $this->executeMasterProcess($parallelizationInput, $input, $output);
 
         return 0;
     }
@@ -297,73 +284,64 @@ trait Parallelization
      * items of the processed data set and terminates. As long as there is data
      * left to process, new child processes are spawned automatically.
      */
-    protected function executeMasterProcess(InputInterface $input, OutputInterface $output): void
-    {
+    protected function executeMasterProcess(
+        ParallelizationInput $parallelizationInput,
+        InputInterface $input,
+        OutputInterface $output
+    ): void {
         $this->runBeforeFirstCommand($input, $output);
 
-        $numberOfProcessesDefined = null !== $input->getOption('processes');
-        $numberOfProcesses = $numberOfProcessesDefined ? (int) $input->getOption('processes') : 1;
-        $hasItem = (bool) $input->getArgument('item');
-        $items = $hasItem ? [$input->getArgument('item')] : $this->fetchItems($input);
-        $count = count($items);
-        $segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined ? $count : $this->getSegmentSize();
-        $batchSize = $this->getBatchSize();
-        $rounds = 1 === $numberOfProcesses ? 1 : ceil($count * 1.0 / $segmentSize);
-        $batches = ceil($segmentSize * 1.0 / $batchSize) * $rounds;
+        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
+        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
 
-        Assert::greaterThan(
-            $numberOfProcesses,
-            0,
-            sprintf(
-                'Requires at least one process. Got "%s"',
-                $input->getOption('processes')
-            )
+        $itemBatchIterator = ItemBatchIterator::create(
+            $parallelizationInput->getItem(),
+            function () use ($input) {
+                return $this->fetchItems($input);
+            },
+            $this->getBatchSize()
         );
 
-        if (!$hasItem && 1 !== $numberOfProcesses) {
-            // Shouldn't check this when only one item has been specified or
-            // when no child processes is used
-            Assert::greaterThanEq(
-                $segmentSize,
-                $batchSize,
-                sprintf(
-                    'The segment size should always be greater or equal to '
-                    .'the batch size. Got respectively "%d" and "%d"',
-                    $segmentSize,
-                    $batchSize
-                )
-            );
-        }
+        $numberOfItems = $itemBatchIterator->getNumberOfItems();
+        $batchSize = $itemBatchIterator->getBatchSize();
+
+        $config = new Configuration(
+            $isNumberOfProcessesDefined,
+            $numberOfProcesses,
+            $numberOfItems,
+            $this->getSegmentSize(),
+            $batchSize
+        );
+
+        $segmentSize = $config->getSegmentSize();
+        $numberOfSegments = $config->getNumberOfSegments();
+        $numberOfBatches = $config->getNumberOfBatches();
 
         $output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
-            $count,
-            $this->getItemName($count),
+            $numberOfItems,
+            $this->getItemName($numberOfItems),
             $segmentSize,
             $batchSize,
-            $rounds,
-            1 === $rounds ? 'round' : 'rounds',
-            $batches,
-            1 === $batches ? 'batch' : 'batches',
+            $numberOfSegments,
+            1 === $numberOfSegments ? 'round' : 'rounds',
+            $numberOfBatches,
+            1 === $numberOfBatches ? 'batch' : 'batches',
             $numberOfProcesses,
             1 === $numberOfProcesses ? 'process' : 'processes'
         ));
         $output->writeln('');
 
-        $progressBar = new ProgressBar($output, $count);
+        $progressBar = new ProgressBar($output, $numberOfItems);
         $progressBar->setFormat('debug');
         $progressBar->start();
 
-        if ($count <= $segmentSize || (1 === $numberOfProcesses && !$numberOfProcessesDefined)) {
+        if ($numberOfItems <= $segmentSize
+            || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
+        ) {
             // Run in the master process
 
-            $itemsChunks = array_chunk(
-                $items,
-                $this->getBatchSize(),
-                false
-            );
-
-            foreach ($itemsChunks as $items) {
+            foreach ($itemBatchIterator->getItemBatches() as $items) {
                 $this->runBeforeBatch($input, $output, $items);
 
                 foreach ($items as $item) {
@@ -382,25 +360,27 @@ trait Parallelization
                 sprintf('The bin/console file could not be found at %s', getcwd()))
             ;
 
-            $commandTemplate = implode(
-                ' ',
-                array_merge(
-                    array_filter([
-                        self::detectPhpExecutable(),
-                        $consolePath,
-                        $this->getName(),
-                        implode(' ', array_slice($input->getArguments(), 1)),
-                        '--child',
-                    ]),
-                    $this->serializeInputOptions($input, ['child', 'processes'])
-                )
+            $commandTemplate = array_merge(
+                array_filter([
+                    self::detectPhpExecutable(),
+                    $consolePath,
+                    $this->getName(),
+                    implode(' ', array_slice($input->getArguments(), 1)),
+                    '--child',
+                ]),
+                $this->serializeInputOptions($input, ['child', 'processes'])
             );
+
             $terminalWidth = (new Terminal())->getWidth();
 
+            // @TODO: can be removed once ProcessLauncher accepts command arrays
+            $tempProcess = new Process($commandTemplate);
+            $commandString = $tempProcess->getCommandLine();
+
             $processLauncher = new ProcessLauncher(
-                $commandTemplate,
+                $commandString,
                 self::getWorkingDirectory($this->getContainer()),
-                self::getEnvironmentVariables($this->getContainer()),
+                $this->getEnvironmentVariables($this->getContainer()),
                 $numberOfProcesses,
                 $segmentSize,
                 $this->getContainer()->get('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
@@ -409,7 +389,7 @@ trait Parallelization
                 }
             );
 
-            $processLauncher->run($items);
+            $processLauncher->run($itemBatchIterator->getItems());
         }
 
         $progressBar->finish();
@@ -418,13 +398,13 @@ trait Parallelization
         $output->writeln('');
         $output->writeln(sprintf(
             'Processed %d %s.',
-            $count,
-            $this->getItemName($count)
+            $numberOfItems,
+            $this->getItemName($numberOfItems)
         ));
 
         $this->runAfterLastCommand($input, $output);
     }
-    
+
     /**
      * Get the path of the executable Symfony bin console.
      */
@@ -445,7 +425,7 @@ trait Parallelization
     ): void {
         $advancementChar = self::getProgressSymbol();
 
-        $itemsChunks = array_chunk(
+        $itemBatchIterator = new ItemBatchIterator(
             array_filter(
                 explode(
                     PHP_EOL,
@@ -455,7 +435,7 @@ trait Parallelization
             $this->getBatchSize()
         );
 
-        foreach ($itemsChunks as $items) {
+        foreach ($itemBatchIterator->getItemBatches() as $items) {
             $this->runBeforeBatch($input, $output, $items);
 
             foreach ($items as $item) {
@@ -527,12 +507,14 @@ trait Parallelization
             }
         }
     }
-    
+
     /**
      * @param string[] $blackListParams
+     *
      * @return string[]
      */
-    private function serializeInputOptions(InputInterface $input, array $blackListParams) : array {
+    private function serializeInputOptions(InputInterface $input, array $blackListParams): array
+    {
         $options = array_diff_key(
             array_filter($input->getOptions()),
             array_fill_keys($blackListParams, '')
@@ -543,19 +525,20 @@ trait Parallelization
             $definition = $this->getDefinition();
             $option = $definition->getOption($name);
 
-            $optionString  = "";
+            $optionString = '';
             if (!$option->acceptValue()) {
-                $optionString .= ' --' . $name;
+                $optionString .= '--'.$name;
             } elseif ($option->isArray()) {
                 foreach ($value as $arrayValue) {
-                    $optionString .= ' --'.$name.'='.$this->quoteOptionValue($arrayValue);
+                    $optionString .= '--'.$name.'='.$this->quoteOptionValue($arrayValue);
                 }
             } else {
-                $optionString .= ' --'.$name.'='.$this->quoteOptionValue($value);
+                $optionString .= '--'.$name.'='.$this->quoteOptionValue($value);
             }
 
             $preparedOptionList[] = $optionString;
         }
+
         return $preparedOptionList;
     }
 

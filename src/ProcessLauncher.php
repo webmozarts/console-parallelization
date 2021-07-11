@@ -49,7 +49,7 @@ class ProcessLauncher
     private $runningProcesses = [];
 
     public function __construct(
-        string $command,
+        string $command, // @TODO change to array for 2.0
         string $workingDirectory,
         array $environmentVariables,
         int $processLimit,
@@ -128,16 +128,26 @@ class ProcessLauncher
      */
     private function startProcess(InputStream $inputStream): void
     {
-        $process = new Process(
+        $arguments = [
             $this->command,
             $this->workingDirectory,
             $this->environmentVariables,
             null,
             null
-        );
+        ];
+
+        if(method_exists(Process::class, 'fromShellCommandline')) {
+            // Symfony >= 4.2 workaround as Symfony 5 requires `Process` to be initiated with an array
+            // @TODO: can be removed once $this->command was changed to an array
+            $process = Process::fromShellCommandline(...$arguments);
+        } else {
+            $process = new Process(...$arguments);
+        }
 
         $process->setInput($inputStream);
-        $process->inheritEnvironmentVariables(true);
+        if(method_exists($process, 'inheritEnvironmentVariables')) {
+            $process->inheritEnvironmentVariables(true);
+        }
         $process->start($this->callback);
 
         $this->logger->debug('Command started: '.$this->command);
