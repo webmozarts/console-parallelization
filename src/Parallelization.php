@@ -354,7 +354,7 @@ trait Parallelization
             }
         } else {
             // Distribute if we have multiple segments
-            $consolePath = realpath(getcwd().'/bin/console');
+            $consolePath = $this->getConsolePath();
             Assert::fileExists(
                 $consolePath,
                 sprintf('The bin/console file could not be found at %s', getcwd()))
@@ -403,6 +403,13 @@ trait Parallelization
         ));
 
         $this->runAfterLastCommand($input, $output);
+    }
+
+    /**
+     * Get the path of the executable Symfony bin console.
+     */
+    protected function getConsolePath() : string {
+        return realpath(getcwd().'/bin/console');
     }
 
     /**
@@ -523,15 +530,36 @@ trait Parallelization
                 $optionString .= '--'.$name;
             } elseif ($option->isArray()) {
                 foreach ($value as $arrayValue) {
-                    $optionString .= '--'.$name.'='.$arrayValue;
+                    $optionString .= '--'.$name.'='.$this->quoteOptionValue($arrayValue);
                 }
             } else {
-                $optionString .= '--'.$name.'='.$value;
+                $optionString .= '--'.$name.'='.$this->quoteOptionValue($value);
             }
 
             $preparedOptionList[] = $optionString;
         }
 
         return $preparedOptionList;
+    }
+
+    /**
+     * Ensure that an option value is quoted correctly, before it is passed to a child process.
+     * @param mixed $value the input option value, which is typically a string but can be of any other primitive type.
+     * @return mixed the replaced and quoted value, if $value contained a character that required quoting.
+     */
+    protected function quoteOptionValue($value) {
+
+        if($this->isValueRequiresQuoting($value)) {
+            return sprintf('"%s"', str_replace('"', '\"', $value));
+        } else {
+            return $value;
+        }
+    }
+
+    /**
+     * Validate whether a command option requires quoting or not, depending on its content.
+     */
+    protected function isValueRequiresQuoting($value) : bool {
+        return 0 < preg_match('/[\s \\\\ \' " & | < > = ! @]/x', $value);
     }
 }
