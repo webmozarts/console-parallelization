@@ -113,6 +113,6 @@ return (new Config())
             ->in(__DIR__)
             ->exclude([
                 'dist',
-                'var',
+                'tests/Integration/var',
             ]),
     );

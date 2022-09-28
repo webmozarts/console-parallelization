@@ -3,7 +3,8 @@
 /.php_cs.cache
 /.phpunit.result.cache
 /composer.lock
-/tests/output
-/var/
+/tests/Integration/output
+/tests/Integration/var/
+!/tests/Integration/var/.gitkeep
 /vendor-bin/*/vendor/
 /vendor/

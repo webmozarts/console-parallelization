@@ -36,6 +36,16 @@ final class Kernel extends HttpKernel
     {
     }
 
+    public function getCacheDir(): string
+    {
+        return __DIR__.'/var/cache';
+    }
+
+    public function getLogDir(): string
+    {
+        return __DIR__.'/var/log';
+    }
+
     protected function build(ContainerBuilder $container): void
     {
         $eventDispatcherDefinition = new Definition(
