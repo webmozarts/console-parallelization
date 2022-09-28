@@ -3,15 +3,13 @@
 
 declare(strict_types=1);
 
+if (!in_array(PHP_SAPI, ['cli', 'phpdbg', 'embed'], true)) {
+    echo 'Warning: The console should be invoked via the CLI version of PHP, not the '.PHP_SAPI.' SAPI'.PHP_EOL;
+}
+
 require __DIR__.'/../vendor/autoload.php';
 
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
-use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
-use Webmozarts\Console\Parallelization\Integration\Kernel;
+use Fidry\Console\Application\ApplicationRunner;
+use Webmozarts\Console\Parallelization\Integration\TestApplication;
 
-$application = new Application(new Kernel());
-$application->add(new ImportMoviesCommand());
-$application->add(new NoSubProcessCommand());
-
-$application->run();
+ApplicationRunner::runApplication(new TestApplication());
