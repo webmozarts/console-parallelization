@@ -28,7 +28,6 @@ final class ItemBatchIterator
 {
     private $items;
     private $numberOfItems;
-    private $batchSize;
     private $itemsChunks;
 
     /**
@@ -52,7 +51,6 @@ final class ItemBatchIterator
             false,
         );
         $this->numberOfItems = count($this->items);
-        $this->batchSize = $batchSize;
     }
 
     /**
@@ -88,11 +86,6 @@ final class ItemBatchIterator
     public function getNumberOfItems(): int
     {
         return $this->numberOfItems;
-    }
-
-    public function getBatchSize(): int
-    {
-        return $this->batchSize;
     }
 
     /**

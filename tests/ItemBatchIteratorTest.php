@@ -40,7 +40,6 @@ final class ItemBatchIteratorTest extends TestCase
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
-            $batchSize,
             $expectedBatches,
         );
     }
@@ -66,7 +65,6 @@ final class ItemBatchIteratorTest extends TestCase
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
-            $batchSize,
             $expectedBatches,
         );
     }
@@ -213,12 +211,10 @@ final class ItemBatchIteratorTest extends TestCase
         ItemBatchIterator $iterator,
         array $expectedItems,
         int $expectedNumberOfItems,
-        int $expectedBatchSize,
         array $expectedBatches
     ): void {
         self::assertSame($expectedItems, $iterator->getItems());
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
-        self::assertSame($expectedBatchSize, $iterator->getBatchSize());
         self::assertSame($expectedBatches, $iterator->getItemBatches());
     }
 }
