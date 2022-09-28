@@ -53,6 +53,8 @@ return (new Config())
                 EOF,
             'location' => 'after_open',
         ],
+        'heredoc_indentation' => true,
+        'heredoc_to_nowdoc' => true,
         'is_null' => true,
         'list_syntax' => [
             'syntax' => 'short',
