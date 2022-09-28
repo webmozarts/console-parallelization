@@ -111,7 +111,6 @@ return (new Config())
             ->in(__DIR__)
             ->exclude([
                 'dist',
-                'tests/Integration/var/cache/',
-                'tests/Integration/var/logs/',
+                'var',
             ]),
     );
