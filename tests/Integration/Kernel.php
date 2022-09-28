@@ -50,13 +50,13 @@ final class Kernel extends HttpKernel
     {
         $eventDispatcherDefinition = new Definition(
             EventDispatcher::class,
-            []
+            [],
         );
         $eventDispatcherDefinition->setPublic(true);
 
         $loggerDefinition = new Definition(
             ConsoleLogger::class,
-            []
+            [],
         );
         $loggerDefinition->setPublic(true);
 

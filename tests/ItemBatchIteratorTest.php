@@ -41,7 +41,7 @@ final class ItemBatchIteratorTest extends TestCase
             $expectedItems,
             $expectedNumberOfItems,
             $batchSize,
-            $expectedBatches
+            $expectedBatches,
         );
     }
 
@@ -67,7 +67,7 @@ final class ItemBatchIteratorTest extends TestCase
             $expectedItems,
             $expectedNumberOfItems,
             $batchSize,
-            $expectedBatches
+            $expectedBatches,
         );
     }
 
@@ -81,7 +81,7 @@ final class ItemBatchIteratorTest extends TestCase
             static function () {
                 yield from [];
             },
-            1
+            1,
         );
     }
 

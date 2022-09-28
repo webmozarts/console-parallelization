@@ -40,7 +40,7 @@ final class ConfigurationTest extends TestCase
             $numberOfProcesses,
             $numberOfItems,
             $segmentSize,
-            $batchSize
+            $batchSize,
         );
 
         self::assertSame($expectedSegmentSize, $config->getSegmentSize());
@@ -66,7 +66,7 @@ final class ConfigurationTest extends TestCase
             $numberOfProcesses,
             $numberOfItems,
             $segmentSize,
-            $batchSize
+            $batchSize,
         );
     }
 
@@ -80,7 +80,7 @@ final class ConfigurationTest extends TestCase
             1,
             0,
             1,
-            1
+            1,
         );
 
         yield 'only one default process: the segment size is the number of items' => self::createInputArgs(
@@ -91,7 +91,7 @@ final class ConfigurationTest extends TestCase
             1,
             50,
             1,
-            1
+            1,
         );
 
         yield 'an arbitrary number of processes given: the segment size is the segment size given' => self::createInputArgs(
@@ -102,7 +102,7 @@ final class ConfigurationTest extends TestCase
             1,
             3,
             17,
-            51
+            51,
         );
 
         yield 'one process given: the segment size is the segment size given' => self::createInputArgs(
@@ -113,7 +113,7 @@ final class ConfigurationTest extends TestCase
             1,
             3,
             1,
-            3
+            3,
         );
 
         // Invalid domain case but we add this test to capture this behaviour nonetheless
@@ -125,7 +125,7 @@ final class ConfigurationTest extends TestCase
             1,
             3,
             17,
-            51
+            51,
         );
 
         yield 'there is no rounds if there is no items' => self::createInputArgs(
@@ -136,7 +136,7 @@ final class ConfigurationTest extends TestCase
             1,
             0,
             1,
-            1
+            1,
         );
 
         yield 'there is only one round if only one process (default)' => self::createInputArgs(
@@ -147,7 +147,7 @@ final class ConfigurationTest extends TestCase
             1,
             50,
             1,
-            1
+            1,
         );
 
         yield 'there is only one round if only one process (arbitrary)' => self::createInputArgs(
@@ -158,7 +158,7 @@ final class ConfigurationTest extends TestCase
             1,
             1,
             1,
-            1
+            1,
         );
 
         yield 'there is enough rounds to reach the number of items with the given segment size (half)' => self::createInputArgs(
@@ -169,7 +169,7 @@ final class ConfigurationTest extends TestCase
             1,
             25,
             2,
-            50
+            50,
         );
 
         yield 'there is enough rounds to reach the number of items with the given segment size (upper)' => self::createInputArgs(
@@ -180,7 +180,7 @@ final class ConfigurationTest extends TestCase
             1,
             15,
             4,
-            60
+            60,
         );
 
         yield 'there is enough rounds to reach the number of items with the given segment size (lower)' => self::createInputArgs(
@@ -191,7 +191,7 @@ final class ConfigurationTest extends TestCase
             1,
             40,
             2,
-            80
+            80,
         );
 
         yield 'the batch size used is the batch size given' => self::createInputArgs(
@@ -202,7 +202,7 @@ final class ConfigurationTest extends TestCase
             7,
             0,
             1,
-            2
+            2,
         );
 
         yield 'there is enough batches to process all the items of a given segment (half)' => self::createInputArgs(
@@ -213,7 +213,7 @@ final class ConfigurationTest extends TestCase
             15,
             30,
             2,
-            4
+            4,
         );
 
         yield 'there is enough batches to process all the items of a given segment (upper)' => self::createInputArgs(
@@ -224,7 +224,7 @@ final class ConfigurationTest extends TestCase
             10,
             30,
             2,
-            6
+            6,
         );
 
         yield 'there is enough batches to process all the items of a given segment (lower)' => self::createInputArgs(
@@ -235,7 +235,7 @@ final class ConfigurationTest extends TestCase
             25,
             30,
             2,
-            4
+            4,
         );
     }
 
