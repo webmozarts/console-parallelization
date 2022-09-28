@@ -22,32 +22,20 @@ use Symfony\Component\HttpKernel\Kernel as HttpKernel;
 
 final class Kernel extends HttpKernel
 {
-    /**
-     * {@inheritdoc}
-     */
     public function __construct()
     {
         parent::__construct('dev', true);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function registerBundles(): array
     {
         return [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function build(ContainerBuilder $container): void
     {
         $eventDispatcherDefinition = new Definition(
