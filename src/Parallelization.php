@@ -269,7 +269,7 @@ trait Parallelization
         );
 
         $numberOfItems = $itemBatchIterator->getNumberOfItems();
-        $batchSize = $itemBatchIterator->getBatchSize();
+        $batchSize = $this->getBatchSize();
 
         $config = new Configuration(
             $isNumberOfProcessesDefined,
