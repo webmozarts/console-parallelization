@@ -76,8 +76,7 @@ final class Configuration
 
         $this->segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined
             ? $numberOfItems
-            : $segmentSize
-        ;
+            : $segmentSize;
         $this->rounds = (int) (1 === $numberOfProcesses ? 1 : ceil($numberOfItems / $segmentSize));
         $this->batches = (int) (ceil($segmentSize / $batchSize) * $this->rounds);
     }

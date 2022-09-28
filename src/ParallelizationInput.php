@@ -103,8 +103,7 @@ final class ParallelizationInput
                 null,
                 InputOption::VALUE_NONE,
                 'Set on child processes',
-            )
-        ;
+            );
     }
 
     public function isNumberOfProcessesDefined(): bool
