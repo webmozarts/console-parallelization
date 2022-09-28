@@ -113,7 +113,7 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         $movies = [];
 
         foreach ($movieFileNames as $movieFileName) {
-            $moviePath = __DIR__.'/movies/'.$movieFileName;
+            $moviePath = __DIR__.'/../movies/'.$movieFileName;
 
             $decodedContent = json_decode(
                 file_get_contents($moviePath),
