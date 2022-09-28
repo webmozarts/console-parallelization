@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function is_numeric;
+use function sprintf;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
-use function is_numeric;
-use function sprintf;
 
 final class ParallelizationInput
 {
@@ -31,35 +31,6 @@ final class ParallelizationInput
     private $numberOfProcesses = 1;
     private $item;
     private $childProcess;
-
-    /**
-     * Adds the command configuration specific to parallelization.
-     *
-     * Call this method in your configure() method.
-     */
-    public static function configureParallelization(Command $command): void
-    {
-        $command
-            ->addArgument(
-                self::ITEM_ARGUMENT,
-                InputArgument::OPTIONAL,
-                'The item to process'
-            )
-            ->addOption(
-                self::PROCESSES_OPTION,
-                'p',
-                InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
-                null
-            )
-            ->addOption(
-                self::CHILD_OPTION,
-                null,
-                InputOption::VALUE_NONE,
-                'Set on child processes'
-            )
-        ;
-    }
 
     public function __construct(InputInterface $input)
     {
@@ -105,6 +76,35 @@ final class ParallelizationInput
         $this->item = $hasItem ? (string) $item : null;
 
         $this->childProcess = (bool) $input->getOption('child');
+    }
+
+    /**
+     * Adds the command configuration specific to parallelization.
+     *
+     * Call this method in your configure() method.
+     */
+    public static function configureParallelization(Command $command): void
+    {
+        $command
+            ->addArgument(
+                self::ITEM_ARGUMENT,
+                InputArgument::OPTIONAL,
+                'The item to process'
+            )
+            ->addOption(
+                self::PROCESSES_OPTION,
+                'p',
+                InputOption::VALUE_OPTIONAL,
+                'The number of parallel processes to run',
+                null
+            )
+            ->addOption(
+                self::CHILD_OPTION,
+                null,
+                InputOption::VALUE_NONE,
+                'Set on child processes'
+            )
+        ;
     }
 
     public function isNumberOfProcessesDefined(): bool

@@ -32,17 +32,17 @@ final class ParallelizationInputTest extends TestCase
         $initialDefinition = $command->getDefinition();
 
         // Sanity check
-        $this->assertFalse($initialDefinition->hasArgument('item'));
-        $this->assertFalse($initialDefinition->hasOption('processes'));
-        $this->assertFalse($initialDefinition->hasOption('child'));
+        self::assertFalse($initialDefinition->hasArgument('item'));
+        self::assertFalse($initialDefinition->hasOption('processes'));
+        self::assertFalse($initialDefinition->hasOption('child'));
 
         ParallelizationInput::configureParallelization($command);
 
         $configuredDefinition = $command->getDefinition();
 
-        $this->assertTrue($configuredDefinition->hasArgument('item'));
-        $this->assertTrue($configuredDefinition->hasOption('processes'));
-        $this->assertTrue($configuredDefinition->hasOption('child'));
+        self::assertTrue($configuredDefinition->hasArgument('item'));
+        self::assertTrue($configuredDefinition->hasOption('processes'));
+        self::assertTrue($configuredDefinition->hasOption('child'));
     }
 
     /**
@@ -59,13 +59,13 @@ final class ParallelizationInputTest extends TestCase
 
         $parallelizationInput = new ParallelizationInput($input);
 
-        $this->assertSame(
+        self::assertSame(
             $expectedIsNumberOfProcessesDefined,
             $parallelizationInput->isNumberOfProcessesDefined()
         );
-        $this->assertSame($expectedNumberOfProcesses, $parallelizationInput->getNumberOfProcesses());
-        $this->assertSame($expectedItem, $parallelizationInput->getItem());
-        $this->assertSame($expectedIsChildProcess, $parallelizationInput->isChildProcess());
+        self::assertSame($expectedNumberOfProcesses, $parallelizationInput->getNumberOfProcesses());
+        self::assertSame($expectedItem, $parallelizationInput->getItem());
+        self::assertSame($expectedIsChildProcess, $parallelizationInput->isChildProcess());
     }
 
     /**

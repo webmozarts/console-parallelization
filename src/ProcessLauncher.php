@@ -133,10 +133,10 @@ class ProcessLauncher
             $this->workingDirectory,
             $this->environmentVariables,
             null,
-            null
+            null,
         ];
 
-        if(method_exists(Process::class, 'fromShellCommandline')) {
+        if (method_exists(Process::class, 'fromShellCommandline')) {
             // Symfony >= 4.2 workaround as Symfony 5 requires `Process` to be initiated with an array
             // @TODO: can be removed once $this->command was changed to an array
             $process = Process::fromShellCommandline(...$arguments);
@@ -145,7 +145,7 @@ class ProcessLauncher
         }
 
         $process->setInput($inputStream);
-        if(method_exists($process, 'inheritEnvironmentVariables')) {
+        if (method_exists($process, 'inheritEnvironmentVariables')) {
             $process->inheritEnvironmentVariables(true);
         }
         $process->start($this->callback);

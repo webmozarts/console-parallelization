@@ -24,7 +24,7 @@
     },
     "require-dev": {
         "ext-json": "*",
-        "friendsofphp/php-cs-fixer": "^2.15",
+        "bamarni/composer-bin-plugin": "^1.8",
         "phpunit/phpunit": "^8.4",
         "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.0"
     },
@@ -41,6 +41,13 @@
     },
 
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true
+        },
+        "bamarni-bin": {
+            "bin-links": false,
+            "forward-command": false
+        }
     }
 }

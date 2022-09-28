@@ -13,16 +13,16 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Closure;
-use Webmozart\Assert\Assert;
 use function array_chunk;
 use function array_values;
+use Closure;
 use function count;
 use function get_class;
 use function gettype;
 use function is_numeric;
 use function is_object;
 use function sprintf;
+use Webmozart\Assert\Assert;
 
 final class ItemBatchIterator
 {
@@ -30,6 +30,30 @@ final class ItemBatchIterator
     private $numberOfItems;
     private $batchSize;
     private $itemsChunks;
+
+    /**
+     * @param list<string> $items
+     */
+    public function __construct(array $items, int $batchSize)
+    {
+        Assert::greaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size to be 1 or greater. Got "%s"',
+                $batchSize
+            )
+        );
+
+        $this->items = self::normalizeItems($items);
+        $this->itemsChunks = array_chunk(
+            $this->items,
+            $batchSize,
+            false
+        );
+        $this->numberOfItems = count($this->items);
+        $this->batchSize = $batchSize;
+    }
 
     /**
      * @param Closure(): list<string> $fetchItems
@@ -56,56 +80,6 @@ final class ItemBatchIterator
     /**
      * @return list<string>
      */
-    private static function normalizeItems($items): array
-    {
-        foreach ($items as $index => $item) {
-            if (is_numeric($item)) {
-                $items[$index] = (string) $item;
-
-                continue;
-            }
-
-            Assert::string(
-                $item,
-                sprintf(
-                    'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s"',
-                    is_object($item) ? get_class($item) : gettype($item),
-                    $index
-                )
-            );
-        }
-
-        return array_values($items);
-    }
-
-    /**
-     * @param list<string> $items
-     * @param int          $batchSize
-     */
-    public function __construct(array $items, int $batchSize)
-    {
-        Assert::greaterThan(
-            $batchSize,
-            0,
-            sprintf(
-                'Expected the batch size to be 1 or greater. Got "%s"',
-                $batchSize
-            )
-        );
-
-        $this->items = self::normalizeItems($items);
-        $this->itemsChunks = array_chunk(
-            $this->items,
-            $batchSize,
-            false
-        );
-        $this->numberOfItems = count($this->items);
-        $this->batchSize = $batchSize;
-    }
-
-    /**
-     * @return list<string>
-     */
     public function getItems(): array
     {
         return $this->items;
@@ -127,5 +101,30 @@ final class ItemBatchIterator
     public function getItemBatches(): array
     {
         return $this->itemsChunks;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function normalizeItems($items): array
+    {
+        foreach ($items as $index => $item) {
+            if (is_numeric($item)) {
+                $items[$index] = (string) $item;
+
+                continue;
+            }
+
+            Assert::string(
+                $item,
+                sprintf(
+                    'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s"',
+                    is_object($item) ? get_class($item) : gettype($item),
+                    $index
+                )
+            );
+        }
+
+        return array_values($items);
     }
 }

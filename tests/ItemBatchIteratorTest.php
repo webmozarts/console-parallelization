@@ -216,9 +216,9 @@ final class ItemBatchIteratorTest extends TestCase
         int $expectedBatchSize,
         array $expectedBatches
     ): void {
-        $this->assertSame($expectedItems, $iterator->getItems());
-        $this->assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
-        $this->assertSame($expectedBatchSize, $iterator->getBatchSize());
-        $this->assertSame($expectedBatches, $iterator->getItemBatches());
+        self::assertSame($expectedItems, $iterator->getItems());
+        self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
+        self::assertSame($expectedBatchSize, $iterator->getBatchSize());
+        self::assertSame($expectedBatches, $iterator->getItemBatches());
     }
 }

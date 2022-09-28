@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function func_get_args;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use function func_get_args;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Configuration
@@ -43,9 +43,9 @@ final class ConfigurationTest extends TestCase
             $batchSize
         );
 
-        $this->assertSame($expectedSegmentSize, $config->getSegmentSize());
-        $this->assertSame($expectedNumberOfSegments, $config->getNumberOfSegments());
-        $this->assertSame($expectedNumberOfBatches, $config->getNumberOfBatches());
+        self::assertSame($expectedSegmentSize, $config->getSegmentSize());
+        self::assertSame($expectedNumberOfSegments, $config->getNumberOfSegments());
+        self::assertSame($expectedNumberOfBatches, $config->getNumberOfBatches());
     }
 
     /**
