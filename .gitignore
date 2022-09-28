@@ -4,3 +4,4 @@
 /composer.lock
 /var/
 /vendor/
+/vendor-bin/*/vendor/
