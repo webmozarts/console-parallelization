@@ -28,14 +28,14 @@ final class ChunkedItemsIteratorTest extends TestCase
      * @dataProvider valuesProvider
      *
      * @param list<string>        $expectedItems
-     * @param array<list<string>> $expectedBatches
+     * @param array<list<string>> $expectedItemChunks
      */
     public function test_it_can_be_instantiated(
         array $items,
         int $batchSize,
         array $expectedItems,
         int $expectedNumberOfItems,
-        array $expectedBatches
+        array $expectedItemChunks
     ): void {
         $iterator = new ChunkedItemsIterator($items, $batchSize);
 
@@ -43,7 +43,7 @@ final class ChunkedItemsIteratorTest extends TestCase
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
-            $expectedBatches,
+            $expectedItemChunks,
         );
     }
 
@@ -52,7 +52,7 @@ final class ChunkedItemsIteratorTest extends TestCase
      *
      * @param Closure(): list<string> $fetchItems
      * @param list<string>            $expectedItems
-     * @param array<list<string>>     $expectedBatches
+     * @param array<list<string>>     $expectedItemChunks
      */
     public function test_it_can_be_created_from_an_input(
         ?string $item,
@@ -60,15 +60,15 @@ final class ChunkedItemsIteratorTest extends TestCase
         int $batchSize,
         array $expectedItems,
         int $expectedNumberOfItems,
-        array $expectedBatches
+        array $expectedItemChunks
     ): void {
         $iterator = ChunkedItemsIterator::create($item, $fetchItems, $batchSize);
 
-        $this->assertStateIs(
+        self::assertStateIs(
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
-            $expectedBatches,
+            $expectedItemChunks,
         );
     }
 
@@ -214,10 +214,10 @@ final class ChunkedItemsIteratorTest extends TestCase
         ChunkedItemsIterator $iterator,
         array $expectedItems,
         int $expectedNumberOfItems,
-        array $expectedBatches
+        array $expectedItemChunks
     ): void {
         self::assertSame($expectedItems, $iterator->getItems());
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
-        self::assertSame($expectedBatches, $iterator->getItemChunks());
+        self::assertSame($expectedItemChunks, $iterator->getItemChunks());
     }
 }
