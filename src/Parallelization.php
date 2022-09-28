@@ -265,7 +265,7 @@ trait Parallelization
             function () use ($input) {
                 return $this->fetchItems($input);
             },
-            $this->getBatchSize()
+            $this->getBatchSize(),
         );
 
         $numberOfItems = $itemBatchIterator->getNumberOfItems();
@@ -276,7 +276,7 @@ trait Parallelization
             $numberOfProcesses,
             $numberOfItems,
             $this->getSegmentSize(),
-            $batchSize
+            $batchSize,
         );
 
         $segmentSize = $config->getSegmentSize();
@@ -294,7 +294,7 @@ trait Parallelization
             $numberOfBatches,
             1 === $numberOfBatches ? 'batch' : 'batches',
             $numberOfProcesses,
-            1 === $numberOfProcesses ? 'process' : 'processes'
+            1 === $numberOfProcesses ? 'process' : 'processes',
         ));
         $output->writeln('');
 
@@ -323,8 +323,8 @@ trait Parallelization
             $consolePath = $this->getConsolePath();
             Assert::fileExists(
                 $consolePath,
-                sprintf('The bin/console file could not be found at %s', getcwd()))
-            ;
+                sprintf('The bin/console file could not be found at %s', getcwd()),
+            );
 
             $commandTemplate = array_merge(
                 array_filter([
@@ -334,7 +334,7 @@ trait Parallelization
                     implode(' ', array_slice($input->getArguments(), 1)),
                     '--child',
                 ]),
-                $this->serializeInputOptions($input, ['child', 'processes'])
+                $this->serializeInputOptions($input, ['child', 'processes']),
             );
 
             $terminalWidth = (new Terminal())->getWidth();
@@ -353,7 +353,7 @@ trait Parallelization
                 new ConsoleLogger($output),
                 function (string $type, string $buffer) use ($progressBar, $output, $terminalWidth) {
                     $this->processChildOutput($buffer, $progressBar, $output, $terminalWidth);
-                }
+                },
             );
 
             $processLauncher->run($itemBatchIterator->getItems());
@@ -366,7 +366,7 @@ trait Parallelization
         $output->writeln(sprintf(
             'Processed %d %s.',
             $numberOfItems,
-            $this->getItemName($numberOfItems)
+            $this->getItemName($numberOfItems),
         ));
 
         $this->runAfterLastCommand($input, $output);
@@ -397,10 +397,10 @@ trait Parallelization
             array_filter(
                 explode(
                     PHP_EOL,
-                    stream_get_contents(STDIN)
-                )
+                    stream_get_contents(STDIN),
+                ),
             ),
-            $this->getBatchSize()
+            $this->getBatchSize(),
         );
 
         foreach ($itemBatchIterator->getItemBatches() as $items) {
@@ -496,7 +496,7 @@ trait Parallelization
             $output->writeln('');
             $output->writeln(sprintf(
                 '<comment>%s</comment>',
-                str_pad(' Process Output ', $terminalWidth, '=', STR_PAD_BOTH)
+                str_pad(' Process Output ', $terminalWidth, '=', STR_PAD_BOTH),
             ));
             $output->writeln(str_replace($advancementChar, '', $buffer));
             $output->writeln('');
@@ -518,7 +518,7 @@ trait Parallelization
                     "Failed to process \"%s\": %s\n%s",
                     trim($item),
                     $exception->getMessage(),
-                    $exception->getTraceAsString()
+                    $exception->getTraceAsString(),
                 ));
             }
 
@@ -542,7 +542,7 @@ trait Parallelization
     {
         $options = array_diff_key(
             array_filter($input->getOptions()),
-            array_fill_keys($blackListParams, '')
+            array_fill_keys($blackListParams, ''),
         );
 
         $preparedOptionList = [];

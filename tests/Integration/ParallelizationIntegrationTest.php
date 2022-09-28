@@ -56,7 +56,7 @@ class ParallelizationIntegrationTest extends TestCase
 
         $commandTester->execute(
             ['command' => 'test:no-subprocess'],
-            ['interactive' => true]
+            ['interactive' => true],
         );
 
         // TODO: note that the "in 1 process is incorrect here..."
@@ -84,7 +84,7 @@ class ParallelizationIntegrationTest extends TestCase
                 'command' => 'test:no-subprocess',
                 '--processes' => '1',
             ],
-            ['interactive' => true]
+            ['interactive' => true],
         );
 
         $output = $this->getOutput($commandTester);
@@ -101,7 +101,7 @@ class ParallelizationIntegrationTest extends TestCase
                 'command' => 'import:movies',
                 '--processes' => 2,
             ],
-            ['interactive' => true]
+            ['interactive' => true],
         );
 
         $expected = <<<'EOF'
@@ -166,19 +166,19 @@ class ParallelizationIntegrationTest extends TestCase
         $output = preg_replace(
             '/\d+(\.\d+)? ([A-Z]i)?B/',
             '10.0 MiB',
-            $output
+            $output,
         );
 
         $output = str_replace(
             '< 1 sec',
             '10 secs',
-            $output
+            $output,
         );
 
         $output = preg_replace(
             '/\d+ secs?/',
             '10 secs',
-            $output
+            $output,
         );
 
         $replaceMap = [
@@ -192,7 +192,7 @@ class ParallelizationIntegrationTest extends TestCase
         return str_replace(
             array_keys($replaceMap),
             $replaceMap,
-            $output
+            $output,
         );
     }
 }

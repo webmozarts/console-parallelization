@@ -41,15 +41,15 @@ final class ItemBatchIterator
             0,
             sprintf(
                 'Expected the batch size to be 1 or greater. Got "%s"',
-                $batchSize
-            )
+                $batchSize,
+            ),
         );
 
         $this->items = self::normalizeItems($items);
         $this->itemsChunks = array_chunk(
             $this->items,
             $batchSize,
-            false
+            false,
         );
         $this->numberOfItems = count($this->items);
         $this->batchSize = $batchSize;
@@ -69,8 +69,8 @@ final class ItemBatchIterator
                 $items,
                 sprintf(
                     'Expected the fetched items to be a list of strings. Got "%s"',
-                    gettype($items)
-                )
+                    gettype($items),
+                ),
             );
         }
 
@@ -120,8 +120,8 @@ final class ItemBatchIterator
                 sprintf(
                     'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s"',
                     is_object($item) ? get_class($item) : gettype($item),
-                    $index
-                )
+                    $index,
+                ),
             );
         }
 

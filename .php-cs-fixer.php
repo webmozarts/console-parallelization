@@ -68,11 +68,20 @@ return (new Config())
         ],
         'modernize_types_casting' => true,
         'multiline_comment_opening_closing' => true,
+        'multiline_whitespace_before_semicolons' => true,
         'no_alternative_syntax' => true,
         'no_binary_string' => true,
         'no_homoglyph_names' => true,
         'no_php4_constructor' => true,
         'no_superfluous_elseif' => true,
+        'no_trailing_comma_in_singleline' => [
+            'elements' => [
+                'arguments',
+                'array_destructuring',
+                'array',
+                'group_import',
+            ],
+        ],
         'no_unset_cast' => true,
         'no_unset_on_property' => false,
         'no_useless_else' => true,
@@ -102,11 +111,14 @@ return (new Config())
         'self_static_accessor' => true,
         'single_line_throw' => false,
         'single_trait_insert_per_statement' => false,
-// TODO: enable once we are on 8.1 min
-//        'trailing_comma_in_multiline' => [
-//            'after_heredoc' => true,
-//            'elements' => ['arrays', 'arguments', 'parameters'],
-//        ],
+        'trailing_comma_in_multiline' => [
+            'after_heredoc' => true,
+            'elements' => [
+                'arrays',
+                'arguments',
+                // TODO: need PHP 8.1 'parameters',
+            ],
+        ],
     ])
     ->setFinder(
         Finder::create()
