@@ -87,7 +87,7 @@ final class ImportMoviesCommand extends ContainerAwareCommand
     {
         $this->logger->recordAfterBatch();
 
-        $this->batchMovies = null;
+        unset($this->batchMovies);
     }
 
     protected function runAfterLastCommand(InputInterface $input, OutputInterface $output): void
