@@ -19,7 +19,10 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-final class ItemBatchIteratorTest extends TestCase
+/**
+ * @covers \Webmozarts\Console\Parallelization\ChunkedItemsIterator
+ */
+final class ChunkedItemsIteratorTest extends TestCase
 {
     /**
      * @dataProvider valuesProvider
@@ -34,9 +37,9 @@ final class ItemBatchIteratorTest extends TestCase
         int $expectedNumberOfItems,
         array $expectedBatches
     ): void {
-        $iterator = new ItemBatchIterator($items, $batchSize);
+        $iterator = new ChunkedItemsIterator($items, $batchSize);
 
-        $this->assertBatchItemIteratorStateIs(
+        self::assertStateIs(
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
@@ -59,9 +62,9 @@ final class ItemBatchIteratorTest extends TestCase
         int $expectedNumberOfItems,
         array $expectedBatches
     ): void {
-        $iterator = ItemBatchIterator::create($item, $fetchItems, $batchSize);
+        $iterator = ChunkedItemsIterator::create($item, $fetchItems, $batchSize);
 
-        $this->assertBatchItemIteratorStateIs(
+        $this->assertStateIs(
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
@@ -74,7 +77,7 @@ final class ItemBatchIteratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected the fetched items to be a list of strings. Got "object"');
 
-        ItemBatchIterator::create(
+        ChunkedItemsIterator::create(
             null,
             static function () {
                 yield from [];
@@ -94,7 +97,7 @@ final class ItemBatchIteratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        new ItemBatchIterator($items, $batchSize);
+        new ChunkedItemsIterator($items, $batchSize);
     }
 
     public static function valuesProvider(): iterable
@@ -207,14 +210,14 @@ final class ItemBatchIteratorTest extends TestCase
         };
     }
 
-    private function assertBatchItemIteratorStateIs(
-        ItemBatchIterator $iterator,
+    private static function assertStateIs(
+        ChunkedItemsIterator $iterator,
         array $expectedItems,
         int $expectedNumberOfItems,
         array $expectedBatches
     ): void {
         self::assertSame($expectedItems, $iterator->getItems());
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
-        self::assertSame($expectedBatches, $iterator->getItemBatches());
+        self::assertSame($expectedBatches, $iterator->getItemChunks());
     }
 }
