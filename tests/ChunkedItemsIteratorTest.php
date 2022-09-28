@@ -19,28 +19,31 @@ use LogicException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-final class ItemBatchIteratorTest extends TestCase
+/**
+ * @covers \Webmozarts\Console\Parallelization\ChunkedItemsIterator
+ */
+final class ChunkedItemsIteratorTest extends TestCase
 {
     /**
      * @dataProvider valuesProvider
      *
      * @param list<string>        $expectedItems
-     * @param array<list<string>> $expectedBatches
+     * @param array<list<string>> $expectedItemChunks
      */
     public function test_it_can_be_instantiated(
         array $items,
         int $batchSize,
         array $expectedItems,
         int $expectedNumberOfItems,
-        array $expectedBatches
+        array $expectedItemChunks
     ): void {
-        $iterator = new ItemBatchIterator($items, $batchSize);
+        $iterator = new ChunkedItemsIterator($items, $batchSize);
 
-        $this->assertBatchItemIteratorStateIs(
+        self::assertStateIs(
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
-            $expectedBatches,
+            $expectedItemChunks,
         );
     }
 
@@ -49,7 +52,7 @@ final class ItemBatchIteratorTest extends TestCase
      *
      * @param Closure(): list<string> $fetchItems
      * @param list<string>            $expectedItems
-     * @param array<list<string>>     $expectedBatches
+     * @param array<list<string>>     $expectedItemChunks
      */
     public function test_it_can_be_created_from_an_input(
         ?string $item,
@@ -57,15 +60,15 @@ final class ItemBatchIteratorTest extends TestCase
         int $batchSize,
         array $expectedItems,
         int $expectedNumberOfItems,
-        array $expectedBatches
+        array $expectedItemChunks
     ): void {
-        $iterator = ItemBatchIterator::create($item, $fetchItems, $batchSize);
+        $iterator = ChunkedItemsIterator::create($item, $fetchItems, $batchSize);
 
-        $this->assertBatchItemIteratorStateIs(
+        self::assertStateIs(
             $iterator,
             $expectedItems,
             $expectedNumberOfItems,
-            $expectedBatches,
+            $expectedItemChunks,
         );
     }
 
@@ -74,7 +77,7 @@ final class ItemBatchIteratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected the fetched items to be a list of strings. Got "object"');
 
-        ItemBatchIterator::create(
+        ChunkedItemsIterator::create(
             null,
             static function () {
                 yield from [];
@@ -94,7 +97,7 @@ final class ItemBatchIteratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        new ItemBatchIterator($items, $batchSize);
+        new ChunkedItemsIterator($items, $batchSize);
     }
 
     public static function valuesProvider(): iterable
@@ -207,14 +210,14 @@ final class ItemBatchIteratorTest extends TestCase
         };
     }
 
-    private function assertBatchItemIteratorStateIs(
-        ItemBatchIterator $iterator,
+    private static function assertStateIs(
+        ChunkedItemsIterator $iterator,
         array $expectedItems,
         int $expectedNumberOfItems,
-        array $expectedBatches
+        array $expectedItemChunks
     ): void {
         self::assertSame($expectedItems, $iterator->getItems());
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
-        self::assertSame($expectedBatches, $iterator->getItemBatches());
+        self::assertSame($expectedItemChunks, $iterator->getItemChunks());
     }
 }

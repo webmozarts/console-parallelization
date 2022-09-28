@@ -261,7 +261,7 @@ trait Parallelization
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
         $batchSize = $this->getBatchSize();
 
-        $itemBatchIterator = ItemBatchIterator::create(
+        $itemIterator = ChunkedItemsIterator::create(
             $parallelizationInput->getItem(),
             function () use ($input) {
                 return $this->fetchItems($input);
@@ -269,7 +269,7 @@ trait Parallelization
             $batchSize,
         );
 
-        $numberOfItems = $itemBatchIterator->getNumberOfItems();
+        $numberOfItems = $itemIterator->getNumberOfItems();
 
         $config = new Configuration(
             $isNumberOfProcessesDefined,
@@ -307,7 +307,7 @@ trait Parallelization
         ) {
             // Run in the master process
 
-            foreach ($itemBatchIterator->getItemBatches() as $items) {
+            foreach ($itemIterator->getItemChunks() as $items) {
                 $this->runBeforeBatch($input, $output, $items);
 
                 foreach ($items as $item) {
@@ -356,7 +356,7 @@ trait Parallelization
                 },
             );
 
-            $processLauncher->run($itemBatchIterator->getItems());
+            $processLauncher->run($itemIterator->getItems());
         }
 
         $progressBar->finish();
@@ -393,7 +393,7 @@ trait Parallelization
     ): void {
         $advancementChar = self::getProgressSymbol();
 
-        $itemBatchIterator = new ItemBatchIterator(
+        $itemIterator = new ChunkedItemsIterator(
             array_filter(
                 explode(
                     PHP_EOL,
@@ -403,7 +403,7 @@ trait Parallelization
             $this->getBatchSize(),
         );
 
-        foreach ($itemBatchIterator->getItemBatches() as $items) {
+        foreach ($itemIterator->getItemChunks() as $items) {
             $this->runBeforeBatch($input, $output, $items);
 
             foreach ($items as $item) {

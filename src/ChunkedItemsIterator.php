@@ -24,7 +24,7 @@ use function is_object;
 use function sprintf;
 use Webmozart\Assert\Assert;
 
-final class ItemBatchIterator
+final class ChunkedItemsIterator
 {
     private $items;
     private $numberOfItems;
@@ -91,7 +91,7 @@ final class ItemBatchIterator
     /**
      * @return array<list<string>>
      */
-    public function getItemBatches(): array
+    public function getItemChunks(): array
     {
         return $this->itemsChunks;
     }
