@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Integration;
 
 use function array_keys;
 use function getcwd;
@@ -23,6 +23,8 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Process\PhpExecutableFinder;
+use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
+use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 
 /**
  * @coversNothing

@@ -11,11 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use DomainException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozarts\Console\Parallelization\ContainerAwareCommand;
+use Webmozarts\Console\Parallelization\Parallelization;
 
 final class NoSubProcessCommand extends ContainerAwareCommand
 {
