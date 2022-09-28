@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Fidry\Console\Command\Configuration as ConsoleConfiguration;
+use Fidry\Console\Input\IO;
+use function array_merge;
 use function is_numeric;
 use function sprintf;
 use Symfony\Component\Console\Command\Command;
@@ -27,83 +30,90 @@ final class ParallelizationInput
     private const PROCESSES_OPTION = 'processes';
     private const CHILD_OPTION = 'child';
 
-    private $numberOfProcessesDefined;
-    private $numberOfProcesses = 1;
-    private $item;
-    private $childProcess;
+    private bool $numberOfProcessesDefined;
 
-    public function __construct(InputInterface $input)
+    /**
+     * @var positive-int
+     */
+    private $numberOfProcesses;
+
+    private ?string $item;
+    private bool $childProcess;
+
+    public function __construct(IO $io)
     {
-        /** @var string|null $processes */
-        $processes = $input->getOption(self::PROCESSES_OPTION);
-
-        $this->numberOfProcessesDefined = null !== $processes;
-
-        if ($this->numberOfProcessesDefined) {
-            Assert::numeric(
-                $processes,
-                sprintf(
-                    'Expected the number of process defined to be a valid numeric value. Got "%s"',
-                    $processes,
-                ),
-            );
-
-            $this->numberOfProcesses = (int) $processes;
-
-            Assert::same(
-                // We cast it again in string to make sure since it is more convenient to pass an
-                // int in the tests or when calling the command directly without passing by the CLI
-                (string) $processes,
-                (string) $this->numberOfProcesses,
-                sprintf(
-                    'Expected the number of process defined to be an integer. Got "%s"',
-                    $processes,
-                ),
-            );
-        }
-
-        /** @var string|null $item */
-        $item = $input->getArgument(self::ITEM_ARGUMENT);
-
-        $hasItem = null !== $item;
-
-        if ($hasItem && !is_numeric($item)) {
-            // Safeguard in case an invalid type is accidentally passed in tests when invoking the
-            // command directly
-            Assert::string($item);
-        }
-
-        $this->item = $hasItem ? (string) $item : null;
-
-        $this->childProcess = (bool) $input->getOption('child');
+        $numberOfProcesses = $io->getOption(self::PROCESSES_OPTION)->asNullablePositiveInteger();
+        $this->numberOfProcesses = $numberOfProcesses ?? 1;
+        $this->numberOfProcessesDefined = null !== $numberOfProcesses;
+        $this->item = $io->getArgument(self::ITEM_ARGUMENT)->asNullableString();
+        $this->childProcess = $io->getOption(self::CHILD_OPTION)->asBoolean();
     }
 
     /**
-     * Adds the command configuration specific to parallelization.
+     * Beware that if the command is lazy, the name and description will be
+     * overwritten by the values provided for the laziness (see the LazyCommand
+     * API).
      *
-     * Call this method in your configure() method.
+     * @param InputArgument[] $arguments
+     * @param InputOption[]   $options
      */
-    public static function configureParallelization(Command $command): void
+    public static function createConfiguration(
+        string $name,
+        string $description,
+        string $help,
+        array $arguments = [],
+        array $options = []
+    ): ConsoleConfiguration
     {
-        $command
-            ->addArgument(
+        return new ConsoleConfiguration(
+            $name,
+            $description,
+            $help,
+            array_merge(
+                $arguments,
+                self::createArguments(),
+            ),
+            array_merge(
+                $options,
+                self::createOptions(),
+            ),
+        );
+    }
+
+    /**
+     * @return list<InputArgument>
+     */
+    public static function createArguments(): array
+    {
+        return [
+            new InputArgument(
                 self::ITEM_ARGUMENT,
                 InputArgument::OPTIONAL,
-                'The item to process',
-            )
-            ->addOption(
+                'The item to process.',
+            ),
+        ];
+    }
+
+    /**
+     * @return list<InputOption>
+     */
+    public static function createOptions(): array
+    {
+        return [
+            new InputOption(
                 self::PROCESSES_OPTION,
                 'p',
                 InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
+                'The number of parallel processes to run.',
                 null,
-            )
-            ->addOption(
+            ),
+            new InputOption(
                 self::CHILD_OPTION,
                 null,
                 InputOption::VALUE_NONE,
-                'Set on child processes',
-            );
+                'Set for child processes.',
+            ),
+        ];
     }
 
     public function isNumberOfProcessesDefined(): bool
@@ -111,6 +121,9 @@ final class ParallelizationInput
         return $this->numberOfProcessesDefined;
     }
 
+    /**
+     * @return positive-int
+     */
     public function getNumberOfProcesses(): int
     {
         return $this->numberOfProcesses;

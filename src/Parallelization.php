@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Fidry\Console\Input\IO;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_filter;
@@ -227,17 +228,17 @@ trait Parallelization
     /**
      * Executes the parallelized command.
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(IO $io): int
     {
-        $parallelizationInput = new ParallelizationInput($input);
+        $parallelizationInput = new ParallelizationInput($io);
 
         if ($parallelizationInput->isChildProcess()) {
-            $this->executeChildProcess($input, $output);
+            $this->executeChildProcess($io);
 
             return 0;
         }
 
-        $this->executeMasterProcess($parallelizationInput, $input, $output);
+        $this->executeMasterProcess($parallelizationInput, $io);
 
         return 0;
     }
@@ -387,10 +388,7 @@ trait Parallelization
      * piped into the process. These items are passed to runSingleCommand() one
      * by one.
      */
-    protected function executeChildProcess(
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
+    protected function executeChildProcess(IO $io): void {
         $advancementChar = self::getProgressSymbol();
 
         $itemBatchIterator = new ItemBatchIterator(

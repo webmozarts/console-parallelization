@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
+use Fidry\Console\Command\Command;
+use Fidry\Console\Command\Configuration;
+use Webmozarts\Console\Parallelization\ParallelizationInput;
 use function file_get_contents;
 use function json_decode;
 use const JSON_THROW_ON_ERROR;
@@ -22,11 +25,9 @@ use Webmozarts\Console\Parallelization\ContainerAwareCommand;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
 use Webmozarts\Console\Parallelization\Parallelization;
 
-final class ImportMoviesCommand extends ContainerAwareCommand
+final class ImportMoviesCommand implements Command
 {
     use Parallelization;
-
-    protected static $defaultName = 'import:movies';
 
     private TestLogger $logger;
 
@@ -42,9 +43,13 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         $this->logger = new TestLogger();
     }
 
-    protected function configure(): void
+    public function getConfiguration(): Configuration
     {
-        self::configureParallelization($this);
+        return ParallelizationInput::createConfiguration(
+            'import:movies',
+            'Imports movies.',
+            'Is for test purposes.',
+        );
     }
 
     protected function fetchItems(InputInterface $input): array
@@ -126,5 +131,15 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         }
 
         return $movies;
+    }
+
+    protected function getContainer()
+    {
+        // TODO: Implement getContainer() method.
+    }
+
+    protected function getApplication()
+    {
+        // TODO: Implement getApplication() method.
     }
 }
