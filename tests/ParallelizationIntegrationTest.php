@@ -66,25 +66,8 @@ class ParallelizationIntegrationTest extends TestCase
 
         $actual = $this->getOutput();
 
-        if ($this->isSymfony3()) {
-            self::assertSame(
-                <<<'EOF'
-Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batch in 1 process
-
- 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
- 1/2 [==============>-------------]  50% < 1 sec/< 1 sec 10.0 MiB
- 2/2 [============================] 100% < 1 sec/< 1 sec 10.0 MiB
-
-Processed 2 movies.
-
-EOF
-                ,
-                $actual,
-                'Expected logs to be identical'
-            );
-        } else {
-            self::assertSame(
-                <<<'EOF'
+        self::assertSame(
+            <<<'EOF'
 Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batch in 1 process
 
  0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
@@ -93,11 +76,10 @@ Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batch in 1 proce
 Processed 2 movies.
 
 EOF
-                ,
-                $actual,
-                'Expected logs to be identical'
-            );
-        }
+            ,
+            $actual,
+            'Expected logs to be identical'
+        );
     }
 
     public function test_it_can_run_the_command_with_a_single_sub_processes(): void
@@ -112,25 +94,8 @@ EOF
 
         $actual = $this->getOutput();
 
-        if ($this->isSymfony3()) {
-            self::assertSame(
-                <<<'EOF'
-Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 1 process
-
- 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
- 1/2 [==============>-------------]  50% < 1 sec/< 1 sec 10.0 MiB
- 2/2 [============================] 100% < 1 sec/< 1 sec 10.0 MiB
-
-Processed 2 movies.
-
-EOF
-                ,
-                $actual,
-                'Expected logs to be identical'
-            );
-        } else {
-            self::assertSame(
-                <<<'EOF'
+        self::assertSame(
+            <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 1 process
 
  0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
@@ -139,11 +104,10 @@ Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 1 proc
 Processed 2 movies.
 
 EOF
-                ,
-                $actual,
-                'Expected logs to be identical'
-            );
-        }
+            ,
+            $actual,
+            'Expected logs to be identical'
+        );
     }
 
     public function test_it_can_run_the_command_with_multiple_processes(): void
@@ -158,25 +122,8 @@ EOF
 
         $actual = $this->getOutput();
 
-        if ($this->isSymfony3()) {
-            self::assertSame(
-                <<<'EOF'
-Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 2 processes
-
- 0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
- 1/2 [==============>-------------]  50% < 1 sec/< 1 sec 10.0 MiB
- 2/2 [============================] 100% < 1 sec/< 1 sec 10.0 MiB
-
-Processed 2 movies.
-
-EOF
-                ,
-                $actual,
-                'Expected logs to be identical'
-            );
-        } else {
-            self::assertSame(
-                <<<'EOF'
+        self::assertSame(
+            <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 2 processes
 
  0/2 [>---------------------------]   0% < 1 sec/< 1 sec 10.0 MiB
@@ -185,11 +132,10 @@ Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 2 proc
 Processed 2 movies.
 
 EOF
-                ,
-                $actual,
-                'Expected logs to be identical'
-            );
-        }
+            ,
+            $actual,
+            'Expected logs to be identical'
+        );
     }
 
     public function test_it_can_run_the_command_with_one_process_as_child_process(): void
