@@ -102,11 +102,14 @@ return (new Config())
         'self_static_accessor' => true,
         'single_line_throw' => false,
         'single_trait_insert_per_statement' => false,
-// TODO: enable once we are on 8.1 min
-//        'trailing_comma_in_multiline' => [
-//            'after_heredoc' => true,
-//            'elements' => ['arrays', 'arguments', 'parameters'],
-//        ],
+        'trailing_comma_in_multiline' => [
+            'after_heredoc' => true,
+            'elements' => [
+                'arrays',
+                'arguments',
+                // TODO: need PHP 8.1 'parameters',
+            ],
+        ],
     ])
     ->setFinder(
         Finder::create()

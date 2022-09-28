@@ -44,8 +44,8 @@ final class ParallelizationInput
                 $processes,
                 sprintf(
                     'Expected the number of process defined to be a valid numeric value. Got "%s"',
-                    $processes
-                )
+                    $processes,
+                ),
             );
 
             $this->numberOfProcesses = (int) $processes;
@@ -57,8 +57,8 @@ final class ParallelizationInput
                 (string) $this->numberOfProcesses,
                 sprintf(
                     'Expected the number of process defined to be an integer. Got "%s"',
-                    $processes
-                )
+                    $processes,
+                ),
             );
         }
 
@@ -89,20 +89,20 @@ final class ParallelizationInput
             ->addArgument(
                 self::ITEM_ARGUMENT,
                 InputArgument::OPTIONAL,
-                'The item to process'
+                'The item to process',
             )
             ->addOption(
                 self::PROCESSES_OPTION,
                 'p',
                 InputOption::VALUE_OPTIONAL,
                 'The number of parallel processes to run',
-                null
+                null,
             )
             ->addOption(
                 self::CHILD_OPTION,
                 null,
                 InputOption::VALUE_NONE,
-                'Set on child processes'
+                'Set on child processes',
             )
         ;
     }

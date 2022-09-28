@@ -61,7 +61,7 @@ final class ParallelizationInputTest extends TestCase
 
         self::assertSame(
             $expectedIsNumberOfProcessesDefined,
-            $parallelizationInput->isNumberOfProcessesDefined()
+            $parallelizationInput->isNumberOfProcessesDefined(),
         );
         self::assertSame($expectedNumberOfProcesses, $parallelizationInput->getNumberOfProcesses());
         self::assertSame($expectedItem, $parallelizationInput->getItem());
