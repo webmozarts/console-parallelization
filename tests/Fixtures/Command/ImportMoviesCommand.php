@@ -11,13 +11,16 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use function file_get_contents;
 use function json_decode;
 use const JSON_THROW_ON_ERROR;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozarts\Console\Parallelization\ContainerAwareCommand;
+use Webmozarts\Console\Parallelization\Integration\TestLogger;
+use Webmozarts\Console\Parallelization\Parallelization;
 
 final class ImportMoviesCommand extends ContainerAwareCommand
 {

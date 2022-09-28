@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Integration;
 
 use function explode;
 use function fclose;
