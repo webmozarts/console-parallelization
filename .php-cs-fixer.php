@@ -44,9 +44,9 @@ return (new Config())
         ],
         'header_comment' => [
             'header' => <<<EOF
-                This file is part of the Fidry\Console package.
+                This file is part of the Webmozarts Console Parallelization package.
 
-                (c) Théo FIDRY <theo.fidry@gmail.com>
+                (c) Webmozarts GmbH <office@webmozarts.com>
 
                 For the full copyright and license information, please view the LICENSE
                 file that was distributed with this source code.
