@@ -29,94 +29,72 @@ use Symfony\Component\Process\PhpExecutableFinder;
  */
 class ParallelizationIntegrationTest extends TestCase
 {
-    /**
-     * @var ImportMoviesCommand
-     */
-    private $command;
-
-    /**
-     * @var CommandTester
-     */
-    private $commandTester;
+    private ImportMoviesCommand $importMoviesCommand;
+    private CommandTester $importMoviesCommandTester;
+    private NoSubProcessCommand $noSubProcessCommand;
+    private CommandTester $noSubProcessCommandTester;
 
     protected function setUp(): void
     {
-        $this->command = (new Application(new Kernel()))->add(new ImportMoviesCommand());
+        $this->importMoviesCommand = (new Application(new Kernel()))->add(new ImportMoviesCommand());
+        $this->importMoviesCommandTester = new CommandTester($this->importMoviesCommand);
 
-        $this->commandTester = new CommandTester($this->command);
+        $this->noSubProcessCommand = (new Application(new Kernel()))->add(new NoSubProcessCommand());
+        $this->noSubProcessCommandTester = new CommandTester($this->noSubProcessCommand);
+    }
+
+    protected function tearDown(): void
+    {
+        TestLogger::clearLogfile();
     }
 
     public function test_it_can_run_the_command_without_sub_processes(): void
     {
-        $this->commandTester->execute(
-            ['command' => 'import:movies'],
+        $commandTester = $this->noSubProcessCommandTester;
+
+        $commandTester->execute(
+            ['command' => 'test:no-subprocess'],
             ['interactive' => true]
         );
 
-        $actual = $this->getOutput();
+        // TODO: note that the "in 1 process is incorrect here..."
+        $expected = <<<'EOF'
+            Processing 5 items in segments of 5, batches of 2, 1 round, 1 batch in 1 process
 
-        self::assertSame(
-            <<<'EOF'
-                Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
+             0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-                 0/2 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-                 2/2 [============================] 100% 10 secs/10 secs 10.0 MiB
+            Processed 5 items.
 
-                Processed 2 movies.
+            EOF;
 
-                EOF
-            ,
-            $actual,
-            'Expected logs to be identical'
-        );
+        $actual = $this->getOutput($commandTester);
+
+        self::assertSame($expected, $actual);
     }
 
-    public function test_it_does_not_use_a_sub_process_if_only_one_process_is_allowed(): void
+    public function test_it_uses_a_sub_process_if_only_one_process_is_used(): void
     {
-        $this->commandTester->execute(
+        $commandTester = $this->noSubProcessCommandTester;
+
+        $commandTester->execute(
             [
-                'command' => 'import:movies',
-                '--processes' => 1,
+                'command' => 'test:no-subprocess',
+                '--processes' => '1',
             ],
             ['interactive' => true]
         );
 
-        $actual = $this->getOutput();
+        $output = $this->getOutput($commandTester);
 
-        self::assertSame(
-            <<<'EOF'
-                Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
-
-                 0/2 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-                 2/2 [============================] 100% 10 secs/10 secs 10.0 MiB
-
-                Processed 2 movies.
-
-                EOF
-            ,
-            $actual,
-            'Expected logs to be identical'
-        );
+        self::assertStringContainsString('Expected to be executed within the main process.', $output);
     }
 
     public function test_it_can_run_the_command_with_multiple_processes(): void
     {
-        $this->command->setItems([
-            'item0',
-            'item1',
-            'item2',
-            'item3',
-            'item4',
-            'item5',
-            'item6',
-            'item7',
-            'item8',
-            'item9',
-            'item10',
-        ]);
-        $this->command->setSegmentSize(2);
+        $commandTester = $this->importMoviesCommandTester;
 
-        $this->commandTester->execute(
+        $commandTester->execute(
             [
                 'command' => 'import:movies',
                 '--processes' => 2,
@@ -124,43 +102,28 @@ class ParallelizationIntegrationTest extends TestCase
             ['interactive' => true]
         );
 
-        $actual = $this->getOutput();
+        $expected = <<<'EOF'
+            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
 
-        self::assertSame(
-            <<<'EOF'
-                Processing 11 movies in segments of 2, batches of 2, 6 rounds, 6 batches in 2 processes
+             0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB
+             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB
+             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-                  0/11 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-                  6/11 [===============>------------]  54% 10 secs/10 secs 10.0 MiB
-                 11/11 [============================] 100% 10 secs/10 secs 10.0 MiB
+            Processed 5 movies.
 
-                Processed 11 movies.
+            EOF;
 
-                EOF
-            ,
-            $actual,
-            'Expected logs to be identical'
-        );
+        $actual = $this->getOutput($commandTester);
+
+        self::assertSame($expected, $actual, $actual);
     }
 
     public function test_it_can_run_the_command_with_multiple_processes_in_debug_mode(): void
     {
-        $this->command->setItems([
-            'item0',
-            'item1',
-            'item2',
-            'item3',
-            'item4',
-            'item5',
-            'item6',
-            'item7',
-            'item8',
-            'item9',
-            'item10',
-        ]);
-        $this->command->setSegmentSize(2);
+        $commandTester = $this->importMoviesCommandTester;
 
-        $this->commandTester->execute(
+        $commandTester->execute(
             [
                 'command' => 'import:movies',
                 '--processes' => 2,
@@ -168,43 +131,35 @@ class ParallelizationIntegrationTest extends TestCase
             [
                 'interactive' => true,
                 'verbosity' => OutputInterface::VERBOSITY_DEBUG,
-            ]
+            ],
         );
 
-        $actual = $this->getOutput();
+        $expected = <<<'EOF'
+            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
 
-        self::assertSame(
-            <<<'EOF'
-                Processing 11 movies in segments of 2, batches of 2, 6 rounds, 6 batches in 2 processes
-
-                  0/11 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-                [debug] Command finished
-                [debug] Command finished
-                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-
-                  6/11 [===============>------------]  54% 10 secs/10 secs 10.0 MiB[debug] Command finished
-                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-                [debug] Command finished
-                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-
-                 11/11 [============================] 100% 10 secs/10 secs 10.0 MiB[debug] Command finished
-                [debug] Command finished
+             0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child' '--env=dev'
+            [debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child' '--env=dev'
+            
+             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB[debug] Command finished
+            [debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child' '--env=dev'
+            
+             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB[debug] Command finished
+            
+             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB[debug] Command finished
 
 
-                Processed 11 movies.
+            Processed 5 movies.
 
-                EOF
-            ,
-            $actual,
-            'Expected logs to be identical'
-        );
+            EOF;
+
+        $actual = $this->getOutput($commandTester);
+
+        self::assertSame($expected, $actual, $actual);
     }
 
-    private function getOutput(): string
+    private function getOutput(CommandTester $commandTester): string
     {
-        $output = $this->commandTester->getDisplay(true);
+        $output = $commandTester->getDisplay(true);
 
         $output = preg_replace(
             '/\d+(\.\d+)? ([A-Z]i)?B/',

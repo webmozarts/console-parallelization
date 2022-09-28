@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function explode;
 use function fclose;
 use function fopen;
 use function fwrite;
 use const PHP_EOL;
+use function sprintf;
 use function unlink;
 
 final class TestLogger
@@ -42,7 +44,40 @@ final class TestLogger
 
     public function recordFirstCommand(): void
     {
-        $this->write(__METHOD__);
+        $this->write(self::formatMethodName(__METHOD__));
+    }
+
+    public function recordBeforeBatch(): void
+    {
+        $this->write(self::formatMethodName(__METHOD__));
+    }
+
+    public function recordSingleCommand(string $movieFileName, string $movieFileContent)
+    {
+        $this->write(
+            sprintf(
+                'recordSingleCommand(%s) => %s',
+                $movieFileName,
+                $movieFileContent,
+            ),
+        );
+    }
+
+    public function recordAfterBatch(): void
+    {
+        $this->write(self::formatMethodName(__METHOD__));
+    }
+
+    public function recordLastCommand(): void
+    {
+        $this->write(self::formatMethodName(__METHOD__));
+    }
+
+    private static function formatMethodName(string $methodName): string
+    {
+        [$className, $methodName] = explode('::', $methodName);
+
+        return $methodName.'()';
     }
 
     private function write(string $message): void
