@@ -74,7 +74,7 @@ return (new Config())
         'no_php4_constructor' => true,
         'no_superfluous_elseif' => true,
         'no_unset_cast' => true,
-        'no_unset_on_property' => true,
+        'no_unset_on_property' => false,
         'no_useless_else' => true,
         'no_useless_return' => true,
         'nullable_type_declaration_for_default_null_value' => true,

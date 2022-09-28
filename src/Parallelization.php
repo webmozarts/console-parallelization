@@ -31,6 +31,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -348,7 +349,8 @@ trait Parallelization
                 $this->getEnvironmentVariables($this->getContainer()),
                 $numberOfProcesses,
                 $segmentSize,
-                $this->getContainer()->get('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                // TODO: offer a way to create the process launcher in a different manner
+                new ConsoleLogger($output),
                 function (string $type, string $buffer) use ($progressBar, $output, $terminalWidth) {
                     $this->processChildOutput($buffer, $progressBar, $output, $terminalWidth);
                 }
