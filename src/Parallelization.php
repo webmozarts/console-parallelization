@@ -259,17 +259,17 @@ trait Parallelization
 
         $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
+        $batchSize = $this->getBatchSize();
 
         $itemBatchIterator = ItemBatchIterator::create(
             $parallelizationInput->getItem(),
             function () use ($input) {
                 return $this->fetchItems($input);
             },
-            $this->getBatchSize(),
+            $batchSize,
         );
 
         $numberOfItems = $itemBatchIterator->getNumberOfItems();
-        $batchSize = $this->getBatchSize();
 
         $config = new Configuration(
             $isNumberOfProcessesDefined,
