@@ -560,6 +560,6 @@ trait Parallelization
      * Validate whether a command option requires quoting or not, depending on its content.
      */
     protected function isValueRequiresQuoting($value) : bool {
-        return 0 < preg_match('/[\s \\\\ \' " & | < > = ! @]/x', $value);
+        return 0 < preg_match('/[\s \\\\ \' " & | < > = ! @]/x', (string) $value);
     }
 }
