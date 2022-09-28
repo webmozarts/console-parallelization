@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__.'/../vendor/autoload.php';
+
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Webmozarts\Console\Parallelization\ImportMoviesCommand;
+use Webmozarts\Console\Parallelization\Kernel;
+
+$application = new Application(new Kernel());
+$application->add(new ImportMoviesCommand());
+
+$application->run();
