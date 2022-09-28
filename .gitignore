@@ -3,5 +3,5 @@
 /.phpunit.result.cache
 /composer.lock
 /var/
-/vendor/
 /vendor-bin/*/vendor/
+/vendor/

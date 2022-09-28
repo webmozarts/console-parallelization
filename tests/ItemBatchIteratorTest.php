@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Webmozarts Console Parallelization package.
+ * This file is part of the Fidry\Console package.
  *
- * (c) Webmozarts GmbH <office@webmozarts.com>
+ * (c) Théo FIDRY <theo.fidry@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -216,9 +216,9 @@ final class ItemBatchIteratorTest extends TestCase
         int $expectedBatchSize,
         array $expectedBatches
     ): void {
-        $this->assertSame($expectedItems, $iterator->getItems());
-        $this->assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
-        $this->assertSame($expectedBatchSize, $iterator->getBatchSize());
-        $this->assertSame($expectedBatches, $iterator->getItemBatches());
+        self::assertSame($expectedItems, $iterator->getItems());
+        self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
+        self::assertSame($expectedBatchSize, $iterator->getBatchSize());
+        self::assertSame($expectedBatches, $iterator->getItemBatches());
     }
 }

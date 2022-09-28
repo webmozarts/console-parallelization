@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Webmozarts Console Parallelization package.
+ * This file is part of the Fidry\Console package.
  *
- * (c) Webmozarts GmbH <office@webmozarts.com>
+ * (c) Théo FIDRY <theo.fidry@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -36,26 +36,17 @@ class ParallelizationIntegrationTest extends TestCase
      */
     private $commandTester;
 
-    /**
-     * {@inheritdoc}
-     */
     protected function setUp(): void
     {
         $command = new ImportMoviesCommand();
 
         $this->application = new Application(
             new class('dev', true) extends Kernel {
-                /**
-                 * {@inheritdoc}
-                 */
                 public function registerBundles(): array
                 {
                     return [];
                 }
 
-                /**
-                 * {@inheritdoc}
-                 */
                 public function registerContainerConfiguration(LoaderInterface $loader): void
                 {
                 }
@@ -76,7 +67,7 @@ class ParallelizationIntegrationTest extends TestCase
         $actual = $this->getOutput();
 
         if ($this->isSymfony3()) {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batch in 1 process
 
@@ -92,7 +83,7 @@ EOF
                 'Expected logs to be identical'
             );
         } else {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batch in 1 process
 
@@ -122,7 +113,7 @@ EOF
         $actual = $this->getOutput();
 
         if ($this->isSymfony3()) {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 1 process
 
@@ -138,7 +129,7 @@ EOF
                 'Expected logs to be identical'
             );
         } else {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 1 process
 
@@ -158,17 +149,17 @@ EOF
     public function test_it_can_run_the_command_with_multiple_processes(): void
     {
         $this->commandTester->execute(
-        [
-            'command' => 'import:movies',
-            '--processes' => 2,
-        ],
-        ['interactive' => true]
-    );
+            [
+                'command' => 'import:movies',
+                '--processes' => 2,
+            ],
+            ['interactive' => true]
+        );
 
         $actual = $this->getOutput();
 
         if ($this->isSymfony3()) {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 2 processes
 
@@ -184,7 +175,7 @@ EOF
                 'Expected logs to be identical'
             );
         } else {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 2 processes
 
@@ -214,7 +205,7 @@ EOF
         $actual = $this->getOutput();
 
         if ($this->isSymfony3()) {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 1 process
 
@@ -230,7 +221,7 @@ EOF
                 'Expected logs to be identical'
             );
         } else {
-            $this->assertSame(
+            self::assertSame(
                 <<<'EOF'
 Processing 2 movies in segments of 50, batches of 50, 1 round, 1 batch in 1 process
 

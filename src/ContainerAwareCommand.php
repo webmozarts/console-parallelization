@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Webmozarts Console Parallelization package.
+ * This file is part of the Fidry\Console package.
  *
- * (c) Webmozarts GmbH <office@webmozarts.com>
+ * (c) Théo FIDRY <theo.fidry@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -25,7 +25,7 @@ abstract class ContainerAwareCommand extends Command implements ContainerAwareIn
      */
     private $container;
 
-    public function setContainer(ContainerInterface $container = null): void
+    public function setContainer(?ContainerInterface $container = null): void
     {
         $this->container = $container;
     }

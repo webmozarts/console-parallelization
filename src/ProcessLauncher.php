@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Webmozarts Console Parallelization package.
+ * This file is part of the Fidry\Console package.
  *
- * (c) Webmozarts GmbH <office@webmozarts.com>
+ * (c) Théo FIDRY <theo.fidry@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -133,10 +133,10 @@ class ProcessLauncher
             $this->workingDirectory,
             $this->environmentVariables,
             null,
-            null
+            null,
         ];
 
-        if(method_exists(Process::class, 'fromShellCommandline')) {
+        if (method_exists(Process::class, 'fromShellCommandline')) {
             // Symfony >= 4.2 workaround as Symfony 5 requires `Process` to be initiated with an array
             // @TODO: can be removed once $this->command was changed to an array
             $process = Process::fromShellCommandline(...$arguments);
@@ -145,7 +145,7 @@ class ProcessLauncher
         }
 
         $process->setInput($inputStream);
-        if(method_exists($process, 'inheritEnvironmentVariables')) {
+        if (method_exists($process, 'inheritEnvironmentVariables')) {
             $process->inheritEnvironmentVariables(true);
         }
         $process->start($this->callback);

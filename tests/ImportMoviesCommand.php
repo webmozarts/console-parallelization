@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Webmozarts Console Parallelization package.
+ * This file is part of the Fidry\Console package.
  *
- * (c) Webmozarts GmbH <office@webmozarts.com>
+ * (c) Théo FIDRY <theo.fidry@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -20,22 +20,13 @@ final class ImportMoviesCommand extends ContainerAwareCommand
 {
     use Parallelization;
 
-    /**
-     * {@inheritdoc}
-     */
     protected static $defaultName = 'import:movies';
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configure(): void
     {
         self::configureParallelization($this);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function fetchItems(InputInterface $input): array
     {
         // open up the file and read movie data...
@@ -48,25 +39,16 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
     {
         // insert into the database
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $items): void
     {
         // flush the database and clear the entity manager
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getItemName(int $count): string
     {
         return 1 === $count ? 'movie' : 'movies';

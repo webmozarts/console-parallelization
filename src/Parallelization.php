@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Webmozarts Console Parallelization package.
+ * This file is part of the Fidry\Console package.
  *
- * (c) Webmozarts GmbH <office@webmozarts.com>
+ * (c) Théo FIDRY <theo.fidry@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,12 +21,12 @@ use function array_slice;
 use function explode;
 use function getcwd;
 use function implode;
-use RuntimeException;
-use function realpath;
-use function sprintf;
-use function stream_get_contents;
 use const PHP_EOL;
+use function realpath;
+use RuntimeException;
+use function sprintf;
 use const STDIN;
+use function stream_get_contents;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -36,8 +36,8 @@ use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Contracts\Service\ResetInterface;
 use Symfony\Component\Process\Process;
+use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use function trim;
 use Webmozart\Assert\Assert;
@@ -74,39 +74,11 @@ trait Parallelization
     private $logError = true;
 
     /**
-     * Returns the symbol for communicating progress from the child to the
-     * master process when displaying the progress bar.
-     */
-    private static function getProgressSymbol(): string
-    {
-        return chr(254);
-    }
-
-    /**
-     * Detects the path of the PHP interpreter.
-     */
-    private static function detectPhpExecutable(): string
-    {
-        $php = (new PhpExecutableFinder())->find();
-
-        if (false === $php) {
-            throw new RuntimeException('Cannot find php executable');
-        }
-
-        return $php;
-    }
-
-    /**
-     * Returns the working directory for the child process.
+     * Provided by Symfony Command class.
      *
-     * @param ContainerInterface $container The service container
-     *
-     * @return string The absolute path to the working directory
+     * @return string The command name
      */
-    private static function getWorkingDirectory(ContainerInterface $container): string
-    {
-        return dirname($container->getParameter('kernel.project_dir'));
-    }
+    abstract public function getName();
 
     /**
      * Adds the command configuration specific to parallelization.
@@ -117,13 +89,6 @@ trait Parallelization
     {
         ParallelizationInput::configureParallelization($command);
     }
-
-    /**
-     * Provided by Symfony Command class.
-     *
-     * @return string The command name
-     */
-    abstract public function getName();
 
     /**
      * Provided by Symfony Command class.
@@ -408,7 +373,8 @@ trait Parallelization
     /**
      * Get the path of the executable Symfony bin console.
      */
-    protected function getConsolePath() : string {
+    protected function getConsolePath(): string
+    {
         return realpath(getcwd().'/bin/console');
     }
 
@@ -446,6 +412,63 @@ trait Parallelization
 
             $this->runAfterBatch($input, $output, $items);
         }
+    }
+
+    /**
+     * Ensure that an option value is quoted correctly, before it is passed to a child process.
+     * @param  mixed $value the input option value, which is typically a string but can be of any other primitive type
+     * @return mixed the replaced and quoted value, if $value contained a character that required quoting
+     */
+    protected function quoteOptionValue($value)
+    {
+        if ($this->isValueRequiresQuoting($value)) {
+            return sprintf('"%s"', str_replace('"', '\"', $value));
+        }
+
+        return $value;
+    }
+
+    /**
+     * Validate whether a command option requires quoting or not, depending on its content.
+     */
+    protected function isValueRequiresQuoting($value): bool
+    {
+        return 0 < preg_match('/[\s \\\\ \' " & | < > = ! @]/x', (string) $value);
+    }
+
+    /**
+     * Returns the symbol for communicating progress from the child to the
+     * master process when displaying the progress bar.
+     */
+    private static function getProgressSymbol(): string
+    {
+        return chr(254);
+    }
+
+    /**
+     * Detects the path of the PHP interpreter.
+     */
+    private static function detectPhpExecutable(): string
+    {
+        $php = (new PhpExecutableFinder())->find();
+
+        if (false === $php) {
+            throw new RuntimeException('Cannot find php executable');
+        }
+
+        return $php;
+    }
+
+    /**
+     * Returns the working directory for the child process.
+     *
+     * @param ContainerInterface $container The service container
+     *
+     * @return string The absolute path to the working directory
+     */
+    private static function getWorkingDirectory(ContainerInterface $container): string
+    {
+        return dirname($container->getParameter('kernel.project_dir'));
     }
 
     /**
@@ -540,26 +563,5 @@ trait Parallelization
         }
 
         return $preparedOptionList;
-    }
-
-    /**
-     * Ensure that an option value is quoted correctly, before it is passed to a child process.
-     * @param mixed $value the input option value, which is typically a string but can be of any other primitive type.
-     * @return mixed the replaced and quoted value, if $value contained a character that required quoting.
-     */
-    protected function quoteOptionValue($value) {
-
-        if($this->isValueRequiresQuoting($value)) {
-            return sprintf('"%s"', str_replace('"', '\"', $value));
-        } else {
-            return $value;
-        }
-    }
-
-    /**
-     * Validate whether a command option requires quoting or not, depending on its content.
-     */
-    protected function isValueRequiresQuoting($value) : bool {
-        return 0 < preg_match('/[\s \\\\ \' " & | < > = ! @]/x', (string) $value);
     }
 }
