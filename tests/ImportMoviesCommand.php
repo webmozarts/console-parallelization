@@ -22,6 +22,11 @@ final class ImportMoviesCommand extends ContainerAwareCommand
 
     protected static $defaultName = 'import:movies';
 
+    public function __construct(?string $name = null)
+    {
+        parent::__construct($name);
+    }
+
     protected function configure(): void
     {
         self::configureParallelization($this);
@@ -29,14 +34,29 @@ final class ImportMoviesCommand extends ContainerAwareCommand
 
     protected function fetchItems(InputInterface $input): array
     {
-        // open up the file and read movie data...
-
-        // return items as strings
         return [
-            '{"id": 1, "name": "Star Wars"}',
-            '{"id": 2, "name": "Django Unchained"}',
-            // ...
+            'movie-1.json',
+            'movie-2.json',
+            'movie-3.json',
+            'movie-4.json',
+            'movie-5.json',
         ];
+    }
+
+    protected function getSegmentSize(): int
+    {
+        return 2;
+    }
+
+    protected function runBeforeFirstCommand(InputInterface $input, OutputInterface $output): void
+    {
+    }
+
+    protected function runBeforeBatch(
+        InputInterface $input,
+        OutputInterface $output,
+        array $items
+    ): void {
     }
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void

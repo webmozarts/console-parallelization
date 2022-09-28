@@ -39,9 +39,6 @@ class ParallelizationIntegrationTest extends TestCase
      */
     private $commandTester;
 
-    /**
-     * {@inheritdoc}
-     */
     protected function setUp(): void
     {
         $this->command = (new Application(new Kernel()))->add(new ImportMoviesCommand());
@@ -58,16 +55,16 @@ class ParallelizationIntegrationTest extends TestCase
 
         $actual = $this->getOutput();
 
-        $this->assertSame(
+        self::assertSame(
             <<<'EOF'
-Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
+                Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
 
- 0/2 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
- 2/2 [============================] 100% 10 secs/10 secs 10.0 MiB
+                 0/2 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+                 2/2 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-Processed 2 movies.
+                Processed 2 movies.
 
-EOF
+                EOF
             ,
             $actual,
             'Expected logs to be identical'
@@ -86,16 +83,16 @@ EOF
 
         $actual = $this->getOutput();
 
-        $this->assertSame(
+        self::assertSame(
             <<<'EOF'
-Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
+                Processing 2 movies in segments of 2, batches of 50, 1 round, 1 batches in 1 process
 
- 0/2 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
- 2/2 [============================] 100% 10 secs/10 secs 10.0 MiB
+                 0/2 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+                 2/2 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-Processed 2 movies.
+                Processed 2 movies.
 
-EOF
+                EOF
             ,
             $actual,
             'Expected logs to be identical'
@@ -129,17 +126,17 @@ EOF
 
         $actual = $this->getOutput();
 
-        $this->assertSame(
+        self::assertSame(
             <<<'EOF'
-Processing 11 movies in segments of 2, batches of 2, 6 rounds, 6 batches in 2 processes
+                Processing 11 movies in segments of 2, batches of 2, 6 rounds, 6 batches in 2 processes
 
-  0/11 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-  6/11 [===============>------------]  54% 10 secs/10 secs 10.0 MiB
- 11/11 [============================] 100% 10 secs/10 secs 10.0 MiB
+                  0/11 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+                  6/11 [===============>------------]  54% 10 secs/10 secs 10.0 MiB
+                 11/11 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-Processed 11 movies.
+                Processed 11 movies.
 
-EOF
+                EOF
             ,
             $actual,
             'Expected logs to be identical'
@@ -176,29 +173,29 @@ EOF
 
         $actual = $this->getOutput();
 
-        $this->assertSame(
+        self::assertSame(
             <<<'EOF'
-Processing 11 movies in segments of 2, batches of 2, 6 rounds, 6 batches in 2 processes
+                Processing 11 movies in segments of 2, batches of 2, 6 rounds, 6 batches in 2 processes
 
-  0/11 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-[debug] Command finished
-[debug] Command finished
-[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
+                  0/11 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
+                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
+                [debug] Command finished
+                [debug] Command finished
+                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
+                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
 
-  6/11 [===============>------------]  54% 10 secs/10 secs 10.0 MiB[debug] Command finished
-[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
-[debug] Command finished
-[debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
+                  6/11 [===============>------------]  54% 10 secs/10 secs 10.0 MiB[debug] Command finished
+                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
+                [debug] Command finished
+                [debug] Command started: /path/to/php /path/to/work-dir/bin/console import:movies --child --env=dev
 
- 11/11 [============================] 100% 10 secs/10 secs 10.0 MiB[debug] Command finished
-[debug] Command finished
+                 11/11 [============================] 100% 10 secs/10 secs 10.0 MiB[debug] Command finished
+                [debug] Command finished
 
 
-Processed 11 movies.
+                Processed 11 movies.
 
-EOF
+                EOF
             ,
             $actual,
             'Expected logs to be identical'
