@@ -27,10 +27,10 @@ final class ParallelizationInput
     private const PROCESSES_OPTION = 'processes';
     private const CHILD_OPTION = 'child';
 
-    private $numberOfProcessesDefined;
-    private $numberOfProcesses = 1;
-    private $item;
-    private $childProcess;
+    private bool $numberOfProcessesDefined;
+    private int $numberOfProcesses = 1;
+    private ?string $item;
+    private bool $childProcess;
 
     public function __construct(InputInterface $input)
     {
@@ -96,7 +96,6 @@ final class ParallelizationInput
                 'p',
                 InputOption::VALUE_OPTIONAL,
                 'The number of parallel processes to run',
-                null,
             )
             ->addOption(
                 self::CHILD_OPTION,

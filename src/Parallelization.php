@@ -27,7 +27,6 @@ use RuntimeException;
 use function sprintf;
 use const STDIN;
 use function stream_get_contents;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -72,7 +71,7 @@ use Webmozart\Assert\Assert;
  */
 trait Parallelization
 {
-    private $logError = true;
+    private bool $logError = true;
 
     /**
      * Provided by Symfony Command class.
@@ -93,15 +92,11 @@ trait Parallelization
 
     /**
      * Provided by Symfony Command class.
-     *
-     * @return ContainerInterface
      */
     abstract protected function getContainer();
 
     /**
      * Provided by Symfony Command class.
-     *
-     * @return Application
      */
     abstract protected function getApplication();
 
@@ -311,7 +306,7 @@ trait Parallelization
                 $this->runBeforeBatch($input, $output, $items);
 
                 foreach ($items as $item) {
-                    $this->runTolerantSingleCommand((string) $item, $input, $output);
+                    $this->runTolerantSingleCommand($item, $input, $output);
 
                     $progressBar->advance();
                 }

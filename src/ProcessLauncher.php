@@ -29,24 +29,24 @@ use Symfony\Component\Process\Process;
  */
 class ProcessLauncher
 {
-    private $command;
+    private string $command;
 
-    private $workingDirectory;
+    private string $workingDirectory;
 
-    private $environmentVariables;
+    private array $environmentVariables;
 
-    private $processLimit;
+    private int $processLimit;
 
-    private $segmentSize;
+    private int $segmentSize;
 
     private $logger;
 
-    private $callback;
+    private Closure $callback;
 
     /**
      * @var Process[]
      */
-    private $runningProcesses = [];
+    private array $runningProcesses = [];
 
     public function __construct(
         string $command, // @TODO change to array for 2.0
