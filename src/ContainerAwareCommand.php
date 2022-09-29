@@ -20,7 +20,7 @@ use Webmozart\Assert\Assert;
 
 abstract class ContainerAwareCommand extends Command implements ContainerAwareInterface
 {
-    private ?ContainerInterface $container;
+    private ?ContainerInterface $container = null;
 
     public function setContainer(?ContainerInterface $container = null): void
     {
