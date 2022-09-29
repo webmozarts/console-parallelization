@@ -184,18 +184,6 @@ final class ChunkedItemsIteratorTest extends TestCase
 
     public static function invalidValuesProvider(): iterable
     {
-        yield 'invalid batch size' => [
-            [],
-            -1,
-            'Expected the batch size to be 1 or greater. Got "-1"',
-        ];
-
-        yield 'invalid batch size (limit)' => [
-            [],
-            0,
-            'Expected the batch size to be 1 or greater. Got "0"',
-        ];
-
         yield 'invalid item type' => [
             [new stdClass()],
             1,
