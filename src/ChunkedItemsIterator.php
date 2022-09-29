@@ -16,7 +16,6 @@ namespace Webmozarts\Console\Parallelization;
 use function array_chunk;
 use function array_filter;
 use function array_values;
-use Closure;
 use function count;
 use function explode;
 use function get_class;
@@ -77,7 +76,7 @@ final class ChunkedItemsIterator
     /**
      * @param callable():list<string> $fetchItems
      */
-    public static function fromItemOrCallable(?string $item, Closure $fetchItems, int $batchSize): self
+    public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
         if (null !== $item) {
             $items = [$item];
