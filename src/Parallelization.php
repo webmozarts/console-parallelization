@@ -229,7 +229,7 @@ trait Parallelization
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $parallelizationInput = new ParallelizationInput($input);
+        $parallelizationInput = ParallelizationInput::fromInput($input);
 
         if ($parallelizationInput->isChildProcess()) {
             $this->executeChildProcess($input, $output);
