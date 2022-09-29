@@ -5,6 +5,9 @@ PHPNOGC=php -d zend.enable_gc=0
 CCYELLOW=\033[0;33m
 CCEND=\033[0m
 
+PHPSTAN_BIN = vendor/phpstan/phpstan/phpstan
+PHPSTAN = $(PHPSTAN_BIN)
+
 .PHONY: help
 help:
 	@echo "\033[33mUsage:\033[0m\n  make TARGET\n\n\033[32m#\n# Commands\n#---------------------------------------------------------------------------\033[0m\n"
@@ -21,6 +24,14 @@ cs:	## Fixes CS
 cs: $(PHP_CS_FIXER)
 	$(PHPNOGC) $(PHP_CS_FIXER) fix
 	LC_ALL=C sort -u .gitignore -o .gitignore
+
+
+.PHONY: phpstan
+phpstan: ## Runs PHPStan
+phpstan: $(PHPSTAN_BIN) vendor
+ifndef SKIP_PHPSTAN
+	$(PHPSTAN) analyze
+endif
 
 
 #
@@ -47,6 +58,11 @@ vendor: composer.lock
 
 $(PHP_CS_FIXER): vendor
 	touch $@
+
+$(PHPSTAN_BIN): vendor
+ifndef SKIP_PHPSTAN
+	touch $@
+endif
 
 $(PHPUNIT): vendor
 	touch $@
