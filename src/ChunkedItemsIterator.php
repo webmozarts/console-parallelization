@@ -26,7 +26,14 @@ use Webmozart\Assert\Assert;
 
 final class ChunkedItemsIterator
 {
+    /**
+     * @var list<string>
+     */
     private array $items;
+
+    /**
+     * @var list<list<string>>
+     */
     private array $itemsChunks;
 
     /**

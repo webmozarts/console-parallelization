@@ -1,7 +1,18 @@
 parameters:
-    level: 6
+    level: 5
     paths:
         - src
         - tests
     excludePaths:
         - tests/Integration/var
+    ignoreErrors:
+        - path: tests/Integration/TestLogger.php
+          message: '#TestLogger::\$outputHandler#'
+
+        - path: src/ContainerAwareCommand.php
+          message: '#Application::getKernel#'
+
+        - path: tests/Integration/ParallelizationIntegrationTest.php
+          message: '#ParallelizationIntegrationTest::\$importMoviesCommand#'
+        - path: tests/Integration/ParallelizationIntegrationTest.php
+          message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
