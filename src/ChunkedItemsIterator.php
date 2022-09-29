@@ -26,9 +26,9 @@ use Webmozart\Assert\Assert;
 
 final class ChunkedItemsIterator
 {
-    private $items;
-    private $numberOfItems;
-    private $itemsChunks;
+    private array $items;
+    private int $numberOfItems;
+    private array $itemsChunks;
 
     /**
      * @param list<string> $items
@@ -48,7 +48,6 @@ final class ChunkedItemsIterator
         $this->itemsChunks = array_chunk(
             $this->items,
             $batchSize,
-            false,
         );
         $this->numberOfItems = count($this->items);
     }
