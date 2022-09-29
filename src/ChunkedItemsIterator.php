@@ -26,24 +26,27 @@ use Webmozart\Assert\Assert;
 
 final class ChunkedItemsIterator
 {
+    /**
+     * @var list<string>
+     */
     private array $items;
-    private int $numberOfItems;
+
+    /**
+     * @var list<list<string>>
+     */
     private array $itemsChunks;
 
     /**
+     * @var 0|positive-int
+     */
+    private int $numberOfItems;
+
+    /**
      * @param list<string> $items
+     * @param positive-int $batchSize
      */
     public function __construct(array $items, int $batchSize)
     {
-        Assert::greaterThan(
-            $batchSize,
-            0,
-            sprintf(
-                'Expected the batch size to be 1 or greater. Got "%s"',
-                $batchSize,
-            ),
-        );
-
         $this->items = self::normalizeItems($items);
         $this->itemsChunks = array_chunk(
             $this->items,
@@ -82,17 +85,20 @@ final class ChunkedItemsIterator
         return $this->items;
     }
 
-    public function getNumberOfItems(): int
-    {
-        return $this->numberOfItems;
-    }
-
     /**
      * @return array<list<string>>
      */
     public function getItemChunks(): array
     {
         return $this->itemsChunks;
+    }
+
+    /**
+     * @return 0|positive-int
+     */
+    public function getNumberOfItems(): int
+    {
+        return $this->numberOfItems;
     }
 
     /**

@@ -32,6 +32,9 @@ final class NoSubProcessCommand extends ContainerAwareCommand
         self::configureParallelization($this);
     }
 
+    /**
+     * @return list<string>
+     */
     protected function fetchItems(InputInterface $input): array
     {
         return [

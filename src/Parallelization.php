@@ -16,6 +16,7 @@ namespace Webmozarts\Console\Parallelization;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_filter;
+use function array_map;
 use function array_merge;
 use function array_slice;
 use function explode;
@@ -258,7 +259,9 @@ trait Parallelization
 
         $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-        $batchSize = $this->getBatchSize();
+
+        $batchSize = $this->getValidatedBatchSize();
+        $segmentSize = $this->getValidatedSegmentSize();
 
         $itemIterator = ChunkedItemsIterator::create(
             $parallelizationInput->getItem(),
@@ -274,11 +277,10 @@ trait Parallelization
             $isNumberOfProcessesDefined,
             $numberOfProcesses,
             $numberOfItems,
-            $this->getSegmentSize(),
+            $segmentSize,
             $batchSize,
         );
 
-        $segmentSize = $config->getSegmentSize();
         $numberOfSegments = $config->getNumberOfSegments();
         $numberOfBatches = $config->getNumberOfBatches();
 
@@ -330,7 +332,13 @@ trait Parallelization
                     self::detectPhpExecutable(),
                     $consolePath,
                     $this->getName(),
-                    implode(' ', array_slice($input->getArguments(), 1)),
+                    implode(
+                        ' ',
+                        array_slice(
+                            array_map('strval', $input->getArguments()),
+                            1,
+                        ),
+                    ),
                     '--child',
                 ]),
                 $this->serializeInputOptions($input, ['child', 'processes']),
@@ -399,7 +407,7 @@ trait Parallelization
                     stream_get_contents(STDIN),
                 ),
             ),
-            $this->getBatchSize(),
+            $this->getValidatedBatchSize(),
         );
 
         foreach ($itemIterator->getItemChunks() as $items) {
@@ -435,6 +443,46 @@ trait Parallelization
     protected function isValueRequiresQuoting($value): bool
     {
         return 0 < preg_match('/[\s \\\\ \' " & | < > = ! @]/x', (string) $value);
+    }
+
+    /**
+     * @internal
+     * @return positive-int
+     */
+    private function getValidatedSegmentSize(): int
+    {
+        $segmentSize = $this->getSegmentSize();
+
+        Assert::greaterThan(
+            $segmentSize,
+            0,
+            sprintf(
+                'Expected the segment size to be 1 or greater. Got "%s".',
+                $segmentSize,
+            ),
+        );
+
+        return $segmentSize;
+    }
+
+    /**
+     * @internal
+     * @return positive-int
+     */
+    private function getValidatedBatchSize(): int
+    {
+        $batchSize = $this->getBatchSize();
+
+        Assert::greaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size to be 1 or greater. Got "%s".',
+                $batchSize,
+            ),
+        );
+
+        return $batchSize;
     }
 
     /**
@@ -525,6 +573,7 @@ trait Parallelization
 
             if (
                 (class_exists(ResetInterface::class) && $container instanceof ResetInterface)
+                // TODO: to remove once we drop Symfony 4.4 support.
                 || (class_exists(ResettableContainerInterface::class) && $container instanceof ResettableContainerInterface)
             ) {
                 $container->reset();

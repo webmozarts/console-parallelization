@@ -18,6 +18,7 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\Kernel as HttpKernel;
 
 final class Kernel extends HttpKernel
@@ -27,6 +28,9 @@ final class Kernel extends HttpKernel
         parent::__construct('dev', true);
     }
 
+    /**
+     * @return list<BundleInterface>
+     */
     public function registerBundles(): array
     {
         return [];

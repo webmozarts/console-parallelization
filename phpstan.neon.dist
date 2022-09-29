@@ -1,7 +1,26 @@
 parameters:
-    level: 6
+    level: 5
     paths:
         - src
         - tests
     excludePaths:
         - tests/Integration/var
+    ignoreErrors:
+        - path: tests/Integration/TestLogger.php
+          message: '#TestLogger::\$outputHandler#'
+
+        - path: src/ContainerAwareCommand.php
+          message: '#Application::getKernel#'
+
+        - path: tests/Integration/ParallelizationIntegrationTest.php
+          message: '#ParallelizationIntegrationTest::\$importMoviesCommand#'
+        - path: tests/Integration/ParallelizationIntegrationTest.php
+          message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
+
+        - path: src/ProcessLauncher.php
+          message: '#Parameter \#1 \$command of class Symfony\\Component\\Process\\Process constructor expects array, string given\.#'
+
+        - path: tests/ChunkedItemsIteratorTest.php
+          message: '#ChunkedItemsIterator::create\(\) expects Closure\(\)#'
+
+        - '#unknown class Symfony\\Component\\DependencyInjection\\ResettableContainerInterface#'
