@@ -37,14 +37,32 @@ final class ParallelizationInput
     private ?string $item;
     private bool $childProcess;
 
-    public function __construct(InputInterface $input)
+    /**
+     * @param positive-int $numberOfProcesses
+     */
+    public function __construct(
+        bool $numberOfProcessesDefined,
+        int $numberOfProcesses,
+        ?string $item,
+        bool $childProcess
+    ) {
+        $this->numberOfProcessesDefined = $numberOfProcessesDefined;
+        $this->numberOfProcesses = $numberOfProcesses;
+        $this->item = $item;
+        $this->childProcess = $childProcess;
+    }
+
+    public static function fromInput(InputInterface $input): self
     {
         /** @var string|null $numberOfProcesses */
         $numberOfProcesses = $input->getOption(self::PROCESSES_OPTION);
+        /** @var string|null $item */
+        $item = $input->getArgument(self::ITEM_ARGUMENT);
+        $isChild = $input->getOption(self::CHILD_OPTION);
 
-        $this->numberOfProcessesDefined = null !== $numberOfProcesses;
+        $numberOfProcessesDefined = null !== $numberOfProcesses;
 
-        if ($this->numberOfProcessesDefined) {
+        if ($numberOfProcessesDefined) {
             Assert::numeric(
                 $numberOfProcesses,
                 sprintf(
@@ -66,22 +84,19 @@ final class ParallelizationInput
                 ),
             );
 
-            $this->numberOfProcesses = $castedNumberOfProcesses;
+            $validatedNumberOfProcesses = $castedNumberOfProcesses;
         } else {
-            $this->numberOfProcesses = 1;
+            $validatedNumberOfProcesses = 1;
         }
 
         Assert::greaterThan(
-            $this->numberOfProcesses,
+            $validatedNumberOfProcesses,
             0,
             sprintf(
                 'Expected the number of processes to be 1 or greater. Got "%s".',
-                $this->numberOfProcesses,
+                $validatedNumberOfProcesses,
             ),
         );
-
-        /** @var string|null $item */
-        $item = $input->getArgument(self::ITEM_ARGUMENT);
 
         $hasItem = null !== $item;
 
@@ -91,9 +106,12 @@ final class ParallelizationInput
             Assert::string($item);
         }
 
-        $this->item = $hasItem ? (string) $item : null;
-
-        $this->childProcess = (bool) $input->getOption(self::CHILD_OPTION);
+        return new self(
+            $numberOfProcessesDefined,
+            $validatedNumberOfProcesses,
+            $hasItem ? (string) $item : null,
+            (bool) $isChild,
+        );
     }
 
     /**

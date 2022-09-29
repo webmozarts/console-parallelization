@@ -48,24 +48,15 @@ final class ParallelizationInputTest extends TestCase
     /**
      * @dataProvider inputProvider
      */
-    public function test_it_can_be_instantiated(
+    public function test_it_can_be_instantiated_from_an_input(
         InputInterface $input,
-        bool $expectedIsNumberOfProcessesDefined,
-        int $expectedNumberOfProcesses,
-        ?string $expectedItem,
-        bool $expectedIsChildProcess
+        ParallelizationInput $expected
     ): void {
         self::bindInput($input);
 
-        $parallelizationInput = new ParallelizationInput($input);
+        $actual = ParallelizationInput::fromInput($input);
 
-        self::assertSame(
-            $expectedIsNumberOfProcessesDefined,
-            $parallelizationInput->isNumberOfProcessesDefined(),
-        );
-        self::assertSame($expectedNumberOfProcesses, $parallelizationInput->getNumberOfProcesses());
-        self::assertSame($expectedItem, $parallelizationInput->getItem());
-        self::assertSame($expectedIsChildProcess, $parallelizationInput->isChildProcess());
+        self::assertEquals($expected, $actual);
     }
 
     /**
@@ -80,73 +71,89 @@ final class ParallelizationInputTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        new ParallelizationInput($input);
+        ParallelizationInput::fromInput($input);
     }
 
     public static function inputProvider(): iterable
     {
         yield 'empty input' => [
             new StringInput(''),
-            false,
-            1,
-            null,
-            false,
+            new ParallelizationInput(
+                false,
+                1,
+                null,
+                false,
+            ),
         ];
 
         yield 'number of process defined: 1' => [
             new StringInput('--processes=1'),
-            true,
-            1,
-            null,
-            false,
+            new ParallelizationInput(
+                true,
+                1,
+                null,
+                false,
+            ),
         ];
 
         yield 'number of process defined: 4' => [
             new StringInput('--processes=4'),
-            true,
-            4,
-            null,
-            false,
+            new ParallelizationInput(
+                true,
+                4,
+                null,
+                false,
+            ),
         ];
 
         yield 'item passed' => [
             new StringInput('item15'),
-            false,
-            1,
-            'item15',
-            false,
+            new ParallelizationInput(
+                false,
+                1,
+                'item15',
+                false,
+            ),
         ];
 
         yield 'integer item passed' => [
             new ArrayInput(['item' => 10]),
-            false,
-            1,
-            '10',
-            false,
+            new ParallelizationInput(
+                false,
+                1,
+                '10',
+                false,
+            ),
         ];
 
         yield 'float item passed' => [
             new ArrayInput(['item' => -.5]),
-            false,
-            1,
-            '-0.5',
-            false,
+            new ParallelizationInput(
+                false,
+                1,
+                '-0.5',
+                false,
+            ),
         ];
 
         yield 'child option' => [
             new StringInput('--child'),
-            false,
-            1,
-            null,
-            true,
+            new ParallelizationInput(
+                false,
+                1,
+                null,
+                true,
+            ),
         ];
 
         yield 'nominal' => [
             new StringInput('item15 --child --processes 15'),
-            true,
-            15,
-            'item15',
-            true,
+            new ParallelizationInput(
+                true,
+                15,
+                'item15',
+                true,
+            ),
         ];
     }
 
