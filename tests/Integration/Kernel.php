@@ -29,7 +29,7 @@ final class Kernel extends HttpKernel
     }
 
     /**
-     * @return iterable<mixed, BundleInterface>
+     * @return list<BundleInterface>
      */
     public function registerBundles(): array
     {

@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Symfony\Component\Cache\ResettableInterface;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_filter;
+use function array_map;
 use function array_merge;
 use function array_slice;
 use function explode;
@@ -371,7 +373,13 @@ trait Parallelization
                     self::detectPhpExecutable(),
                     $consolePath,
                     $this->getName(),
-                    implode(' ', array_slice($input->getArguments(), 1)),
+                    implode(
+                        ' ',
+                        array_slice(
+                            array_map('strval', $input->getArguments()),
+                            1,
+                        ),
+                    ),
                     '--child',
                 ]),
                 $this->serializeInputOptions($input, ['child', 'processes']),
@@ -566,6 +574,7 @@ trait Parallelization
 
             if (
                 (class_exists(ResetInterface::class) && $container instanceof ResetInterface)
+                // TODO: to remove once we drop Symfony 4.4 support.
                 || (class_exists(ResettableContainerInterface::class) && $container instanceof ResettableContainerInterface)
             ) {
                 $container->reset();

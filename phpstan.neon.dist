@@ -16,3 +16,11 @@ parameters:
           message: '#ParallelizationIntegrationTest::\$importMoviesCommand#'
         - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
+
+        - path: src/ProcessLauncher.php
+          message: '#Parameter \#1 \$command of class Symfony\\Component\\Process\\Process constructor expects array, string given\.#'
+
+        - path: tests/ChunkedItemsIteratorTest.php
+          message: '#ChunkedItemsIterator::create\(\) expects Closure\(\)#'
+
+        - '#unknown class Symfony\\Component\\DependencyInjection\\ResettableContainerInterface#'
