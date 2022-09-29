@@ -14,9 +14,13 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Closure;
+use function fclose;
+use function fopen;
+use function fwrite;
 use InvalidArgumentException;
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use function rewind;
 use stdClass;
 
 /**
@@ -48,28 +52,36 @@ final class ChunkedItemsIteratorTest extends TestCase
     }
 
     /**
+     * @dataProvider streamProvider
+     *
+     * @param resource     $stream
+     * @param list<string> $expectedItems
+     */
+    public function test_it_can_be_created_from_a_stream(
+        $stream,
+        array $expectedItems
+    ): void {
+        $iterator = ChunkedItemsIterator::fromStream($stream, 10);
+
+        self::assertEquals($expectedItems, $iterator->getItems());
+
+        @fclose($stream);
+    }
+
+    /**
      * @dataProvider inputProvider
      *
-     * @param Closure(): list<string> $fetchItems
+     * @param callable():list<string> $fetchItems
      * @param list<string>            $expectedItems
-     * @param array<list<string>>     $expectedItemChunks
      */
-    public function test_it_can_be_created_from_an_input(
+    public function test_it_can_be_created_from_an_an_item_or_a_callable(
         ?string $item,
-        Closure $fetchItems,
-        int $batchSize,
-        array $expectedItems,
-        int $expectedNumberOfItems,
-        array $expectedItemChunks
+        callable $fetchItems,
+        array $expectedItems
     ): void {
-        $iterator = ChunkedItemsIterator::create($item, $fetchItems, $batchSize);
+        $iterator = ChunkedItemsIterator::fromItemOrCallable($item, $fetchItems, 10);
 
-        self::assertStateIs(
-            $iterator,
-            $expectedItems,
-            $expectedNumberOfItems,
-            $expectedItemChunks,
-        );
+        self::assertEquals($expectedItems, $iterator->getItems());
     }
 
     public function test_it_validates_the_items_provided_by_the_closure(): void
@@ -77,7 +89,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected the fetched items to be a list of strings. Got "object".');
 
-        ChunkedItemsIterator::create(
+        ChunkedItemsIterator::fromItemOrCallable(
             null,
             static function () {
                 yield from [];
@@ -97,7 +109,11 @@ final class ChunkedItemsIteratorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        new ChunkedItemsIterator($items, $batchSize);
+        ChunkedItemsIterator::fromItemOrCallable(
+            null,
+            static fn () => $items,
+            $batchSize,
+        );
     }
 
     public static function valuesProvider(): iterable
@@ -110,16 +126,6 @@ final class ChunkedItemsIteratorTest extends TestCase
             [
                 ['item0', 'item1'],
                 ['item3', 'item4'],
-            ],
-        ];
-
-        yield 'numerical items – items are casted to strings' => [
-            ['string item', 10, .5, 0x1A, 0b11111111],
-            10,
-            ['string item', '10', '0.5', '26', '255'],
-            5,
-            [
-                ['string item', '10', '0.5', '26', '255'],
             ],
         ];
 
@@ -155,39 +161,94 @@ final class ChunkedItemsIteratorTest extends TestCase
         ];
     }
 
+    public static function streamProvider(): iterable
+    {
+        yield 'single item' => [
+            self::createStream('item0'),
+            ['item0'],
+        ];
+
+        yield 'single item with space' => [
+            self::createStream('it em'),
+            ['it em'],
+        ];
+
+        yield 'empty string' => [
+            self::createStream(''),
+            [],
+        ];
+
+        yield 'whitespace string' => [
+            self::createStream(' '),
+            [' '],
+        ];
+
+        yield 'several items' => [
+            self::createStream(<<<'STDIN'
+                item0
+                item1
+                item3
+                STDIN),
+            ['item0', 'item1', 'item3'],
+        ];
+
+        yield 'several items with blank values' => [
+            self::createStream(<<<'STDIN'
+                item0
+                item1
+            
+                item3
+            
+                item4
+                STDIN),
+            ['item0', 'item1', 'item3', 'item4'],
+        ];
+
+        yield 'numerical items – items are kept as strings' => [
+            self::createStream(<<<'STDIN'
+                string item
+                10
+                .5
+                0x1A
+                0b11111111
+                STDIN),
+            ['string item', '10', '.5', '0x1A', '0b11111111'],
+        ];
+    }
+
     public static function inputProvider(): iterable
     {
         yield 'one item: the fetch item closure is not evaluated' => [
             'item0',
             self::createFakeClosure(),
-            1,
             ['item0'],
-            1,
-            [
-                ['item0'],
-            ],
         ];
 
         yield 'no item: the fetch item closure is evaluated' => [
             null,
-            static function (): array {
-                return ['item0', 'item1'];
-            },
-            2,
+            static fn () => ['item0', 'item1'],
             ['item0', 'item1'],
-            2,
-            [
-                ['item0', 'item1'],
-            ],
         ];
     }
 
     public static function invalidValuesProvider(): iterable
     {
-        yield 'invalid item type' => [
+        yield 'stdClass item' => [
             [new stdClass()],
             1,
-            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass".',
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass" for the item "0".',
+        ];
+
+        yield 'closure item' => [
+            [self::createFakeClosure()],
+            1,
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "Closure" for the item "0".',
+        ];
+
+        yield 'boolean item' => [
+            [true],
+            1,
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "boolean" for the item "0".',
         ];
     }
 
@@ -196,6 +257,18 @@ final class ChunkedItemsIteratorTest extends TestCase
         return static function () {
             throw new LogicException('Did not expect to be called');
         };
+    }
+
+    /**
+     * @return resource
+     */
+    private static function createStream(string $value)
+    {
+        $stream = fopen('php://memory', 'rb+');
+        fwrite($stream, $value);
+        rewind($stream);
+
+        return $stream;
     }
 
     private static function assertStateIs(

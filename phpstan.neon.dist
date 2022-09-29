@@ -21,6 +21,6 @@ parameters:
           message: '#Parameter \#1 \$command of class Symfony\\Component\\Process\\Process constructor expects array, string given\.#'
 
         - path: tests/ChunkedItemsIteratorTest.php
-          message: '#ChunkedItemsIterator::create\(\) expects Closure\(\)#'
+          message: '#Parameter \#2 \$fetchItems of static method .+ChunkedItemsIterator::fromItemOrCallable\(\) expects callable\(\)#'
 
         - '#unknown class Symfony\\Component\\DependencyInjection\\ResettableContainerInterface#'

@@ -19,15 +19,12 @@ use function array_filter;
 use function array_map;
 use function array_merge;
 use function array_slice;
-use function explode;
 use function getcwd;
 use function implode;
-use const PHP_EOL;
 use function realpath;
 use RuntimeException;
 use function sprintf;
 use const STDIN;
-use function stream_get_contents;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -263,11 +260,9 @@ trait Parallelization
         $batchSize = $this->getValidatedBatchSize();
         $segmentSize = $this->getValidatedSegmentSize();
 
-        $itemIterator = ChunkedItemsIterator::create(
+        $itemIterator = ChunkedItemsIterator::fromItemOrCallable(
             $parallelizationInput->getItem(),
-            function () use ($input) {
-                return $this->fetchItems($input);
-            },
+            fn () => $this->fetchItems($input),
             $batchSize,
         );
 
@@ -400,13 +395,8 @@ trait Parallelization
     ): void {
         $advancementChar = self::getProgressSymbol();
 
-        $itemIterator = new ChunkedItemsIterator(
-            array_filter(
-                explode(
-                    PHP_EOL,
-                    stream_get_contents(STDIN),
-                ),
-            ),
+        $itemIterator = ChunkedItemsIterator::fromStream(
+            STDIN,
             $this->getValidatedBatchSize(),
         );
 
