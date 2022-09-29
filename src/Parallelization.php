@@ -92,11 +92,15 @@ trait Parallelization
 
     /**
      * Provided by Symfony Command class.
+     *
+     * @return ContainerInterface
      */
     abstract protected function getContainer();
 
     /**
      * Provided by Symfony Command class.
+     *
+     * @return Application
      */
     abstract protected function getApplication();
 
