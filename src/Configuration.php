@@ -53,7 +53,7 @@ final class Configuration
             $segmentSize,
             $batchSize,
             sprintf(
-                'Expected the segment size ("%s") to be greater or equal to the batch size ("%s")',
+                'Expected the segment size ("%s") to be greater or equal to the batch size ("%s").',
                 $segmentSize,
                 $batchSize,
             ),

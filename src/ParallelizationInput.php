@@ -48,7 +48,7 @@ final class ParallelizationInput
             Assert::numeric(
                 $numberOfProcesses,
                 sprintf(
-                    'Expected the number of process defined to be a valid numeric value. Got "%s"',
+                    'Expected the number of process defined to be a valid numeric value. Got "%s".',
                     $numberOfProcesses,
                 ),
             );
@@ -61,7 +61,7 @@ final class ParallelizationInput
                 (string) $numberOfProcesses,
                 (string) $castedNumberOfProcesses,
                 sprintf(
-                    'Expected the number of process defined to be an integer. Got "%s"',
+                    'Expected the number of process defined to be an integer. Got "%s".',
                     $numberOfProcesses,
                 ),
             );
@@ -75,7 +75,7 @@ final class ParallelizationInput
             $this->numberOfProcesses,
             0,
             sprintf(
-                'Expected the number of processes to be 1 or greater. Got "%s"',
+                'Expected the number of processes to be 1 or greater. Got "%s".',
                 $this->numberOfProcesses,
             ),
         );

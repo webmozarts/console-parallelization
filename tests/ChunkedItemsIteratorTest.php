@@ -75,7 +75,7 @@ final class ChunkedItemsIteratorTest extends TestCase
     public function test_it_validates_the_items_provided_by_the_closure(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected the fetched items to be a list of strings. Got "object"');
+        $this->expectExceptionMessage('Expected the fetched items to be a list of strings. Got "object".');
 
         ChunkedItemsIterator::create(
             null,
@@ -187,7 +187,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         yield 'invalid item type' => [
             [new stdClass()],
             1,
-            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass"',
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass".',
         ];
     }
 
