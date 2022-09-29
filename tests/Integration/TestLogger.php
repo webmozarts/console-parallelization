@@ -52,7 +52,7 @@ final class TestLogger
         $this->write(self::formatMethodName(__METHOD__));
     }
 
-    public function recordSingleCommand(string $movieFileName, string $movieFileContent)
+    public function recordSingleCommand(string $movieFileName, string $movieFileContent): void
     {
         $this->write(
             sprintf(

@@ -19,9 +19,9 @@ use Webmozart\Assert\Assert;
 
 final class Configuration
 {
-    private $segmentSize;
-    private $rounds;
-    private $batches;
+    private int $segmentSize;
+    private int $rounds;
+    private int $batches;
 
     /**
      * @param positive-int $numberOfProcesses

@@ -6,7 +6,7 @@ This library supports the parallelization of Symfony Console commands.
 How it works
 ------------
 
-When you launch a command with multi-processing enabled (`--processes 2`), a 
+When you launch a command with multiprocessing enabled (`--processes 2`), a
 master process fetches *items* and distributes them across the given number of
 child processes. Child processes are killed after a fixed number of items
 (a *segment*) in order to prevent them from slowing down over time.
@@ -103,7 +103,7 @@ Items
 -----
 
 The master process fetches all the items that need to be processed and passes
-them to the child processes through their Standard Input. Hence items must 
+them to the child processes through their Standard Input. Hence, items must
 fulfill two requirements:
 
 * Items must be strings
@@ -118,9 +118,9 @@ master process to the child process. Some typical examples for items:
 Segments
 --------
 
-When you run a command with multi-processing enabled, the items returned by
+When you run a command with multiprocessing enabled, the items returned by
 `fetchItems()` are split into segments of a fixed size. Each child processes
-processes a single segment and kills itself after that.
+process a single segment and kills itself after that.
 
 By default, the segment size is the same as the batch size (see below), but you 
 can try to tweak the performance of your command by choosing a different segment
@@ -173,12 +173,12 @@ Hooks
 The `Parallelization` trait supports more hooks than the one mentioned in the
 last section. In the table below you can find a complete list of them:
 
-Method                                      | Scope             | Description
-------------------------------------------- | ----------------- | ---------------------------------------------
-`runBeforeFirstCommand($input, $output)`    | Master process    | Run before any child process is spawned
-`runAfterLastCommand($input, $output)`      | Master process    | Run after all child processes have completed
-`runBeforeBatch($input, $output, $items)`   | Child process     | Run before each batch in the child process
-`runAfterBatch($input, $output, $items)`    | Child process     | Run after each batch in the child process
+| Method                                    | Scope          | Description                                  |
+|-------------------------------------------|----------------|----------------------------------------------|
+| `runBeforeFirstCommand($input, $output)`  | Master process | Run before any child process is spawned      |
+| `runAfterLastCommand($input, $output)`    | Master process | Run after all child processes have completed |
+| `runBeforeBatch($input, $output, $items)` | Child process  | Run before each batch in the child process   |
+| `runAfterBatch($input, $output, $items)`  | Child process  | Run after each batch in the child process    |
 
 Authors
 -------
@@ -206,4 +206,4 @@ All contents of this package are licensed under the [MIT license].
 [The Community Contributors]: https://github.com/webmozarts/console-parallelization/graphs/contributors
 [issue tracker]: https://github.com/webmozarts/console-parallelization/issues
 [Git repository]: https://github.com/webmozarts/console-parallelization
-[MIT license]: LICENSE
+[MIT license]: LICENSE.md_

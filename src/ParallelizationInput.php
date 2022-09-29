@@ -114,7 +114,6 @@ final class ParallelizationInput
                 'p',
                 InputOption::VALUE_OPTIONAL,
                 'The number of parallel processes to run',
-                null,
             )
             ->addOption(
                 self::CHILD_OPTION,
