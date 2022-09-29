@@ -214,6 +214,26 @@ trait Parallelization
     }
 
     /**
+     * @internal
+     * @return positive-int
+     */
+    private function getValidatedSegmentSize(): int
+    {
+        $segmentSize = $this->getSegmentSize();
+
+        Assert::greaterThan(
+            $segmentSize,
+            0,
+            sprintf(
+                'Expected the segment size to be 1 or greater. Got "%s".',
+                $segmentSize,
+            ),
+        );
+
+        return $segmentSize;
+    }
+
+    /**
      * Returns the number of items to process in a batch. Multiple batches
      * can be executed within the master and child processes. This allows to
      * early fetch aggregates or persist aggregates in batches for performance
@@ -222,6 +242,26 @@ trait Parallelization
     protected function getBatchSize(): int
     {
         return $this->getSegmentSize();
+    }
+
+    /**
+     * @internal
+     * @return positive-int
+     */
+    private function getValidatedBatchSize(): int
+    {
+        $batchSize = $this->getBatchSize();
+
+        Assert::greaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size to be 1 or greater. Got "%s".',
+                $batchSize,
+            ),
+        );
+
+        return $batchSize;
     }
 
     /**
@@ -259,7 +299,9 @@ trait Parallelization
 
         $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-        $batchSize = $this->getBatchSize();
+
+        $batchSize = $this->getValidatedBatchSize();
+        $segmentSize = $this->getValidatedSegmentSize();
 
         $itemIterator = ChunkedItemsIterator::create(
             $parallelizationInput->getItem(),
@@ -275,11 +317,10 @@ trait Parallelization
             $isNumberOfProcessesDefined,
             $numberOfProcesses,
             $numberOfItems,
-            $this->getSegmentSize(),
+            $segmentSize,
             $batchSize,
         );
 
-        $segmentSize = $config->getSegmentSize();
         $numberOfSegments = $config->getNumberOfSegments();
         $numberOfBatches = $config->getNumberOfBatches();
 

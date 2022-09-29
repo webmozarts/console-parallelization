@@ -32,6 +32,7 @@ final class ChunkedItemsIterator
 
     /**
      * @param list<string> $items
+     * @param positive-int $batchSize
      */
     public function __construct(array $items, int $batchSize)
     {

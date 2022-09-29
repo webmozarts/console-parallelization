@@ -23,6 +23,9 @@ final class Configuration
     private $rounds;
     private $batches;
 
+    /**
+     * @param positive-int $numberOfProcesses
+     */
     public function __construct(
         bool $numberOfProcessesDefined,
         int $numberOfProcesses,
@@ -30,14 +33,6 @@ final class Configuration
         int $segmentSize,
         int $batchSize
     ) {
-        Assert::greaterThan(
-            $numberOfProcesses,
-            0,
-            sprintf(
-                'Expected the number of processes to be 1 or greater. Got "%s"',
-                $numberOfProcesses,
-            ),
-        );
         Assert::natural(
             $numberOfItems,
             sprintf(
