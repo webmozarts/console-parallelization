@@ -68,7 +68,7 @@ final class ChunkedItemsIterator
             Assert::isArray(
                 $items,
                 sprintf(
-                    'Expected the fetched items to be a list of strings. Got "%s"',
+                    'Expected the fetched items to be a list of strings. Got "%s".',
                     gettype($items),
                 ),
             );
@@ -116,7 +116,7 @@ final class ChunkedItemsIterator
             Assert::string(
                 $item,
                 sprintf(
-                    'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s"',
+                    'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
                     is_object($item) ? get_class($item) : gettype($item),
                     $index,
                 ),

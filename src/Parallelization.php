@@ -324,7 +324,7 @@ trait Parallelization
             $consolePath = $this->getConsolePath();
             Assert::fileExists(
                 $consolePath,
-                sprintf('The bin/console file could not be found at %s', getcwd()),
+                sprintf('The bin/console file could not be found at %s.', getcwd()),
             );
 
             $commandTemplate = array_merge(

@@ -154,12 +154,12 @@ final class ParallelizationInputTest extends TestCase
     {
         yield 'non numeric value' => [
             new StringInput('--processes foo'),
-            'Expected the number of process defined to be a valid numeric value. Got "foo"',
+            'Expected the number of process defined to be a valid numeric value. Got "foo".',
         ];
 
         yield 'non integer value' => [
             new StringInput('--processes 1.5'),
-            'Expected the number of process defined to be an integer. Got "1.5"',
+            'Expected the number of process defined to be an integer. Got "1.5".',
         ];
     }
 

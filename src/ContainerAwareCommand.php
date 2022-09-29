@@ -37,7 +37,7 @@ abstract class ContainerAwareCommand extends Command implements ContainerAwareIn
 
         Assert::notNull(
             $application,
-            'The container cannot be retrieved as the application instance is not yet set',
+            'The container cannot be retrieved as the application instance is not yet set.',
         );
 
         return $this->container = $application->getKernel()->getContainer();
