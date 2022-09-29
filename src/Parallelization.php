@@ -440,7 +440,7 @@ trait Parallelization
                     stream_get_contents(STDIN),
                 ),
             ),
-            $this->getBatchSize(),
+            $this->getValidatedBatchSize(),
         );
 
         foreach ($itemIterator->getItemChunks() as $items) {
