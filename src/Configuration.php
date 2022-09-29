@@ -35,10 +35,10 @@ final class Configuration
     private int $numberOfBatches;
 
     /**
-     * @param positive-int $numberOfProcesses
+     * @param positive-int   $numberOfProcesses
      * @param 0|positive-int $numberOfItems
-     * @param positive-int $segmentSize
-     * @param positive-int $batchSize
+     * @param positive-int   $segmentSize
+     * @param positive-int   $batchSize
      */
     public function __construct(
         bool $numberOfProcessesDefined,
