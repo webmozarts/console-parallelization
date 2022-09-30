@@ -18,5 +18,9 @@ interface Logger
 
     public function startProgress(int $numberOfItems): void;
 
+    public function advance(): void;
+
     public function end(): void;
+
+    public function logUnexpectedOutput(string $buffer): void;
 }

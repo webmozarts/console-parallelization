@@ -81,6 +81,12 @@ final class ParallelExecutor
      * @var callable(InputInterface, OutputInterface, list<string>):void
      */
     private $runAfterBatch;
+    private string $consolePath;
+    private string $phpExecutable;
+    private string $commandName;
+    private string $workingDirectory;
+    private array $environmentVariables;
+    private InputOptionsSerializer $inputOptionsSerializer;
 
     /**
      * @param resource $sourceStream
@@ -106,7 +112,13 @@ final class ParallelExecutor
         int $batchSize,
         int $segmentSize,
         string $singularItemName,
-        string $pluralItemName
+        string $pluralItemName,
+        string $consolePath,
+        string $phpExecutable,
+        string $commandName,
+        string $workingDirectory,
+        array $environmentVariables,
+        InputOptionsSerializer $inputOptionsSerializer
     ) {
         $this->sourceStream = $sourceStream;
         $this->logger = $logger;
@@ -120,6 +132,12 @@ final class ParallelExecutor
         $this->pluralItemName = $pluralItemName;
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
+        $this->consolePath = $consolePath;
+        $this->phpExecutable = $phpExecutable;
+        $this->commandName = $commandName;
+        $this->workingDirectory = $workingDirectory;
+        $this->environmentVariables = $environmentVariables;
+        $this->inputOptionsSerializer = $inputOptionsSerializer;
     }
 
     /**
@@ -287,20 +305,18 @@ final class ParallelExecutor
         );
     }
 
-    private function launchChildProcesses(): void
+    private function launchChildProcesses(
+        ParallelizationInput $parallelizationInput,
+        InputInterface $input,
+        ChunkedItemsIterator $itemIterator
+    ): void
     {
-        // Distribute if we have multiple segments
-        $consolePath = $this->getConsolePath();
-        Assert::fileExists(
-            $consolePath,
-            sprintf('The bin/console file could not be found at %s.', getcwd()),
-        );
-
+        // TODO: could be moved in a template factory
         $commandTemplate = array_merge(
             array_filter([
-                self::detectPhpExecutable(),
-                $consolePath,
-                $this->getName(),
+                $this->phpExecutable,
+                $this->consolePath,
+                $this->commandName,
                 implode(
                     ' ',
                     array_slice(
@@ -310,10 +326,8 @@ final class ParallelExecutor
                 ),
                 '--child',
             ]),
-            $this->serializeInputOptions($input, ['child', 'processes']),
+            $this->inputOptionsSerializer->serialize($input, ['child', 'processes']),
         );
-
-        $terminalWidth = (new Terminal())->getWidth();
 
         // @TODO: can be removed once ProcessLauncher accepts command arrays
         $tempProcess = new Process($commandTemplate);
@@ -321,18 +335,27 @@ final class ParallelExecutor
 
         $processLauncher = new ProcessLauncher(
             $commandString,
-            self::getWorkingDirectory($this->getContainer()),
-            $this->getEnvironmentVariables($this->getContainer()),
-            $numberOfProcesses,
+            $this->workingDirectory,
+            $this->environmentVariables,
+            $parallelizationInput->getNumberOfProcesses(),
             $this->segmentSize,
-            // TODO: offer a way to create the process launcher in a different manner
-            new ConsoleLogger($output),
-            function (string $type, string $buffer) use ($progressBar, $output, $terminalWidth) {
-                $this->processChildOutput($buffer, $progressBar, $output, $terminalWidth);
-            },
+            $this->logger,
+            fn (string $type, string $buffer) => $this->processChildOutput($buffer),
         );
 
         $processLauncher->run($itemIterator->getItems());
+    }
+
+    private function processChildOutput(string $buffer): void {
+        $advancementChar = $this->progressSymbol;
+        $chars = mb_substr_count($buffer, $advancementChar);
+
+        // Display unexpected output
+        if ($chars !== mb_strlen($buffer)) {
+            $this->logger->logUnexpectedOutput($buffer);
+        }
+
+        $this->logger->advance();
     }
 
     /**
