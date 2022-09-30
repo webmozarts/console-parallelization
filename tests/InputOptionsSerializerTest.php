@@ -147,7 +147,16 @@ final class InputOptionsSerializerTest extends TestCase
                 '--env' => 'dev',
             ]),
             ['child', 'processes'],
-            ['--env=dev'],
+            [
+                '--help',
+                '--quiet',
+                '--verbose',
+                '--version',
+                '--no-ansi',
+                '--no-interaction',
+                '--env=dev',
+                '--no-debug',
+            ],
         ];
 
         yield from self::optionSerializationProvider();
