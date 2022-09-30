@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function array_diff_key;
-use function array_fill_keys;
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -336,7 +334,14 @@ trait Parallelization
                     ),
                     '--child',
                 ]),
-                $this->serializeInputOptions($input, ['child', 'processes']),
+                // Forward all the options except for "processes" to the children
+                // this way the children can inherit the options such as env
+                // or no-debug.
+                InputOptionsSerializer::serialize(
+                    $this->getDefinition(),
+                    $input,
+                    ['child', 'processes'],
+                ),
             );
 
             $terminalWidth = (new Terminal())->getWidth();
@@ -569,39 +574,5 @@ trait Parallelization
                 $container->reset();
             }
         }
-    }
-
-    /**
-     * @param string[] $blackListParams
-     *
-     * @return string[]
-     */
-    private function serializeInputOptions(InputInterface $input, array $blackListParams): array
-    {
-        $options = array_diff_key(
-            array_filter($input->getOptions()),
-            array_fill_keys($blackListParams, ''),
-        );
-
-        $preparedOptionList = [];
-        foreach ($options as $name => $value) {
-            $definition = $this->getDefinition();
-            $option = $definition->getOption($name);
-
-            $optionString = '';
-            if (!$option->acceptValue()) {
-                $optionString .= '--'.$name;
-            } elseif ($option->isArray()) {
-                foreach ($value as $arrayValue) {
-                    $optionString .= '--'.$name.'='.$this->quoteOptionValue($arrayValue);
-                }
-            } else {
-                $optionString .= '--'.$name.'='.$this->quoteOptionValue($value);
-            }
-
-            $preparedOptionList[] = $optionString;
-        }
-
-        return $preparedOptionList;
     }
 }
