@@ -23,7 +23,7 @@ final class NonResettableContainer implements ContainerInterface
         throw new DomainException('Unexpected call.');
     }
 
-    public function has(string $id)
+    public function has(string $id): bool
     {
         throw new DomainException('Unexpected call.');
     }

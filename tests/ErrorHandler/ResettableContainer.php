@@ -26,7 +26,7 @@ final class ResettableContainer implements ContainerInterface, ResetInterface
         throw new DomainException('Unexpected call.');
     }
 
-    public function has(string $id)
+    public function has(string $id): bool
     {
         throw new DomainException('Unexpected call.');
     }
