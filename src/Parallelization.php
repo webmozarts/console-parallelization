@@ -131,20 +131,14 @@ trait Parallelization
     abstract protected function getItemName(int $count): string;
 
     /**
-     * Returns the environment variables that are passed to the child processes.
+     * Returns the extra environment variables that are passed to the child
+     * processes.
      *
-     * @param ContainerInterface $container The service containers
-     *
-     * @return string[] A list of environment variable names and values
+     * @return array<string, string> a hashmap of environment variable names and values
      */
-    protected function getEnvironmentVariables(ContainerInterface $container): array
+    protected function getExtraEnvironmentVariables(): ?array
     {
-        return [
-            'PATH' => getenv('PATH'),
-            'HOME' => getenv('HOME'),
-            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
-            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
-        ];
+        return null;
     }
 
     /**
@@ -239,7 +233,7 @@ trait Parallelization
             self::detectPhpExecutable(),
             $this->getName(),
             self::getWorkingDirectory($container),
-            $this->getEnvironmentVariables($container),
+            $this->getExtraEnvironmentVariables(),
             $this->getDefinition(),
             $this->createItemErrorHandler(),
         ))->execute(
