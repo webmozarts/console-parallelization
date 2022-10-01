@@ -215,7 +215,6 @@ trait Parallelization
     {
         $parallelizationInput = ParallelizationInput::fromInput($input);
 
-        $container = $this->getContainer();
         $logger = $this->createLogger($output);
 
         return (new ParallelExecutor(
