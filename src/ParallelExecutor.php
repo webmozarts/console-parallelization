@@ -18,18 +18,40 @@ use function array_map;
 use function array_merge;
 use function array_slice;
 use function implode;
+use function mb_strlen;
+use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use function trim;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class ParallelExecutor
 {
-    private string $progressSymbol;
+    /**
+     * @var callable(InputInterface):list<string>
+     */
+    private $fetchItems;
+
+    /**
+     * @var callable(string, InputInterface, OutputInterface):void
+     */
+    private $runSingleCommand;
+
+    /**
+     * @var callable(int): string
+     */
+    private $getItemName;
+
+    private string $commandName;
+
+    private InputDefinition $commandDefinition;
+
+    private ItemProcessingErrorHandler $errorHandler;
 
     /**
      * @var positive-int
@@ -40,11 +62,6 @@ final class ParallelExecutor
      * @var positive-int
      */
     private int $segmentSize;
-
-    /**
-     * @var callable(InputInterface):list<string>
-     */
-    private $fetchItems;
 
     /**
      * @var callable(InputInterface, OutputInterface):void
@@ -66,14 +83,12 @@ final class ParallelExecutor
      */
     private $runAfterBatch;
 
-    /**
-     * @var callable(string, InputInterface, OutputInterface):void
-     */
-    private $runSingleCommand;
+    private string $progressSymbol;
+
+    private string $phpExecutable;
 
     private string $scriptPath;
-    private string $phpExecutable;
-    private string $commandName;
+
     private string $workingDirectory;
 
     /**
@@ -81,63 +96,59 @@ final class ParallelExecutor
      */
     private ?array $extraEnvironmentVariables;
 
-    private InputDefinition $commandDefinition;
-
     /**
-     * @var callable(int): string
-     */
-    private $getItemName;
-
-    private ItemProcessingErrorHandler $errorHandler;
-
-    /**
+     * @param callable(InputInterface):list<string>                        $fetchItems
+     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
+     * @param callable(int):string                                         $getItemName
      * @param positive-int                                                 $batchSize
      * @param positive-int                                                 $segmentSize
-     * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
      * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
      * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
-     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(int):string                                         $getItemName
      * @param array<string, string>                                        $extraEnvironmentVariables
      */
     public function __construct(
-        string $progressSymbol,
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler,
         int $batchSize,
         int $segmentSize,
-        callable $fetchItems,
         callable $runBeforeFirstCommand,
         callable $runAfterLastCommand,
         callable $runBeforeBatch,
         callable $runAfterBatch,
-        callable $runSingleCommand,
-        callable $getItemName,
-        string $scriptPath,
+        string $progressSymbol,
         string $phpExecutable,
-        string $commandName,
+        string $scriptPath,
         string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler
+        ?array $extraEnvironmentVariables
     ) {
-        $this->progressSymbol = $progressSymbol;
-        $this->batchSize = $batchSize;
+        self::validateBatchSize($batchSize);
+        self::validateSegmentSize($segmentSize);
+        self::validateScriptPath($scriptPath);
+        self::validateProgressSymbol($progressSymbol);
+
         $this->fetchItems = $fetchItems;
+        $this->runSingleCommand = $runSingleCommand;
+        $this->getItemName = $getItemName;
+        $this->commandName = $commandName;
+        $this->commandDefinition = $commandDefinition;
+        $this->errorHandler = $errorHandler;
+        $this->batchSize = $batchSize;
+        $this->segmentSize = $segmentSize;
         $this->runBeforeFirstCommand = $runBeforeFirstCommand;
         $this->runAfterLastCommand = $runAfterLastCommand;
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
-        $this->runSingleCommand = $runSingleCommand;
-        $this->segmentSize = $segmentSize;
-        $this->scriptPath = $scriptPath;
+        $this->progressSymbol = $progressSymbol;
         $this->phpExecutable = $phpExecutable;
-        $this->commandName = $commandName;
+        $this->scriptPath = $scriptPath;
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
-        $this->commandDefinition = $commandDefinition;
-        $this->getItemName = $getItemName;
-        $this->errorHandler = $errorHandler;
     }
 
     public function execute(
@@ -339,5 +350,56 @@ final class ParallelExecutor
         }
 
         $logger->advance($chars);
+    }
+
+    private static function validateBatchSize(int $batchSize): void
+    {
+        Assert::greaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size to be 1 or greater. Got "%s".',
+                $batchSize,
+            ),
+        );
+    }
+
+    private static function validateSegmentSize(int $segmentSize): void
+    {
+        Assert::greaterThan(
+            $segmentSize,
+            0,
+            sprintf(
+                'Expected the segment size to be 1 or greater. Got "%s".',
+                $segmentSize,
+            ),
+        );
+    }
+
+    private static function validateScriptPath(string $scriptPath): void
+    {
+        Assert::fileExists(
+            $scriptPath,
+            sprintf(
+                'The script file could not be found at the path "%s" (working directory: %s)',
+                $scriptPath,
+                getcwd(),
+            ),
+        );
+    }
+
+    private static function validateProgressSymbol(string $progressSymbol): void
+    {
+        $symbolLength = mb_strlen($progressSymbol);
+
+        Assert::same(
+            1,
+            $symbolLength,
+            sprintf(
+                'Expected the progress symbol length to be 1. Got "%s" for "%s".',
+                $symbolLength,
+                $progressSymbol,
+            ),
+        );
     }
 }

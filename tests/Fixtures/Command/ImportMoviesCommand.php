@@ -16,20 +16,26 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 use function file_get_contents;
 use function json_decode;
 use const JSON_THROW_ON_ERROR;
+use function realpath;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ContainerAwareCommand;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
 
 final class ImportMoviesCommand extends ContainerAwareCommand
 {
-    use Parallelization;
+    use Parallelization {
+        getParallelExecutableFactory as getOriginalParallelExecutableFactory;
+    }
 
     protected static $defaultName = 'import:movies';
 
@@ -66,24 +72,38 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         ];
     }
 
-    protected function getSegmentSize(): int
-    {
-        return 2;
-    }
-
-    protected function runBeforeFirstCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->logger->recordFirstCommand();
-    }
-
-    protected function runBeforeBatch(
-        InputInterface $input,
-        OutputInterface $output,
-        array $movieFileNames
-    ): void {
-        $this->logger->recordBeforeBatch();
-
-        $this->batchMovies = self::fetchMovieTitles($movieFileNames);
+    protected function getParallelExecutableFactory(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory {
+        return $this
+            ->getOriginalParallelExecutableFactory(
+                $fetchItems,
+                $runSingleCommand,
+                $getItemName,
+                $commandName,
+                $commandDefinition,
+                $errorHandler,
+            )
+            ->withBatchSize(2)
+            ->withSegmentSize(2)
+            ->withRunBeforeFirstCommand(
+                fn () => $this->logger->recordFirstCommand(),
+            )
+            ->withRunBeforeBatch(
+                fn ($input, $output, $movieFileNames) => $this->runBeforeBatch($movieFileNames),
+            )
+            ->withRunAfterBatch(
+                fn ($input, $output, $movieFileNames) => $this->runAfterBatch(),
+            )
+            ->withRunAfterLastCommand(
+                fn () => $this->logger->recordLastCommand(),
+            )
+            ->withScriptPath(realpath(__DIR__.'/../../../bin/console'));
     }
 
     protected function runSingleCommand(string $movieFileName, InputInterface $input, OutputInterface $output): void
@@ -92,18 +112,6 @@ final class ImportMoviesCommand extends ContainerAwareCommand
             $movieFileName,
             $this->batchMovies[$movieFileName],
         );
-    }
-
-    protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $items): void
-    {
-        $this->logger->recordAfterBatch();
-
-        unset($this->batchMovies);
-    }
-
-    protected function runAfterLastCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->logger->recordLastCommand();
     }
 
     protected function getItemName(int $count): string
@@ -121,9 +129,19 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         );
     }
 
-    protected function getScriptPath(): string
+    private function runBeforeBatch(
+        array $movieFileNames
+    ): void {
+        $this->logger->recordBeforeBatch();
+
+        $this->batchMovies = self::fetchMovieTitles($movieFileNames);
+    }
+
+    private function runAfterBatch(): void
     {
-        return __DIR__.'/../../../bin/console';
+        $this->logger->recordAfterBatch();
+
+        unset($this->batchMovies);
     }
 
     /**

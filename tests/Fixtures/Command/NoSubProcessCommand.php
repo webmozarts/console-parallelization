@@ -15,19 +15,24 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use DomainException;
 use function realpath;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ContainerAwareCommand;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
 
 final class NoSubProcessCommand extends ContainerAwareCommand
 {
-    use Parallelization;
+    use Parallelization {
+        getParallelExecutableFactory as getOriginalParallelExecutableFactory;
+    }
 
     protected static $defaultName = 'test:no-subprocess';
 
@@ -52,14 +57,31 @@ final class NoSubProcessCommand extends ContainerAwareCommand
         ];
     }
 
-    protected function getSegmentSize(): int
-    {
-        return 2;
-    }
-
-    protected function runBeforeFirstCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->mainProcess = true;
+    protected function getParallelExecutableFactory(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory {
+        return $this
+            ->getOriginalParallelExecutableFactory(
+                $fetchItems,
+                $runSingleCommand,
+                $getItemName,
+                $commandName,
+                $commandDefinition,
+                $errorHandler,
+            )
+            ->withBatchSize(2)
+            ->withSegmentSize(2)
+            ->withRunBeforeFirstCommand(
+                function () {
+                    $this->mainProcess = true;
+                },
+            )
+            ->withScriptPath(realpath(__DIR__.'/../../../bin/console'));
     }
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
@@ -82,10 +104,5 @@ final class NoSubProcessCommand extends ContainerAwareCommand
             new TestDebugProgressBarFactory(),
             new ConsoleLogger($output),
         );
-    }
-
-    protected function getScriptPath(): string
-    {
-        return realpath(__DIR__.'/../../../bin/console');
     }
 }
