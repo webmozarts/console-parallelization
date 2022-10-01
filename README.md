@@ -195,6 +195,10 @@ Contributions to the package are always welcome!
 * Report any bugs or issues you find on the [issue tracker].
 * You can grab the source code at the package's [Git repository].
 
+To run the CS fixer and tests you can use the command `make`. More details
+available with `make help`.
+
+
 License
 -------
 
