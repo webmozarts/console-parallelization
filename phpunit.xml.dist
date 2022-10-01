@@ -5,8 +5,8 @@
          beStrictAboutChangesToGlobalState="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutResourceUsageDuringSmallTests="true"
-         beStrictAboutCoversAnnotation="true"
-         colors="true">
+         colors="true"
+         executionOrder="random">
 
     <testsuites>
         <testsuite name="Test Suite">
@@ -15,9 +15,9 @@
     </testsuites>
 
     <coverage>
-        <exclude>
-            <directory suffix=".php">src/</directory>
-        </exclude>
+        <include>
+            <directory>src</directory>
+        </include>
     </coverage>
 
 </phpunit>

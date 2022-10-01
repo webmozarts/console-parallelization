@@ -4,6 +4,8 @@
 /.php_cs.cache
 /.phpunit.result.cache
 /composer.lock
+/dist/
+!/dist/.gitkeep
 /tests/Integration/output
 /tests/Integration/var/
 /vendor-bin/*/vendor/
