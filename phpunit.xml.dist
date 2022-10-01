@@ -14,10 +14,10 @@
         </testsuite>
     </testsuites>
 
-    <filter>
-        <whitelist>
+    <coverage>
+        <exclude>
             <directory suffix=".php">src/</directory>
-        </whitelist>
-    </filter>
+        </exclude>
+    </coverage>
 
 </phpunit>

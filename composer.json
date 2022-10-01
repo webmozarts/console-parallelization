@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "psr/log": "^1.1",
+        "psr/log": "^1.1 || ^2.0",
         "symfony/console": "^4.4 || ^5.4 || ^6.0",
         "symfony/dependency-injection": "^4.4 || ^5.4 || ^6.0",
         "symfony/process": "^4.4 || ^5.4 || ^6.0",
@@ -26,7 +26,7 @@
         "bamarni/composer-bin-plugin": "^1.8",
         "ergebnis/composer-normalize": "^2.28",
         "phpstan/phpstan": "^1.8",
-        "phpunit/phpunit": "^8.4",
+        "phpunit/phpunit": "^9.0",
         "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.0"
     },
     "autoload": {
