@@ -75,9 +75,9 @@ final class ParallelExecutorFactory
      */
     private $runAfterBatch;
 
-    private string $progressSymbol;
-
     private string $phpExecutable;
+
+    private string $progressSymbol;
 
     private string $scriptPath;
 
@@ -89,15 +89,15 @@ final class ParallelExecutorFactory
     private ?array $extraEnvironmentVariables;
 
     /**
+     * @param callable(InputInterface):list<string>                        $fetchItems
+     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
+     * @param callable(int):string                                         $getItemName
      * @param positive-int                                                 $batchSize
      * @param positive-int                                                 $segmentSize
-     * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
      * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
      * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
-     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(int):string                                         $getItemName
      * @param array<string, string>                                        $extraEnvironmentVariables
      */
     private function __construct(
@@ -114,8 +114,8 @@ final class ParallelExecutorFactory
         callable $runBeforeBatch,
         callable $runAfterBatch,
         string $progressSymbol,
-        string $scriptPath,
         string $phpExecutable,
+        string $scriptPath,
         string $workingDirectory,
         ?array $extraEnvironmentVariables
     ) {
@@ -132,8 +132,8 @@ final class ParallelExecutorFactory
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
         $this->progressSymbol = $progressSymbol;
-        $this->scriptPath = $scriptPath;
         $this->phpExecutable = $phpExecutable;
+        $this->scriptPath = $scriptPath;
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
     }
@@ -165,8 +165,8 @@ final class ParallelExecutorFactory
             self::getNoopCallable(),
             self::getNoopCallable(),
             self::getProgressSymbol(),
-            self::getScriptPath(),
             self::getPhpExecutable(),
+            self::getScriptPath(),
             self::getWorkingDirectory(),
             null,
         );
@@ -268,7 +268,19 @@ final class ParallelExecutorFactory
     public function withProgressSymbol(string $progressSymbol): self
     {
         $clone = clone $this;
-        $clone->runAfterBatch = $progressSymbol;
+        $clone->progressSymbol = $progressSymbol;
+
+        return $clone;
+    }
+
+    /**
+     * The path of the PHP executable. It is the executable that will be used
+     * to spawn the child process(es).
+     */
+    public function withPhpExecutable(string $phpExecutable): self
+    {
+        $clone = clone $this;
+        $clone->phpExecutable = $phpExecutable;
 
         return $clone;
     }
@@ -282,18 +294,6 @@ final class ParallelExecutorFactory
     {
         $clone = clone $this;
         $clone->scriptPath = $scriptPath;
-
-        return $clone;
-    }
-
-    /**
-     * The path of the PHP executable. It is the executable that will be used
-     * to spawn the child process(es).
-     */
-    public function withPhpExecutable(string $phpExecutable): self
-    {
-        $clone = clone $this;
-        $clone->phpExecutable = $phpExecutable;
 
         return $clone;
     }
@@ -339,8 +339,8 @@ final class ParallelExecutorFactory
             $this->runBeforeBatch,
             $this->runAfterBatch,
             $this->progressSymbol,
-            $this->scriptPath,
             $this->phpExecutable,
+            $this->scriptPath,
             $this->workingDirectory,
             $this->extraEnvironmentVariables,
         );

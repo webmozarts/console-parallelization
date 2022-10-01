@@ -97,15 +97,15 @@ final class ParallelExecutor
     private ?array $extraEnvironmentVariables;
 
     /**
+     * @param callable(InputInterface):list<string>                        $fetchItems
+     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
+     * @param callable(int):string                                         $getItemName
      * @param positive-int                                                 $batchSize
      * @param positive-int                                                 $segmentSize
-     * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
      * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
      * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
-     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(int):string                                         $getItemName
      * @param array<string, string>                                        $extraEnvironmentVariables
      */
     public function __construct(
@@ -122,8 +122,8 @@ final class ParallelExecutor
         callable $runBeforeBatch,
         callable $runAfterBatch,
         string $progressSymbol,
-        string $scriptPath,
         string $phpExecutable,
+        string $scriptPath,
         string $workingDirectory,
         ?array $extraEnvironmentVariables
     ) {
@@ -145,8 +145,8 @@ final class ParallelExecutor
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
         $this->progressSymbol = $progressSymbol;
-        $this->scriptPath = $scriptPath;
         $this->phpExecutable = $phpExecutable;
+        $this->scriptPath = $scriptPath;
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
     }
