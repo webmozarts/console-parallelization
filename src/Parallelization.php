@@ -15,7 +15,6 @@ namespace Webmozarts\Console\Parallelization;
 
 use function getcwd;
 use function realpath;
-use RuntimeException;
 use function sprintf;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,8 +22,6 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
@@ -32,6 +29,7 @@ use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 
 /**
  * Adds parallelization capabilities to console commands.
@@ -229,9 +227,9 @@ trait Parallelization
             fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
             fn (int $count) => $this->getItemName($count),
             $this->getConsolePath(),
-            self::detectPhpExecutable(),
+            $this->getPhpExecutable(),
             $this->getName(),
-            self::getWorkingDirectory(),
+            $this->getWorkingDirectory(),
             $this->getExtraEnvironmentVariables(),
             $this->getDefinition(),
             $this->createItemErrorHandler(),
@@ -325,23 +323,17 @@ trait Parallelization
     }
 
     /**
-     * Detects the path of the PHP interpreter.
+     * Returns the path of the PHP executable.
      */
-    private static function detectPhpExecutable(): string
+    private function getPhpExecutable(): string
     {
-        $php = (new PhpExecutableFinder())->find();
-
-        if (false === $php) {
-            throw new RuntimeException('Cannot find php executable');
-        }
-
-        return $php;
+        return PhpExecutableFinder::find();
     }
 
     /**
      * Returns the working directory for the child process.
      */
-    private static function getWorkingDirectory(): string
+    private function getWorkingDirectory(): string
     {
         return getcwd();
     }
