@@ -259,7 +259,6 @@ trait Parallelization
     {
         return new StandardLogger(
             $output,
-            self::getProgressSymbol(),
             (new Terminal())->getWidth(),
             new DebugProgressBarFactory(),
             new ConsoleLogger($output),
