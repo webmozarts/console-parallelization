@@ -36,7 +36,6 @@ final class StandardLoggerTest extends TestCase
 
         $this->logger = new StandardLogger(
             $this->output,
-            self::ADVANCEMENT_CHARACTER,
             self::TERMINAL_WIDTH,
             new TestProgressBarFactory(),
             new ConsoleLogger($this->output),
@@ -129,7 +128,32 @@ final class StandardLoggerTest extends TestCase
         $this->logger->advance(4);
         $this->output->fetch();
 
-        $this->logger->logUnexpectedOutput('An error occurred.');
+        $this->logger->logUnexpectedOutput(
+            'An error occurred.',
+            self::ADVANCEMENT_CHARACTER,
+        );
+
+        $expected = <<<'TXT'
+            
+            ================= Process Output =================
+            An error occurred.
+
+
+            TXT;
+
+        self::assertSame($expected, $this->output->fetch());
+    }
+
+    public function test_it_removes_the_progress_character_of_the_unexpected_output_of_a_child_process(): void
+    {
+        $this->logger->startProgress(10);
+        $this->logger->advance(4);
+        $this->output->fetch();
+
+        $this->logger->logUnexpectedOutput(
+            'An error'.self::ADVANCEMENT_CHARACTER.' occurred.',
+            self::ADVANCEMENT_CHARACTER,
+        );
 
         $expected = <<<'TXT'
             

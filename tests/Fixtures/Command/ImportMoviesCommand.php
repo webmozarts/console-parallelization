@@ -115,7 +115,6 @@ final class ImportMoviesCommand extends ContainerAwareCommand
     {
         return new StandardLogger(
             $output,
-            self::getProgressSymbol(),
             (new Terminal())->getWidth(),
             new TestDebugProgressBarFactory(),
             new ConsoleLogger($output),
