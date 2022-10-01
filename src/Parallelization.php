@@ -24,7 +24,6 @@ use RuntimeException;
 use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,6 +36,9 @@ use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use function trim;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
+use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 
 /**
  * Adds parallelization capabilities to console commands.
@@ -278,7 +280,11 @@ trait Parallelization
         $numberOfBatches = $config->getNumberOfBatches();
         $itemName = $this->getItemName($numberOfItems);
 
-        $logger = new DefaultLogger(
+        $logger = new StandardLogger(
+            $output,
+            self::getProgressSymbol(),
+            (new Terminal())->getWidth(),
+            new DebugProgressBarFactory(),
             new ConsoleLogger($output),
         );
 
@@ -342,8 +348,6 @@ trait Parallelization
                 ),
             );
 
-            $terminalWidth = (new Terminal())->getWidth();
-
             // @TODO: can be removed once ProcessLauncher accepts command arrays
             $tempProcess = new Process($commandTemplate);
             $commandString = $tempProcess->getCommandLine();
@@ -355,7 +359,7 @@ trait Parallelization
                 $numberOfProcesses,
                 $segmentSize,
                 // TODO: offer a way to create the process launcher in a different manner
-                new ConsoleLogger($output),
+                $logger,
                 fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
             );
 
@@ -484,11 +488,7 @@ trait Parallelization
     /**
      * Called whenever data is received in the master process from a child process.
      *
-     * @param string          $buffer        The received data
-     * @param ProgressBar     $progressBar   The progress bar
-     * @param OutputInterface $output        The output of the master process
-     * @param int             $terminalWidth The width of the terminal window
-     *                                       in characters
+     * @param string $buffer The received data
      */
     private function processChildOutput(
         string $buffer,

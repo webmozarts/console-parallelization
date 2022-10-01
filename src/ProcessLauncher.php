@@ -14,10 +14,9 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Closure;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
+use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
  * Launches a number of processes and distributes data among these processes.
@@ -39,7 +38,7 @@ class ProcessLauncher
 
     private int $segmentSize;
 
-    private $logger;
+    private Logger $logger;
 
     private Closure $callback;
 
@@ -54,7 +53,7 @@ class ProcessLauncher
         array $environmentVariables,
         int $processLimit,
         int $segmentSize,
-        ?LoggerInterface $logger,
+        Logger $logger,
         Closure $callback
     ) {
         $this->command = $command;
@@ -62,7 +61,7 @@ class ProcessLauncher
         $this->environmentVariables = $environmentVariables;
         $this->processLimit = $processLimit;
         $this->segmentSize = $segmentSize;
-        $this->logger = $logger ?? new NullLogger();
+        $this->logger = $logger;
         $this->callback = $callback;
     }
 
@@ -150,7 +149,7 @@ class ProcessLauncher
         }
         $process->start($this->callback);
 
-        $this->logger->debug('Command started: '.$this->command);
+        $this->logger->logCommandStarted('Command started: '.$this->command);
 
         $this->runningProcesses[] = $process;
     }
@@ -163,7 +162,7 @@ class ProcessLauncher
     {
         foreach ($this->runningProcesses as $key => $process) {
             if (!$process->isRunning()) {
-                $this->logger->debug('Command finished');
+                $this->logger->logCommandFinished('Command finished');
 
                 unset($this->runningProcesses[$key]);
             }
