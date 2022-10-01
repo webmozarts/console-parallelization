@@ -149,7 +149,7 @@ class ProcessLauncher
         }
         $process->start($this->callback);
 
-        $this->logger->logCommandStarted('Command started: '.$this->command);
+        $this->logger->logCommandStarted($this->command);
 
         $this->runningProcesses[] = $process;
     }
@@ -162,7 +162,7 @@ class ProcessLauncher
     {
         foreach ($this->runningProcesses as $key => $process) {
             if (!$process->isRunning()) {
-                $this->logger->logCommandFinished('Command finished');
+                $this->logger->logCommandFinished();
 
                 unset($this->runningProcesses[$key]);
             }

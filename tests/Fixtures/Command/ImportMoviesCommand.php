@@ -17,9 +17,14 @@ use function file_get_contents;
 use function json_decode;
 use const JSON_THROW_ON_ERROR;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ContainerAwareCommand;
+use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
+use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\Parallelization;
 
 final class ImportMoviesCommand extends ContainerAwareCommand
@@ -104,6 +109,17 @@ final class ImportMoviesCommand extends ContainerAwareCommand
     protected function getItemName(int $count): string
     {
         return 1 === $count ? 'movie' : 'movies';
+    }
+
+    protected function createLogger(OutputInterface $output): Logger
+    {
+        return new StandardLogger(
+            $output,
+            self::getProgressSymbol(),
+            (new Terminal())->getWidth(),
+            new TestDebugProgressBarFactory(),
+            new ConsoleLogger($output),
+        );
     }
 
     /**

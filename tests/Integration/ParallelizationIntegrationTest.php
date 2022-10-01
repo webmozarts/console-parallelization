@@ -64,6 +64,10 @@ class ParallelizationIntegrationTest extends TestCase
             Processing 5 items in segments of 2, batches of 2, 1 round, 1 batch in 1 process
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+             1/5 [=====>----------------------]  20% 10 secs/10 secs 10.0 MiB
+             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB
+             3/5 [================>-----------]  60% 10 secs/10 secs 10.0 MiB
+             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
             Processed 5 items.
@@ -136,6 +140,18 @@ class ParallelizationIntegrationTest extends TestCase
             ],
         );
 
+        $expectedWithNoDebugMode = <<<'EOF'
+            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
+
+             0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB
+             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB
+             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+            Processed 5 movies.
+
+            EOF;
+
         $expected = <<<'EOF'
             Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
 
@@ -156,7 +172,19 @@ class ParallelizationIntegrationTest extends TestCase
 
         $actual = $this->getOutput($commandTester);
 
-        self::assertSame($expected, $actual, $actual);
+        $expectedChildProcessesCount = 3;
+        $expectedCommandStartedLine = "[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n";
+        $expectedCommandFinishedLine = "[debug] Command finished\n";
+
+        $outputWithoutExtraDebugInfo = str_replace(
+            [$expectedCommandStartedLine, $expectedCommandFinishedLine],
+            ['', ''],
+            $actual,
+        );
+
+        self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $outputWithoutExtraDebugInfo);
+        self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandStartedLine));
+        self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandFinishedLine));
     }
 
     private function getOutput(CommandTester $commandTester): string

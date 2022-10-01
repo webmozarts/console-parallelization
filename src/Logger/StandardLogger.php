@@ -135,8 +135,8 @@ final class StandardLogger implements Logger
         $this->logger->debug('Command started: '.$commandName);
     }
 
-    public function logCommandFinished(string $commandName): void
+    public function logCommandFinished(): void
     {
-        $this->logger->debug('Command finished: '.$commandName);
+        $this->logger->debug('Command finished');
     }
 }

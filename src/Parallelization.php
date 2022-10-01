@@ -280,13 +280,7 @@ trait Parallelization
         $numberOfBatches = $config->getNumberOfBatches();
         $itemName = $this->getItemName($numberOfItems);
 
-        $logger = new StandardLogger(
-            $output,
-            self::getProgressSymbol(),
-            (new Terminal())->getWidth(),
-            new DebugProgressBarFactory(),
-            new ConsoleLogger($output),
-        );
+        $logger = $this->createLogger($output);
 
         $logger->logConfiguration(
             $segmentSize,
@@ -408,6 +402,17 @@ trait Parallelization
 
             $this->runAfterBatch($input, $output, $items);
         }
+    }
+
+    protected function createLogger(OutputInterface $output): Logger
+    {
+        return new StandardLogger(
+            $output,
+            self::getProgressSymbol(),
+            (new Terminal())->getWidth(),
+            new DebugProgressBarFactory(),
+            new ConsoleLogger($output),
+        );
     }
 
     /**
