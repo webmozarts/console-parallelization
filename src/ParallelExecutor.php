@@ -80,9 +80,9 @@ final class ParallelExecutor
     private string $workingDirectory;
 
     /**
-     * @var array<string, string>
+     * @var array<string, string>|null
      */
-    private array $environmentVariables;
+    private ?array $extraEnvironmentVariables;
 
     private InputDefinition $commandDefinition;
 
@@ -103,7 +103,7 @@ final class ParallelExecutor
      * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(int):string                                         $getItemName
-     * @param array<string, string>                                        $environmentVariables
+     * @param array<string, string>                                        $extraEnvironmentVariables
      */
     public function __construct(
         string $progressSymbol,
@@ -120,7 +120,7 @@ final class ParallelExecutor
         string $phpExecutable,
         string $commandName,
         string $workingDirectory,
-        array $environmentVariables,
+        ?array $extraEnvironmentVariables,
         InputDefinition $commandDefinition,
         ItemProcessingErrorHandler $errorHandler
     ) {
@@ -137,7 +137,7 @@ final class ParallelExecutor
         $this->phpExecutable = $phpExecutable;
         $this->commandName = $commandName;
         $this->workingDirectory = $workingDirectory;
-        $this->environmentVariables = $environmentVariables;
+        $this->extraEnvironmentVariables = $extraEnvironmentVariables;
         $this->commandDefinition = $commandDefinition;
         $this->getItemName = $getItemName;
         $this->errorHandler = $errorHandler;
@@ -270,7 +270,7 @@ final class ParallelExecutor
             $processLauncher = new ProcessLauncher(
                 $commandTemplate,
                 $this->workingDirectory,
-                $this->environmentVariables,
+                $this->extraEnvironmentVariables,
                 $numberOfProcesses,
                 $segmentSize,
                 $logger,

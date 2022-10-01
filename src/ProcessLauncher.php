@@ -36,9 +36,9 @@ class ProcessLauncher
     private string $workingDirectory;
 
     /**
-     * @var array<string, string>
+     * @var array<string, string>|null
      */
-    private array $environmentVariables;
+    private ?array $environmentVariables;
 
     /**
      * @var positive-int
@@ -60,15 +60,15 @@ class ProcessLauncher
     private array $runningProcesses = [];
 
     /**
-     * @param list<string>          $command
-     * @param array<string, string> $environmentVariables
-     * @param positive-int          $numberOfProcesses
-     * @param positive-int          $segmentSize
+     * @param list<string>               $command
+     * @param array<string, string>|null $extraEnvironmentVariables
+     * @param positive-int               $numberOfProcesses
+     * @param positive-int               $segmentSize
      */
     public function __construct(
         array $command,
         string $workingDirectory,
-        array $environmentVariables,
+        ?array $extraEnvironmentVariables,
         int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
@@ -76,7 +76,7 @@ class ProcessLauncher
     ) {
         $this->command = $command;
         $this->workingDirectory = $workingDirectory;
-        $this->environmentVariables = $environmentVariables;
+        $this->environmentVariables = $extraEnvironmentVariables;
         $this->numberOfProcesses = $numberOfProcesses;
         $this->segmentSize = $segmentSize;
         $this->logger = $logger;
