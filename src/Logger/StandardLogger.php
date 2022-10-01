@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Psr\Log\LoggerInterface;
+use Throwable;
 use function sprintf;
 use function str_pad;
 use const STR_PAD_BOTH;
@@ -138,5 +139,10 @@ final class StandardLogger implements Logger
     public function logCommandFinished(): void
     {
         $this->logger->debug('Command finished');
+    }
+
+    public function processingItemFailed(string $item, Throwable $throwable): void
+    {
+        // TODO: Implement processingItemFailed() method.
     }
 }

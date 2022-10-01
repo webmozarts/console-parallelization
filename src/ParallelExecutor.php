@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorhandler;
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -72,14 +74,11 @@ final class ParallelExecutor
      */
     private $runAfterBatch;
 
-    private bool $logError;
-
     /**
      * @var callable(string, InputInterface, OutputInterface):void
      */
     private $runSingleCommand;
 
-    private ?ContainerInterface $container;
     private ?string $consolePath;
     private string $phpExecutable;
     private string $commandName;
@@ -97,6 +96,8 @@ final class ParallelExecutor
      * @var callable(int): string
      */
     private $getItemName;
+
+    private ItemProcessingErrorHandler $errorHandler;
 
     /**
      * @param positive-int                                                 $batchSize
@@ -120,8 +121,6 @@ final class ParallelExecutor
         callable $runBeforeBatch,
         callable $runAfterBatch,
         callable $runSingleCommand,
-        bool $logError,
-        ?ContainerInterface $container,
         callable $getItemName,
         ?string $consolePath,
         string $phpExecutable,
@@ -129,7 +128,8 @@ final class ParallelExecutor
         string $workingDirectory,
         array $environmentVariables,
         InputDefinition $commandDefinition,
-        LoggerFactory $loggerFactory
+        LoggerFactory $loggerFactory,
+        ItemProcessingErrorHandler $errorHandler
     ) {
         $this->progressSymbol = $progressSymbol;
         $this->batchSize = $batchSize;
@@ -138,9 +138,7 @@ final class ParallelExecutor
         $this->runAfterLastCommand = $runAfterLastCommand;
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
-        $this->logError = $logError;
         $this->runSingleCommand = $runSingleCommand;
-        $this->container = $container;
         $this->segmentSize = $segmentSize;
         $this->consolePath = $consolePath;
         $this->phpExecutable = $phpExecutable;
@@ -150,6 +148,7 @@ final class ParallelExecutor
         $this->commandDefinition = $commandDefinition;
         $this->loggerFactory = $loggerFactory;
         $this->getItemName = $getItemName;
+        $this->errorHandler = $errorHandler;
     }
 
     public function execute(
@@ -327,25 +326,8 @@ final class ParallelExecutor
     ): void {
         try {
             ($this->runSingleCommand)(trim($item), $input, $output);
-        } catch (Throwable $exception) {
-            if ($this->logError) {
-                $output->writeln(sprintf(
-                    "Failed to process \"%s\": %s\n%s",
-                    trim($item),
-                    $exception->getMessage(),
-                    $exception->getTraceAsString(),
-                ));
-            }
-
-            $container = $this->container;
-
-            if (
-                (class_exists(ResetInterface::class) && $container instanceof ResetInterface)
-                // TODO: to remove once we drop Symfony 4.4 support.
-                || (class_exists(ResettableContainerInterface::class) && $container instanceof ResettableContainerInterface)
-            ) {
-                $container->reset();
-            }
+        } catch (Throwable $throwable) {
+            $this->errorHandler->handleError($item, $throwable);
         }
     }
 

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Logger;
 
+use Throwable;
+
 interface Logger
 {
     public function logConfiguration(
@@ -36,4 +38,6 @@ interface Logger
     public function logCommandStarted(string $commandName): void;
 
     public function logCommandFinished(): void;
+
+    public function processingItemFailed(string $item, Throwable $throwable): void;
 }
