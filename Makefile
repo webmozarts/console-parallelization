@@ -90,10 +90,20 @@ validate-package: ## Validates the Composer package
 validate-package: vendor
 	composer validate --strict
 
+.PHONY: clear
+clear: 	  	  ## Clears various artifacts
+clear: clear-cache clear-coverage
+
 .PHONY: clear-cache
 clear-cache: 	  ## Clears the integration test app cache
 clear-cache:
 	rm -rf tests/Integration/**/cache || true
+
+.PHONY: clear-coverage
+clear-coverage:	  ## Clears the coverage reports
+clear-coverage:
+	rm -rf dist/phpunit* || true
+	rm -rf dist/coverage* || true
 
 
 #

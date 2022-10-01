@@ -1,3 +1,4 @@
+!/dist/.gitkeep
 !/tests/Integration/var/.gitkeep
 /.idea
 /.php-cs-fixer.cache
@@ -5,7 +6,6 @@
 /.phpunit.result.cache
 /composer.lock
 /dist/
-!/dist/.gitkeep
 /tests/Integration/output
 /tests/Integration/var/
 /vendor-bin/*/vendor/
