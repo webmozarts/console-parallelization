@@ -342,17 +342,12 @@ trait Parallelization
                 ),
             );
 
-            // @TODO: can be removed once ProcessLauncher accepts command arrays
-            $tempProcess = new Process($commandTemplate);
-            $commandString = $tempProcess->getCommandLine();
-
             $processLauncher = new ProcessLauncher(
-                $commandString,
+                $commandTemplate,
                 self::getWorkingDirectory($this->getContainer()),
                 $this->getEnvironmentVariables($this->getContainer()),
                 $numberOfProcesses,
                 $segmentSize,
-                // TODO: offer a way to create the process launcher in a different manner
                 $logger,
                 fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
             );
