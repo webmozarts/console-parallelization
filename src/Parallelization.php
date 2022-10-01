@@ -13,31 +13,22 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function array_slice;
 use function getcwd;
-use function implode;
 use function realpath;
 use RuntimeException;
 use function sprintf;
-use const STDIN;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
-use Symfony\Contracts\Service\ResetInterface;
-use Throwable;
-use function trim;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\LoggerFactory;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 
 /**
@@ -228,175 +219,56 @@ trait Parallelization
     {
         $parallelizationInput = ParallelizationInput::fromInput($input);
 
-        if ($parallelizationInput->isChildProcess()) {
-            $this->executeChildProcess($input, $output);
-
-            return 0;
-        }
-
-        $this->executeMasterProcess($parallelizationInput, $input, $output);
-
-        return 0;
-    }
-
-    /**
-     * Executes the master process.
-     *
-     * The master process spawns as many child processes as set in the
-     * "--processes" option. Each of the child processes receives a segment of
-     * items of the processed data set and terminates. As long as there is data
-     * left to process, new child processes are spawned automatically.
-     */
-    protected function executeMasterProcess(
-        ParallelizationInput $parallelizationInput,
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-        $this->runBeforeFirstCommand($input, $output);
-
-        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
-        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-
-        $batchSize = $this->getValidatedBatchSize();
-        $segmentSize = $this->getValidatedSegmentSize();
-
-        $itemIterator = ChunkedItemsIterator::fromItemOrCallable(
-            $parallelizationInput->getItem(),
-            fn () => $this->fetchItems($input),
-            $batchSize,
-        );
-
-        $numberOfItems = $itemIterator->getNumberOfItems();
-
-        $config = new Configuration(
-            $isNumberOfProcessesDefined,
-            $numberOfProcesses,
-            $numberOfItems,
-            $segmentSize,
-            $batchSize,
-        );
-
-        $numberOfSegments = $config->getNumberOfSegments();
-        $numberOfBatches = $config->getNumberOfBatches();
-        $itemName = $this->getItemName($numberOfItems);
-
+        $container = $this->getContainer();
         $logger = $this->createLogger($output);
 
-        $logger->logConfiguration(
-            $segmentSize,
-            $batchSize,
-            $numberOfItems,
-            $numberOfSegments,
-            $numberOfBatches,
-            $numberOfProcesses,
-            $itemName,
-        );
+        return (new ParallelExecutor(
+            self::getProgressSymbol(),
+            $this->getValidatedBatchSize(),
+            $this->getValidatedSegmentSize(),
+            fn (InputInterface $input) => $this->fetchItems($input),
+            fn (InputInterface $input, OutputInterface $output) => $this->runBeforeFirstCommand($input, $output),
+            fn (InputInterface $input, OutputInterface $output) => $this->runAfterLastCommand($input, $output),
+            fn (InputInterface $input, OutputInterface $output, array $items) => $this->runBeforeBatch($input, $output, $items),
+            fn (InputInterface $input, OutputInterface $output, array $items) => $this->runAfterBatch($input, $output, $items),
+            fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
+            $this->logError,
+            $container,
+            fn (int $count) => $this->getItemName($count),
+            $this->getConsolePath(),
+            self::detectPhpExecutable(),
+            $this->getName(),
+            self::getWorkingDirectory($container),
+            $this->getEnvironmentVariables($container),
+            $this->getDefinition(),
+            new class($logger) implements LoggerFactory {
+                private Logger $logger;
 
-        $logger->startProgress($numberOfItems);
-
-        if ($numberOfItems <= $segmentSize
-            || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
-        ) {
-            // Run in the master process
-
-            foreach ($itemIterator->getItemChunks() as $items) {
-                $this->runBeforeBatch($input, $output, $items);
-
-                foreach ($items as $item) {
-                    $this->runTolerantSingleCommand($item, $input, $output);
-
-                    $logger->advance();
+                public function __construct(Logger $logger)
+                {
+                    $this->logger = $logger;
                 }
 
-                $this->runAfterBatch($input, $output, $items);
-            }
-        } else {
-            // Distribute if we have multiple segments
-            $consolePath = $this->getConsolePath();
-            Assert::fileExists(
-                $consolePath,
-                sprintf('The bin/console file could not be found at %s.', getcwd()),
-            );
-
-            $commandTemplate = array_merge(
-                array_filter([
-                    self::detectPhpExecutable(),
-                    $consolePath,
-                    $this->getName(),
-                    implode(
-                        ' ',
-                        array_slice(
-                            array_map('strval', $input->getArguments()),
-                            1,
-                        ),
-                    ),
-                    '--child',
-                ]),
-                // Forward all the options except for "processes" to the children
-                // this way the children can inherit the options such as env
-                // or no-debug.
-                InputOptionsSerializer::serialize(
-                    $this->getDefinition(),
-                    $input,
-                    ['child', 'processes'],
-                ),
-            );
-
-            $processLauncher = new ProcessLauncher(
-                $commandTemplate,
-                self::getWorkingDirectory($this->getContainer()),
-                $this->getEnvironmentVariables($this->getContainer()),
-                $numberOfProcesses,
-                $segmentSize,
-                $logger,
-                fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
-            );
-
-            $processLauncher->run($itemIterator->getItems());
-        }
-
-        $logger->finish($itemName);
-
-        $this->runAfterLastCommand($input, $output);
+                public function create(OutputInterface $output): Logger
+                {
+                    return $this->logger;
+                }
+            },
+        ))->execute(
+            $parallelizationInput,
+            $input,
+            $output,
+        );
     }
 
     /**
      * Get the path of the executable Symfony bin console.
      */
-    protected function getConsolePath(): string
+    protected function getConsolePath(): ?string
     {
-        return realpath(getcwd().'/bin/console');
-    }
+        $consolePath = realpath(getcwd().'/bin/console');
 
-    /**
-     * Executes the child process.
-     *
-     * This method reads the items from the standard input that the master process
-     * piped into the process. These items are passed to runSingleCommand() one
-     * by one.
-     */
-    protected function executeChildProcess(
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-        $advancementChar = self::getProgressSymbol();
-
-        $itemIterator = ChunkedItemsIterator::fromStream(
-            STDIN,
-            $this->getValidatedBatchSize(),
-        );
-
-        foreach ($itemIterator->getItemChunks() as $items) {
-            $this->runBeforeBatch($input, $output, $items);
-
-            foreach ($items as $item) {
-                $this->runTolerantSingleCommand($item, $input, $output);
-
-                $output->write($advancementChar);
-            }
-
-            $this->runAfterBatch($input, $output, $items);
-        }
+        return false === $consolePath ? null : $consolePath;
     }
 
     protected function createLogger(OutputInterface $output): Logger
@@ -483,54 +355,5 @@ trait Parallelization
     private static function getWorkingDirectory(ContainerInterface $container): string
     {
         return dirname($container->getParameter('kernel.project_dir'));
-    }
-
-    /**
-     * Called whenever data is received in the master process from a child process.
-     *
-     * @param string $buffer The received data
-     */
-    private function processChildOutput(
-        string $buffer,
-        Logger $logger
-    ): void {
-        $advancementChar = self::getProgressSymbol();
-        $chars = mb_substr_count($buffer, $advancementChar);
-
-        // Display unexpected output
-        if ($chars !== mb_strlen($buffer)) {
-            $logger->logUnexpectedOutput($buffer);
-        }
-
-        $logger->advance($chars);
-    }
-
-    private function runTolerantSingleCommand(
-        string $item,
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-        try {
-            $this->runSingleCommand(trim($item), $input, $output);
-        } catch (Throwable $exception) {
-            if ($this->logError) {
-                $output->writeln(sprintf(
-                    "Failed to process \"%s\": %s\n%s",
-                    trim($item),
-                    $exception->getMessage(),
-                    $exception->getTraceAsString(),
-                ));
-            }
-
-            $container = $this->getContainer();
-
-            if (
-                (class_exists(ResetInterface::class) && $container instanceof ResetInterface)
-                // TODO: to remove once we drop Symfony 4.4 support.
-                || (class_exists(ResettableContainerInterface::class) && $container instanceof ResettableContainerInterface)
-            ) {
-                $container->reset();
-            }
-        }
     }
 }
