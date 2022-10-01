@@ -122,6 +122,11 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         );
     }
 
+    protected function getScriptPath(): string
+    {
+        return __DIR__.'/../../../bin/console';
+    }
+
     /**
      * @param list<string> $movieFileNames
      *
