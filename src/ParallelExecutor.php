@@ -29,8 +29,6 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class ParallelExecutor
 {
-    private string $progressSymbol;
-
     /**
      * @var positive-int
      */
@@ -45,6 +43,22 @@ final class ParallelExecutor
      * @var callable(InputInterface):list<string>
      */
     private $fetchItems;
+
+    /**
+     * @var callable(string, InputInterface, OutputInterface):void
+     */
+    private $runSingleCommand;
+
+    /**
+     * @var callable(int): string
+     */
+    private $getItemName;
+
+    private string $commandName;
+
+    private InputDefinition $commandDefinition;
+
+    private ItemProcessingErrorHandler $errorHandler;
 
     /**
      * @var callable(InputInterface, OutputInterface):void
@@ -66,29 +80,13 @@ final class ParallelExecutor
      */
     private $runAfterBatch;
 
-    /**
-     * @var callable(string, InputInterface, OutputInterface):void
-     */
-    private $runSingleCommand;
+    private string $progressSymbol;
+
+    private string $phpExecutable;
 
     private string $scriptPath;
-    private string $phpExecutable;
-    private string $commandName;
+
     private string $workingDirectory;
-
-    /**
-     * @var array<string, string>|null
-     */
-    private ?array $extraEnvironmentVariables;
-
-    private InputDefinition $commandDefinition;
-
-    /**
-     * @var callable(int): string
-     */
-    private $getItemName;
-
-    private ItemProcessingErrorHandler $errorHandler;
 
     /**
      * @param positive-int                                                 $batchSize
@@ -103,23 +101,23 @@ final class ParallelExecutor
      * @param array<string, string>                                        $extraEnvironmentVariables
      */
     public function __construct(
-        string $progressSymbol,
         int $batchSize,
         int $segmentSize,
         callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler,
         callable $runBeforeFirstCommand,
         callable $runAfterLastCommand,
         callable $runBeforeBatch,
         callable $runAfterBatch,
-        callable $runSingleCommand,
-        callable $getItemName,
+        string $progressSymbol,
         string $scriptPath,
         string $phpExecutable,
-        string $commandName,
         string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler
+        ?array $extraEnvironmentVariables
     ) {
         $this->progressSymbol = $progressSymbol;
         $this->batchSize = $batchSize;

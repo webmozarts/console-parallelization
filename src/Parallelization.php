@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Symfony\Component\Console\Input\InputDefinition;
+use function func_num_args;
 use const DIRECTORY_SEPARATOR;
 use function getcwd;
 use function sprintf;
@@ -129,61 +131,6 @@ trait Parallelization
     abstract protected function getItemName(int $count): string;
 
     /**
-     * Returns the extra environment variables that are passed to the child
-     * processes.
-     *
-     * @return array<string, string> a hashmap of environment variable names and values
-     */
-    protected function getExtraEnvironmentVariables(): ?array
-    {
-        return null;
-    }
-
-    /**
-     * Method executed at the very beginning of the master process.
-     */
-    protected function runBeforeFirstCommand(
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-    }
-
-    /**
-     * Method executed at the very end of the master process.
-     */
-    protected function runAfterLastCommand(
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-    }
-
-    /**
-     * Method executed before executing all the items of the current batch.
-     * This method is executed in both the master and child process.
-     *
-     * @param string[] $items
-     */
-    protected function runBeforeBatch(
-        InputInterface $input,
-        OutputInterface $output,
-        array $items
-    ): void {
-    }
-
-    /**
-     * Method executed after executing all the items of the current batch.
-     * This method is executed in both the master and child process.
-     *
-     * @param string[] $items
-     */
-    protected function runAfterBatch(
-        InputInterface $input,
-        OutputInterface $output,
-        array $items
-    ): void {
-    }
-
-    /**
      * Returns the number of items to process per child process. This is
      * done in order to circumvent some issues recurring to long living
      * processes such as memory leaks.
@@ -213,46 +160,24 @@ trait Parallelization
     {
         $parallelizationInput = ParallelizationInput::fromInput($input);
 
-        $logger = $this->createLogger($output);
-
-        return (new ParallelExecutor(
-            self::getProgressSymbol(),
-            $this->getValidatedBatchSize(),
-            $this->getValidatedSegmentSize(),
-            fn (InputInterface $input) => $this->fetchItems($input),
-            fn (InputInterface $input, OutputInterface $output) => $this->runBeforeFirstCommand($input, $output),
-            fn (InputInterface $input, OutputInterface $output) => $this->runAfterLastCommand($input, $output),
-            fn (InputInterface $input, OutputInterface $output, array $items) => $this->runBeforeBatch($input, $output, $items),
-            fn (InputInterface $input, OutputInterface $output, array $items) => $this->runAfterBatch($input, $output, $items),
-            fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
-            fn (int $count) => $this->getItemName($count),
-            $this->getValidatedScriptPath(),
-            $this->getPhpExecutable(),
-            $this->getName(),
-            $this->getWorkingDirectory(),
-            $this->getExtraEnvironmentVariables(),
-            $this->getDefinition(),
-            $this->createItemErrorHandler(),
-        ))->execute(
-            $parallelizationInput,
-            $input,
-            $output,
-            $logger,
-        );
-    }
-
-    /**
-     * Get the path of the executable for the application. For example the
-     * path to the Symfony bin/console script.
-     */
-    protected function getScriptPath(): string
-    {
-        $pwd = $_SERVER['PWD'];
-        $scriptName = $_SERVER['SCRIPT_NAME'];
-
-        return 0 === mb_strpos($scriptName, $pwd)
-            ? $scriptName
-            : $pwd.DIRECTORY_SEPARATOR.$scriptName;
+        return $this
+            ->getParallelExecutableFactory(
+                $this->getValidatedBatchSize(),
+                $this->getValidatedSegmentSize(),
+                fn (InputInterface $input) => $this->fetchItems($input),
+                fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
+                fn (int $count) => $this->getItemName($count),
+                $this->getName(),
+                $this->getDefinition(),
+                $this->createItemErrorHandler(),
+            )
+            ->build()
+            ->execute(
+                $parallelizationInput,
+                $input,
+                $output,
+                $this->createLogger($output),
+            );
     }
 
     protected function createLogger(OutputInterface $output): Logger
@@ -268,29 +193,11 @@ trait Parallelization
 
     protected function createItemErrorHandler(): ItemProcessingErrorHandler
     {
-        $errorHandler = new ResetContainerErrorHandler(
-            $this->getContainer(),
-        );
+        $errorHandler = new ResetContainerErrorHandler($this->getContainer());
 
         return $this->logError
             ? new ItemProcessingErrorHandlerLogger($errorHandler)
             : $errorHandler;
-    }
-
-    private function getValidatedScriptPath(): string
-    {
-        $scriptPath = $this->getScriptPath();
-
-        Assert::fileExists(
-            $scriptPath,
-            sprintf(
-                'The script file could not be found at the path "%s" (working directory: %s)',
-                $scriptPath,
-                getcwd(),
-            ),
-        );
-
-        return $scriptPath;
     }
 
     /**
@@ -334,27 +241,37 @@ trait Parallelization
     }
 
     /**
-     * Returns the symbol for communicating progress from the child to the
-     * master process when displaying the progress bar.
+     * @param positive-int                                                 $batchSize
+     * @param positive-int                                                 $segmentSize
+     * @param callable(InputInterface):list<string>                        $fetchItems
+     * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
+     * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
+     * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
+     * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
+     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
+     * @param callable(int):string                                         $getItemName
+     * @param array<string, string>                                        $extraEnvironmentVariables
      */
-    private static function getProgressSymbol(): string
+    protected function getParallelExecutableFactory(
+        int $batchSize,
+        int $segmentSize,
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory
     {
-        return chr(254);
-    }
-
-    /**
-     * Returns the path of the PHP executable.
-     */
-    private function getPhpExecutable(): string
-    {
-        return PhpExecutableFinder::find();
-    }
-
-    /**
-     * Returns the working directory for the child process.
-     */
-    private function getWorkingDirectory(): string
-    {
-        return getcwd();
+        return ParallelExecutorFactory::create(
+            $batchSize,
+            $segmentSize,
+            $fetchItems,
+            $runSingleCommand,
+            $getItemName,
+            $commandName,
+            $commandDefinition,
+            $errorHandler,
+        );
     }
 }
