@@ -232,7 +232,7 @@ trait Parallelization
             $this->getConsolePath(),
             self::detectPhpExecutable(),
             $this->getName(),
-            self::getWorkingDirectory($container),
+            self::getWorkingDirectory(),
             $this->getExtraEnvironmentVariables(),
             $this->getDefinition(),
             $this->createItemErrorHandler(),
@@ -341,13 +341,9 @@ trait Parallelization
 
     /**
      * Returns the working directory for the child process.
-     *
-     * @param ContainerInterface $container The service container
-     *
-     * @return string The absolute path to the working directory
      */
-    private static function getWorkingDirectory(ContainerInterface $container): string
+    private static function getWorkingDirectory(): string
     {
-        return dirname($container->getParameter('kernel.project_dir'));
+        return getcwd();
     }
 }
