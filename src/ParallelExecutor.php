@@ -21,6 +21,7 @@ use function implode;
 use function mb_strlen;
 use function sprintf;
 use const STDIN;
+use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -158,35 +159,31 @@ final class ParallelExecutor
         Logger $logger
     ): int {
         if ($parallelizationInput->isChildProcess()) {
-            $this->executeChildProcess($input, $output, $logger);
-
-            return 0;
+            return $this->executeChildProcess($input, $output, $logger);
         }
 
-        $this->executeMasterProcess(
+        return $this->executeMainProcess(
             $parallelizationInput,
             $input,
             $output,
             $logger,
         );
-
-        return 0;
     }
 
     /**
-     * Executes the master process.
+     * Executes the main process.
      *
-     * The master process spawns as many child processes as set in the
+     * The main process spawns as many child processes as set in the
      * "--processes" option. Each of the child processes receives a segment of
      * items of the processed data set and terminates. As long as there is data
      * left to process, new child processes are spawned automatically.
      */
-    private function executeMasterProcess(
+    private function executeMainProcess(
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
         OutputInterface $output,
         Logger $logger
-    ): void {
+    ): int {
         ($this->runBeforeFirstCommand)($input, $output);
 
         $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
@@ -227,64 +224,36 @@ final class ParallelExecutor
 
         $logger->startProgress($numberOfItems);
 
-        if ($numberOfItems <= $segmentSize
-            || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
-        ) {
-            // Run in the master process
-
-            foreach ($itemIterator->getItemChunks() as $items) {
-                ($this->runBeforeBatch)($input, $output, $items);
-
-                foreach ($items as $item) {
-                    $this->runTolerantSingleCommand($item, $input, $output, $logger);
-
-                    $logger->advance();
-                }
-
-                ($this->runAfterBatch)($input, $output, $items);
-            }
-        } else {
-            // Distribute if we have multiple segments
-            $commandTemplate = array_merge(
-                array_filter([
-                    $this->phpExecutable,
-                    $this->scriptPath,
-                    $this->commandName,
-                    implode(
-                        ' ',
-                        array_slice(
-                            array_map('strval', $input->getArguments()),
-                            1,
-                        ),
-                    ),
-                    '--child',
-                ]),
-                // Forward all the options except for "processes" to the children
-                // this way the children can inherit the options such as env
-                // or no-debug.
-                InputOptionsSerializer::serialize(
-                    $this->commandDefinition,
+        if (self::shouldSpawnChildProcesses(
+            $numberOfItems,
+            $segmentSize,
+            $numberOfProcesses,
+            $parallelizationInput->isNumberOfProcessesDefined(),
+        )) {
+            $this
+                ->createProcessLauncher(
+                    $segmentSize,
+                    $numberOfProcesses,
                     $input,
-                    ['child', 'processes'],
-                ),
-            );
-
-            $processLauncher = new ProcessLauncher(
-                $commandTemplate,
-                $this->workingDirectory,
-                $this->extraEnvironmentVariables,
-                $numberOfProcesses,
-                $segmentSize,
+                    $logger,
+                )
+                ->run($itemIterator->getItems());
+        } else {
+            $this->processItems(
+                $itemIterator,
+                $input,
+                $output,
                 $logger,
-                fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
+                static fn () => $logger->advance(),
             );
-
-            $processLauncher->run($itemIterator->getItems());
         }
 
         $logger->finish($itemName);
 
         ($this->runAfterLastCommand)($input, $output);
+
+        // TODO: use the exit code constants once we drop support for Symfony 4.4
+        return 0;
     }
 
     /**
@@ -298,21 +267,43 @@ final class ParallelExecutor
         InputInterface $input,
         OutputInterface $output,
         Logger $logger
-    ): void {
-        $advancementChar = $this->progressSymbol;
-
+    ): int {
         $itemIterator = ChunkedItemsIterator::fromStream(
             STDIN,
             $this->batchSize,
         );
 
+        $progressSymbol = $this->progressSymbol;
+
+        $this->processItems(
+            $itemIterator,
+            $input,
+            $output,
+            $logger,
+            static fn () => $output->write($progressSymbol),
+        );
+
+        // TODO: use the exit code constants once we drop support for Symfony 4.4
+        return 0;
+    }
+
+    /**
+     * @param callable():void $advance
+     */
+    private function processItems(
+        ChunkedItemsIterator $itemIterator,
+        InputInterface $input,
+        OutputInterface $output,
+        Logger $logger,
+        callable $advance
+    ): void {
         foreach ($itemIterator->getItemChunks() as $items) {
             ($this->runBeforeBatch)($input, $output, $items);
 
             foreach ($items as $item) {
                 $this->runTolerantSingleCommand($item, $input, $output, $logger);
 
-                $output->write($advancementChar);
+                $advance();
             }
 
             ($this->runAfterBatch)($input, $output, $items);
@@ -330,6 +321,70 @@ final class ParallelExecutor
         } catch (Throwable $throwable) {
             $this->errorHandler->handleError($item, $throwable, $logger);
         }
+    }
+
+    /**
+     * @param 0|positive-int $numberOfItems
+     * @param positive-int   $segmentSize
+     * @param positive-int   $numberOfProcesses
+     */
+    private static function shouldSpawnChildProcesses(
+        int $numberOfItems,
+        int $segmentSize,
+        int $numberOfProcesses,
+        bool $umberOfProcessesDefined
+    ): bool {
+        return $numberOfItems > $segmentSize
+            && ($numberOfProcesses > 1 || $umberOfProcessesDefined);
+    }
+
+    private function createProcessLauncher(
+        int $segmentSize,
+        int $numberOfProcesses,
+        InputInterface $input,
+        Logger $logger
+    ): ProcessLauncher {
+        $childCommand = array_merge(
+            $this->createChildCommand($input),
+            // Forward all the options except for "processes" to the children
+            // this way the children can inherit the options such as env
+            // or no-debug.
+            InputOptionsSerializer::serialize(
+                $this->commandDefinition,
+                $input,
+                ['child', 'processes'],
+            ),
+        );
+
+        return new ProcessLauncher(
+            $childCommand,
+            $this->workingDirectory,
+            $this->extraEnvironmentVariables,
+            $numberOfProcesses,
+            $segmentSize,
+            $logger,
+            fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
+        );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function createChildCommand(InputInterface $input): array
+    {
+        return array_filter([
+            $this->phpExecutable,
+            $this->scriptPath,
+            $this->commandName,
+            implode(
+                ' ',
+                array_slice(
+                    array_map('strval', $input->getArguments()),
+                    1,
+                ),
+            ),
+            '--child',
+        ]);
     }
 
     /**
