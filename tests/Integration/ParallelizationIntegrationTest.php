@@ -152,24 +152,6 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $expected = <<<'EOF'
-            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
-
-             0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child' '--env=dev'
-            [debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child' '--env=dev'
-            
-             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB[debug] Command finished
-            [debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child' '--env=dev'
-            
-             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB[debug] Command finished
-            
-             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB[debug] Command finished
-
-
-            Processed 5 movies.
-
-            EOF;
-
         $actual = $this->getOutput($commandTester);
 
         $expectedChildProcessesCount = 3;
@@ -217,9 +199,20 @@ class ParallelizationIntegrationTest extends TestCase
             getcwd() => '/path/to/work-dir',
         ];
 
+        $output = self::normalizeConsolePath($output);
+
         return str_replace(
             array_keys($replaceMap),
             $replaceMap,
+            $output,
+        );
+    }
+
+    private static function normalizeConsolePath(string $output): string
+    {
+        return preg_replace(
+            '~'.getcwd().'.+?console~',
+            '/path/to/work-dir/bin/console',
             $output,
         );
     }

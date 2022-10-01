@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use DomainException;
+use function realpath;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -82,5 +83,10 @@ final class NoSubProcessCommand extends ContainerAwareCommand
             new TestDebugProgressBarFactory(),
             new ConsoleLogger($output),
         );
+    }
+
+    protected function getScriptPath(): string
+    {
+        return realpath(__DIR__.'/../../../bin/console');
     }
 }

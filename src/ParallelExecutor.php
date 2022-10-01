@@ -17,16 +17,13 @@ use function array_filter;
 use function array_map;
 use function array_merge;
 use function array_slice;
-use function getcwd;
 use function implode;
-use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use function trim;
-use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
@@ -74,7 +71,7 @@ final class ParallelExecutor
      */
     private $runSingleCommand;
 
-    private ?string $consolePath;
+    private string $scriptPath;
     private string $phpExecutable;
     private string $commandName;
     private string $workingDirectory;
@@ -116,7 +113,7 @@ final class ParallelExecutor
         callable $runAfterBatch,
         callable $runSingleCommand,
         callable $getItemName,
-        ?string $consolePath,
+        string $scriptPath,
         string $phpExecutable,
         string $commandName,
         string $workingDirectory,
@@ -133,7 +130,7 @@ final class ParallelExecutor
         $this->runAfterBatch = $runAfterBatch;
         $this->runSingleCommand = $runSingleCommand;
         $this->segmentSize = $segmentSize;
-        $this->consolePath = $consolePath;
+        $this->scriptPath = $scriptPath;
         $this->phpExecutable = $phpExecutable;
         $this->commandName = $commandName;
         $this->workingDirectory = $workingDirectory;
@@ -237,16 +234,10 @@ final class ParallelExecutor
             }
         } else {
             // Distribute if we have multiple segments
-            $consolePath = $this->consolePath;
-            Assert::fileExists(
-                $consolePath,
-                sprintf('The bin/console file could not be found at %s.', getcwd()),
-            );
-
             $commandTemplate = array_merge(
                 array_filter([
                     $this->phpExecutable,
-                    $consolePath,
+                    $this->scriptPath,
                     $this->commandName,
                     implode(
                         ' ',

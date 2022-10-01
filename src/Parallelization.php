@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use const DIRECTORY_SEPARATOR;
 use function getcwd;
-use function realpath;
 use function sprintf;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -226,7 +226,7 @@ trait Parallelization
             fn (InputInterface $input, OutputInterface $output, array $items) => $this->runAfterBatch($input, $output, $items),
             fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
             fn (int $count) => $this->getItemName($count),
-            $this->getConsolePath(),
+            $this->getValidatedScriptPath(),
             $this->getPhpExecutable(),
             $this->getName(),
             $this->getWorkingDirectory(),
@@ -242,13 +242,17 @@ trait Parallelization
     }
 
     /**
-     * Get the path of the executable Symfony bin console.
+     * Get the path of the executable for the application. For example the
+     * path to the Symfony bin/console script.
      */
-    protected function getConsolePath(): ?string
+    protected function getScriptPath(): string
     {
-        $consolePath = realpath(getcwd().'/bin/console');
+        $pwd = $_SERVER['PWD'];
+        $scriptName = $_SERVER['SCRIPT_NAME'];
 
-        return false === $consolePath ? null : $consolePath;
+        return 0 === mb_strpos($scriptName, $pwd)
+            ? $scriptName
+            : $pwd.DIRECTORY_SEPARATOR.$scriptName;
     }
 
     protected function createLogger(OutputInterface $output): Logger
@@ -271,6 +275,22 @@ trait Parallelization
         return $this->logError
             ? new ItemProcessingErrorHandlerLogger($errorHandler)
             : $errorHandler;
+    }
+
+    private function getValidatedScriptPath(): string
+    {
+        $scriptPath = $this->getScriptPath();
+
+        Assert::fileExists(
+            $scriptPath,
+            sprintf(
+                'The script file could not be found at the path "%s" (working directory: %s)',
+                $scriptPath,
+                getcwd(),
+            ),
+        );
+
+        return $scriptPath;
     }
 
     /**
