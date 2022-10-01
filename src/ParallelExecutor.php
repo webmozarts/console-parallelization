@@ -328,12 +328,12 @@ final class ParallelExecutor
         string $buffer,
         Logger $logger
     ): void {
-        $advancementChar = $this->progressSymbol;
-        $chars = mb_substr_count($buffer, $advancementChar);
+        $progressSymbol = $this->progressSymbol;
+        $chars = mb_substr_count($buffer, $progressSymbol);
 
         // Display unexpected output
         if ($chars !== mb_strlen($buffer)) {
-            $logger->logUnexpectedOutput($buffer);
+            $logger->logUnexpectedOutput($buffer, $progressSymbol);
         }
 
         $logger->advance($chars);

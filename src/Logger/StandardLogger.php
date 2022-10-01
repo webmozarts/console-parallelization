@@ -26,7 +26,6 @@ use Webmozart\Assert\Assert;
 final class StandardLogger implements Logger
 {
     private OutputInterface $output;
-    private string $advancementChar;
     private int $terminalWidth;
     private ProgressBar $progressBar;
     private ProgressBarFactory $progressBarFactory;
@@ -34,13 +33,11 @@ final class StandardLogger implements Logger
 
     public function __construct(
         OutputInterface $output,
-        string $advancementCharacter,
         int $terminalWidth,
         ProgressBarFactory $progressBarFactory,
         LoggerInterface $logger
     ) {
         $this->output = $output;
-        $this->advancementChar = $advancementCharacter;
         $this->terminalWidth = $terminalWidth;
         $this->progressBarFactory = $progressBarFactory;
         $this->logger = $logger;
@@ -115,7 +112,7 @@ final class StandardLogger implements Logger
         unset($this->progressBar);
     }
 
-    public function logUnexpectedOutput(string $buffer): void
+    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
     {
         $this->output->writeln('');
         $this->output->writeln(sprintf(
@@ -127,7 +124,7 @@ final class StandardLogger implements Logger
                 STR_PAD_BOTH,
             ),
         ));
-        $this->output->writeln(str_replace($this->advancementChar, '', $buffer));
+        $this->output->writeln(str_replace($progressSymbol, '', $buffer));
         $this->output->writeln('');
     }
 

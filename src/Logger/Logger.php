@@ -33,7 +33,7 @@ interface Logger
 
     public function finish(string $itemName): void;
 
-    public function logUnexpectedOutput(string $buffer): void;
+    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void;
 
     public function logCommandStarted(string $commandName): void;
 
