@@ -102,13 +102,24 @@ final class InputOptionsSerializerTest extends TestCase
             ]),
             new ArrayInput([]),
             [],
-            ['--opt1=opt1DefaultValue'],
+            [],
         ];
 
         yield 'input & options' => [
             $completeInputDefinition,
             new ArrayInput([
                 'arg2' => 'arg2Value',
+                '--opt2' => 'opt2Value',
+            ]),
+            [],
+            ['--opt2=opt2Value'],
+        ];
+
+        yield 'input & options with default value' => [
+            $completeInputDefinition,
+            new ArrayInput([
+                'arg2' => 'arg2Value',
+                '--opt1' => 'opt1DefaultValue',
                 '--opt2' => 'opt2Value',
             ]),
             [],
@@ -125,7 +136,7 @@ final class InputOptionsSerializerTest extends TestCase
                 '--opt2' => 'opt2Value',
             ]),
             ['opt2'],
-            ['--opt1=opt1DefaultValue'],
+            [],
         ];
 
         yield 'input & options with excluded option default option' => [
@@ -145,17 +156,12 @@ final class InputOptionsSerializerTest extends TestCase
                 'item' => null,
                 '--processes' => '1',
                 '--env' => 'dev',
+                '--ansi' => null,
             ]),
             ['child', 'processes'],
             [
-                '--help',
-                '--quiet',
-                '--verbose',
-                '--version',
-                '--no-ansi',
-                '--no-interaction',
                 '--env=dev',
-                '--no-debug',
+                '--ansi',
             ],
         ];
 

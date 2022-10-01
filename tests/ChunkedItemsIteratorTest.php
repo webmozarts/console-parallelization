@@ -196,9 +196,9 @@ final class ChunkedItemsIteratorTest extends TestCase
             self::createStream(<<<'STDIN'
                 item0
                 item1
-            
+
                 item3
-            
+
                 item4
                 STDIN),
             ['item0', 'item1', 'item3', 'item4'],

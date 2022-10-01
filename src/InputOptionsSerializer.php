@@ -43,7 +43,7 @@ final class InputOptionsSerializer
         array $excludedOptionNames
     ): array {
         $filteredOptions = array_diff_key(
-            $input->getOptions(),
+            RawOptionsInput::getRawOptions($input),
             array_fill_keys($excludedOptionNames, ''),
         );
 
