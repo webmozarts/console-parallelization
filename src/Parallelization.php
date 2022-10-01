@@ -24,7 +24,6 @@ use RuntimeException;
 use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,6 +36,9 @@ use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use function trim;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
+use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 
 /**
  * Adds parallelization capabilities to console commands.
@@ -276,25 +278,27 @@ trait Parallelization
 
         $numberOfSegments = $config->getNumberOfSegments();
         $numberOfBatches = $config->getNumberOfBatches();
+        $itemName = $this->getItemName($numberOfItems);
 
-        $output->writeln(sprintf(
-            'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
-            $numberOfItems,
-            $this->getItemName($numberOfItems),
+        $logger = new StandardLogger(
+            $output,
+            self::getProgressSymbol(),
+            (new Terminal())->getWidth(),
+            new DebugProgressBarFactory(),
+            new ConsoleLogger($output),
+        );
+
+        $logger->logConfiguration(
             $segmentSize,
             $batchSize,
+            $numberOfItems,
             $numberOfSegments,
-            1 === $numberOfSegments ? 'round' : 'rounds',
             $numberOfBatches,
-            1 === $numberOfBatches ? 'batch' : 'batches',
             $numberOfProcesses,
-            1 === $numberOfProcesses ? 'process' : 'processes',
-        ));
-        $output->writeln('');
+            $itemName,
+        );
 
-        $progressBar = new ProgressBar($output, $numberOfItems);
-        $progressBar->setFormat('debug');
-        $progressBar->start();
+        $logger->startProgress($numberOfItems);
 
         if ($numberOfItems <= $segmentSize
             || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
@@ -307,7 +311,7 @@ trait Parallelization
                 foreach ($items as $item) {
                     $this->runTolerantSingleCommand($item, $input, $output);
 
-                    $progressBar->advance();
+                    $logger->advance();
                 }
 
                 $this->runAfterBatch($input, $output, $items);
@@ -344,8 +348,6 @@ trait Parallelization
                 ),
             );
 
-            $terminalWidth = (new Terminal())->getWidth();
-
             // @TODO: can be removed once ProcessLauncher accepts command arrays
             $tempProcess = new Process($commandTemplate);
             $commandString = $tempProcess->getCommandLine();
@@ -357,24 +359,14 @@ trait Parallelization
                 $numberOfProcesses,
                 $segmentSize,
                 // TODO: offer a way to create the process launcher in a different manner
-                new ConsoleLogger($output),
-                function (string $type, string $buffer) use ($progressBar, $output, $terminalWidth) {
-                    $this->processChildOutput($buffer, $progressBar, $output, $terminalWidth);
-                },
+                $logger,
+                fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
             );
 
             $processLauncher->run($itemIterator->getItems());
         }
 
-        $progressBar->finish();
-
-        $output->writeln('');
-        $output->writeln('');
-        $output->writeln(sprintf(
-            'Processed %d %s.',
-            $numberOfItems,
-            $this->getItemName($numberOfItems),
-        ));
+        $logger->finish($itemName);
 
         $this->runAfterLastCommand($input, $output);
     }
@@ -496,33 +488,21 @@ trait Parallelization
     /**
      * Called whenever data is received in the master process from a child process.
      *
-     * @param string          $buffer        The received data
-     * @param ProgressBar     $progressBar   The progress bar
-     * @param OutputInterface $output        The output of the master process
-     * @param int             $terminalWidth The width of the terminal window
-     *                                       in characters
+     * @param string $buffer The received data
      */
     private function processChildOutput(
         string $buffer,
-        ProgressBar $progressBar,
-        OutputInterface $output,
-        int $terminalWidth
+        Logger $logger
     ): void {
         $advancementChar = self::getProgressSymbol();
         $chars = mb_substr_count($buffer, $advancementChar);
 
         // Display unexpected output
         if ($chars !== mb_strlen($buffer)) {
-            $output->writeln('');
-            $output->writeln(sprintf(
-                '<comment>%s</comment>',
-                str_pad(' Process Output ', $terminalWidth, '=', STR_PAD_BOTH),
-            ));
-            $output->writeln(str_replace($advancementChar, '', $buffer));
-            $output->writeln('');
+            $logger->logUnexpectedOutput($buffer);
         }
 
-        $progressBar->advance($chars);
+        $logger->advance($chars);
     }
 
     private function runTolerantSingleCommand(
