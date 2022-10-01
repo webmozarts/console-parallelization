@@ -14,25 +14,20 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Throwable;
-use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class ItemProcessingErrorHandlerLogger implements ItemProcessingErrorHandler
 {
     private ItemProcessingErrorHandler $decoratedErrorHandler;
-    private Logger $logger;
 
-    public function __construct(
-        ItemProcessingErrorHandler $decoratedErrorHandler,
-        Logger $logger
-    ) {
+    public function __construct(ItemProcessingErrorHandler $decoratedErrorHandler)
+    {
         $this->decoratedErrorHandler = $decoratedErrorHandler;
-        $this->logger = $logger;
     }
 
-    public function handleError(string $item, Throwable $throwable): void
+    public function handleError(string $item, Throwable $throwable, $logger): void
     {
-        $this->logger->logItemProcessingFailed($item, $throwable);
+        $logger->logItemProcessingFailed($item, $throwable);
 
-        $this->decoratedErrorHandler->handleError($item, $throwable);
+        $this->decoratedErrorHandler->handleError($item, $throwable, $logger);
     }
 }

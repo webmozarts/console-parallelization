@@ -17,6 +17,7 @@ use function interface_exists;
 use Psr\Container\ContainerInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
+use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Symfony\ResettableContainerInterface;
 
 final class ResetContainerErrorHandler implements ItemProcessingErrorHandler
@@ -31,7 +32,7 @@ final class ResetContainerErrorHandler implements ItemProcessingErrorHandler
         $this->container = self::isResettable($container) ? $container : null;
     }
 
-    public function handleError(string $item, Throwable $throwable): void
+    public function handleError(string $item, Throwable $throwable, Logger $logger): void
     {
         if (null !== $this->container) {
             $this->container->reset();

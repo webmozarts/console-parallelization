@@ -31,7 +31,6 @@ use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLo
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
-use Webmozarts\Console\Parallelization\Logger\LoggerFactory;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 
 /**
@@ -242,24 +241,12 @@ trait Parallelization
             self::getWorkingDirectory($container),
             $this->getEnvironmentVariables($container),
             $this->getDefinition(),
-            new class($logger) implements LoggerFactory {
-                private Logger $logger;
-
-                public function __construct(Logger $logger)
-                {
-                    $this->logger = $logger;
-                }
-
-                public function create(OutputInterface $output): Logger
-                {
-                    return $this->logger;
-                }
-            },
-            $this->createItemErrorHandler($logger),
+            $this->createItemErrorHandler(),
         ))->execute(
             $parallelizationInput,
             $input,
             $output,
+            $logger,
         );
     }
 
@@ -284,17 +271,14 @@ trait Parallelization
         );
     }
 
-    protected function createItemErrorHandler(Logger $logger): ItemProcessingErrorHandler
+    protected function createItemErrorHandler(): ItemProcessingErrorHandler
     {
         $errorHandler = new ResetContainerErrorHandler(
             $this->getContainer(),
         );
 
         return $this->logError
-            ? new ItemProcessingErrorHandlerLogger(
-                $errorHandler,
-                $logger,
-            )
+            ? new ItemProcessingErrorHandlerLogger($errorHandler)
             : $errorHandler;
     }
 
