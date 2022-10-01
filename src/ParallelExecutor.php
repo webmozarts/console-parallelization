@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -27,6 +26,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use function trim;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 

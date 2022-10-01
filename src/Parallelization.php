@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function sprintf;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,7 +20,6 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
