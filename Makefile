@@ -119,7 +119,7 @@ $(PHPUNIT_BIN): vendor
 	touch $@
 
 $(COVERAGE_DIR): $(PHPUNIT_BIN) src tests phpunit.xml.dist
-	$(MAKE) phpunit_coverage
+	$(MAKE) phpunit_coverage_infection
 	$(TOUCH) "$@"
 
 $(INFECTION_BIN): vendor
