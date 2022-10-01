@@ -159,10 +159,10 @@ final class StandardLoggerTest extends TestCase
     {
         $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
 
-        $this->logger->logCommandFinished('/path/to/bin/console foo:bar --child');
+        $this->logger->logCommandFinished();
 
         $expected = <<<'TXT'
-            [debug] Command finished: /path/to/bin/console foo:bar --child
+            [debug] Command finished
 
             TXT;
 
