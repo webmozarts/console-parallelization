@@ -13,8 +13,12 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
+use Symfony\Component\Console\Input\InputDefinition;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use function file_get_contents;
 use function json_decode;
+use function realpath;
 use const JSON_THROW_ON_ERROR;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -29,7 +33,9 @@ use Webmozarts\Console\Parallelization\Parallelization;
 
 final class ImportMoviesCommand extends ContainerAwareCommand
 {
-    use Parallelization;
+    use Parallelization {
+        getParallelExecutableFactory as getOriginalParallelExecutableFactory;
+    }
 
     protected static $defaultName = 'import:movies';
 
@@ -66,24 +72,38 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         ];
     }
 
-    protected function getSegmentSize(): int
-    {
-        return 2;
-    }
-
-    protected function runBeforeFirstCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->logger->recordFirstCommand();
-    }
-
-    protected function runBeforeBatch(
-        InputInterface $input,
-        OutputInterface $output,
-        array $movieFileNames
-    ): void {
-        $this->logger->recordBeforeBatch();
-
-        $this->batchMovies = self::fetchMovieTitles($movieFileNames);
+    protected function getParallelExecutableFactory(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory {
+        return $this
+            ->getOriginalParallelExecutableFactory(
+                $fetchItems,
+                $runSingleCommand,
+                $getItemName,
+                $commandName,
+                $commandDefinition,
+                $errorHandler,
+            )
+            ->withBatchSize(2)
+            ->withSegmentSize(2)
+            ->withRunBeforeFirstCommand(
+                fn () => $this->logger->recordFirstCommand(),
+            )
+            ->withRunBeforeBatch(
+                fn ($input, $output, $movieFileNames) => $this->runBeforeBatch($movieFileNames),
+            )
+            ->withRunAfterBatch(
+                fn ($input, $output, $movieFileNames) => $this->runAfterBatch(),
+            )
+            ->withRunAfterLastCommand(
+                fn () => $this->logger->recordLastCommand(),
+            )
+            ->withScriptPath(realpath(__DIR__.'/../../../bin/console'));
     }
 
     protected function runSingleCommand(string $movieFileName, InputInterface $input, OutputInterface $output): void
@@ -94,21 +114,24 @@ final class ImportMoviesCommand extends ContainerAwareCommand
         );
     }
 
-    protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $items): void
+    protected function getItemName(int $count): string
+    {
+        return 1 === $count ? 'movie' : 'movies';
+    }
+
+    private function runBeforeBatch(
+        array $movieFileNames
+    ): void {
+        $this->logger->recordBeforeBatch();
+
+        $this->batchMovies = self::fetchMovieTitles($movieFileNames);
+    }
+
+    private function runAfterBatch(): void
     {
         $this->logger->recordAfterBatch();
 
         unset($this->batchMovies);
-    }
-
-    protected function runAfterLastCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->logger->recordLastCommand();
-    }
-
-    protected function getItemName(int $count): string
-    {
-        return 1 === $count ? 'movie' : 'movies';
     }
 
     protected function createLogger(OutputInterface $output): Logger
@@ -119,11 +142,6 @@ final class ImportMoviesCommand extends ContainerAwareCommand
             new TestDebugProgressBarFactory(),
             new ConsoleLogger($output),
         );
-    }
-
-    protected function getScriptPath(): string
-    {
-        return __DIR__.'/../../../bin/console';
     }
 
     /**

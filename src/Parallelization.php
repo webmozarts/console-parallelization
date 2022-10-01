@@ -13,12 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Symfony\Component\Console\Input\InputDefinition;
-use function func_num_args;
-use const DIRECTORY_SEPARATOR;
-use function getcwd;
 use function sprintf;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,7 +28,6 @@ use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
-use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 
 /**
  * Adds parallelization capabilities to console commands.
@@ -131,29 +127,6 @@ trait Parallelization
     abstract protected function getItemName(int $count): string;
 
     /**
-     * Returns the number of items to process per child process. This is
-     * done in order to circumvent some issues recurring to long living
-     * processes such as memory leaks.
-     *
-     * This value is only relevant when ran with child process(es).
-     */
-    protected function getSegmentSize(): int
-    {
-        return 50;
-    }
-
-    /**
-     * Returns the number of items to process in a batch. Multiple batches
-     * can be executed within the master and child processes. This allows to
-     * early fetch aggregates or persist aggregates in batches for performance
-     * optimizations.
-     */
-    protected function getBatchSize(): int
-    {
-        return $this->getSegmentSize();
-    }
-
-    /**
      * Executes the parallelized command.
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -162,8 +135,6 @@ trait Parallelization
 
         return $this
             ->getParallelExecutableFactory(
-                $this->getValidatedBatchSize(),
-                $this->getValidatedSegmentSize(),
                 fn (InputInterface $input) => $this->fetchItems($input),
                 fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
                 fn (int $count) => $this->getItemName($count),
@@ -180,13 +151,26 @@ trait Parallelization
             );
     }
 
-    protected function createLogger(OutputInterface $output): Logger
-    {
-        return new StandardLogger(
-            $output,
-            (new Terminal())->getWidth(),
-            new DebugProgressBarFactory(),
-            new ConsoleLogger($output),
+    /**
+     * @param callable(InputInterface):list<string>                  $fetchItems
+     * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
+     * @param callable(int):string                                   $getItemName
+     */
+    protected function getParallelExecutableFactory(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory {
+        return ParallelExecutorFactory::create(
+            $fetchItems,
+            $runSingleCommand,
+            $getItemName,
+            $commandName,
+            $commandDefinition,
+            $errorHandler,
         );
     }
 
@@ -199,78 +183,13 @@ trait Parallelization
             : $errorHandler;
     }
 
-    /**
-     * @internal
-     * @return positive-int
-     */
-    private function getValidatedSegmentSize(): int
+    protected function createLogger(OutputInterface $output): Logger
     {
-        $segmentSize = $this->getSegmentSize();
-
-        Assert::greaterThan(
-            $segmentSize,
-            0,
-            sprintf(
-                'Expected the segment size to be 1 or greater. Got "%s".',
-                $segmentSize,
-            ),
-        );
-
-        return $segmentSize;
-    }
-
-    /**
-     * @internal
-     * @return positive-int
-     */
-    private function getValidatedBatchSize(): int
-    {
-        $batchSize = $this->getBatchSize();
-
-        Assert::greaterThan(
-            $batchSize,
-            0,
-            sprintf(
-                'Expected the batch size to be 1 or greater. Got "%s".',
-                $batchSize,
-            ),
-        );
-
-        return $batchSize;
-    }
-
-    /**
-     * @param positive-int                                                 $batchSize
-     * @param positive-int                                                 $segmentSize
-     * @param callable(InputInterface):list<string>                        $fetchItems
-     * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
-     * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
-     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(int):string                                         $getItemName
-     * @param array<string, string>                                        $extraEnvironmentVariables
-     */
-    protected function getParallelExecutableFactory(
-        int $batchSize,
-        int $segmentSize,
-        callable $fetchItems,
-        callable $runSingleCommand,
-        callable $getItemName,
-        string $commandName,
-        InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler
-    ): ParallelExecutorFactory
-    {
-        return ParallelExecutorFactory::create(
-            $batchSize,
-            $segmentSize,
-            $fetchItems,
-            $runSingleCommand,
-            $getItemName,
-            $commandName,
-            $commandDefinition,
-            $errorHandler,
+        return new StandardLogger(
+            $output,
+            (new Terminal())->getWidth(),
+            new DebugProgressBarFactory(),
+            new ConsoleLogger($output),
         );
     }
 }
