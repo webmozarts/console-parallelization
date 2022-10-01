@@ -20,6 +20,7 @@ use const STR_PAD_BOTH;
 use function str_replace;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 use Webmozart\Assert\Assert;
 
 final class StandardLogger implements Logger
@@ -138,5 +139,15 @@ final class StandardLogger implements Logger
     public function logCommandFinished(): void
     {
         $this->logger->debug('Command finished');
+    }
+
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void
+    {
+        $this->output->writeln(sprintf(
+            "Failed to process \"%s\": %s\n%s",
+            trim($item),
+            $throwable->getMessage(),
+            $throwable->getTraceAsString(),
+        ));
     }
 }

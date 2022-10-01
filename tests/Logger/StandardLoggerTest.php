@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Logger;
 
+use Error;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -167,5 +168,15 @@ final class StandardLoggerTest extends TestCase
             TXT;
 
         self::assertSame($expected, $this->output->fetch());
+    }
+
+    public function test_it_can_log_an_item_processing_failure(): void
+    {
+        $this->logger->logItemProcessingFailed('item1', new Error('An error occurred.'));
+
+        self::assertStringStartsWith(
+            'Failed to process "item1": An error occurred.',
+            $this->output->fetch(),
+        );
     }
 }

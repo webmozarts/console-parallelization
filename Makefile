@@ -35,7 +35,7 @@ INFECTION = $(INFECTION_BIN) --skip-initial-tests --coverage=$(COVERAGE_DIR) --o
 #---------------------------------------------------------------------------
 
 .PHONY: all
-all: cs test
+all: cs test infection
 
 .PHONY: help
 help:

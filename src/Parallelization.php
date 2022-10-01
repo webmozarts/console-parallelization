@@ -26,6 +26,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
+use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\LoggerFactory;
@@ -232,8 +235,6 @@ trait Parallelization
             fn (InputInterface $input, OutputInterface $output, array $items) => $this->runBeforeBatch($input, $output, $items),
             fn (InputInterface $input, OutputInterface $output, array $items) => $this->runAfterBatch($input, $output, $items),
             fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
-            $this->logError,
-            $container,
             fn (int $count) => $this->getItemName($count),
             $this->getConsolePath(),
             self::detectPhpExecutable(),
@@ -254,6 +255,7 @@ trait Parallelization
                     return $this->logger;
                 }
             },
+            $this->createItemErrorHandler($logger),
         ))->execute(
             $parallelizationInput,
             $input,
@@ -280,6 +282,20 @@ trait Parallelization
             new DebugProgressBarFactory(),
             new ConsoleLogger($output),
         );
+    }
+
+    protected function createItemErrorHandler(Logger $logger): ItemProcessingErrorHandler
+    {
+        $errorHandler = new ResetContainerErrorHandler(
+            $this->getContainer(),
+        );
+
+        return $this->logError
+            ? new ItemProcessingErrorHandlerLogger(
+                $errorHandler,
+                $logger,
+            )
+            : $errorHandler;
     }
 
     /**
