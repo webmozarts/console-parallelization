@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Error;
 use PHPUnit\Framework\TestCase;
+use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler
@@ -51,6 +52,7 @@ final class ResetContainerErrorhandlerTest extends TestCase
         $errorHandler->handleError(
             'item0',
             new Error('An error occurred.'),
+            new FakeLogger(),
         );
     }
 }

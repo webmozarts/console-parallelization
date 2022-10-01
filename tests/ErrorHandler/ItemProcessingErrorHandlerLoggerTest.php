@@ -31,20 +31,24 @@ final class ItemProcessingErrorHandlerLoggerTest extends TestCase
         $throwable = new Error('An error occurred.');
 
         $decoratedErrorHandlerProphecy = $this->prophesize(ItemProcessingErrorHandler::class);
-        $loggerProphecy = $this->prophesize(Logger::class);
+        $decoratedErrorHandler = $decoratedErrorHandlerProphecy->reveal();
 
-        $errorHandler = new ItemProcessingErrorHandlerLogger(
-            $decoratedErrorHandlerProphecy->reveal(),
-            $loggerProphecy->reveal(),
-        );
+        $loggerProphecy = $this->prophesize(Logger::class);
+        $logger = $loggerProphecy->reveal();
+
+        $errorHandler = new ItemProcessingErrorHandlerLogger($decoratedErrorHandler);
 
         $decoratedErrorHandlerProphecy
-            ->handleError($item, $throwable)
+            ->handleError($item, $throwable, $logger)
             ->shouldBeCalledTimes(1);
         $loggerProphecy
             ->logItemProcessingFailed($item, $throwable)
             ->shouldBeCalledTimes(1);
 
-        $errorHandler->handleError($item, $throwable);
+        $errorHandler->handleError(
+            $item,
+            $throwable,
+            $logger,
+        );
     }
 }

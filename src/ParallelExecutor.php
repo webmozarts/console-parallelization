@@ -29,7 +29,6 @@ use function trim;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\Logger;
-use Webmozarts\Console\Parallelization\Logger\LoggerFactory;
 
 final class ParallelExecutor
 {
@@ -86,7 +85,6 @@ final class ParallelExecutor
     private array $environmentVariables;
 
     private InputDefinition $commandDefinition;
-    private LoggerFactory $loggerFactory;
 
     /**
      * @var callable(int): string
@@ -124,7 +122,6 @@ final class ParallelExecutor
         string $workingDirectory,
         array $environmentVariables,
         InputDefinition $commandDefinition,
-        LoggerFactory $loggerFactory,
         ItemProcessingErrorHandler $errorHandler
     ) {
         $this->progressSymbol = $progressSymbol;
@@ -142,7 +139,6 @@ final class ParallelExecutor
         $this->workingDirectory = $workingDirectory;
         $this->environmentVariables = $environmentVariables;
         $this->commandDefinition = $commandDefinition;
-        $this->loggerFactory = $loggerFactory;
         $this->getItemName = $getItemName;
         $this->errorHandler = $errorHandler;
     }
@@ -150,15 +146,21 @@ final class ParallelExecutor
     public function execute(
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
+        Logger $logger
     ): int {
         if ($parallelizationInput->isChildProcess()) {
-            $this->executeChildProcess($input, $output);
+            $this->executeChildProcess($input, $output, $logger);
 
             return 0;
         }
 
-        $this->executeMasterProcess($parallelizationInput, $input, $output);
+        $this->executeMasterProcess(
+            $parallelizationInput,
+            $input,
+            $output,
+            $logger,
+        );
 
         return 0;
     }
@@ -174,7 +176,8 @@ final class ParallelExecutor
     private function executeMasterProcess(
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
+        Logger $logger
     ): void {
         ($this->runBeforeFirstCommand)($input, $output);
 
@@ -204,8 +207,6 @@ final class ParallelExecutor
         $numberOfBatches = $config->getNumberOfBatches();
         $itemName = ($this->getItemName)($numberOfItems);
 
-        $logger = $this->loggerFactory->create($output);
-
         $logger->logConfiguration(
             $segmentSize,
             $batchSize,
@@ -227,7 +228,7 @@ final class ParallelExecutor
                 ($this->runBeforeBatch)($input, $output, $items);
 
                 foreach ($items as $item) {
-                    $this->runTolerantSingleCommand($item, $input, $output);
+                    $this->runTolerantSingleCommand($item, $input, $output, $logger);
 
                     $logger->advance();
                 }
@@ -293,7 +294,8 @@ final class ParallelExecutor
      */
     private function executeChildProcess(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
+        Logger $logger
     ): void {
         $advancementChar = $this->progressSymbol;
 
@@ -306,7 +308,7 @@ final class ParallelExecutor
             ($this->runBeforeBatch)($input, $output, $items);
 
             foreach ($items as $item) {
-                $this->runTolerantSingleCommand($item, $input, $output);
+                $this->runTolerantSingleCommand($item, $input, $output, $logger);
 
                 $output->write($advancementChar);
             }
@@ -318,12 +320,13 @@ final class ParallelExecutor
     private function runTolerantSingleCommand(
         string $item,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
+        Logger $logger
     ): void {
         try {
             ($this->runSingleCommand)(trim($item), $input, $output);
         } catch (Throwable $throwable) {
-            $this->errorHandler->handleError($item, $throwable);
+            $this->errorHandler->handleError($item, $throwable, $logger);
         }
     }
 
