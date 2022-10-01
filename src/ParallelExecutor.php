@@ -13,25 +13,21 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
-use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorhandler;
 use function array_filter;
 use function array_map;
 use function array_merge;
 use function array_slice;
-use function class_exists;
 use function getcwd;
 use function implode;
-use Psr\Container\ContainerInterface;
 use function sprintf;
 use const STDIN;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use function trim;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\LoggerFactory;
 

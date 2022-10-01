@@ -13,9 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
-use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorhandler;
 use function getcwd;
 use function realpath;
 use RuntimeException;
@@ -29,6 +26,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
+use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\LoggerFactory;
@@ -286,7 +286,7 @@ trait Parallelization
 
     protected function createItemErrorHandler(Logger $logger): ItemProcessingErrorHandler
     {
-        $errorHandler = new ResetContainerErrorhandler(
+        $errorHandler = new ResetContainerErrorHandler(
             $this->getContainer(),
         );
 

@@ -13,9 +13,18 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
-use Throwable;
+use DomainException;
+use Psr\Container\ContainerInterface;
 
-interface ItemProcessingErrorHandler
+final class NonResettableContainer implements ContainerInterface
 {
-    public function handleError(string $item, Throwable $throwable): void;
+    public function get(string $id)
+    {
+        throw new DomainException('Unexpected call.');
+    }
+
+    public function has(string $id)
+    {
+        throw new DomainException('Unexpected call.');
+    }
 }

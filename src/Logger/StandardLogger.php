@@ -14,13 +14,13 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Psr\Log\LoggerInterface;
-use Throwable;
 use function sprintf;
 use function str_pad;
 use const STR_PAD_BOTH;
 use function str_replace;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 use Webmozart\Assert\Assert;
 
 final class StandardLogger implements Logger
@@ -141,8 +141,13 @@ final class StandardLogger implements Logger
         $this->logger->debug('Command finished');
     }
 
-    public function processingItemFailed(string $item, Throwable $throwable): void
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void
     {
-        // TODO: Implement processingItemFailed() method.
+        $this->output->writeln(sprintf(
+            "Failed to process \"%s\": %s\n%s",
+            trim($item),
+            $throwable->getMessage(),
+            $throwable->getTraceAsString(),
+        ));
     }
 }

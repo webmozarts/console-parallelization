@@ -39,5 +39,5 @@ interface Logger
 
     public function logCommandFinished(): void;
 
-    public function processingItemFailed(string $item, Throwable $throwable): void;
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void;
 }
