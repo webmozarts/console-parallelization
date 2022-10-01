@@ -172,8 +172,6 @@ final class StandardLoggerTest extends TestCase
 
     public function test_it_can_log_an_item_processing_failure(): void
     {
-        $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
-
         $this->logger->logItemProcessingFailed('item1', new Error('An error occurred.'));
 
         self::assertStringStartsWith(
