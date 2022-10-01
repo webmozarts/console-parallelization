@@ -229,7 +229,7 @@ trait Parallelization
             $this->getConsolePath(),
             $this->getPhpExecutable(),
             $this->getName(),
-            $this->getWorkingDirectory(),
+            self::getWorkingDirectory(),
             $this->getExtraEnvironmentVariables(),
             $this->getDefinition(),
             $this->createItemErrorHandler(),
@@ -333,7 +333,7 @@ trait Parallelization
     /**
      * Returns the working directory for the child process.
      */
-    private function getWorkingDirectory(): string
+    private static function getWorkingDirectory(): string
     {
         return getcwd();
     }
