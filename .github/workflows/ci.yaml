@@ -11,11 +11,36 @@ jobs:
         runs-on: "ubuntu-latest"
         name: "Test ${{ matrix.php }}"
         strategy:
-            fail-fast: true
+            fail-fast: false
             matrix:
                 php:
                     - "7.4"
                     - "8.0"
+                    - "8.1"
+
+        steps:
+            -   name: "Check out repository code"
+                uses: "actions/checkout@v2"
+
+            -   name: "Setup PHP"
+                uses: "shivammathur/setup-php@v2"
+                with:
+                    php-version: "${{ matrix.php }}"
+                    tools: "composer"
+
+            -   name: "Install Composer dependencies"
+                uses: "ramsey/composer-install@v2"
+
+            -   name: "Run tests"
+                run: "make test"
+
+    infection:
+        runs-on: "ubuntu-latest"
+        name: "Infection ${{ matrix.php }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                php:
                     - "8.1"
 
         steps:
@@ -32,5 +57,5 @@ jobs:
             -   name: "Install Composer dependencies"
                 uses: "ramsey/composer-install@v2"
 
-            -   name: "Run tests"
-                run: "make test"
+            -   name: "Run tests with coverage and Infection"
+                run: "make infection"
