@@ -25,6 +25,7 @@
         "ext-json": "*",
         "bamarni/composer-bin-plugin": "^1.8",
         "ergebnis/composer-normalize": "^2.28",
+        "infection/infection": "^0.26.6",
         "jangregor/phpstan-prophecy": "^1.0",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpstan/extension-installer": "^1.1",
@@ -46,7 +47,8 @@
         "allow-plugins": {
             "bamarni/composer-bin-plugin": true,
             "ergebnis/composer-normalize": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "infection/extension-installer": true
         },
         "bamarni-bin": {
             "bin-links": false,
