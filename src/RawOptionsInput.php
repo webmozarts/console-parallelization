@@ -40,12 +40,12 @@ final class RawOptionsInput extends Input
             : [];
     }
 
-    public function getFirstArgument()
+    public function getFirstArgument(): ?string
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function hasParameterOption($values, bool $onlyParams = false)
+    public function hasParameterOption($values, bool $onlyParams = false): bool
     {
         throw new DomainException('Not implemented.');
     }
@@ -55,7 +55,7 @@ final class RawOptionsInput extends Input
         throw new DomainException('Not implemented.');
     }
 
-    protected function parse()
+    protected function parse(): void
     {
         throw new DomainException('Not implemented.');
     }
