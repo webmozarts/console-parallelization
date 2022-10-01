@@ -13,7 +13,7 @@ CCYELLOW=\033[0;33m
 CCEND=\033[0m
 
 # PHP specific variables
-COVERAGE_DIR = dist/coverage
+COVERAGE_DIR = dist/coverage-xml
 TARGET_MSI = 50
 
 PHP_CS_FIXER_BIN = vendor-bin/php-cs-fixer/vendor/friendsofphp/php-cs-fixer/php-cs-fixer
