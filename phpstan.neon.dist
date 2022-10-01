@@ -17,7 +17,8 @@ parameters:
         - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
 
+        - path: src/ParallelExecutor.php
+          message: '#Call to method reset\(\) on an unknown class .*ResettableContainerInterface#'
+
         - path: tests/ChunkedItemsIteratorTest.php
           message: '#Parameter \#2 \$fetchItems of static method .+ChunkedItemsIterator::fromItemOrCallable\(\) expects callable\(\)#'
-
-        - '#unknown class Symfony\\Component\\DependencyInjection\\ResettableContainerInterface#'
