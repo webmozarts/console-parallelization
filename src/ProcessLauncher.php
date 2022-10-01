@@ -28,14 +28,26 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
  */
 class ProcessLauncher
 {
-    private string $command;
+    /**
+     * @var list<string>
+     */
+    private array $command;
 
     private string $workingDirectory;
 
+    /**
+     * @var array<string, string>
+     */
     private array $environmentVariables;
 
-    private int $processLimit;
+    /**
+     * @var positive-int
+     */
+    private int $numberOfProcesses;
 
+    /**
+     * @var positive-int
+     */
     private int $segmentSize;
 
     private Logger $logger;
@@ -47,11 +59,17 @@ class ProcessLauncher
      */
     private array $runningProcesses = [];
 
+    /**
+     * @param list<string>          $command
+     * @param array<string, string> $environmentVariables
+     * @param positive-int          $numberOfProcesses
+     * @param positive-int          $segmentSize
+     */
     public function __construct(
-        string $command, // @TODO change to array for 2.0
+        array $command,
         string $workingDirectory,
         array $environmentVariables,
-        int $processLimit,
+        int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
         Closure $callback
@@ -59,7 +77,7 @@ class ProcessLauncher
         $this->command = $command;
         $this->workingDirectory = $workingDirectory;
         $this->environmentVariables = $environmentVariables;
-        $this->processLimit = $processLimit;
+        $this->numberOfProcesses = $numberOfProcesses;
         $this->segmentSize = $segmentSize;
         $this->logger = $logger;
         $this->callback = $callback;
@@ -90,7 +108,7 @@ class ProcessLauncher
             while (null === $currentInputStream) {
                 $this->freeTerminatedProcesses();
 
-                if (count($this->runningProcesses) < $this->processLimit) {
+                if (count($this->runningProcesses) < $this->numberOfProcesses) {
                     // Start a new process
                     $currentInputStream = new InputStream();
                     $numberOfStreamedItems = 0;
@@ -127,29 +145,23 @@ class ProcessLauncher
      */
     private function startProcess(InputStream $inputStream): void
     {
-        $arguments = [
+        $process = new Process(...[
             $this->command,
             $this->workingDirectory,
             $this->environmentVariables,
             null,
             null,
-        ];
-
-        if (method_exists(Process::class, 'fromShellCommandline')) {
-            // Symfony >= 4.2 workaround as Symfony 5 requires `Process` to be initiated with an array
-            // @TODO: can be removed once $this->command was changed to an array
-            $process = Process::fromShellCommandline(...$arguments);
-        } else {
-            $process = new Process(...$arguments);
-        }
+        ]);
 
         $process->setInput($inputStream);
+        // TODO: remove the following once dropping Symfony 4.4. Environment
+        //  variables are always inherited as of 5.0
         if (method_exists($process, 'inheritEnvironmentVariables')) {
             $process->inheritEnvironmentVariables(true);
         }
         $process->start($this->callback);
 
-        $this->logger->logCommandStarted($this->command);
+        $this->logger->logCommandStarted($process->getCommandLine());
 
         $this->runningProcesses[] = $process;
     }
