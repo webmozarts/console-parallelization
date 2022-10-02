@@ -15,7 +15,6 @@ namespace Webmozarts\Console\Parallelization\Process;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\InputStream;
-use Webmozarts\Console\Parallelization\FakeCallable;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory
@@ -30,7 +29,14 @@ final class StandardSymfonyProcessFactoryTest extends TestCase
         $command = ['php', 'echo.php'];
         $workingDirectory = __DIR__;
         $environmentVariables = ['TEST_PARALLEL' => '0'];
-        $callback = FakeCallable::create();
+
+        $callbackCalled = false;
+
+        // Do not use a Fake callback here as it would otherwise throw an
+        // exception at a random time during cleanup.
+        $callback = static function () use (&$callbackCalled) {
+            $callbackCalled = true;
+        };
 
         $process = $factory->startProcess(
             $inputStream,
@@ -43,5 +49,7 @@ final class StandardSymfonyProcessFactoryTest extends TestCase
         self::assertSame("'php' 'echo.php'", $process->getCommandLine());
         self::assertSame($workingDirectory, $process->getWorkingDirectory());
         self::assertSame($environmentVariables, $process->getEnv());
+        self::assertTrue($process->isRunning());
+        self::assertFalse($callbackCalled);
     }
 }
