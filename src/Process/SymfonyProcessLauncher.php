@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Process;
 
 use Closure;
 use Symfony\Component\Process\InputStream;
@@ -26,7 +26,7 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
  * of the data set via its standard input, separated by newlines. The size
  * of this share can be configured in the constructor (the segment size).
  */
-class ProcessLauncher
+final class SymfonyProcessLauncher implements ProcessLauncher
 {
     /**
      * @var list<string>

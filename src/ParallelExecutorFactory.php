@@ -21,6 +21,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
+use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
+use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 
 final class ParallelExecutorFactory
 {
@@ -88,6 +90,8 @@ final class ParallelExecutorFactory
      */
     private ?array $extraEnvironmentVariables;
 
+    private ProcessLauncherFactory $processLauncherFactory;
+
     /**
      * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
@@ -117,7 +121,8 @@ final class ParallelExecutorFactory
         string $phpExecutable,
         string $scriptPath,
         string $workingDirectory,
-        ?array $extraEnvironmentVariables
+        ?array $extraEnvironmentVariables,
+        ProcessLauncherFactory $processLauncherFactory
     ) {
         $this->fetchItems = $fetchItems;
         $this->runSingleCommand = $runSingleCommand;
@@ -136,6 +141,7 @@ final class ParallelExecutorFactory
         $this->scriptPath = $scriptPath;
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
+        $this->processLauncherFactory = $processLauncherFactory;
     }
 
     /**
@@ -169,6 +175,7 @@ final class ParallelExecutorFactory
             self::getScriptPath(),
             self::getWorkingDirectory(),
             null,
+            self::getProcessLauncherFactory(),
         );
     }
 
@@ -323,6 +330,14 @@ final class ParallelExecutorFactory
         return $clone;
     }
 
+    public function withProcessLauncherFactory(ProcessLauncherFactory $processLauncherFactory): self
+    {
+        $clone = clone $this;
+        $clone->processLauncherFactory = $processLauncherFactory;
+
+        return $clone;
+    }
+
     public function build(): ParallelExecutor
     {
         return new ParallelExecutor(
@@ -343,6 +358,7 @@ final class ParallelExecutorFactory
             $this->scriptPath,
             $this->workingDirectory,
             $this->extraEnvironmentVariables,
+            $this->processLauncherFactory,
         );
     }
 
@@ -404,5 +420,16 @@ final class ParallelExecutorFactory
         }
 
         return $cwd;
+    }
+
+    private static function getProcessLauncherFactory(): ProcessLauncherFactory
+    {
+        static $processLauncherFactory;
+
+        if (!isset($processLauncherFactory)) {
+            $processLauncherFactory = new SymfonyProcessLauncherFactory();
+        }
+
+        return $processLauncherFactory;
     }
 }

@@ -16,6 +16,7 @@ namespace Webmozarts\Console\Parallelization;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputDefinition;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
+use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutorFactory
@@ -44,15 +45,16 @@ final class ParallelExecutorFactoryTest extends TestCase
         $segmentSize = 20;
         $extraEnvironmentVariables = ['CUSTOM_CI' => '0'];
         $progressSymbol = 'ø';
+        $processLauncherFactory = new FakeProcessLauncherFactory();
 
         $executor = ParallelExecutorFactory::create(
-            $callable0,
-            $callable1,
-            $callable2,
-            $commandName,
-            $definition,
-            $errorHandler,
-        )
+                $callable0,
+                $callable1,
+                $callable2,
+                $commandName,
+                $definition,
+                $errorHandler,
+            )
             ->withBatchSize($batchSize)
             ->withSegmentSize($segmentSize)
             ->withRunBeforeFirstCommand($callable3)
@@ -64,6 +66,7 @@ final class ParallelExecutorFactoryTest extends TestCase
             ->withScriptPath(self::FILE_2)
             ->withWorkingDirectory(self::FILE_3)
             ->withExtraEnvironmentVariables($extraEnvironmentVariables)
+            ->withProcessLauncherFactory($processLauncherFactory)
             ->build();
 
         $expected = new ParallelExecutor(
@@ -84,6 +87,7 @@ final class ParallelExecutorFactoryTest extends TestCase
             self::FILE_2,
             self::FILE_3,
             $extraEnvironmentVariables,
+            $processLauncherFactory,
         );
 
         self::assertEquals($expected, $executor);
