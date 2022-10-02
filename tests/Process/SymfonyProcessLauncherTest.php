@@ -197,13 +197,13 @@ final class SymfonyProcessLauncherTest extends TestCase
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
                 type: dummy; buffer: item1
-            
+
                 type: dummy; buffer: item2
-            
+
                 type: dummy; buffer: item3
-            
+
                 type: dummy; buffer: item4
-            
+
                 type: dummy; buffer: item5
 
 
@@ -222,13 +222,13 @@ final class SymfonyProcessLauncherTest extends TestCase
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
                 type: dummy; buffer: item1
-            
+
                 type: dummy; buffer: item2
-            
+
                 type: dummy; buffer: item3
-            
+
                 type: dummy; buffer: item4
-            
+
                 type: dummy; buffer: item5
 
 
@@ -251,13 +251,13 @@ final class SymfonyProcessLauncherTest extends TestCase
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
                 type: dummy; buffer: item1
-            
+
                 type: dummy; buffer: item2
-            
+
                 type: dummy; buffer: item3
-            
+
                 type: dummy; buffer: item4
-            
+
                 type: dummy; buffer: item5
 
 

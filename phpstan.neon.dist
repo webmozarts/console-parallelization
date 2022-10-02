@@ -5,6 +5,9 @@ parameters:
         - tests
     excludePaths:
         - tests/Integration/var
+        - tests/Process/DummyProcess.php
+        - tests/Process/DummyProcess74.php
+        - tests/Process/DummyProcess81.php
     ignoreErrors:
         - path: tests/Integration/TestLogger.php
           message: '#TestLogger::\$outputHandler#'
@@ -23,5 +26,8 @@ parameters:
         - path: src/ErrorHandler/ResetContainerErrorHandler.php
           message: '#Property .*ResetContainerErrorHandler::\$container.*does not accept.*ContainerInterface\|null\.#'
 
-        - path: tests/Process/DummyProcess.php
-          message: '#DummyProcess::\$input#'
+        - path: tests/Process/DummyProcessFactory.php
+          message: '#DummyProcess#'
+
+        - path: tests/Process/SymfonyProcessLauncherTest.php
+          message: '#DummyProcess#'
