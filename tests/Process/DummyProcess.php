@@ -16,7 +16,7 @@ namespace Webmozarts\Console\Parallelization\Process;
 use function class_alias;
 use const PHP_VERSION_ID;
 
-$sourceClass = PHP_VERSION_ID > 81_000
+$sourceClass = PHP_VERSION_ID > 80_100
     ? DummyProcess81::class
     : DummyProcess74::class;
 
