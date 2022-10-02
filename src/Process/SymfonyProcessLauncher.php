@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use Closure;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -70,12 +69,12 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     private SymfonyProcessFactory $processFactory;
 
     /**
-     * @param list<string>               $command
-     * @param array<string, string>|null $extraEnvironmentVariables
-     * @param positive-int               $numberOfProcesses
-     * @param positive-int               $segmentSize
+     * @param list<string>                   $command
+     * @param array<string, string>|null     $extraEnvironmentVariables
+     * @param positive-int                   $numberOfProcesses
+     * @param positive-int                   $segmentSize
      * @param callable(string, string): void $callback
-     * @param callable(): void $tick
+     * @param callable(): void               $tick
      */
     public function __construct(
         array $command,

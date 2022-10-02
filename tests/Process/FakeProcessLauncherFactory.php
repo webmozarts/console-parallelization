@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use Closure;
 use DomainException;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 

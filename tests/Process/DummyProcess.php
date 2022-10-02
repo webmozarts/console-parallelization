@@ -1,17 +1,25 @@
 <?php
 
+/*
+ * This file is part of the Webmozarts Console Parallelization package.
+ *
+ * (c) Webmozarts GmbH <office@webmozarts.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
 use DomainException;
+use function func_get_args;
 use Generator;
+use function implode;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
-use Traversable;
 use Webmozart\Assert\Assert;
-use function func_get_args;
-use function implode;
 
 final class DummyProcess extends Process
 {
@@ -42,14 +50,34 @@ final class DummyProcess extends Process
 
     public function __construct(
         array $command,
-        string $cwd = null,
-        array $env = null,
+        ?string $cwd = null,
+        ?array $env = null,
         $input = null,
         ?float $timeout = 60
     ) {
         parent::__construct($command, $cwd, $env, $input, $timeout);
 
         $this->command = $command;
+    }
+
+    /** @noinspection MagicMethodsValidityInspection */
+    public function __destruct()
+    {
+    }
+
+    public function __sleep()
+    {
+        throw new DomainException('Unexpected call.');
+    }
+
+    public function __wakeup()
+    {
+        throw new DomainException('Unexpected call.');
+    }
+
+    public function __clone()
+    {
+        throw new DomainException('Unexpected call.');
     }
 
     public function setTimeout(?float $timeout)
@@ -80,7 +108,7 @@ final class DummyProcess extends Process
         ];
     }
 
-    public function start(callable $callback = null, array $env = [])
+    public function start(?callable $callback = null, array $env = [])
     {
         Assert::false($this->started);
 
@@ -113,15 +141,10 @@ final class DummyProcess extends Process
         return true;
     }
 
-    /** @noinspection MagicMethodsValidityInspection */
-    public function __destruct()
-    {
-    }
-
     public static function fromShellCommandline(
         string $command,
-        string $cwd = null,
-        array $env = null,
+        ?string $cwd = null,
+        ?array $env = null,
         $input = null,
         ?float $timeout = 60
     ) {
@@ -130,46 +153,31 @@ final class DummyProcess extends Process
             $cwd,
             $env,
             $input,
-            $timeout
+            $timeout,
         );
     }
 
-    public function stop(float $timeout = 10, int $signal = null)
+    public function stop(float $timeout = 10, ?int $signal = null)
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function __sleep()
+    public function run(?callable $callback = null, array $env = []): int
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function __wakeup()
+    public function mustRun(?callable $callback = null, array $env = []): Process
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function __clone()
+    public function restart(?callable $callback = null, array $env = []): Process
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function run(callable $callback = null, array $env = []): int
-    {
-        throw new DomainException('Unexpected call.');
-    }
-
-    public function mustRun(callable $callback = null, array $env = []): Process
-    {
-        throw new DomainException('Unexpected call.');
-    }
-
-    public function restart(callable $callback = null, array $env = []): Process
-    {
-        throw new DomainException('Unexpected call.');
-    }
-
-    public function wait(callable $callback = null)
+    public function wait(?callable $callback = null)
     {
         throw new DomainException('Unexpected call.');
     }
@@ -379,7 +387,7 @@ final class DummyProcess extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    protected function buildCallback(callable $callback = null)
+    protected function buildCallback(?callable $callback = null)
     {
         throw new DomainException('Unexpected call.');
     }

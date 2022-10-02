@@ -13,18 +13,17 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use Closure;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
 {
     /**
-     * @param list<string>               $command
-     * @param array<string, string>|null $extraEnvironmentVariables
-     * @param positive-int               $numberOfProcesses
-     * @param positive-int               $segmentSize
+     * @param list<string>                   $command
+     * @param array<string, string>|null     $extraEnvironmentVariables
+     * @param positive-int                   $numberOfProcesses
+     * @param positive-int                   $segmentSize
      * @param callable(string, string): void $callback
-     * @param callable(): void $tick
+     * @param callable(): void               $tick
      */
     public function create(
         array $command,
