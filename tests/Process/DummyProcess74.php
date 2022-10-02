@@ -134,7 +134,6 @@ final class DummyProcess74 extends Process
 
     public function stop(float $timeout = 10, ?int $signal = null): ?int
     {
-        throw new DomainException('Unexpected call.');
     }
 
     public function run(?callable $callback = null, array $env = []): int
