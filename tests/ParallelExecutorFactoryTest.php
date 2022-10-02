@@ -48,13 +48,13 @@ final class ParallelExecutorFactoryTest extends TestCase
         $processLauncherFactory = new FakeProcessLauncherFactory();
 
         $executor = ParallelExecutorFactory::create(
-                $callable0,
-                $callable1,
-                $callable2,
-                $commandName,
-                $definition,
-                $errorHandler,
-            )
+            $callable0,
+            $callable1,
+            $callable2,
+            $commandName,
+            $definition,
+            $errorHandler,
+        )
             ->withBatchSize($batchSize)
             ->withSegmentSize($segmentSize)
             ->withRunBeforeFirstCommand($callable3)

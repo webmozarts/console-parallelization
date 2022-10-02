@@ -14,21 +14,18 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Process;
 
 use DomainException;
-use Webmozarts\Console\Parallelization\Logger\Logger;
+use Symfony\Component\Process\InputStream;
+use Symfony\Component\Process\Process;
 
-final class FakeProcessLauncherFactory implements ProcessLauncherFactory
+final class FakeProcessFactory implements SymfonyProcessFactory
 {
-    public function create(
+    public function startProcess(
+        InputStream $inputStream,
         array $command,
         string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        int $numberOfProcesses,
-        int $segmentSize,
-        Logger $logger,
-        callable $callback,
-        callable $tick,
-        SymfonyProcessFactory $processFactory
-    ): ProcessLauncher {
+        ?array $environmentVariables,
+        callable $callback
+    ): Process {
         throw new DomainException('Unexpected call.');
     }
 }
