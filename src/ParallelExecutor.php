@@ -20,7 +20,6 @@ use function array_slice;
 use function implode;
 use function mb_strlen;
 use function sprintf;
-use const STDIN;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -57,6 +56,11 @@ final class ParallelExecutor
     private InputDefinition $commandDefinition;
 
     private ItemProcessingErrorHandler $errorHandler;
+
+    /**
+     * @var resource
+     */
+    private $childSourceStream;
 
     /**
      * @var positive-int
@@ -107,6 +111,7 @@ final class ParallelExecutor
      * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(int):string                                         $getItemName
+     * @param resource                                                     $childSourceStream
      * @param positive-int                                                 $batchSize
      * @param positive-int                                                 $segmentSize
      * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
@@ -122,6 +127,7 @@ final class ParallelExecutor
         string $commandName,
         InputDefinition $commandDefinition,
         ItemProcessingErrorHandler $errorHandler,
+        $childSourceStream,
         int $batchSize,
         int $segmentSize,
         callable $runBeforeFirstCommand,
@@ -147,6 +153,7 @@ final class ParallelExecutor
         $this->commandName = $commandName;
         $this->commandDefinition = $commandDefinition;
         $this->errorHandler = $errorHandler;
+        $this->childSourceStream = $childSourceStream;
         $this->batchSize = $batchSize;
         $this->segmentSize = $segmentSize;
         $this->runBeforeFirstCommand = $runBeforeFirstCommand;
@@ -278,7 +285,7 @@ final class ParallelExecutor
         Logger $logger
     ): int {
         $itemIterator = ChunkedItemsIterator::fromStream(
-            STDIN,
+            $this->childSourceStream,
             $this->batchSize,
         );
 

@@ -13,14 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Closure;
 use function fclose;
-use function fopen;
-use function fwrite;
 use InvalidArgumentException;
-use LogicException;
 use PHPUnit\Framework\TestCase;
-use function rewind;
 use stdClass;
 
 /**
@@ -164,27 +159,27 @@ final class ChunkedItemsIteratorTest extends TestCase
     public static function streamProvider(): iterable
     {
         yield 'single item' => [
-            self::createStream('item0'),
+            StringStream::fromString('item0'),
             ['item0'],
         ];
 
         yield 'single item with space' => [
-            self::createStream('it em'),
+            StringStream::fromString('it em'),
             ['it em'],
         ];
 
         yield 'empty string' => [
-            self::createStream(''),
+            StringStream::fromString(''),
             [],
         ];
 
         yield 'whitespace string' => [
-            self::createStream(' '),
+            StringStream::fromString(' '),
             [' '],
         ];
 
         yield 'several items' => [
-            self::createStream(<<<'STDIN'
+            StringStream::fromString(<<<'STDIN'
                 item0
                 item1
                 item3
@@ -193,7 +188,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         ];
 
         yield 'several items with blank values' => [
-            self::createStream(<<<'STDIN'
+            StringStream::fromString(<<<'STDIN'
                 item0
                 item1
 
@@ -205,7 +200,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         ];
 
         yield 'numerical items – items are kept as strings' => [
-            self::createStream(<<<'STDIN'
+            StringStream::fromString(<<<'STDIN'
                 string item
                 10
                 .5
@@ -220,7 +215,7 @@ final class ChunkedItemsIteratorTest extends TestCase
     {
         yield 'one item: the fetch item closure is not evaluated' => [
             'item0',
-            self::createFakeClosure(),
+            FakeCallable::create(),
             ['item0'],
         ];
 
@@ -240,7 +235,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         ];
 
         yield 'closure item' => [
-            [self::createFakeClosure()],
+            [FakeCallable::create()],
             1,
             'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "Closure" for the item "0".',
         ];
@@ -250,25 +245,6 @@ final class ChunkedItemsIteratorTest extends TestCase
             1,
             'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "boolean" for the item "0".',
         ];
-    }
-
-    private static function createFakeClosure(): Closure
-    {
-        return static function () {
-            throw new LogicException('Did not expect to be called');
-        };
-    }
-
-    /**
-     * @return resource
-     */
-    private static function createStream(string $value)
-    {
-        $stream = fopen('php://memory', 'rb+');
-        fwrite($stream, $value);
-        rewind($stream);
-
-        return $stream;
     }
 
     private static function assertStateIs(

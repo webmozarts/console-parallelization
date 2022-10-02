@@ -16,6 +16,7 @@ namespace Webmozarts\Console\Parallelization;
 use function chr;
 use const DIRECTORY_SEPARATOR;
 use function getcwd;
+use const STDIN;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -46,6 +47,11 @@ final class ParallelExecutorFactory
     private InputDefinition $commandDefinition;
 
     private ItemProcessingErrorHandler $errorHandler;
+
+    /**
+     * @var resource
+     */
+    private $childSourceStream;
 
     /**
      * @var positive-int
@@ -96,6 +102,7 @@ final class ParallelExecutorFactory
      * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(int):string                                         $getItemName
+     * @param resource                                                     $childSourceStream
      * @param positive-int                                                 $batchSize
      * @param positive-int                                                 $segmentSize
      * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
@@ -111,6 +118,7 @@ final class ParallelExecutorFactory
         string $commandName,
         InputDefinition $commandDefinition,
         ItemProcessingErrorHandler $errorHandler,
+        $childSourceStream,
         int $batchSize,
         int $segmentSize,
         callable $runBeforeFirstCommand,
@@ -130,6 +138,7 @@ final class ParallelExecutorFactory
         $this->commandName = $commandName;
         $this->commandDefinition = $commandDefinition;
         $this->errorHandler = $errorHandler;
+        $this->childSourceStream = $childSourceStream;
         $this->batchSize = $batchSize;
         $this->segmentSize = $segmentSize;
         $this->runBeforeFirstCommand = $runBeforeFirstCommand;
@@ -164,6 +173,7 @@ final class ParallelExecutorFactory
             $commandName,
             $commandDefinition,
             $errorHandler,
+            STDIN,
             50,
             50,
             self::getNoopCallable(),
@@ -177,6 +187,17 @@ final class ParallelExecutorFactory
             null,
             self::getProcessLauncherFactory(),
         );
+    }
+
+    /**
+     * @param resource $childSourceStream
+     */
+    public function withChildSourceStream($childSourceStream): self
+    {
+        $clone = clone $this;
+        $clone->childSourceStream = $childSourceStream;
+
+        return $clone;
     }
 
     /**
@@ -347,6 +368,7 @@ final class ParallelExecutorFactory
             $this->commandName,
             $this->commandDefinition,
             $this->errorHandler,
+            $this->childSourceStream,
             $this->batchSize,
             $this->segmentSize,
             $this->runBeforeFirstCommand,

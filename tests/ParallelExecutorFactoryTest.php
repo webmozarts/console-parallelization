@@ -41,6 +41,7 @@ final class ParallelExecutorFactoryTest extends TestCase
         $callable5 = self::createCallable(5);
         $callable6 = self::createCallable(6);
 
+        $childSourceStream = StringStream::fromString('');
         $batchSize = 10;
         $segmentSize = 20;
         $extraEnvironmentVariables = ['CUSTOM_CI' => '0'];
@@ -55,6 +56,7 @@ final class ParallelExecutorFactoryTest extends TestCase
             $definition,
             $errorHandler,
         )
+            ->withChildSourceStream($childSourceStream)
             ->withBatchSize($batchSize)
             ->withSegmentSize($segmentSize)
             ->withRunBeforeFirstCommand($callable3)
@@ -76,6 +78,7 @@ final class ParallelExecutorFactoryTest extends TestCase
             $commandName,
             $definition,
             $errorHandler,
+            $childSourceStream,
             $batchSize,
             $segmentSize,
             $callable3,
