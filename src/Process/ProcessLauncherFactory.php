@@ -23,6 +23,8 @@ interface ProcessLauncherFactory
      * @param array<string, string>|null $extraEnvironmentVariables
      * @param positive-int               $numberOfProcesses
      * @param positive-int               $segmentSize
+     * @param callable(string, string): void $callback
+     * @param callable(): void $tick
      */
     public function create(
         array $command,
@@ -31,6 +33,8 @@ interface ProcessLauncherFactory
         int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
-        Closure $callback
+        callable $callback,
+        callable $tick,
+        SymfonyProcessFactory $processFactory
     ): ProcessLauncher;
 }

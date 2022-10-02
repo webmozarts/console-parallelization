@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -20,6 +21,7 @@ use function array_slice;
 use function implode;
 use function mb_strlen;
 use function sprintf;
+use function usleep;
 use const STDIN;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -371,6 +373,8 @@ final class ParallelExecutor
             $segmentSize,
             $logger,
             fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
+            static fn () => usleep(1000),   // 1ms
+            new StandardSymfonyProcessFactory(),
         );
     }
 
@@ -404,14 +408,14 @@ final class ParallelExecutor
         Logger $logger
     ): void {
         $progressSymbol = $this->progressSymbol;
-        $chars = mb_substr_count($buffer, $progressSymbol);
+        $charactersCount = mb_substr_count($buffer, $progressSymbol);
 
         // Display unexpected output
-        if ($chars !== mb_strlen($buffer)) {
+        if ($charactersCount !== mb_strlen($buffer)) {
             $logger->logUnexpectedOutput($buffer, $progressSymbol);
         }
 
-        $logger->advance($chars);
+        $logger->advance($charactersCount);
     }
 
     private static function validateBatchSize(int $batchSize): void

@@ -52,7 +52,10 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
     private Logger $logger;
 
-    private Closure $callback;
+    /**
+     * @var callable(string, string): void
+     */
+    private $callback;
 
     /**
      * @var Process[]
@@ -60,10 +63,19 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     private array $runningProcesses = [];
 
     /**
+     * @var callable
+     */
+    private $tick;
+
+    private SymfonyProcessFactory $processFactory;
+
+    /**
      * @param list<string>               $command
      * @param array<string, string>|null $extraEnvironmentVariables
      * @param positive-int               $numberOfProcesses
      * @param positive-int               $segmentSize
+     * @param callable(string, string): void $callback
+     * @param callable(): void $tick
      */
     public function __construct(
         array $command,
@@ -72,7 +84,9 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
-        Closure $callback
+        callable $callback,
+        callable $tick,
+        SymfonyProcessFactory $processFactory
     ) {
         $this->command = $command;
         $this->workingDirectory = $workingDirectory;
@@ -81,14 +95,10 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         $this->segmentSize = $segmentSize;
         $this->logger = $logger;
         $this->callback = $callback;
+        $this->tick = $tick;
+        $this->processFactory = $processFactory;
     }
 
-    /**
-     * Runs child processes to process the given items.
-     *
-     * @param string[] $items The items to process. None of the items must
-     *                        contain newlines
-     */
     public function run(array $items): void
     {
         /** @var InputStream|null $currentInputStream */
@@ -99,8 +109,8 @@ final class SymfonyProcessLauncher implements ProcessLauncher
             // Close the input stream if the segment is full
             if (null !== $currentInputStream && $numberOfStreamedItems >= $this->segmentSize) {
                 $currentInputStream->close();
-
                 $currentInputStream = null;
+
                 $numberOfStreamedItems = 0;
             }
 
@@ -108,8 +118,9 @@ final class SymfonyProcessLauncher implements ProcessLauncher
             while (null === $currentInputStream) {
                 $this->freeTerminatedProcesses();
 
-                if (count($this->runningProcesses) < $this->numberOfProcesses) {
-                    // Start a new process
+                $maxNumberOfRunningProcessesReached = count($this->runningProcesses) >= $this->numberOfProcesses;
+
+                if (!$maxNumberOfRunningProcessesReached) {
                     $currentInputStream = new InputStream();
                     $numberOfStreamedItems = 0;
 
@@ -118,8 +129,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
                     break;
                 }
 
-                // 1ms
-                usleep(1000);
+                ($this->tick)();
             }
 
             // Stream the data segment to the process' input stream
@@ -132,34 +142,23 @@ final class SymfonyProcessLauncher implements ProcessLauncher
             $currentInputStream->close();
         }
 
+        // Waiting until all running processes are terminated
         while (count($this->runningProcesses) > 0) {
             $this->freeTerminatedProcesses();
 
-            // 1ms
-            usleep(1000);
+            ($this->tick)();
         }
     }
 
-    /**
-     * Starts a single process reading from the given input stream.
-     */
     private function startProcess(InputStream $inputStream): void
     {
-        $process = new Process(...[
+        $process = $this->processFactory->startProcess(
+            $inputStream,
             $this->command,
             $this->workingDirectory,
             $this->environmentVariables,
-            null,
-            null,
-        ]);
-
-        $process->setInput($inputStream);
-        // TODO: remove the following once dropping Symfony 4.4. Environment
-        //  variables are always inherited as of 5.0
-        if (method_exists($process, 'inheritEnvironmentVariables')) {
-            $process->inheritEnvironmentVariables(true);
-        }
-        $process->start($this->callback);
+            $this->callback,
+        );
 
         $this->logger->logCommandStarted($process->getCommandLine());
 
@@ -172,12 +171,17 @@ final class SymfonyProcessLauncher implements ProcessLauncher
      */
     private function freeTerminatedProcesses(): void
     {
-        foreach ($this->runningProcesses as $key => $process) {
+        foreach ($this->runningProcesses as $index => $process) {
             if (!$process->isRunning()) {
-                $this->logger->logCommandFinished();
-
-                unset($this->runningProcesses[$key]);
+                $this->freeProcess($index);
             }
         }
+    }
+
+    private function freeProcess(int $index): void
+    {
+        $this->logger->logCommandFinished();
+
+        unset($this->runningProcesses[$index]);
     }
 }
