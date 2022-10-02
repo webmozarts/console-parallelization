@@ -29,7 +29,7 @@ interface SymfonyProcessFactory
         InputStream $inputStream,
         array $command,
         string $workingDirectory,
-        array $environmentVariables,
+        ?array $environmentVariables,
         callable $callback
     ): Process;
 }

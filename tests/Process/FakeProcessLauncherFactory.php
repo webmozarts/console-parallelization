@@ -26,7 +26,8 @@ final class FakeProcessLauncherFactory implements ProcessLauncherFactory
         int $segmentSize,
         Logger $logger,
         callable $callback,
-        callable $tick
+        callable $tick,
+        SymfonyProcessFactory $processFactory
     ): ProcessLauncher {
         throw new DomainException('Unexpected call.');
     }

@@ -23,16 +23,16 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
         InputStream $inputStream,
         array $command,
         string $workingDirectory,
-        array $environmentVariables,
+        ?array $environmentVariables,
         callable $callback
     ): Process {
-        $process = new Process(...[
+        $process = new Process(
             $command,
             $workingDirectory,
             $environmentVariables,
             null,
             null,
-        ]);
+        );
 
         $process->setInput($inputStream);
         // TODO: remove the following once dropping Symfony 4.4. Environment

@@ -22,3 +22,6 @@ parameters:
 
         - path: src/ErrorHandler/ResetContainerErrorHandler.php
           message: '#Property .*ResetContainerErrorHandler::\$container.*does not accept.*ContainerInterface\|null\.#'
+
+        - path: tests/Process/DummyProcess.php
+          message: '#DummyProcess::\$input#'

@@ -80,7 +80,7 @@ final class DummyProcess extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function setTimeout(?float $timeout)
+    public function setTimeout(?float $timeout): self
     {
         parent::setTimeout($timeout);
 
@@ -88,17 +88,21 @@ final class DummyProcess extends Process
             __FUNCTION__,
             func_get_args(),
         ];
+
+        return $this;
     }
 
-    public function setInput($input)
+    public function setInput($input): self
     {
         Assert::isInstanceOf($input, InputStream::class);
         $this->input = $input;
 
         $this->calls[] = [__FUNCTION__];
+
+        return $this;
     }
 
-    public function setEnv(array $env)
+    public function setEnv(array $env): self
     {
         parent::setEnv($env);
 
@@ -106,6 +110,8 @@ final class DummyProcess extends Process
             __FUNCTION__,
             func_get_args(),
         ];
+
+        return $this;
     }
 
     public function start(?callable $callback = null, array $env = [])
