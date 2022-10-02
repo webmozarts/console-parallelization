@@ -18,7 +18,7 @@ use function explode;
 use PHPUnit\Framework\TestCase;
 use function sprintf;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Webmozarts\Console\Parallelization\FakeCallable;
+use Webmozarts\Console\Parallelization\CallableUtil;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 
@@ -36,8 +36,8 @@ final class SymfonyProcessLauncherTest extends TestCase
             10,
             1,
             new FakeLogger(),
-            FakeCallable::create(),
-            FakeCallable::create(),
+            CallableUtil::create(),
+            CallableUtil::create(),
             new FakeProcessFactory(),
         );
 

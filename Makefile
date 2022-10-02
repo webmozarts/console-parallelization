@@ -35,7 +35,7 @@ INFECTION = $(INFECTION_BIN) --skip-initial-tests --coverage=$(COVERAGE_DIR) --o
 #---------------------------------------------------------------------------
 
 .PHONY: all
-all: cs test infection
+all: cs validate-package phpstan infection
 
 .PHONY: help
 help:
@@ -58,7 +58,7 @@ gitignore_sort:
 
 .PHONY: test
 test: 	 	  ## Runs all the tests
-test: clear-cache validate-package phpstan phpunit
+test: validate-package phpstan phpunit
 
 .PHONY: phpstan
 phpstan: 	  ## Runs PHPStan
@@ -94,16 +94,16 @@ validate-package: vendor
 
 .PHONY: clear
 clear: 	  	  ## Clears various artifacts
-clear: clear-cache clear-coverage
+clear: clear_cache clear_coverage
 
-.PHONY: clear-cache
-clear-cache: 	  ## Clears the integration test app cache
-clear-cache:
+.PHONY: clear_cache
+clear_cache: 	  ## Clears the integration test app cache
+clear_cache:
 	rm -rf tests/Integration/**/cache || true
 
-.PHONY: clear-coverage
-clear-coverage:	  ## Clears the coverage reports
-clear-coverage:
+.PHONY: clear_coverage
+clear_coverage:	  ## Clears the coverage reports
+clear_coverage:
 	rm -rf $(COVERAGE_DIR) || true
 
 

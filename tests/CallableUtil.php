@@ -15,7 +15,7 @@ namespace Webmozarts\Console\Parallelization;
 
 use DomainException;
 
-final class FakeCallable
+final class CallableUtil
 {
     private function __construct()
     {
