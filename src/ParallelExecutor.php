@@ -30,6 +30,8 @@ use function trim;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
+use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 
 final class ParallelExecutor
 {
@@ -97,6 +99,8 @@ final class ParallelExecutor
      */
     private ?array $extraEnvironmentVariables;
 
+    private ProcessLauncherFactory $processLauncherFactory;
+
     /**
      * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
@@ -126,12 +130,14 @@ final class ParallelExecutor
         string $phpExecutable,
         string $scriptPath,
         string $workingDirectory,
-        ?array $extraEnvironmentVariables
+        ?array $extraEnvironmentVariables,
+        ProcessLauncherFactory $processLauncherFactory
     ) {
         self::validateBatchSize($batchSize);
         self::validateSegmentSize($segmentSize);
         self::validateScriptPath($scriptPath);
         self::validateProgressSymbol($progressSymbol);
+        // TODO: validate that fetch items do not have new lines
 
         $this->fetchItems = $fetchItems;
         $this->runSingleCommand = $runSingleCommand;
@@ -150,6 +156,7 @@ final class ParallelExecutor
         $this->scriptPath = $scriptPath;
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
+        $this->processLauncherFactory = $processLauncherFactory;
     }
 
     public function execute(
@@ -344,7 +351,7 @@ final class ParallelExecutor
         InputInterface $input,
         Logger $logger
     ): ProcessLauncher {
-        $childCommand = array_merge(
+        $enrichedChildCommand = array_merge(
             $this->createChildCommand($input),
             // Forward all the options except for "processes" to the children
             // this way the children can inherit the options such as env
@@ -356,8 +363,8 @@ final class ParallelExecutor
             ),
         );
 
-        return new ProcessLauncher(
-            $childCommand,
+        return $this->processLauncherFactory->create(
+            $enrichedChildCommand,
             $this->workingDirectory,
             $this->extraEnvironmentVariables,
             $numberOfProcesses,
