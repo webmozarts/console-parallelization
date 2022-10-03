@@ -18,21 +18,31 @@ use function func_get_args;
 use function implode;
 use const PHP_EOL;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
+use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
+use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
+use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutor
  */
 final class ParallelExecutorTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @dataProvider childProcessProvider
      */
@@ -217,6 +227,464 @@ final class ParallelExecutorTest extends TestCase
         })();
     }
 
+    public function test_it_can_launch_configured_child_processes(): void
+    {
+        $numberOfProcesses = 3;
+        $segmentSize = 2;
+
+        $parallelizationInput = new ParallelizationInput(
+            true,
+            $numberOfProcesses,
+            null,
+            false,
+        );
+        $input = new StringInput('');
+        $output = new NullOutput();
+        $errorHandler = new DummyErrorHandler();
+        $logger = new DummyLogger();
+
+        $noop = static function () {};
+
+        $items = ['item0', 'item1', 'item2'];
+        $commandName = 'import:something';
+        $commandDefinition = new InputDefinition([
+            new InputArgument(
+                'groupId',
+                InputArgument::REQUIRED,
+            ),
+        ]);
+        $phpExecutable = __FILE__;
+        $scriptPath = __DIR__.'/../bin/console';
+        $workingDirectory = __DIR__;
+        $extraEnvironmentVariables = ['EXTRA_ENV' => '1'];
+
+        $processLauncherProphecy = $this->prophesize(ProcessLauncher::class);
+        $processLauncherProphecy
+            ->run($items)
+            ->shouldBeCalled();
+
+        $processLauncherFactoryProphecy = $this->prophesize(ProcessLauncherFactory::class);
+        $processLauncherFactoryProphecy
+            ->create(
+                [
+                    $phpExecutable,
+                    $scriptPath,
+                    $commandName,
+                    '--child',
+                ],
+                $workingDirectory,
+                $extraEnvironmentVariables,
+                $numberOfProcesses,
+                $segmentSize,
+                $logger,
+                Argument::type('callable'),
+                Argument::type('callable'),
+                Argument::type(StandardSymfonyProcessFactory::class),
+            )
+            ->willReturn($processLauncherProphecy->reveal());
+
+        $executor = new ParallelExecutor(
+            static fn () => $items,
+            $noop,
+            static fn (int $itemCount) => 0 === $itemCount ? 'item' : 'items',
+            $commandName,
+            $commandDefinition,
+            $errorHandler,
+            StringStream::fromString(''),
+            1,
+            $segmentSize,
+            $noop,
+            $noop,
+            $noop,
+            $noop,
+            'ø',
+            $phpExecutable,
+            $scriptPath,
+            $workingDirectory,
+            $extraEnvironmentVariables,
+            $processLauncherFactoryProphecy->reveal(),
+        );
+
+        $executor->execute(
+            $parallelizationInput,
+            $input,
+            $output,
+            $logger,
+        );
+
+        $processLauncherProphecy
+            ->run(Argument::cetera())
+            ->shouldHaveBeenCalledTimes(1);
+        $processLauncherFactoryProphecy
+            ->create(Argument::cetera())
+            ->shouldHaveBeenCalledTimes(1);
+    }
+
+    /**
+     * @dataProvider childProcessSpawnerProvider
+     */
+    public function test_it_can_can_launch_child_processes_or_process_within_the_main_process(
+        ParallelizationInput $parallelizationInput,
+        int $segmentSize,
+        array $items,
+        bool $expected
+    ): void {
+        $noop = static function () {};
+
+        $processLauncherFactory = $this->createProcessLauncherFactory($expected);
+
+        $executor = self::createMainProcessExecutor(
+            $items,
+            $noop,
+            new DummyErrorHandler(),
+            2,
+            $segmentSize,
+            $noop,
+            $noop,
+            $noop,
+            $noop,
+            'ø',
+            $processLauncherFactory,
+        );
+
+        $executor->execute(
+            $parallelizationInput,
+            new StringInput(''),
+            new NullOutput(),
+            new DummyLogger(),
+        );
+
+        $this->addToAssertionCount(1);
+    }
+
+    public static function childProcessSpawnerProvider(): iterable
+    {
+        $createSet = static fn (
+            int $itemCount,
+            bool $numberOfProcessesDefined,
+            int $segmentSize,
+            int $numberOfProcesses,
+            bool $expectedChildProcessesSpawned
+        ) => [
+            new ParallelizationInput(
+                $numberOfProcessesDefined,
+                $numberOfProcesses,
+                null,
+                false,
+            ),
+            $segmentSize,
+            array_fill(0, $itemCount, 'itemX'),
+            $expectedChildProcessesSpawned,
+        ];
+
+        yield 'more items than segment size; more than one process; number of processes defined' => $createSet(
+            3,
+            true,
+            2,
+            2,
+            true,
+        );
+
+        yield 'more items than segment size; more than one process; number of processes NOT defined' => $createSet(
+            3,
+            false,
+            2,
+            2,
+            true,
+        );
+
+        yield 'more items than segment size; one process; number of processes defined' => $createSet(
+            3,
+            true,
+            2,
+            1,
+            true,
+        );
+
+        yield 'more items than segment size; one process; number of processes NOT defined' => $createSet(
+            3,
+            false,
+            3,
+            1,
+            false,
+        );
+
+        yield 'as many items as segment size; more than one process; number of processes defined' => $createSet(
+            3,
+            true,
+            3,
+            2,
+            false,
+        );
+
+        yield 'as many items as segment size; more than one process; number of processes NOT defined' => $createSet(
+            3,
+            false,
+            3,
+            2,
+            false,
+        );
+
+        yield 'as many items as segment size; one process; number of processes defined' => $createSet(
+            3,
+            true,
+            3,
+            1,
+            false,
+        );
+
+        yield 'as many items as segment size; one process; number of processes NOT defined' => $createSet(
+            3,
+            false,
+            3,
+            1,
+            false,
+        );
+    }
+
+    /**
+     * @dataProvider mainProcessProvider
+     */
+    public function test_it_can_execute_a_main_process(
+        ParallelizationInput $parallelizationInput,
+        InputInterface $input,
+        BufferedOutput $output,
+        array $items,
+        int $batchSize,
+        int $segmentSize,
+        string $progressSymbol,
+        string $expectedOutput,
+        int $expectedExitCode,
+        array $expectedCalls,
+        array $expectedLogRecords,
+        bool $expectedChildProcessesSpawned
+    ): void {
+        $calls = [];
+        $errorHandler = new DummyErrorHandler();
+        $logger = new DummyLogger();
+
+        $createCallable = static function (string $name) use (&$calls) {
+            return static function () use ($name, &$calls): void {
+                $calls[] = [$name, func_get_args()];
+            };
+        };
+
+        $processLauncherFactory = $this->createProcessLauncherFactory(
+            $expectedChildProcessesSpawned,
+        );
+
+        $executor = self::createMainProcessExecutor(
+            $items,
+            $createCallable('runSingleCommand'),
+            $errorHandler,
+            $batchSize,
+            $segmentSize,
+            $createCallable('runBeforeFirstCommand'),
+            $createCallable('runAfterLastCommand'),
+            $createCallable('runBeforeBatch'),
+            $createCallable('runAfterBatch'),
+            $progressSymbol,
+            $processLauncherFactory,
+        );
+
+        $exitCode = $executor->execute(
+            $parallelizationInput,
+            $input,
+            $output,
+            $logger,
+        );
+
+        self::assertSame($expectedOutput, $output->fetch());
+        self::assertSame($expectedExitCode, $exitCode);
+        self::assertSame($expectedCalls, $calls);
+        self::assertSame($expectedLogRecords, $logger->records);
+    }
+
+    public static function mainProcessProvider(): iterable
+    {
+        yield from PHPUnitProviderUtil::prefixWithLabel(
+            '[withChild] ',
+            self::mainProcessWithChildProcessLaunchedProvider(),
+        );
+
+        yield from PHPUnitProviderUtil::prefixWithLabel(
+            '[withoutChild] ',
+            self::mainProcessWithoutChildProcessLaunchedProvider(),
+        );
+    }
+
+    private static function mainProcessWithChildProcessLaunchedProvider(): iterable
+    {
+        $batchSize = 2;
+        $segmentSize = 2;
+        $numberOfProcesses = 5;
+        $numberOfProcessesDefined = true;
+        $numberOfSegments = 2;
+        $numberOfBatches = 2;
+
+        $input = new StringInput('');
+        $output = new BufferedOutput();
+
+        $items = [
+            'item1',
+            'item2',
+            'item3',
+        ];
+
+        yield [
+            new ParallelizationInput(
+                $numberOfProcessesDefined,
+                $numberOfProcesses,
+                null,
+                false,
+            ),
+            $input,
+            $output,
+            $items,
+            $batchSize,
+            $segmentSize,
+            '👉',
+            '',
+            0,
+            [
+                [
+                    'runBeforeFirstCommand',
+                    [$input, $output],
+                ],
+                [
+                    'runAfterLastCommand',
+                    [$input, $output],
+                ],
+            ],
+            [
+                [
+                    'logConfiguration',
+                    [
+                        $segmentSize,
+                        $batchSize,
+                        3,
+                        $numberOfSegments,
+                        $numberOfBatches,
+                        $numberOfProcesses,
+                        'items',
+                    ],
+                ],
+                [
+                    'startProgress',
+                    [3],
+                ],
+                [
+                    'finish',
+                    ['items'],
+                ],
+            ],
+            true,
+        ];
+    }
+
+    /** @noinspection NestedTernaryOperatorInspection */
+    private static function mainProcessWithoutChildProcessLaunchedProvider(): iterable
+    {
+        $batchSize = 2;
+        $segmentSize = 3;
+        $numberOfProcesses = 1;
+        $numberOfSegments = 1;
+        $numberOfBatches = 2;
+
+        $input = new StringInput('');
+        $output = new BufferedOutput();
+
+        yield [
+            new ParallelizationInput(
+                false,
+                $numberOfProcesses,
+                null,
+                false,
+            ),
+            $input,
+            $output,
+            ['item1', 'item2', 'item3'],
+            $batchSize,
+            $segmentSize,
+            '👉',
+            '',
+            0,
+            [
+                [
+                    'runBeforeFirstCommand',
+                    [$input, $output],
+                ],
+                [
+                    'runBeforeBatch',
+                    [$input, $output, ['item1', 'item2']],
+                ],
+                [
+                    'runSingleCommand',
+                    ['item1', $input, $output],
+                ],
+                [
+                    'runSingleCommand',
+                    ['item2', $input, $output],
+                ],
+                [
+                    'runAfterBatch',
+                    [$input, $output, ['item1', 'item2']],
+                ],
+                [
+                    'runBeforeBatch',
+                    [$input, $output, ['item3']],
+                ],
+                [
+                    'runSingleCommand',
+                    ['item3', $input, $output],
+                ],
+                [
+                    'runAfterBatch',
+                    [$input, $output, ['item3']],
+                ],
+                [
+                    'runAfterLastCommand',
+                    [$input, $output],
+                ],
+            ],
+            [
+                [
+                    'logConfiguration',
+                    [
+                        $segmentSize,
+                        $batchSize,
+                        3,
+                        $numberOfSegments,
+                        $numberOfBatches,
+                        $numberOfProcesses,
+                        'items',
+                    ],
+                ],
+                [
+                    'startProgress',
+                    [3],
+                ],
+                [
+                    'advance',
+                    [],
+                ],
+                [
+                    'advance',
+                    [],
+                ],
+                [
+                    'advance',
+                    [],
+                ],
+                [
+                    'finish',
+                    ['items'],
+                ],
+            ],
+            false,
+        ];
+    }
+
     /**
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param resource                                                     $childSourceStream
@@ -258,5 +726,75 @@ final class ParallelExecutorTest extends TestCase
             null,
             new FakeProcessLauncherFactory(),
         );
+    }
+
+    /**
+     * @param list<string>                                                 $items
+     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
+     * @param positive-int                                                 $batchSize
+     * @param positive-int                                                 $segmentSize
+     * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
+     * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
+     * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
+     * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
+     */
+    private static function createMainProcessExecutor(
+        array $items,
+        callable $runSingleCommand,
+        ItemProcessingErrorHandler $errorHandler,
+        int $batchSize,
+        int $segmentSize,
+        callable $runBeforeFirstCommand,
+        callable $runAfterLastCommand,
+        callable $runBeforeBatch,
+        callable $runAfterBatch,
+        string $progressSymbol,
+        ProcessLauncherFactory $processLauncherFactory
+    ): ParallelExecutor {
+        return new ParallelExecutor(
+            static fn () => $items,
+            $runSingleCommand,
+            static fn (int $itemCount) => 0 === $itemCount ? 'item' : 'items',
+            'import:something',
+            new InputDefinition([
+                new InputArgument(
+                    'groupId',
+                    InputArgument::REQUIRED,
+                ),
+            ]),
+            $errorHandler,
+            StringStream::fromString(''),
+            $batchSize,
+            $segmentSize,
+            $runBeforeFirstCommand,
+            $runAfterLastCommand,
+            $runBeforeBatch,
+            $runAfterBatch,
+            $progressSymbol,
+            __FILE__,
+            __FILE__,
+            __DIR__,
+            null,
+            $processLauncherFactory,
+        );
+    }
+
+    private function createProcessLauncherFactory(bool $spawnChildProcesses): ProcessLauncherFactory
+    {
+        if (!$spawnChildProcesses) {
+            return new FakeProcessLauncherFactory();
+        }
+
+        $processLauncherProphecy = $this->prophesize(ProcessLauncher::class);
+        $processLauncherProphecy
+            ->run(Argument::cetera())
+            ->shouldBeCalled();
+
+        $processLauncherFactoryProphecy = $this->prophesize(ProcessLauncherFactory::class);
+        $processLauncherFactoryProphecy
+            ->create(Argument::cetera())
+            ->willReturn($processLauncherProphecy->reveal());
+
+        return $processLauncherFactoryProphecy->reveal();
     }
 }
