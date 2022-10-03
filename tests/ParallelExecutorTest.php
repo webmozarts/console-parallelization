@@ -18,13 +18,17 @@ use function func_get_args;
 use function implode;
 use const PHP_EOL;
 use PHPUnit\Framework\TestCase;
+<<<<<<< HEAD
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Console\Input\InputArgument;
+=======
+>>>>>>> upstream/master
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+<<<<<<< HEAD
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
@@ -35,14 +39,24 @@ use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
+=======
+use Symfony\Component\Console\Output\OutputInterface;
+use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\Logger\FakeLogger;
+use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
+>>>>>>> upstream/master
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutor
  */
 final class ParallelExecutorTest extends TestCase
 {
+<<<<<<< HEAD
     use ProphecyTrait;
 
+=======
+>>>>>>> upstream/master
     /**
      * @dataProvider childProcessProvider
      */
@@ -227,6 +241,7 @@ final class ParallelExecutorTest extends TestCase
         })();
     }
 
+<<<<<<< HEAD
     public function test_it_can_launch_configured_child_processes(): void
     {
         $numberOfProcesses = 3;
@@ -685,6 +700,8 @@ final class ParallelExecutorTest extends TestCase
         ];
     }
 
+=======
+>>>>>>> upstream/master
     /**
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param resource                                                     $childSourceStream
@@ -727,6 +744,7 @@ final class ParallelExecutorTest extends TestCase
             new FakeProcessLauncherFactory(),
         );
     }
+<<<<<<< HEAD
 
     /**
      * @param list<string>                                                 $items
@@ -797,4 +815,6 @@ final class ParallelExecutorTest extends TestCase
 
         return $processLauncherFactoryProphecy->reveal();
     }
+=======
+>>>>>>> upstream/master
 }
