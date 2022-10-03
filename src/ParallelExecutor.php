@@ -348,10 +348,10 @@ final class ParallelExecutor
         int $numberOfItems,
         int $segmentSize,
         int $numberOfProcesses,
-        bool $umberOfProcessesDefined
+        bool $numberOfProcessesDefined
     ): bool {
         return $numberOfItems > $segmentSize
-            && ($numberOfProcesses > 1 || $umberOfProcessesDefined);
+            && ($numberOfProcesses > 1 || $numberOfProcessesDefined);
     }
 
     private function createProcessLauncher(
