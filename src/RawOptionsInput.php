@@ -23,7 +23,10 @@ use Symfony\Component\Console\Input\InputInterface;
  */
 final class RawOptionsInput extends Input
 {
-    private function __construct(?InputDefinition $definition = null)
+    /**
+     * @codeCoverageIgnore
+     */
+    private function __construct(?InputDefinition $definition)
     {
         parent::__construct($definition);
     }
@@ -40,21 +43,33 @@ final class RawOptionsInput extends Input
             : [];
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getFirstArgument(): ?string
     {
         throw new DomainException('Not implemented.');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function hasParameterOption($values, bool $onlyParams = false): bool
     {
         throw new DomainException('Not implemented.');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getParameterOption($values, $default = false, bool $onlyParams = false)
     {
         throw new DomainException('Not implemented.');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     protected function parse(): void
     {
         throw new DomainException('Not implemented.');

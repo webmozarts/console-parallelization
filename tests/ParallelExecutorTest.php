@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use function array_fill;
+use Error;
 use function func_get_args;
 use function implode;
 use const PHP_EOL;
@@ -87,8 +88,9 @@ final class ParallelExecutorTest extends TestCase
         );
 
         self::assertSame($expectedOutput, $output->fetch());
-        self::assertSame($expectedExitCode, $exitCode);
         self::assertSame($expectedCalls, $calls);
+        self::assertSame([], $errorHandler->calls);
+        self::assertSame($expectedExitCode, $exitCode);
     }
 
     public static function childProcessProvider(): iterable
@@ -225,6 +227,107 @@ final class ParallelExecutorTest extends TestCase
                 [],
             ];
         })();
+    }
+
+    public function test_it_handles_processing_failures_in_child_processes(): void
+    {
+        $parallelizationInput = new ParallelizationInput(
+            true,
+            5,
+            null,
+            true,
+        );
+        $input = new StringInput('');
+        $output = new BufferedOutput();
+        $items = [
+            'item1',
+            'item2',
+            'item3',
+        ];
+        $sourceStreamString = implode(PHP_EOL, $items);
+        $batchSize = 2;
+        $progressSymbol = '👉';
+        $calls = [];
+        $errorHandler = new DummyErrorHandler();
+        $sourceStream = StringStream::fromString($sourceStreamString);
+        $error = new Error('Processing failed.');
+        $logger = new FakeLogger();
+
+        $createCallable = static function (string $name) use (&$calls) {
+            return static function () use ($name, &$calls): void {
+                $calls[] = [$name, func_get_args()];
+            };
+        };
+
+        $executor = self::createChildProcessExecutor(
+            static function (string $item) use ($error, &$calls): void {
+                $calls[] = ['runSingleCommand', func_get_args()];
+
+                if ('item2' === $item) {
+                    throw $error;
+                }
+            },
+            $errorHandler,
+            $sourceStream,
+            $batchSize,
+            $createCallable('runBeforeFirstCommand'),
+            $createCallable('runAfterLastCommand'),
+            $createCallable('runBeforeBatch'),
+            $createCallable('runAfterBatch'),
+            $progressSymbol,
+        );
+
+        $expectedOutput = $progressSymbol.$progressSymbol.$progressSymbol;
+        $expectedExitCode = 0;  // TODO: since a child failed shouldn't it fail?
+        $expectedCalls = [
+            [
+                'runBeforeBatch',
+                [$input, $output, ['item1', 'item2']],
+            ],
+            [
+                'runSingleCommand',
+                ['item1', $input, $output],
+            ],
+            [
+                'runSingleCommand',
+                ['item2', $input, $output],
+            ],
+            [
+                'runAfterBatch',
+                [$input, $output, ['item1', 'item2']],
+            ],
+            [
+                'runBeforeBatch',
+                [$input, $output, ['item3']],
+            ],
+            [
+                'runSingleCommand',
+                ['item3', $input, $output],
+            ],
+            [
+                'runAfterBatch',
+                [$input, $output, ['item3']],
+            ],
+        ];
+        $expectedErrors = [
+            [
+                'item2',
+                $error,
+                $logger,
+            ],
+        ];
+
+        $exitCode = $executor->execute(
+            $parallelizationInput,
+            $input,
+            $output,
+            $logger,
+        );
+
+        self::assertSame($expectedOutput, $output->fetch());
+        self::assertSame($expectedCalls, $calls);
+        self::assertSame($expectedErrors, $errorHandler->calls);
+        self::assertSame($expectedExitCode, $exitCode);
     }
 
     public function test_it_can_launch_configured_child_processes(): void
@@ -495,9 +598,10 @@ final class ParallelExecutorTest extends TestCase
         );
 
         self::assertSame($expectedOutput, $output->fetch());
-        self::assertSame($expectedExitCode, $exitCode);
         self::assertSame($expectedCalls, $calls);
         self::assertSame($expectedLogRecords, $logger->records);
+        self::assertSame([], $errorHandler->calls);
+        self::assertSame($expectedExitCode, $exitCode);
     }
 
     public static function mainProcessProvider(): iterable
@@ -511,6 +615,145 @@ final class ParallelExecutorTest extends TestCase
             '[withoutChild] ',
             self::mainProcessWithoutChildProcessLaunchedProvider(),
         );
+    }
+
+    public function test_it_processes_the_child_processes_output(): void
+    {
+        $parallelizationInput = new ParallelizationInput(
+            true,
+            2,
+            null,
+            false,
+        );
+        $batchSize = 2;
+        $segmentSize = 2;
+        $input = new StringInput('');
+        $output = new BufferedOutput();
+        $items = [
+            'item1',
+            'item2',
+            'item3',
+            'item4',
+            'item5',
+        ];
+        $progressSymbol = '👉';
+        $calls = [];
+        $errorHandler = new DummyErrorHandler();
+        $logger = new DummyLogger();
+
+        $createCallable = static function (string $name) use (&$calls) {
+            return static function () use ($name, &$calls): void {
+                $calls[] = [$name, func_get_args()];
+            };
+        };
+
+        $processCallback = FakeCallable::create();
+
+        $processLauncherProphecy = $this->prophesize(ProcessLauncher::class);
+        $processLauncherProphecy
+            ->run(Argument::cetera())
+            ->will(static function () use ($progressSymbol, &$processCallback): void {
+                $processCallback('test', $progressSymbol);
+                $processCallback('test', 'FOO');    // unexpected output
+                $processCallback('test', $progressSymbol);
+                $processCallback('test', $progressSymbol.$progressSymbol.$progressSymbol);  // multi-step
+                $processCallback('test', $progressSymbol);
+            });
+
+        $processLauncherFactoryProphecy = $this->prophesize(ProcessLauncherFactory::class);
+        $processLauncherFactoryProphecy
+            ->create(Argument::cetera())
+            ->will(static function (array $arguments) use ($processLauncherProphecy, &$processCallback) {
+                $processCallback = $arguments[6];
+
+                return $processLauncherProphecy->reveal();
+            });
+
+        $executor = self::createMainProcessExecutor(
+            $items,
+            $createCallable('runSingleCommand'),
+            $errorHandler,
+            $batchSize,
+            $segmentSize,
+            $createCallable('runBeforeFirstCommand'),
+            $createCallable('runAfterLastCommand'),
+            $createCallable('runBeforeBatch'),
+            $createCallable('runAfterBatch'),
+            $progressSymbol,
+            $processLauncherFactoryProphecy->reveal(),
+        );
+
+        $expectedOutput = '';
+        $expectedCalls = [
+            [
+                'runBeforeFirstCommand',
+                [$input, $output],
+            ],
+            [
+                'runAfterLastCommand',
+                [$input, $output],
+            ],
+        ];
+        $expectedLogRecords = [
+            [
+                'logConfiguration',
+                [
+                    $segmentSize,
+                    $batchSize,
+                    5,
+                    3,
+                    3,
+                    2,
+                    'items',
+                ],
+            ],
+            [
+                'startProgress',
+                [5],
+            ],
+            [
+                'advance',
+                [1],
+            ],
+            [
+                'logUnexpectedOutput',
+                ['FOO', $progressSymbol],
+            ],
+            [
+                'advance',
+                [0],
+            ],
+            [
+                'advance',
+                [1],
+            ],
+            [
+                'advance',
+                [3],
+            ],
+            [
+                'advance',
+                [1],
+            ],
+            [
+                'finish',
+                ['items'],
+            ],
+        ];
+        $expectedExitCode = 0;  // TODO: should return since a child process failed
+
+        $exitCode = $executor->execute(
+            $parallelizationInput,
+            $input,
+            $output,
+            $logger,
+        );
+
+        self::assertSame($expectedOutput, $output->fetch());
+        self::assertSame($expectedCalls, $calls);
+        self::assertSame($expectedLogRecords, $logger->records);
+        self::assertSame([], $errorHandler->calls);
+        self::assertSame($expectedExitCode, $exitCode);
     }
 
     private static function mainProcessWithChildProcessLaunchedProvider(): iterable

@@ -5,6 +5,9 @@ parameters:
         - tests
     excludePaths:
         - tests/Integration/var
+        - tests/FakeInput.php
+        - tests/FakeInput74.php
+        - tests/FakeInput81.php
         - tests/Process/DummyProcess.php
         - tests/Process/DummyProcess74.php
         - tests/Process/DummyProcess81.php
@@ -31,3 +34,9 @@ parameters:
 
         - path: tests/Process/SymfonyProcessLauncherTest.php
           message: '#DummyProcess#'
+
+        - path: tests/RawOptionsInputTest.php
+          message: '#FakeInput#'
+
+        - path: tests/ParallelExecutorFactoryTest.php
+          message: '#ParallelExecutorFactory::create\(\) expects callable#'

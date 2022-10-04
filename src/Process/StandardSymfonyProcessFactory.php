@@ -37,9 +37,11 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
         $process->setInput($inputStream);
         // TODO: remove the following once dropping Symfony 4.4. Environment
         //  variables are always inherited as of 5.0
+        // @codeCoverageIgnoreStart
         if (method_exists($process, 'inheritEnvironmentVariables')) {
             $process->inheritEnvironmentVariables(true);
         }
+        // @codeCoverageIgnoreEnd
         $process->start($callback);
 
         return $process;
