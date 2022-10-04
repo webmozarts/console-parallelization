@@ -13,7 +13,14 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function chr;
+use function getcwd;
 use PHPUnit\Framework\TestCase;
+use function Safe\chdir;
+use function Safe\putenv;
 use Symfony\Component\Console\Input\InputDefinition;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
@@ -94,6 +101,149 @@ final class ParallelExecutorFactoryTest extends TestCase
         );
 
         self::assertEquals($expected, $executor);
+    }
+
+    /**
+     * @dataProvider defaultValuesProvider
+     */
+    public function test_it_can_create_an_executor_with_default_values(
+        array $environmentVariables,
+        string $workingDirectory,
+        string $expectedSymbol,
+        string $expectedPhpExecutable,
+        string $expectedScriptPath,
+        string $expectedWorkingDirectory
+    ): void {
+        $cleanUpWorkingDirectory = self::moveToWorkingDirectory($workingDirectory);
+        $cleanUpEnvironmentVariables = self::setEnvironmentVariables($environmentVariables);
+
+        $expected = ParallelExecutorFactory::create(
+            static fn () => ['item1', 'item2'],
+            static fn () => '',
+            static fn () => 'item',
+            'import:movies',
+            new InputDefinition(),
+            new FakeErrorHandler(),
+        )
+            ->withProgressSymbol($expectedSymbol)
+            ->withPhpExecutable($expectedPhpExecutable)
+            ->withScriptPath($expectedScriptPath)
+            ->withWorkingDirectory($expectedWorkingDirectory)
+            ->build();
+
+        $actual = ParallelExecutorFactory::create(
+            static fn () => ['item1', 'item2'],
+            static fn () => '',
+            static fn () => 'item',
+            'import:movies',
+            new InputDefinition(),
+            new FakeErrorHandler(),
+        )->build();
+
+        $cleanUpWorkingDirectory();
+        $cleanUpEnvironmentVariables();
+
+        self::assertEquals($expected, $actual);
+    }
+
+    public static function defaultValuesProvider(): iterable
+    {
+        $progressSymbol = chr(254);
+        $phpExecutable = __DIR__.'/Fixtures/fake-php-executable.php';
+        $expectedScriptPath = __DIR__.'/../bin/console';
+        $workingDirectory = __DIR__.'/Process';
+
+        yield 'nominal' => [
+            [
+                'PHP_BINARY' => $phpExecutable,
+                'PWD' => __DIR__.'/..',
+                'SCRIPT_NAME' => 'bin/console',
+            ],
+            $workingDirectory,
+            $progressSymbol,
+            $phpExecutable,
+            $expectedScriptPath,
+            $workingDirectory,
+        ];
+
+        yield 'script name is an absolute path' => [
+            [
+                'PHP_BINARY' => $phpExecutable,
+                'PWD' => __DIR__.'/..',
+                'SCRIPT_NAME' => __DIR__.'/../bin/console',
+            ],
+            $workingDirectory,
+            $progressSymbol,
+            $phpExecutable,
+            $expectedScriptPath,
+            $workingDirectory,
+        ];
+    }
+
+    /**
+     * @return callable():void
+     */
+    private static function moveToWorkingDirectory(string $workingDirectory): callable
+    {
+        $currentWorkingDirectory = getcwd();
+        chdir($workingDirectory);
+
+        return static fn () => chdir($currentWorkingDirectory);
+    }
+
+    /**
+     * @param array<string, string> $environmentVariables
+     *
+     * @return callable():void
+     */
+    private static function setEnvironmentVariables(array $environmentVariables): callable
+    {
+        $restoreEnvironmentVariables = array_map(
+            static fn (string $name) => self::setEnvironmentVariable($name, $environmentVariables[$name]),
+            array_keys($environmentVariables),
+        );
+
+        return static function () use ($restoreEnvironmentVariables): void {
+            foreach ($restoreEnvironmentVariables as $restoreEnvironmentVariable) {
+                $restoreEnvironmentVariable();
+            }
+        };
+    }
+
+    /**
+     * @return callable():void
+     */
+    private static function setEnvironmentVariable(string $name, string $value): callable
+    {
+        if (array_key_exists($name, $_SERVER)) {
+            $previousValue = $_SERVER[$name];
+
+            $restoreServer = static fn () => $_SERVER[$name] = $previousValue;
+        } else {
+            $restoreServer = static function () use ($name) {
+                unset($_SERVER[$name]);
+            };
+        }
+
+        if (array_key_exists($name, $_ENV)) {
+            $previousValue = $_ENV[$name];
+
+            $restoreEnv = static fn () => $_SERVER[$name] = $previousValue;
+        } else {
+            $restoreEnv = static function () use ($name) {
+                unset($_ENV[$name]);
+            };
+        }
+
+        putenv($name.'='.$value);
+        $_SERVER[$name] = $value;
+        $_ENV[$name] = $value;
+
+        return static function () use ($restoreServer, $restoreEnv, $name): void {
+            putenv($name.'=');
+            $restoreServer();
+            $restoreEnv();
+        };
     }
 
     private static function createCallable(int $id): callable

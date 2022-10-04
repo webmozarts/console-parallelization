@@ -180,12 +180,12 @@ final class ParallelExecutorFactory
             self::getNoopCallable(),
             self::getNoopCallable(),
             self::getNoopCallable(),
-            self::getProgressSymbol(),
-            self::getPhpExecutable(),
+            chr(254),
+            PhpExecutableFinder::find(),
             self::getScriptPath(),
-            self::getWorkingDirectory(),
+            getcwd(),
             null,
-            self::getProcessLauncherFactory(),
+            new SymfonyProcessLauncherFactory(),
         );
     }
 
@@ -384,74 +384,26 @@ final class ParallelExecutorFactory
         );
     }
 
-    private static function getProgressSymbol(): string
-    {
-        static $progressSymbol;
-
-        if (!isset($progressSymbol)) {
-            $progressSymbol = chr(254);
-        }
-
-        return $progressSymbol;
-    }
-
     private static function getNoopCallable(): callable
     {
         static $noop;
 
+        // @codeCoverageIgnoreStart
         if (!isset($noop)) {
             $noop = static function () {};
         }
+        // @codeCoverageIgnoreEnd
 
         return $noop;
     }
 
     private static function getScriptPath(): string
     {
-        static $scriptPath;
+        $pwd = $_SERVER['PWD'];
+        $scriptName = $_SERVER['SCRIPT_NAME'];
 
-        if (!isset($scriptPath)) {
-            $pwd = $_SERVER['PWD'];
-            $scriptName = $_SERVER['SCRIPT_NAME'];
-
-            $scriptPath = 0 === mb_strpos($scriptName, $pwd)
-                ? $scriptName
-                : $pwd.DIRECTORY_SEPARATOR.$scriptName;
-        }
-
-        return $scriptPath;
-    }
-
-    private static function getPhpExecutable(): string
-    {
-        static $phpExecutable;
-
-        if (!isset($phpExecutable)) {
-            $phpExecutable = PhpExecutableFinder::find();
-        }
-
-        return $phpExecutable;
-    }
-
-    private static function getWorkingDirectory(): string
-    {
-        static $cwd;
-
-        if (!isset($cwd)) {
-            $cwd = getcwd();
-        }
-
-        return $cwd;
-    }
-
-    private static function getProcessLauncherFactory(): ProcessLauncherFactory
-    {
-        static $processLauncherFactory;
-
-        if (!isset($processLauncherFactory)) {
-            $processLauncherFactory = new SymfonyProcessLauncherFactory();
-        }
-
-        return $processLauncherFactory;
+        return 0 === mb_strpos($scriptName, $pwd)
+            ? $scriptName
+            : $pwd.DIRECTORY_SEPARATOR.$scriptName;
     }
 }

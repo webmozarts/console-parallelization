@@ -45,6 +45,21 @@ final class ParallelizationInputTest extends TestCase
         self::assertTrue($configuredDefinition->hasOption('child'));
     }
 
+    public function test_it_can_be_instantiated(): void
+    {
+        $input = new ParallelizationInput(
+            true,
+            5,
+            'item',
+            true,
+        );
+
+        self::assertTrue($input->isNumberOfProcessesDefined());
+        self::assertSame(5, $input->getNumberOfProcesses());
+        self::assertSame('item', $input->getItem());
+        self::assertTrue($input->isChildProcess());
+    }
+
     /**
      * @dataProvider inputProvider
      */

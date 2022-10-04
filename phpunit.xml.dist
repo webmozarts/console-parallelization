@@ -18,6 +18,12 @@
         <include>
             <directory>src</directory>
         </include>
+        <exclude>
+            <file>src/Logger/DebugProgressBarFactory.php</file>
+            <file>src/Parallelization.php</file>
+            <file>src/Process/PhpExecutableFinder.php</file>
+            <file>src/Process/SymfonyProcessLauncherFactory.php</file>
+        </exclude>
     </coverage>
 
 </phpunit>
