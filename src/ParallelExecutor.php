@@ -25,7 +25,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-use function trim;
 use function usleep;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
@@ -36,6 +35,8 @@ use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 
 final class ParallelExecutor
 {
+    private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
+
     /**
      * @var callable(InputInterface):list<string>
      */
@@ -333,7 +334,7 @@ final class ParallelExecutor
         Logger $logger
     ): void {
         try {
-            ($this->runSingleCommand)(trim($item), $input, $output);
+            ($this->runSingleCommand)($item, $input, $output);
         } catch (Throwable $throwable) {
             $this->errorHandler->handleError($item, $throwable, $logger);
         }
@@ -380,7 +381,7 @@ final class ParallelExecutor
             $segmentSize,
             $logger,
             fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
-            static fn () => usleep(1000),   // 1ms
+            static fn () => usleep(self::CHILD_POLLING_IN_MICRO_SECONDS),
             new StandardSymfonyProcessFactory(),
         );
     }
@@ -396,9 +397,14 @@ final class ParallelExecutor
             $this->commandName,
             implode(
                 ' ',
-                array_slice(
-                    array_map('strval', $input->getArguments()),
-                    1,
+                // TODO: this looks suspicious: why do we need to take the first arg?
+                //      why is this not a specific arg?
+                //      why do we include optional arguments? (cf. options)
+                array_filter(
+                    array_slice(
+                        array_map('strval', $input->getArguments()),
+                        1,
+                    ),
                 ),
             ),
             '--child',

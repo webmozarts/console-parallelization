@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Error;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -42,25 +43,93 @@ final class StandardLoggerTest extends TestCase
         );
     }
 
-    public function test_it_can_log_the_configuration(): void
-    {
+    /**
+     * @dataProvider configurationProvider
+     */
+    public function test_it_can_log_the_configuration(
+        int $segmentSize,
+        int $batchSize,
+        int $numberOfItems,
+        int $numberOfSegments,
+        int $numberOfBatches,
+        int $numberOfProcesses,
+        string $itemName,
+        string $expected
+    ): void {
         $this->logger->logConfiguration(
+            $segmentSize,
+            $batchSize,
+            $numberOfItems,
+            $numberOfSegments,
+            $numberOfBatches,
+            $numberOfProcesses,
+            $itemName,
+        );
+
+        self::assertSame($expected, $this->output->fetch());
+    }
+
+    public static function configurationProvider(): iterable
+    {
+        yield 'nominal' => [
             5,
             3,
             8,
             2,
             4,
             2,
-            'token',
-        );
-
-        $expected = <<<'TXT'
-            Processing 8 token in segments of 5, batches of 3, 2 rounds, 4 batches in 2 processes
+            'tokens',
+            <<<'TXT'
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 2 processes
 
 
-            TXT;
+                TXT,
+        ];
 
-        self::assertSame($expected, $this->output->fetch());
+        yield 'single segment' => [
+            5,
+            3,
+            8,
+            1,
+            4,
+            2,
+            'tokens',
+            <<<'TXT'
+                Processing 8 tokens in segments of 5, batches of 3, 1 round, 4 batches in 2 processes
+
+
+                TXT,
+        ];
+
+        yield 'single batch' => [
+            5,
+            3,
+            8,
+            2,
+            1,
+            2,
+            'tokens',
+            <<<'TXT'
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 1 batch in 2 processes
+
+
+                TXT,
+        ];
+
+        yield 'single process' => [
+            5,
+            3,
+            8,
+            2,
+            4,
+            1,
+            'tokens',
+            <<<'TXT'
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 1 process
+
+
+                TXT,
+        ];
     }
 
     public function test_it_can_log_the_start_of_the_processing(): void
@@ -72,6 +141,16 @@ final class StandardLoggerTest extends TestCase
             TXT;
 
         self::assertSame($expected, $this->output->fetch());
+    }
+
+    public function test_it_cannot_start_an_already_started_process(): void
+    {
+        $this->logger->startProgress(10);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot start the progress: already started.');
+
+        $this->logger->startProgress(10);
     }
 
     public function test_it_can_log_the_progress_of_the_processing(): void
@@ -87,6 +166,14 @@ final class StandardLoggerTest extends TestCase
             TXT;
 
         self::assertSame($expected, $this->output->fetch());
+    }
+
+    public function test_it_cannot_advance_a_non_started_process(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected the progress to be started.');
+
+        $this->logger->advance();
     }
 
     public function test_it_can_log_the_progress_of_the_processing_of_multiple_items(): void
@@ -120,6 +207,14 @@ final class StandardLoggerTest extends TestCase
             TXT;
 
         self::assertSame($expected, $this->output->fetch());
+    }
+
+    public function test_it_cannot_end_the_processing_of_a_non_started_process(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected the progress to be started.');
+
+        $this->logger->finish('tokens');
     }
 
     public function test_it_can_log_the_unexpected_output_of_a_child_process(): void

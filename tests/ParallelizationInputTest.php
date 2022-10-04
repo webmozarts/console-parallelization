@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -72,6 +73,19 @@ final class ParallelizationInputTest extends TestCase
         $actual = ParallelizationInput::fromInput($input);
 
         self::assertEquals($expected, $actual);
+    }
+
+    public function test_it_can_be_instantiated_from_an_input_with_an_invalid_item(): void
+    {
+        $input = new ArrayInput([
+            'item' => new stdClass(),
+        ]);
+        self::bindInput($input);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid item type. Expected a string, got "object".');
+
+        ParallelizationInput::fromInput($input);
     }
 
     /**

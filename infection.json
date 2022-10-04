@@ -9,6 +9,55 @@
         "text": "dist/infection.log"
     },
     "mutators": {
-        "@default": true
+        "@default": true,
+        "ArrayItemRemoval": {
+            "ignoreSourceCodeByRegex": [
+                "InputOptionsSerializer::serialize\\(\\$this->commandDefinition, \\$input, \\['child', 'processes'\\]\\)"
+            ]
+        },
+        "CastString": {
+            "ignoreSourceCodeByRegex": [
+                "\\(string\\) \\$numberOfProcesses,"
+            ]
+        },
+        "CloneRemoval": false,
+        "DecrementInteger": {
+            "ignoreSourceCodeByRegex": [
+                ".*\\$numberOfStreamedItems = .*"
+            ]
+        },
+        "MBString": false,
+        "MethodCallRemoval": {
+            "ignoreSourceCodeByRegex": [
+                "\\$currentInputStream->close\\(\\);",
+                "Assert::.*?\\("
+            ]
+        },
+        "LogicalAnd": {
+            "ignoreSourceCodeByRegex": [
+                ".*ResettableContainerInterface.*"
+            ]
+        },
+        "UnwrapArrayFilter": {
+            "ignoreSourceCodeByRegex": [
+                "function createChildCommand\\("
+            ]
+        },
+        "UnwrapArrayMap": {
+            "ignoreSourceCodeByRegex": [
+                "array_map\\('strval', \\$input->getArguments\\(\\)\\)"
+            ]
+        },
+
+
+
+
+
+
+        "Break_": {
+            "ignoreSourceCodeByRegex": [
+                ".*\\$this->startProcess\\(\\$currentInputStream\\);\n-\\s+break;\n\\+\\s+continue;.*"
+            ]
+        }
     }
 }

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use function gettype;
 use function is_numeric;
 use function sprintf;
 use Symfony\Component\Console\Command\Command;
@@ -58,6 +59,7 @@ final class ParallelizationInput
         $numberOfProcesses = $input->getOption(self::PROCESSES_OPTION);
         /** @var string|null $item */
         $item = $input->getArgument(self::ITEM_ARGUMENT);
+        /** @var bool $isChild */
         $isChild = $input->getOption(self::CHILD_OPTION);
 
         $numberOfProcessesDefined = null !== $numberOfProcesses;
@@ -103,14 +105,21 @@ final class ParallelizationInput
         if ($hasItem && !is_numeric($item)) {
             // Safeguard in case an invalid type is accidentally passed in tests when invoking the
             // command directly
-            Assert::string($item);
+            Assert::string(
+                $item,
+                sprintf(
+                    'Invalid item type. Expected a string, got "%s".',
+                    // TODO: change to get_debug_type() once dropping PHP 7.4
+                    gettype($input),
+                ),
+            );
         }
 
         return new self(
             $numberOfProcessesDefined,
             $validatedNumberOfProcesses,
             $hasItem ? (string) $item : null,
-            (bool) $isChild,
+            $isChild,
         );
     }
 
