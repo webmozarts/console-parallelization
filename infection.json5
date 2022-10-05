@@ -1,5 +1,6 @@
 {
     "$schema": "vendor/infection/infection/resources/schema.json",
+    "timeout": 5,
     "source": {
         "directories": [
             "src"
@@ -9,15 +10,18 @@
         "text": "dist/infection.log"
     },
     "mutators": {
+        "global-ignoreSourceCodeByRegex": [
+            "Assert::.*"
+        ],
         "@default": true,
-        "ArrayItemRemoval": {
-            "ignoreSourceCodeByRegex": [
-                "InputOptionsSerializer::serialize\\(\\$this->commandDefinition, \\$input, \\['child', 'processes'\\]\\)"
+        "Break_": {
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\Process\\SymfonyProcessLauncher::run"
             ]
         },
         "CastString": {
             "ignoreSourceCodeByRegex": [
-                "\\(string\\) \\$numberOfProcesses,"
+                "\\(string\\) \\$numberOfProcesses.*"
             ]
         },
         "CloneRemoval": false,
@@ -28,9 +32,11 @@
         },
         "MBString": false,
         "MethodCallRemoval": {
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\Process\\StandardSymfonyProcessFactory::startProcess"
+            ],
             "ignoreSourceCodeByRegex": [
                 "\\$currentInputStream->close\\(\\);",
-                "Assert::.*?\\("
             ]
         },
         "LogicalAnd": {
@@ -39,24 +45,13 @@
             ]
         },
         "UnwrapArrayFilter": {
-            "ignoreSourceCodeByRegex": [
-                "function createChildCommand\\("
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\ParallelExecutor::createChildCommand"
             ]
         },
         "UnwrapArrayMap": {
-            "ignoreSourceCodeByRegex": [
-                "array_map\\('strval', \\$input->getArguments\\(\\)\\)"
-            ]
-        },
-
-
-
-
-
-
-        "Break_": {
-            "ignoreSourceCodeByRegex": [
-                ".*\\$this->startProcess\\(\\$currentInputStream\\);\n-\\s+break;\n\\+\\s+continue;.*"
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\ParallelExecutor::createChildCommand"
             ]
         }
     }

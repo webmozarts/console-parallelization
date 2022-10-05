@@ -88,6 +88,19 @@ final class ParallelizationInputTest extends TestCase
         ParallelizationInput::fromInput($input);
     }
 
+    public function test_it_can_be_instantiated_from_an_input_with_an_invalid_number_of_processes(): void
+    {
+        $input = new ArrayInput([
+            '--processes' => 0,
+        ]);
+        self::bindInput($input);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Expected the number of processes to be 1 or greater. Got "0".');
+
+        ParallelizationInput::fromInput($input);
+    }
+
     /**
      * @dataProvider invalidNumberOfProcessesProvider
      */

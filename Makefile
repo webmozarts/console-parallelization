@@ -16,7 +16,7 @@ CCEND=\033[0m
 COVERAGE_DIR = dist/coverage
 COVERAGE_XML = $(COVERAGE_DIR)/xml
 COVERAGE_HTML = $(COVERAGE_DIR)/html
-TARGET_MSI = 50
+TARGET_MSI = 100
 
 PHP_CS_FIXER_BIN = vendor-bin/php-cs-fixer/vendor/friendsofphp/php-cs-fixer/php-cs-fixer
 PHP_CS_FIXER = $(PHPNOGC) $(PHP_CS_FIXER_BIN)
