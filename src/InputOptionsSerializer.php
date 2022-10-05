@@ -28,6 +28,8 @@ use Symfony\Component\Console\Input\InputOption;
 
 final class InputOptionsSerializer
 {
+    private const ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
+
     private function __construct()
     {
     }
@@ -132,6 +134,6 @@ final class InputOptionsSerializer
      */
     private static function isValueRequiresQuoting($value): bool
     {
-        return is_string($value) && 0 < preg_match('/[\s\W]/x', $value);
+        return is_string($value) && 0 < preg_match(self::ESCAPE_TOKEN_PATTERN, $value);
     }
 }

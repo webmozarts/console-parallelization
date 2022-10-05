@@ -16,19 +16,24 @@ namespace Webmozarts\Console\Parallelization;
 use function array_fill;
 use Error;
 use function func_get_args;
+use function getcwd;
 use function implode;
+use InvalidArgumentException;
 use const PHP_EOL;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
@@ -341,7 +346,48 @@ final class ParallelExecutorTest extends TestCase
             null,
             false,
         );
-        $input = new StringInput('');
+
+        $input = new ArrayInput([
+            'item' => 'item3',
+            'groupId' => 'group2',
+            '--child' => null,
+            '--processes' => '2',
+            '--opt' => 'val',
+        ]);
+
+        $commandDefinition = new InputDefinition([
+            new InputArgument(
+                'item',
+                InputArgument::REQUIRED,
+            ),
+            new InputArgument(
+                'groupId',
+                InputArgument::REQUIRED,
+            ),
+            new InputArgument(
+                'optArg',
+                InputArgument::OPTIONAL,
+                '',
+                '',
+            ),
+            new InputOption(
+                'opt',
+                null,
+                InputOption::VALUE_REQUIRED,
+            ),
+            new InputOption(
+                'child',
+                null,
+                InputOption::VALUE_NONE,
+            ),
+            new InputOption(
+                'processes',
+                null,
+                InputOption::VALUE_REQUIRED,
+            ),
+        ]);
+        $input->bind($commandDefinition);
+
         $output = new NullOutput();
         $errorHandler = new DummyErrorHandler();
         $logger = new DummyLogger();
@@ -350,12 +396,6 @@ final class ParallelExecutorTest extends TestCase
 
         $items = ['item0', 'item1', 'item2'];
         $commandName = 'import:something';
-        $commandDefinition = new InputDefinition([
-            new InputArgument(
-                'groupId',
-                InputArgument::REQUIRED,
-            ),
-        ]);
         $phpExecutable = __FILE__;
         $scriptPath = __DIR__.'/../bin/console';
         $workingDirectory = __DIR__;
@@ -373,7 +413,9 @@ final class ParallelExecutorTest extends TestCase
                     $phpExecutable,
                     $scriptPath,
                     $commandName,
+                    'group2',
                     '--child',
+                    '--opt=val',
                 ],
                 $workingDirectory,
                 $extraEnvironmentVariables,
@@ -507,9 +549,17 @@ final class ParallelExecutorTest extends TestCase
         yield 'more items than segment size; one process; number of processes NOT defined' => $createSet(
             3,
             false,
-            3,
+            2,
             1,
             false,
+        );
+
+        yield 'more items than segment size; two processes; number of processes NOT defined' => $createSet(
+            3,
+            false,
+            2,
+            2,
+            true,
         );
 
         yield 'as many items as segment size; more than one process; number of processes defined' => $createSet(
@@ -754,6 +804,58 @@ final class ParallelExecutorTest extends TestCase
         self::assertSame($expectedLogRecords, $logger->records);
         self::assertSame([], $errorHandler->calls);
         self::assertSame($expectedExitCode, $exitCode);
+    }
+
+    /**
+     * @dataProvider invalidExecutorProvider
+     */
+    public function test_it_cannot_create_an_executor_with_an_invalid_value(
+        ParallelExecutorFactory $factory,
+        string $expectedExceptionMessage
+    ): void {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        $factory->build();
+    }
+
+    public static function invalidExecutorProvider(): iterable
+    {
+        $createFactory = static fn () => ParallelExecutorFactory::create(
+            FakeCallable::create(),
+            FakeCallable::create(),
+            FakeCallable::create(),
+            'test:command',
+            new InputDefinition(),
+            new FakeErrorHandler(),
+        );
+
+        yield 'invalid batch size' => [
+            // @phpstan-ignore-next-line
+            $createFactory()->withBatchSize(0),
+            'Expected the batch size to be 1 or greater. Got "0".',
+        ];
+
+        yield 'invalid segment size' => [
+            // @phpstan-ignore-next-line
+            $createFactory()->withSegmentSize(0),
+            'Expected the segment size to be 1 or greater. Got "0".',
+        ];
+
+        yield 'invalid script path' => [
+            $createFactory()->withScriptPath('/path/to/nowhere'),
+            'The script file could not be found at the path "/path/to/nowhere" (working directory: '.getcwd().')',
+        ];
+
+        yield 'invalid progress symbol' => [
+            $createFactory()->withProgressSymbol('foo'),
+            'Expected the progress symbol length to be 1. Got "3" for "foo".',
+        ];
+
+        yield 'invalid progress symbol (emoji)' => [
+            $createFactory()->withProgressSymbol('👹👹'),
+            'Expected the progress symbol length to be 1. Got "2" for "👹👹".',
+        ];
     }
 
     private static function mainProcessWithChildProcessLaunchedProvider(): iterable

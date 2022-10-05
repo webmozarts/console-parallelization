@@ -76,7 +76,7 @@ final class ChunkedItemsIteratorTest extends TestCase
     ): void {
         $iterator = ChunkedItemsIterator::fromItemOrCallable($item, $fetchItems, 10);
 
-        self::assertEquals($expectedItems, $iterator->getItems());
+        self::assertSame($expectedItems, $iterator->getItems());
     }
 
     public function test_it_validates_the_items_provided_by_the_closure(): void
@@ -223,6 +223,12 @@ final class ChunkedItemsIteratorTest extends TestCase
             null,
             static fn () => ['item0', 'item1'],
             ['item0', 'item1'],
+        ];
+
+        yield 'item closure; non string stringeable values' => [
+            null,
+            static fn () => [0, -.5, 7.3, 'item1'],
+            ['0', '-0.5', '7.3', 'item1'],
         ];
     }
 

@@ -83,8 +83,8 @@ final class StandardLogger implements Logger
 
     public function advance(int $steps = 1): void
     {
-        Assert::notNull(
-            $this->progressBar,
+        Assert::true(
+            isset($this->progressBar),
             'Expected the progress to be started.',
         );
 
@@ -93,19 +93,18 @@ final class StandardLogger implements Logger
 
     public function finish(string $itemName): void
     {
-        $progressBar = $this->progressBar;
-        Assert::notNull(
-            $progressBar,
+        Assert::true(
+            isset($this->progressBar),
             'Expected the progress to be started.',
         );
 
-        $progressBar->finish();
+        $this->progressBar->finish();
 
         $this->output->writeln('');
         $this->output->writeln('');
         $this->output->writeln(sprintf(
             'Processed %d %s.',
-            $progressBar->getMaxSteps(),
+            $this->progressBar->getMaxSteps(),
             $itemName,
         ));
 
@@ -142,7 +141,7 @@ final class StandardLogger implements Logger
     {
         $this->output->writeln(sprintf(
             "Failed to process \"%s\": %s\n%s",
-            trim($item),
+            $item,
             $throwable->getMessage(),
             $throwable->getTraceAsString(),
         ));

@@ -211,16 +211,6 @@ final class InputOptionsSerializerTest extends TestCase
             ['--opt=foo'],
         );
 
-        yield 'option with value requiring escaping' => $createSet(
-            new InputOption(
-                'opt',
-                null,
-                InputOption::VALUE_REQUIRED,
-            ),
-            ['--opt' => '"o_id in(\'20\')"'],
-            ['--opt="\"o_id in(\'20\')\""'],
-        );
-
         yield 'option with non string value (bool)' => $createSet(
             new InputOption(
                 'opt',
@@ -279,6 +269,59 @@ final class InputOptionsSerializerTest extends TestCase
             ),
             ['--no-opt' => null],
             ['--no-opt'],
+        );
+
+        yield from PHPUnitProviderUtil::prefixWithLabel(
+            '[escape token] ',
+            self::escapedValuesProvider(),
+        );
+    }
+
+    private static function escapedValuesProvider(): iterable
+    {
+        $createSet = static fn (
+            string $optionValue,
+            ?string $expected
+        ) => [
+            new InputDefinition([
+                new InputOption(
+                    'opt',
+                    null,
+                    InputOption::VALUE_REQUIRED,
+                ),
+            ]),
+            new ArrayInput([
+                '--opt' => $optionValue,
+            ]),
+            [],
+            [
+                '--opt='.$expected,
+            ],
+        ];
+
+        yield $createSet(
+            'foo',
+            'foo',
+        );
+
+        yield $createSet(
+            '"foo"',
+            '"\"foo\""',
+        );
+
+        yield $createSet(
+            '"o_id in(\'20\')"',
+            '"\"o_id in(\'20\')\""',
+        );
+
+        yield $createSet(
+            'a b c d',
+            '"a b c d"',
+        );
+
+        yield $createSet(
+            "A\nB'C",
+            "\"A\nB'C\"",
         );
     }
 
