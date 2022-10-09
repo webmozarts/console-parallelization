@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Input;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -22,9 +22,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use Webmozarts\Console\Parallelization\Integration\Kernel;
+use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\InputOptionsSerializer
+ * @covers \Webmozarts\Console\Parallelization\Input\InputOptionsSerializer
  */
 final class InputOptionsSerializerTest extends TestCase
 {

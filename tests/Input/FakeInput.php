@@ -11,15 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization\Process;
+namespace Webmozarts\Console\Parallelization\Input;
 
 use function class_alias;
 use const PHP_VERSION_ID;
-use Webmozarts\Console\Parallelization\FakeInput74;
-use Webmozarts\Console\Parallelization\FakeInput81;
 
 $sourceClass = PHP_VERSION_ID > 80_000
     ? FakeInput81::class
     : FakeInput74::class;
 
-class_alias($sourceClass, \Webmozarts\Console\Parallelization\FakeInput::class);
+class_alias($sourceClass, \Webmozarts\Console\Parallelization\Input\FakeInput::class);
