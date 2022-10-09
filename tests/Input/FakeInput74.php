@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Input;
 
 use DomainException;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 
-final class FakeInput81 implements InputInterface
+final class FakeInput74 implements InputInterface
 {
     public function __call($name, $arguments)
     {
@@ -34,7 +34,7 @@ final class FakeInput81 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function getParameterOption(string|array $values, string|bool|int|float|array|null $default = false, bool $onlyParams = false)
+    public function getParameterOption($values, $default = false, bool $onlyParams = false)
     {
         throw new DomainException('Not implemented.');
     }

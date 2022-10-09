@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Input;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -20,7 +20,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\RawOptionsInput
+ * @covers \Webmozarts\Console\Parallelization\Input\RawOptionsInput
  */
 final class RawOptionsInputTest extends TestCase
 {

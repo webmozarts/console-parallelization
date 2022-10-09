@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Input;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -22,7 +22,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ParallelizationInput
+ * @covers \Webmozarts\Console\Parallelization\Input\ParallelizationInput
  */
 final class ParallelizationInputTest extends TestCase
 {
