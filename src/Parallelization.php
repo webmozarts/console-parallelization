@@ -56,8 +56,6 @@ use Webmozarts\Console\Parallelization\Logger\StandardLogger;
  */
 trait Parallelization
 {
-    private bool $logError = true;
-
     /**
      * Provided by Symfony Command class.
      *
@@ -174,11 +172,9 @@ trait Parallelization
 
     protected function createItemErrorHandler(): ItemProcessingErrorHandler
     {
-        $errorHandler = new ResetContainerErrorHandler($this->getContainer());
-
-        return $this->logError
-            ? new ItemProcessingErrorHandlerLogger($errorHandler)
-            : $errorHandler;
+        return new ItemProcessingErrorHandlerLogger(
+            new ResetContainerErrorHandler($this->getContainer()),
+        );
     }
 
     protected function createLogger(OutputInterface $output): Logger
