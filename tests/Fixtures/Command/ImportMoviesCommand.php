@@ -15,19 +15,32 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use Fidry\Console\Command\Command;
 use Fidry\Console\Command\Configuration;
-use Webmozarts\Console\Parallelization\ParallelizationInput;
+use Fidry\Console\Input\IO;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
+use Webmozarts\Console\Parallelization\ErrorHandler\NullErrorHandler;
+use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use function file_get_contents;
 use function json_decode;
 use const JSON_THROW_ON_ERROR;
+use function realpath;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Webmozarts\Console\Parallelization\ContainerAwareCommand;
+use Symfony\Component\Console\Terminal;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
+use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
 
 final class ImportMoviesCommand implements Command
 {
-    use Parallelization;
+    use Parallelization {
+        getParallelExecutableFactory as getOriginalParallelExecutableFactory;
+    }
 
     private TestLogger $logger;
 
@@ -38,21 +51,27 @@ final class ImportMoviesCommand implements Command
 
     public function __construct()
     {
-        parent::__construct(self::$defaultName);
-
         $this->logger = new TestLogger();
+    }
+
+    public function getName(): string
+    {
+        return 'import:movies';
     }
 
     public function getConfiguration(): Configuration
     {
         return ParallelizationInput::createConfiguration(
-            'import:movies',
+            $this->getName(),
             'Imports movies.',
             'Is for test purposes.',
         );
     }
 
-    protected function fetchItems(InputInterface $input): array
+    /**
+     * @return list<string>
+     */
+    protected function fetchItems(IO $io): array
     {
         return [
             'movie-1.json',
@@ -63,27 +82,41 @@ final class ImportMoviesCommand implements Command
         ];
     }
 
-    protected function getSegmentSize(): int
-    {
-        return 2;
+    protected function getParallelExecutableFactory(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory {
+        return $this
+            ->getOriginalParallelExecutableFactory(
+                $fetchItems,
+                $runSingleCommand,
+                $getItemName,
+                $commandName,
+                $commandDefinition,
+                $errorHandler,
+            )
+            ->withBatchSize(2)
+            ->withSegmentSize(2)
+            ->withRunBeforeFirstCommand(
+                fn () => $this->logger->recordFirstCommand(),
+            )
+            ->withRunBeforeBatch(
+                fn ($io, $movieFileNames) => $this->runBeforeBatch($movieFileNames),
+            )
+            ->withRunAfterBatch(
+                fn ($io, $movieFileNames) => $this->runAfterBatch(),
+            )
+            ->withRunAfterLastCommand(
+                fn () => $this->logger->recordLastCommand(),
+            )
+            ->withScriptPath(realpath(__DIR__.'/../../../bin/console'));
     }
 
-    protected function runBeforeFirstCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->logger->recordFirstCommand();
-    }
-
-    protected function runBeforeBatch(
-        InputInterface $input,
-        OutputInterface $output,
-        array $movieFileNames
-    ): void {
-        $this->logger->recordBeforeBatch();
-
-        $this->batchMovies = self::fetchMovieTitles($movieFileNames);
-    }
-
-    protected function runSingleCommand(string $movieFileName, InputInterface $input, OutputInterface $output): void
+    protected function runSingleCommand(string $movieFileName, IO $io): void
     {
         $this->logger->recordSingleCommand(
             $movieFileName,
@@ -91,21 +124,41 @@ final class ImportMoviesCommand implements Command
         );
     }
 
-    protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $items): void
+    protected function getItemName(int $count): string
+    {
+        return 1 === $count ? 'movie' : 'movies';
+    }
+
+    protected function createLogger(IO $io): Logger
+    {
+        return new StandardLogger(
+            $io,
+            (new Terminal())->getWidth(),
+            new TestDebugProgressBarFactory(),
+            new ConsoleLogger($io->getOutput()),
+        );
+    }
+
+    protected function createItemErrorHandler(): ItemProcessingErrorHandler
+    {
+        return new ItemProcessingErrorHandlerLogger(
+            new NullErrorHandler(),
+        );
+    }
+
+    private function runBeforeBatch(
+        array $movieFileNames
+    ): void {
+        $this->logger->recordBeforeBatch();
+
+        $this->batchMovies = self::fetchMovieTitles($movieFileNames);
+    }
+
+    private function runAfterBatch(): void
     {
         $this->logger->recordAfterBatch();
 
         unset($this->batchMovies);
-    }
-
-    protected function runAfterLastCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->logger->recordLastCommand();
-    }
-
-    protected function getItemName(int $count): string
-    {
-        return 1 === $count ? 'movie' : 'movies';
     }
 
     /**
@@ -131,15 +184,5 @@ final class ImportMoviesCommand implements Command
         }
 
         return $movies;
-    }
-
-    protected function getContainer()
-    {
-        // TODO: Implement getContainer() method.
-    }
-
-    protected function getApplication()
-    {
-        // TODO: Implement getApplication() method.
     }
 }

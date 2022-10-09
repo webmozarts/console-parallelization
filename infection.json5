@@ -1,0 +1,58 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "timeout": 5,
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "logs": {
+        "text": "dist/infection.log"
+    },
+    "mutators": {
+        "global-ignoreSourceCodeByRegex": [
+            "Assert::.*"
+        ],
+        "@default": true,
+        "Break_": {
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\Process\\SymfonyProcessLauncher::run"
+            ]
+        },
+        "CastString": {
+            "ignoreSourceCodeByRegex": [
+                "\\(string\\) \\$numberOfProcesses.*"
+            ]
+        },
+        "CloneRemoval": false,
+        "DecrementInteger": {
+            "ignoreSourceCodeByRegex": [
+                ".*\\$numberOfStreamedItems = .*"
+            ]
+        },
+        "MBString": false,
+        "MethodCallRemoval": {
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\Process\\StandardSymfonyProcessFactory::startProcess"
+            ],
+            "ignoreSourceCodeByRegex": [
+                "\\$currentInputStream->close\\(\\);",
+            ]
+        },
+        "LogicalAnd": {
+            "ignoreSourceCodeByRegex": [
+                ".*ResettableContainerInterface.*"
+            ]
+        },
+        "UnwrapArrayFilter": {
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\ParallelExecutor::createChildCommand"
+            ]
+        },
+        "UnwrapArrayMap": {
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\ParallelExecutor::createChildCommand"
+            ]
+        }
+    }
+}

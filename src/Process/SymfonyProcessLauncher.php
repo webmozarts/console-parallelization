@@ -11,13 +11,11 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Process;
 
-use Closure;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
+use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
  * Launches a number of processes and distributes data among these processes.
@@ -27,51 +25,79 @@ use Symfony\Component\Process\Process;
  * of the data set via its standard input, separated by newlines. The size
  * of this share can be configured in the constructor (the segment size).
  */
-class ProcessLauncher
+final class SymfonyProcessLauncher implements ProcessLauncher
 {
-    private $command;
+    /**
+     * @var list<string>
+     */
+    private array $command;
 
-    private $workingDirectory;
+    private string $workingDirectory;
 
-    private $environmentVariables;
+    /**
+     * @var array<string, string>|null
+     */
+    private ?array $environmentVariables;
 
-    private $processLimit;
+    /**
+     * @var positive-int
+     */
+    private int $numberOfProcesses;
 
-    private $segmentSize;
+    /**
+     * @var positive-int
+     */
+    private int $segmentSize;
 
-    private $logger;
+    private Logger $logger;
 
+    /**
+     * @var callable(string, string): void
+     */
     private $callback;
 
     /**
      * @var Process[]
      */
-    private $runningProcesses = [];
+    private array $runningProcesses = [];
 
+    /**
+     * @var callable
+     */
+    private $tick;
+
+    private SymfonyProcessFactory $processFactory;
+
+    /**
+     * @param list<string>                   $command
+     * @param array<string, string>|null     $extraEnvironmentVariables
+     * @param positive-int                   $numberOfProcesses
+     * @param positive-int                   $segmentSize
+     * @param callable(string, string): void $callback
+     * @param callable(): void               $tick
+     */
     public function __construct(
-        string $command, // @TODO change to array for 2.0
+        array $command,
         string $workingDirectory,
-        array $environmentVariables,
-        int $processLimit,
+        ?array $extraEnvironmentVariables,
+        int $numberOfProcesses,
         int $segmentSize,
-        ?LoggerInterface $logger,
-        Closure $callback
+        Logger $logger,
+        callable $callback,
+        callable $tick,
+        SymfonyProcessFactory $processFactory
     ) {
         $this->command = $command;
         $this->workingDirectory = $workingDirectory;
-        $this->environmentVariables = $environmentVariables;
-        $this->processLimit = $processLimit;
+        $this->environmentVariables = $extraEnvironmentVariables;
+        $this->numberOfProcesses = $numberOfProcesses;
         $this->segmentSize = $segmentSize;
-        $this->logger = $logger ?? new NullLogger();
+        $this->logger = $logger;
         $this->callback = $callback;
+        $this->tick = $tick;
+        $this->processFactory = $processFactory;
     }
 
-    /**
-     * Runs child processes to process the given items.
-     *
-     * @param string[] $items The items to process. None of the items must
-     *                        contain newlines
-     */
     public function run(array $items): void
     {
         /** @var InputStream|null $currentInputStream */
@@ -82,8 +108,8 @@ class ProcessLauncher
             // Close the input stream if the segment is full
             if (null !== $currentInputStream && $numberOfStreamedItems >= $this->segmentSize) {
                 $currentInputStream->close();
-
                 $currentInputStream = null;
+
                 $numberOfStreamedItems = 0;
             }
 
@@ -91,8 +117,9 @@ class ProcessLauncher
             while (null === $currentInputStream) {
                 $this->freeTerminatedProcesses();
 
-                if (count($this->runningProcesses) < $this->processLimit) {
-                    // Start a new process
+                $maxNumberOfRunningProcessesReached = count($this->runningProcesses) >= $this->numberOfProcesses;
+
+                if (!$maxNumberOfRunningProcessesReached) {
                     $currentInputStream = new InputStream();
                     $numberOfStreamedItems = 0;
 
@@ -101,8 +128,7 @@ class ProcessLauncher
                     break;
                 }
 
-                // 1ms
-                usleep(1000);
+                ($this->tick)();
             }
 
             // Stream the data segment to the process' input stream
@@ -115,42 +141,25 @@ class ProcessLauncher
             $currentInputStream->close();
         }
 
+        // Waiting until all running processes are terminated
         while (count($this->runningProcesses) > 0) {
             $this->freeTerminatedProcesses();
 
-            // 1ms
-            usleep(1000);
+            ($this->tick)();
         }
     }
 
-    /**
-     * Starts a single process reading from the given input stream.
-     */
     private function startProcess(InputStream $inputStream): void
     {
-        $arguments = [
+        $process = $this->processFactory->startProcess(
+            $inputStream,
             $this->command,
             $this->workingDirectory,
             $this->environmentVariables,
-            null,
-            null,
-        ];
+            $this->callback,
+        );
 
-        if (method_exists(Process::class, 'fromShellCommandline')) {
-            // Symfony >= 4.2 workaround as Symfony 5 requires `Process` to be initiated with an array
-            // @TODO: can be removed once $this->command was changed to an array
-            $process = Process::fromShellCommandline(...$arguments);
-        } else {
-            $process = new Process(...$arguments);
-        }
-
-        $process->setInput($inputStream);
-        if (method_exists($process, 'inheritEnvironmentVariables')) {
-            $process->inheritEnvironmentVariables(true);
-        }
-        $process->start($this->callback);
-
-        $this->logger->debug('Command started: '.$this->command);
+        $this->logger->logCommandStarted($process->getCommandLine());
 
         $this->runningProcesses[] = $process;
     }
@@ -161,12 +170,17 @@ class ProcessLauncher
      */
     private function freeTerminatedProcesses(): void
     {
-        foreach ($this->runningProcesses as $key => $process) {
+        foreach ($this->runningProcesses as $index => $process) {
             if (!$process->isRunning()) {
-                $this->logger->debug('Command finished');
-
-                unset($this->runningProcesses[$key]);
+                $this->freeProcess($index);
             }
         }
+    }
+
+    private function freeProcess(int $index): void
+    {
+        $this->logger->logCommandFinished();
+
+        unset($this->runningProcesses[$index]);
     }
 }

@@ -14,35 +14,18 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Fidry\Console\Input\IO;
-use function array_diff_key;
-use function array_fill_keys;
-use function array_filter;
-use function array_merge;
-use function array_slice;
-use function explode;
-use function getcwd;
-use function implode;
-use const PHP_EOL;
-use function realpath;
-use RuntimeException;
-use function sprintf;
-use const STDIN;
-use function stream_get_contents;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Logger\ConsoleLogger;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\ResettableContainerInterface;
-use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\Process;
-use Symfony\Contracts\Service\ResetInterface;
-use Throwable;
-use function trim;
-use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
+use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
+use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
+use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
+use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 
 /**
  * Adds parallelization capabilities to console commands.
@@ -73,8 +56,6 @@ use Webmozart\Assert\Assert;
  */
 trait Parallelization
 {
-    private $logError = true;
-
     /**
      * Provided by Symfony Command class.
      *
@@ -93,20 +74,6 @@ trait Parallelization
     }
 
     /**
-     * Provided by Symfony Command class.
-     *
-     * @return ContainerInterface
-     */
-    abstract protected function getContainer();
-
-    /**
-     * Provided by Symfony Command class.
-     *
-     * @return Application
-     */
-    abstract protected function getApplication();
-
-    /**
      * Fetches the items that should be processed.
      *
      * Typically, you will fetch all the items of the database objects that
@@ -114,19 +81,18 @@ trait Parallelization
      *
      * This method is called exactly once in the master process.
      *
-     * @param InputInterface $input The console input
+     * @param IO $io The console input
      *
      * @return string[] The items to process
      */
-    abstract protected function fetchItems(InputInterface $input): array;
+    abstract protected function fetchItems(IO $io): array;
 
     /**
      * Processes an item in the child process.
      */
     abstract protected function runSingleCommand(
         string $item,
-        InputInterface $input,
-        OutputInterface $output
+        IO $io
     ): void;
 
     /**
@@ -142,426 +108,87 @@ trait Parallelization
     abstract protected function getItemName(int $count): string;
 
     /**
-     * Returns the environment variables that are passed to the child processes.
-     *
-     * @param ContainerInterface $container The service containers
-     *
-     * @return string[] A list of environment variable names and values
-     */
-    protected function getEnvironmentVariables(ContainerInterface $container): array
-    {
-        return [
-            'PATH' => getenv('PATH'),
-            'HOME' => getenv('HOME'),
-            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
-            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
-        ];
-    }
-
-    /**
-     * Method executed at the very beginning of the master process.
-     */
-    protected function runBeforeFirstCommand(
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-    }
-
-    /**
-     * Method executed at the very end of the master process.
-     */
-    protected function runAfterLastCommand(
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-    }
-
-    /**
-     * Method executed before executing all the items of the current batch.
-     * This method is executed in both the master and child process.
-     *
-     * @param string[] $items
-     */
-    protected function runBeforeBatch(
-        InputInterface $input,
-        OutputInterface $output,
-        array $items
-    ): void {
-    }
-
-    /**
-     * Method executed after executing all the items of the current batch.
-     * This method is executed in both the master and child process.
-     *
-     * @param string[] $items
-     */
-    protected function runAfterBatch(
-        InputInterface $input,
-        OutputInterface $output,
-        array $items
-    ): void {
-    }
-
-    /**
-     * Returns the number of items to process per child process. This is
-     * done in order to circumvent some issues recurring to long living
-     * processes such as memory leaks.
-     *
-     * This value is only relevant when ran with child process(es).
-     */
-    protected function getSegmentSize(): int
-    {
-        return 50;
-    }
-
-    /**
-     * Returns the number of items to process in a batch. Multiple batches
-     * can be executed within the master and child processes. This allows to
-     * early fetch aggregates or persist aggregates in batches for performance
-     * optimizations.
-     */
-    protected function getBatchSize(): int
-    {
-        return $this->getSegmentSize();
-    }
-
-    /**
      * Executes the parallelized command.
      */
-    protected function execute(IO $io): int
+    public function execute(IO $io): int
     {
-        $parallelizationInput = new ParallelizationInput($io);
+        $parallelizationInput = ParallelizationInput::fromInput($io);
 
-        if ($parallelizationInput->isChildProcess()) {
-            $this->executeChildProcess($io);
-
-            return 0;
-        }
-
-        $this->executeMasterProcess($parallelizationInput, $io);
-
-        return 0;
-    }
-
-    /**
-     * Executes the master process.
-     *
-     * The master process spawns as many child processes as set in the
-     * "--processes" option. Each of the child processes receives a segment of
-     * items of the processed data set and terminates. As long as there is data
-     * left to process, new child processes are spawned automatically.
-     */
-    protected function executeMasterProcess(
-        ParallelizationInput $parallelizationInput,
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-        $this->runBeforeFirstCommand($input, $output);
-
-        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
-        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-
-        $itemBatchIterator = ItemBatchIterator::create(
-            $parallelizationInput->getItem(),
-            function () use ($input) {
-                return $this->fetchItems($input);
-            },
-            $this->getBatchSize(),
-        );
-
-        $numberOfItems = $itemBatchIterator->getNumberOfItems();
-        $batchSize = $itemBatchIterator->getBatchSize();
-
-        $config = new Configuration(
-            $isNumberOfProcessesDefined,
-            $numberOfProcesses,
-            $numberOfItems,
-            $this->getSegmentSize(),
-            $batchSize,
-        );
-
-        $segmentSize = $config->getSegmentSize();
-        $numberOfSegments = $config->getNumberOfSegments();
-        $numberOfBatches = $config->getNumberOfBatches();
-
-        $output->writeln(sprintf(
-            'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
-            $numberOfItems,
-            $this->getItemName($numberOfItems),
-            $segmentSize,
-            $batchSize,
-            $numberOfSegments,
-            1 === $numberOfSegments ? 'round' : 'rounds',
-            $numberOfBatches,
-            1 === $numberOfBatches ? 'batch' : 'batches',
-            $numberOfProcesses,
-            1 === $numberOfProcesses ? 'process' : 'processes',
-        ));
-        $output->writeln('');
-
-        $progressBar = new ProgressBar($output, $numberOfItems);
-        $progressBar->setFormat('debug');
-        $progressBar->start();
-
-        if ($numberOfItems <= $segmentSize
-            || (1 === $numberOfProcesses && !$parallelizationInput->isNumberOfProcessesDefined())
-        ) {
-            // Run in the master process
-
-            foreach ($itemBatchIterator->getItemBatches() as $items) {
-                $this->runBeforeBatch($input, $output, $items);
-
-                foreach ($items as $item) {
-                    $this->runTolerantSingleCommand((string) $item, $input, $output);
-
-                    $progressBar->advance();
-                }
-
-                $this->runAfterBatch($input, $output, $items);
-            }
-        } else {
-            // Distribute if we have multiple segments
-            $consolePath = $this->getConsolePath();
-            Assert::fileExists(
-                $consolePath,
-                sprintf('The bin/console file could not be found at %s', getcwd()),
+        return $this
+            ->getParallelExecutableFactory(
+                fn (IO $io) => $this->fetchItems($io),
+                fn (string $item, IO $io) => $this->runSingleCommand($item, $io),
+                fn (int $count) => $this->getItemName($count),
+                $this->getName(),
+                $this->getDefinition(),
+                $this->createItemErrorHandler(),
+            )
+            ->build()
+            ->execute(
+                $parallelizationInput,
+                $io,
+                $this->createLogger($io),
             );
-
-            $commandTemplate = array_merge(
-                array_filter([
-                    self::detectPhpExecutable(),
-                    $consolePath,
-                    $this->getName(),
-                    implode(' ', array_slice($input->getArguments(), 1)),
-                    '--child',
-                ]),
-                $this->serializeInputOptions($input, ['child', 'processes']),
-            );
-
-            $terminalWidth = (new Terminal())->getWidth();
-
-            // @TODO: can be removed once ProcessLauncher accepts command arrays
-            $tempProcess = new Process($commandTemplate);
-            $commandString = $tempProcess->getCommandLine();
-
-            $processLauncher = new ProcessLauncher(
-                $commandString,
-                self::getWorkingDirectory($this->getContainer()),
-                $this->getEnvironmentVariables($this->getContainer()),
-                $numberOfProcesses,
-                $segmentSize,
-                // TODO: offer a way to create the process launcher in a different manner
-                new ConsoleLogger($output),
-                function (string $type, string $buffer) use ($progressBar, $output, $terminalWidth) {
-                    $this->processChildOutput($buffer, $progressBar, $output, $terminalWidth);
-                },
-            );
-
-            $processLauncher->run($itemBatchIterator->getItems());
-        }
-
-        $progressBar->finish();
-
-        $output->writeln('');
-        $output->writeln('');
-        $output->writeln(sprintf(
-            'Processed %d %s.',
-            $numberOfItems,
-            $this->getItemName($numberOfItems),
-        ));
-
-        $this->runAfterLastCommand($input, $output);
     }
 
     /**
-     * Get the path of the executable Symfony bin console.
+     * @param callable(IO):list<string>                  $fetchItems
+     * @param callable(string, IO):void $runSingleCommand
+     * @param callable(int):string                                   $getItemName
      */
-    protected function getConsolePath(): string
-    {
-        return realpath(getcwd().'/bin/console');
-    }
-
-    /**
-     * Executes the child process.
-     *
-     * This method reads the items from the standard input that the master process
-     * piped into the process. These items are passed to runSingleCommand() one
-     * by one.
-     */
-    protected function executeChildProcess(IO $io): void {
-        $advancementChar = self::getProgressSymbol();
-
-        $itemBatchIterator = new ItemBatchIterator(
-            array_filter(
-                explode(
-                    PHP_EOL,
-                    stream_get_contents(STDIN),
-                ),
-            ),
-            $this->getBatchSize(),
+    protected function getParallelExecutableFactory(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory {
+        return ParallelExecutorFactory::create(
+            $fetchItems,
+            $runSingleCommand,
+            $getItemName,
+            $commandName,
+            $commandDefinition,
+            $errorHandler,
         );
-
-        foreach ($itemBatchIterator->getItemBatches() as $items) {
-            $this->runBeforeBatch($input, $output, $items);
-
-            foreach ($items as $item) {
-                $this->runTolerantSingleCommand($item, $input, $output);
-
-                $output->write($advancementChar);
-            }
-
-            $this->runAfterBatch($input, $output, $items);
-        }
     }
 
-    /**
-     * Ensure that an option value is quoted correctly, before it is passed to a child process.
-     * @param  mixed $value the input option value, which is typically a string but can be of any other primitive type
-     * @return mixed the replaced and quoted value, if $value contained a character that required quoting
-     */
-    protected function quoteOptionValue($value)
+    protected function createItemErrorHandler(): ItemProcessingErrorHandler
     {
-        if ($this->isValueRequiresQuoting($value)) {
-            return sprintf('"%s"', str_replace('"', '\"', $value));
-        }
-
-        return $value;
-    }
-
-    /**
-     * Validate whether a command option requires quoting or not, depending on its content.
-     */
-    protected function isValueRequiresQuoting($value): bool
-    {
-        return 0 < preg_match('/[\s \\\\ \' " & | < > = ! @]/x', (string) $value);
-    }
-
-    /**
-     * Returns the symbol for communicating progress from the child to the
-     * master process when displaying the progress bar.
-     */
-    private static function getProgressSymbol(): string
-    {
-        return chr(254);
-    }
-
-    /**
-     * Detects the path of the PHP interpreter.
-     */
-    private static function detectPhpExecutable(): string
-    {
-        $php = (new PhpExecutableFinder())->find();
-
-        if (false === $php) {
-            throw new RuntimeException('Cannot find php executable');
-        }
-
-        return $php;
-    }
-
-    /**
-     * Returns the working directory for the child process.
-     *
-     * @param ContainerInterface $container The service container
-     *
-     * @return string The absolute path to the working directory
-     */
-    private static function getWorkingDirectory(ContainerInterface $container): string
-    {
-        return dirname($container->getParameter('kernel.project_dir'));
-    }
-
-    /**
-     * Called whenever data is received in the master process from a child process.
-     *
-     * @param string          $buffer        The received data
-     * @param ProgressBar     $progressBar   The progress bar
-     * @param OutputInterface $output        The output of the master process
-     * @param int             $terminalWidth The width of the terminal window
-     *                                       in characters
-     */
-    private function processChildOutput(
-        string $buffer,
-        ProgressBar $progressBar,
-        OutputInterface $output,
-        int $terminalWidth
-    ): void {
-        $advancementChar = self::getProgressSymbol();
-        $chars = mb_substr_count($buffer, $advancementChar);
-
-        // Display unexpected output
-        if ($chars !== mb_strlen($buffer)) {
-            $output->writeln('');
-            $output->writeln(sprintf(
-                '<comment>%s</comment>',
-                str_pad(' Process Output ', $terminalWidth, '=', STR_PAD_BOTH),
-            ));
-            $output->writeln(str_replace($advancementChar, '', $buffer));
-            $output->writeln('');
-        }
-
-        $progressBar->advance($chars);
-    }
-
-    private function runTolerantSingleCommand(
-        string $item,
-        InputInterface $input,
-        OutputInterface $output
-    ): void {
-        try {
-            $this->runSingleCommand(trim($item), $input, $output);
-        } catch (Throwable $exception) {
-            if ($this->logError) {
-                $output->writeln(sprintf(
-                    "Failed to process \"%s\": %s\n%s",
-                    trim($item),
-                    $exception->getMessage(),
-                    $exception->getTraceAsString(),
-                ));
-            }
-
-            $container = $this->getContainer();
-
-            if (
-                (class_exists(ResetInterface::class) && $container instanceof ResetInterface)
-                || (class_exists(ResettableContainerInterface::class) && $container instanceof ResettableContainerInterface)
-            ) {
-                $container->reset();
-            }
-        }
-    }
-
-    /**
-     * @param string[] $blackListParams
-     *
-     * @return string[]
-     */
-    private function serializeInputOptions(InputInterface $input, array $blackListParams): array
-    {
-        $options = array_diff_key(
-            array_filter($input->getOptions()),
-            array_fill_keys($blackListParams, ''),
+        return new ItemProcessingErrorHandlerLogger(
+            new ResetContainerErrorHandler($this->getContainer()),
         );
+    }
 
-        $preparedOptionList = [];
-        foreach ($options as $name => $value) {
-            $definition = $this->getDefinition();
-            $option = $definition->getOption($name);
+    protected function createLogger(IO $io): Logger
+    {
+        return new StandardLogger(
+            $io,
+            (new Terminal())->getWidth(),
+            new DebugProgressBarFactory(),
+            new ConsoleLogger($io->getOutput()),
+        );
+    }
 
-            $optionString = '';
-            if (!$option->acceptValue()) {
-                $optionString .= '--'.$name;
-            } elseif ($option->isArray()) {
-                foreach ($value as $arrayValue) {
-                    $optionString .= '--'.$name.'='.$this->quoteOptionValue($arrayValue);
-                }
-            } else {
-                $optionString .= '--'.$name.'='.$this->quoteOptionValue($value);
-            }
+    protected function getContainer(): ContainerInterface
+    {
+        // The container is required to reset the container upon failure to
+        // avoid things such as a broken UoW or entity manager.
+        //
+        // If no such behaviour is desired, ::createItemErrorHandler() can be
+        // overridden to provide a different error handler.
+        // @phpstan-ignore-next-line
+        return $this->getApplication()->getKernel()->getContainer();
+    }
 
-            $preparedOptionList[] = $optionString;
-        }
+    protected function getDefinition(): InputDefinition
+    {
+        $configuration = $this->getConfiguration();
 
-        return $preparedOptionList;
+        return new InputDefinition([
+            ...$configuration->getArguments(),
+            ...$configuration->getOptions(),
+        ]);
     }
 }

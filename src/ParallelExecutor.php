@@ -1,0 +1,478 @@
+<?php
+
+/*
+ * This file is part of the Webmozarts Console Parallelization package.
+ *
+ * (c) Webmozarts GmbH <office@webmozarts.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace Webmozarts\Console\Parallelization;
+
+use Fidry\Console\Input\IO;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function array_slice;
+use function implode;
+use function mb_strlen;
+use function sprintf;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
+use function usleep;
+use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\Input\InputOptionsSerializer;
+use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
+use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
+use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
+use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
+
+final class ParallelExecutor
+{
+    private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
+
+    /**
+     * @var callable(IO):list<string>
+     */
+    private $fetchItems;
+
+    /**
+     * @var callable(string, IO):void
+     */
+    private $runSingleCommand;
+
+    /**
+     * @var callable(int): string
+     */
+    private $getItemName;
+
+    private string $commandName;
+
+    private InputDefinition $commandDefinition;
+
+    private ItemProcessingErrorHandler $errorHandler;
+
+    /**
+     * @var resource
+     */
+    private $childSourceStream;
+
+    /**
+     * @var positive-int
+     */
+    private int $batchSize;
+
+    /**
+     * @var positive-int
+     */
+    private int $segmentSize;
+
+    /**
+     * @var callable(IO):void
+     */
+    private $runBeforeFirstCommand;
+
+    /**
+     * @var callable(IO):void
+     */
+    private $runAfterLastCommand;
+
+    /**
+     * @var callable(IO, list<string>):void
+     */
+    private $runBeforeBatch;
+
+    /**
+     * @var callable(IO, list<string>):void
+     */
+    private $runAfterBatch;
+
+    private string $progressSymbol;
+
+    private string $phpExecutable;
+
+    private string $scriptPath;
+
+    private string $workingDirectory;
+
+    /**
+     * @var array<string, string>|null
+     */
+    private ?array $extraEnvironmentVariables;
+
+    private ProcessLauncherFactory $processLauncherFactory;
+
+    /**
+     * @param callable(InputInterface):list<string>                        $fetchItems
+     * @param callable(string, IO):void       $runSingleCommand
+     * @param callable(int):string                                         $getItemName
+     * @param resource                                                     $childSourceStream
+     * @param positive-int                                                 $batchSize
+     * @param positive-int                                                 $segmentSize
+     * @param callable(IO):void               $runBeforeFirstCommand
+     * @param callable(IO):void               $runAfterLastCommand
+     * @param callable(IO, list<string>):void $runBeforeBatch
+     * @param callable(IO, list<string>):void $runAfterBatch
+     * @param array<string, string>                                        $extraEnvironmentVariables
+     */
+    public function __construct(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler,
+        $childSourceStream,
+        int $batchSize,
+        int $segmentSize,
+        callable $runBeforeFirstCommand,
+        callable $runAfterLastCommand,
+        callable $runBeforeBatch,
+        callable $runAfterBatch,
+        string $progressSymbol,
+        string $phpExecutable,
+        string $scriptPath,
+        string $workingDirectory,
+        ?array $extraEnvironmentVariables,
+        ProcessLauncherFactory $processLauncherFactory
+    ) {
+        self::validateBatchSize($batchSize);
+        self::validateSegmentSize($segmentSize);
+        self::validateScriptPath($scriptPath);
+        self::validateProgressSymbol($progressSymbol);
+        // TODO: validate that fetch items do not have new lines
+
+        $this->fetchItems = $fetchItems;
+        $this->runSingleCommand = $runSingleCommand;
+        $this->getItemName = $getItemName;
+        $this->commandName = $commandName;
+        $this->commandDefinition = $commandDefinition;
+        $this->errorHandler = $errorHandler;
+        $this->childSourceStream = $childSourceStream;
+        $this->batchSize = $batchSize;
+        $this->segmentSize = $segmentSize;
+        $this->runBeforeFirstCommand = $runBeforeFirstCommand;
+        $this->runAfterLastCommand = $runAfterLastCommand;
+        $this->runBeforeBatch = $runBeforeBatch;
+        $this->runAfterBatch = $runAfterBatch;
+        $this->progressSymbol = $progressSymbol;
+        $this->phpExecutable = $phpExecutable;
+        $this->scriptPath = $scriptPath;
+        $this->workingDirectory = $workingDirectory;
+        $this->extraEnvironmentVariables = $extraEnvironmentVariables;
+        $this->processLauncherFactory = $processLauncherFactory;
+    }
+
+    public function execute(
+        ParallelizationInput $parallelizationInput,
+        IO $io,
+        Logger $logger
+    ): int {
+        if ($parallelizationInput->isChildProcess()) {
+            return $this->executeChildProcess($io, $logger);
+        }
+
+        return $this->executeMainProcess(
+            $parallelizationInput,
+            $io,
+            $logger,
+        );
+    }
+
+    /**
+     * Executes the main process.
+     *
+     * The main process spawns as many child processes as set in the
+     * "--processes" option. Each of the child processes receives a segment of
+     * items of the processed data set and terminates. As long as there is data
+     * left to process, new child processes are spawned automatically.
+     */
+    private function executeMainProcess(
+        ParallelizationInput $parallelizationInput,
+        IO $io,
+        Logger $logger
+    ): int {
+        ($this->runBeforeFirstCommand)($io);
+
+        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
+        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
+
+        $batchSize = $this->batchSize;
+        $segmentSize = $this->segmentSize;
+
+        $itemIterator = ChunkedItemsIterator::fromItemOrCallable(
+            $parallelizationInput->getItem(),
+            fn () => ($this->fetchItems)($io),
+            $batchSize,
+        );
+
+        $numberOfItems = $itemIterator->getNumberOfItems();
+
+        $config = new Configuration(
+            $isNumberOfProcessesDefined,
+            $numberOfProcesses,
+            $numberOfItems,
+            $segmentSize,
+            $batchSize,
+        );
+
+        $numberOfSegments = $config->getNumberOfSegments();
+        $numberOfBatches = $config->getNumberOfBatches();
+        $itemName = ($this->getItemName)($numberOfItems);
+
+        $logger->logConfiguration(
+            $segmentSize,
+            $batchSize,
+            $numberOfItems,
+            $numberOfSegments,
+            $numberOfBatches,
+            $numberOfProcesses,
+            $itemName,
+        );
+
+        $logger->startProgress($numberOfItems);
+
+        if (self::shouldSpawnChildProcesses(
+            $numberOfItems,
+            $segmentSize,
+            $numberOfProcesses,
+            $parallelizationInput->isNumberOfProcessesDefined(),
+        )) {
+            $this
+                ->createProcessLauncher(
+                    $segmentSize,
+                    $numberOfProcesses,
+                    $io,
+                    $logger,
+                )
+                ->run($itemIterator->getItems());
+        } else {
+            $this->processItems(
+                $itemIterator,
+                $io,
+                $logger,
+                static fn () => $logger->advance(),
+            );
+        }
+
+        $logger->finish($itemName);
+
+        ($this->runAfterLastCommand)($io);
+
+        // TODO: use the exit code constants once we drop support for Symfony 4.4
+        return 0;
+    }
+
+    /**
+     * Executes the child process.
+     *
+     * This method reads the items from the standard input that the master process
+     * piped into the process. These items are passed to runSingleCommand() one
+     * by one.
+     */
+    private function executeChildProcess(
+        IO $io,
+        Logger $logger
+    ): int {
+        $itemIterator = ChunkedItemsIterator::fromStream(
+            $this->childSourceStream,
+            $this->batchSize,
+        );
+
+        $progressSymbol = $this->progressSymbol;
+
+        $this->processItems(
+            $itemIterator,
+            $io,
+            $logger,
+            static fn () => $io->write($progressSymbol),
+        );
+
+        // TODO: use the exit code constants once we drop support for Symfony 4.4
+        return 0;
+    }
+
+    /**
+     * @param callable():void $advance
+     */
+    private function processItems(
+        ChunkedItemsIterator $itemIterator,
+        IO $io,
+        Logger $logger,
+        callable $advance
+    ): void {
+        foreach ($itemIterator->getItemChunks() as $items) {
+            ($this->runBeforeBatch)($io, $items);
+
+            foreach ($items as $item) {
+                $this->runTolerantSingleCommand($item, $io, $logger);
+
+                $advance();
+            }
+
+            ($this->runAfterBatch)($io, $items);
+        }
+    }
+
+    private function runTolerantSingleCommand(
+        string $item,
+        IO $io,
+        Logger $logger
+    ): void {
+        try {
+            ($this->runSingleCommand)($item, $io);
+        } catch (Throwable $throwable) {
+            $this->errorHandler->handleError($item, $throwable, $logger);
+        }
+    }
+
+    /**
+     * @param 0|positive-int $numberOfItems
+     * @param positive-int   $segmentSize
+     * @param positive-int   $numberOfProcesses
+     */
+    private static function shouldSpawnChildProcesses(
+        int $numberOfItems,
+        int $segmentSize,
+        int $numberOfProcesses,
+        bool $numberOfProcessesDefined
+    ): bool {
+        return $numberOfItems > $segmentSize
+            && ($numberOfProcesses > 1 || $numberOfProcessesDefined);
+    }
+
+    private function createProcessLauncher(
+        int $segmentSize,
+        int $numberOfProcesses,
+        IO $io,
+        Logger $logger
+    ): ProcessLauncher {
+        $enrichedChildCommand = array_merge(
+            $this->createChildCommand($io),
+            // Forward all the options except for "processes" to the children
+            // this way the children can inherit the options such as env
+            // or no-debug.
+            InputOptionsSerializer::serialize(
+                $this->commandDefinition,
+                $io->getInput(),
+                ['child', 'processes'],
+            ),
+        );
+
+        return $this->processLauncherFactory->create(
+            $enrichedChildCommand,
+            $this->workingDirectory,
+            $this->extraEnvironmentVariables,
+            $numberOfProcesses,
+            $segmentSize,
+            $logger,
+            fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
+            static fn () => usleep(self::CHILD_POLLING_IN_MICRO_SECONDS),
+            new StandardSymfonyProcessFactory(),
+        );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function createChildCommand(IO $io): array
+    {
+        return array_filter([
+            $this->phpExecutable,
+            $this->scriptPath,
+            $this->commandName,
+            implode(
+                ' ',
+                // TODO: this looks suspicious: why do we need to take the first arg?
+                //      why is this not a specific arg?
+                //      why do we include optional arguments? (cf. options)
+                array_filter(
+                    array_slice(
+                        array_map('strval', $io->getInput()->getArguments()),
+                        1,
+                    ),
+                ),
+            ),
+            '--child',
+        ]);
+    }
+
+    /**
+     * Called whenever data is received in the master process from a child process.
+     *
+     * @param string $buffer The received data
+     */
+    private function processChildOutput(
+        string $buffer,
+        Logger $logger
+    ): void {
+        $progressSymbol = $this->progressSymbol;
+        $charactersCount = mb_substr_count($buffer, $progressSymbol);
+
+        // Display unexpected output
+        if ($charactersCount !== mb_strlen($buffer)) {
+            $logger->logUnexpectedOutput($buffer, $progressSymbol);
+        }
+
+        $logger->advance($charactersCount);
+    }
+
+    private static function validateBatchSize(int $batchSize): void
+    {
+        Assert::greaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size to be 1 or greater. Got "%s".',
+                $batchSize,
+            ),
+        );
+    }
+
+    private static function validateSegmentSize(int $segmentSize): void
+    {
+        Assert::greaterThan(
+            $segmentSize,
+            0,
+            sprintf(
+                'Expected the segment size to be 1 or greater. Got "%s".',
+                $segmentSize,
+            ),
+        );
+    }
+
+    private static function validateScriptPath(string $scriptPath): void
+    {
+        Assert::fileExists(
+            $scriptPath,
+            sprintf(
+                'The script file could not be found at the path "%s" (working directory: %s)',
+                $scriptPath,
+                getcwd(),
+            ),
+        );
+    }
+
+    private static function validateProgressSymbol(string $progressSymbol): void
+    {
+        $symbolLength = mb_strlen($progressSymbol);
+
+        Assert::same(
+            1,
+            $symbolLength,
+            sprintf(
+                'Expected the progress symbol length to be 1. Got "%s" for "%s".',
+                $symbolLength,
+                $progressSymbol,
+            ),
+        );
+    }
+}

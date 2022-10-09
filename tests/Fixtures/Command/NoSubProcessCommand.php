@@ -14,25 +14,49 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use DomainException;
+use Fidry\Console\Command\Command;
+use Fidry\Console\Command\Configuration;
+use Fidry\Console\Input\IO;
+use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
+use function realpath;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Webmozarts\Console\Parallelization\ContainerAwareCommand;
+use Symfony\Component\Console\Terminal;
+use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
+use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
 
-final class NoSubProcessCommand extends ContainerAwareCommand
+final class NoSubProcessCommand implements Command
 {
-    use Parallelization;
-
-    protected static $defaultName = 'test:no-subprocess';
+    use Parallelization {
+        getParallelExecutableFactory as getOriginalParallelExecutableFactory;
+    }
 
     private bool $mainProcess = false;
 
-    protected function configure(): void
+    public function getName(): string
     {
-        self::configureParallelization($this);
+        return 'test:no-subprocess';
     }
 
-    protected function fetchItems(InputInterface $input): array
+    public function getConfiguration(): Configuration
+    {
+        return ParallelizationInput::createConfiguration(
+            $this->getName(),
+            '',
+            '',
+        );
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function fetchItems(IO $io): array
     {
         return [
             'item1',
@@ -43,17 +67,34 @@ final class NoSubProcessCommand extends ContainerAwareCommand
         ];
     }
 
-    protected function getSegmentSize(): int
-    {
-        return 2;
+    protected function getParallelExecutableFactory(
+        callable $fetchItems,
+        callable $runSingleCommand,
+        callable $getItemName,
+        string $commandName,
+        InputDefinition $commandDefinition,
+        ItemProcessingErrorHandler $errorHandler
+    ): ParallelExecutorFactory {
+        return $this
+            ->getOriginalParallelExecutableFactory(
+                $fetchItems,
+                $runSingleCommand,
+                $getItemName,
+                $commandName,
+                $commandDefinition,
+                $errorHandler,
+            )
+            ->withBatchSize(2)
+            ->withSegmentSize(2)
+            ->withRunBeforeFirstCommand(
+                function () {
+                    $this->mainProcess = true;
+                },
+            )
+            ->withScriptPath(realpath(__DIR__.'/../../../bin/console'));
     }
 
-    protected function runBeforeFirstCommand(InputInterface $input, OutputInterface $output): void
-    {
-        $this->mainProcess = true;
-    }
-
-    protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
+    protected function runSingleCommand(string $item, IO $io): void
     {
         if (!$this->mainProcess) {
             throw new DomainException('Expected to be executed within the main process.');
@@ -63,5 +104,15 @@ final class NoSubProcessCommand extends ContainerAwareCommand
     protected function getItemName(int $count): string
     {
         return 0 === $count ? 'item' : 'items';
+    }
+
+    protected function createLogger(IO $io): Logger
+    {
+        return new StandardLogger(
+            $io,
+            (new Terminal())->getWidth(),
+            new TestDebugProgressBarFactory(),
+            new ConsoleLogger($io->getOutput()),
+        );
     }
 }
