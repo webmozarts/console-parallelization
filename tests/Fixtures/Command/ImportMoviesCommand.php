@@ -17,12 +17,12 @@ use function file_get_contents;
 use function json_decode;
 use const JSON_THROW_ON_ERROR;
 use function realpath;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
-use Webmozarts\Console\Parallelization\ContainerAwareCommand;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
@@ -31,7 +31,7 @@ use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
 
-final class ImportMoviesCommand extends ContainerAwareCommand
+final class ImportMoviesCommand extends Command
 {
     use Parallelization {
         getParallelExecutableFactory as getOriginalParallelExecutableFactory;
