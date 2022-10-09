@@ -15,12 +15,12 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use DomainException;
 use function realpath;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
-use Webmozarts\Console\Parallelization\ContainerAwareCommand;
 use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -28,7 +28,7 @@ use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
 
-final class NoSubProcessCommand extends ContainerAwareCommand
+final class NoSubProcessCommand extends Command
 {
     use Parallelization {
         getParallelExecutableFactory as getOriginalParallelExecutableFactory;

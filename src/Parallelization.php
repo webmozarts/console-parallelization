@@ -74,20 +74,6 @@ trait Parallelization
     }
 
     /**
-     * Provided by Symfony Command class.
-     *
-     * @return ContainerInterface
-     */
-    abstract protected function getContainer();
-
-    /**
-     * Provided by Symfony Command class.
-     *
-     * @return Application
-     */
-    abstract protected function getApplication();
-
-    /**
      * Fetches the items that should be processed.
      *
      * Typically, you will fetch all the items of the database objects that
@@ -185,5 +171,16 @@ trait Parallelization
             new DebugProgressBarFactory(),
             new ConsoleLogger($output),
         );
+    }
+
+    protected function getContainer(): ContainerInterface
+    {
+        // The container is required to reset the container upon failure to
+        // avoid things such as a broken UoW or entity manager.
+        //
+        // If no such behaviour is desired, ::createItemErrorHandler() can be
+        // overridden to provide a different error handler.
+        // @phpstan-ignore-next-line
+        return $this->getApplication()->getKernel()->getContainer();
     }
 }
