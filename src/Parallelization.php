@@ -80,7 +80,7 @@ trait Parallelization
      * Typically, you will fetch all the items of the database objects that
      * you want to process here. These will be passed to runSingleCommand().
      *
-     * This method is called exactly once in the master process.
+     * This method is called exactly once in the main process.
      *
      * @param InputInterface $input The console input
      *
@@ -123,7 +123,7 @@ trait Parallelization
                 fn (int $count) => $this->getItemName($count),
                 $this->getName(),
                 $this->getDefinition(),
-                $this->createItemErrorHandler(),
+                $this->createErrorHandler(),
             )
             ->build()
             ->execute(
@@ -157,7 +157,8 @@ trait Parallelization
         );
     }
 
-    protected function createItemErrorHandler(): ErrorHandler
+    // TODO: probably worth passing the output here in case
+    protected function createErrorHandler(): ErrorHandler
     {
         return new LoggingErrorHandler(
             new ResetContainerErrorHandler($this->getContainer()),
@@ -182,6 +183,7 @@ trait Parallelization
         // If no such behaviour is desired, ::createItemErrorHandler() can be
         // overridden to provide a different error handler.
         // @phpstan-ignore-next-line
+        // TODO: it should be fine to not provide the Container
         return $this->getApplication()->getKernel()->getContainer();
     }
 }

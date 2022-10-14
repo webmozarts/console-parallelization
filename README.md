@@ -6,15 +6,16 @@ This library supports the parallelization of Symfony Console commands.
 How it works
 ------------
 
-When you launch a command with multiprocessing enabled (`--processes 2`), a
-master process fetches *items* and distributes them across the given number of
-child processes. Child processes are killed after a fixed number of items
+When you launch a command with multiprocessing enabled, a
+main process fetches *items* and distributes them across the given number of
+child processes over the STDIN. Child processes are killed after a fixed number of items
 (a *segment*) in order to prevent them from slowing down over time.
 
 Optionally, the work of child processes can be split down into further chunks
 (*batches*). You can perform certain work before and after each of these batches
 (for example flushing changes to the database) in order to optimize the
 performance of your command.
+
 
 Installation
 ------------
@@ -38,7 +39,9 @@ class ImportMoviesCommand extends Command
 {
     use Parallelization;
 
-    protected static $defaultName = 'import:movies';
+    public function __construct(string $name = null) {
+        parent::__construct('import:movies');
+    }
 
     protected function configure(): void
     {
@@ -59,7 +62,7 @@ class ImportMoviesCommand extends Command
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
     {
-        $movieData = unserialize($item);
+        $movieData = json_decode($item);
    
         // insert into the database
     }
@@ -101,18 +104,18 @@ Processed 2768 movies.
 Items
 -----
 
-The master process fetches all the items that need to be processed and passes
-them to the child processes through their Standard Input. Hence, items must
+The main process fetches all the items that need to be processed and passes
+them to the child processes through their Standard Input (STDIN). Hence, items must
 fulfill two requirements:
 
 * Items must be strings
 * Items must not contain newlines
 
 Typically, you want to keep items small in order to offload processing from the
-master process to the child process. Some typical examples for items:
+main process to the child process. Some typical examples for items:
 
-* The master process reads a file and passes the lines to the child processes
-* The master processes fetches IDs of database rows that need to be updated and passes them to the child processes
+* The main process reads a file and passes the lines to the child processes
+* The main processes fetches IDs of database rows that need to be updated and passes them to the child processes
 
 Segments
 --------
@@ -136,7 +139,7 @@ protected function getSegmentSize(): int
 Batches
 -------
 
-By default, the batch size and the segment size is the same. If desired, you can
+By default, the batch size and the segment size are the same. If desired, you can
 however choose a smaller batch size than the segment size and run custom code
 before or after each batch. You will typically do so in order to flush changes
 to the database or free resources that you don't need anymore.
@@ -172,19 +175,12 @@ Hooks
 The `Parallelization` trait supports more hooks than the one mentioned in the
 last section. In the table below you can find a complete list of them:
 
-| Method                                    | Scope          | Description                                  |
-|-------------------------------------------|----------------|----------------------------------------------|
-| `runBeforeFirstCommand($input, $output)`  | Master process | Run before any child process is spawned      |
-| `runAfterLastCommand($input, $output)`    | Master process | Run after all child processes have completed |
-| `runBeforeBatch($input, $output, $items)` | Child process  | Run before each batch in the child process   |
-| `runAfterBatch($input, $output, $items)`  | Child process  | Run after each batch in the child process    |
-
-Authors
--------
-
-* [Bernhard Schussek]
-* [Théo Fidry]
-* [The Community Contributors]
+| Method                                    | Scope         | Description                                  |
+|-------------------------------------------|---------------|----------------------------------------------|
+| `runBeforeFirstCommand($input, $output)`  | Main process  | Run before any child process is spawned      |
+| `runAfterLastCommand($input, $output)`    | Main process  | Run after all child processes have completed |
+| `runBeforeBatch($input, $output, $items)` | Child process | Run before each batch in the child process   |
+| `runAfterBatch($input, $output, $items)`  | Child process | Run after each batch in the child process    |
 
 Contribute
 ----------
@@ -196,6 +192,19 @@ Contributions to the package are always welcome!
 
 To run the CS fixer and tests you can use the command `make`. More details
 available with `make help`.
+
+Upgrade
+-------
+
+See the [upgrade guide](UPGRADE.md).
+
+
+Authors
+-------
+
+* [Bernhard Schussek]
+* [Théo Fidry]
+* [The Community Contributors]
 
 
 License

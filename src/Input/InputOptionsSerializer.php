@@ -26,6 +26,9 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
+/**
+ * @internal
+ */
 final class InputOptionsSerializer
 {
     private const ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
