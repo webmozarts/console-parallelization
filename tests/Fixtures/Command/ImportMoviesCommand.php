@@ -72,6 +72,14 @@ final class ImportMoviesCommand extends Command
         ];
     }
 
+    protected function execute(
+        #[]
+        int $numberOfItems,
+        InputInterface $input,
+        OutputInterface $output): int
+    {
+    }
+
     protected function getParallelExecutableFactory(
         callable $fetchItems,
         callable $runSingleCommand,
@@ -98,7 +106,7 @@ final class ImportMoviesCommand extends Command
                 fn ($input, $output, $movieFileNames) => $this->runBeforeBatch($movieFileNames),
             )
             ->withRunAfterBatch(
-                fn ($input, $output, $movieFileNames) => $this->runAfterBatch(),
+                $this->runAfterBatch(...),
             )
             ->withRunAfterLastCommand(
                 fn () => $this->logger->recordLastCommand(),

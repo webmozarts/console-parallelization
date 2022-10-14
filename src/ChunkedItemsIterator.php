@@ -48,10 +48,10 @@ final class ChunkedItemsIterator
      * @param list<string> $items
      * @param positive-int $batchSize
      */
-    public function __construct(array $items, int $batchSize)
+    public function __construct(iterable $items, int $batchSize)
     {
         $this->items = $items;
-        $this->itemsChunks = array_chunk($this->items, $batchSize);
+        $this->itemsChunks = \iter\chunk($this->items, $batchSize);
         $this->numberOfItems = count($this->items);
     }
 

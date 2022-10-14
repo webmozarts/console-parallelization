@@ -118,13 +118,16 @@ final class ParallelExecutorFactory
         string $commandName,
         InputDefinition $commandDefinition,
         ItemProcessingErrorHandler $errorHandler,
+
         $childSourceStream,
+
         int $batchSize,
         int $segmentSize,
         callable $runBeforeFirstCommand,
         callable $runAfterLastCommand,
         callable $runBeforeBatch,
         callable $runAfterBatch,
+
         string $progressSymbol,
         string $phpExecutable,
         string $scriptPath,

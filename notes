@@ -1,0 +1,45 @@
+Goal of the meeting
+===================
+
+- Assess if the concerns/constraints are proven and if there is more to take into consideration
+- Review the refactor design decisions, especially the UX
+- Review the desirability of the proposed features
+
+
+Problems
+========
+
+- Hard to test
+- Lots of untested part that are hard to figure out (e.g. when an element is failing, or the TODO about the first arg)
+- Very fragile/unstable output
+- Dependency on legacy API (ContainerAware)
+- Unusable outside of Symfony
+
+
+Concerns/Constraints
+====================
+
+- We are still using Symfony4 & PHP 7.4 – we do not want to make a new version hard to migrate to
+- We do not want to have a new brand new API just to make it attractive on PHP 8.1
+- Question about fidry/console integration
+
+
+Current changes
+===============
+
+A lot of API changes & new abstractions
+
+
+Future considerations
+=====================
+
+- Output (log) decision
+- Support for infinite number: https://github.com/webmozarts/console-parallelization/issues/26
+- Auto-detect the max number of processes: https://github.com/webmozarts/console-parallelization/issues/112
+- Always use a sub-process; add no-parallel option? maybe --single-process instead https://github.com/webmozarts/console-parallelization/issxues/113
+- Support for a different parallelization process
+
+
+
+// rename ItemProcessingErrorHandler to ErrorHandler
+// LoggingErrorHandler
