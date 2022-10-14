@@ -51,4 +51,25 @@ final class LoggingErrorHandlerTest extends TestCase
             $logger,
         );
     }
+
+    public function test_it_can_be_created_and_called_without_a_decorated_handler(): void
+    {
+        $item = 'item1';
+        $throwable = new Error('An error occurred.');
+
+        $loggerProphecy = $this->prophesize(Logger::class);
+        $logger = $loggerProphecy->reveal();
+
+        $errorHandler = new LoggingErrorHandler();
+
+        $loggerProphecy
+            ->logItemProcessingFailed($item, $throwable)
+            ->shouldBeCalledTimes(1);
+
+        $errorHandler->handleError(
+            $item,
+            $throwable,
+            $logger,
+        );
+    }
 }

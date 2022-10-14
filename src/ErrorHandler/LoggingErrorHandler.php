@@ -19,9 +19,9 @@ final class LoggingErrorHandler implements ErrorHandler
 {
     private ErrorHandler $decoratedErrorHandler;
 
-    public function __construct(ErrorHandler $decoratedErrorHandler)
+    public function __construct(?ErrorHandler $decoratedErrorHandler = null)
     {
-        $this->decoratedErrorHandler = $decoratedErrorHandler;
+        $this->decoratedErrorHandler = $decoratedErrorHandler ?? new NullErrorHandler();
     }
 
     public function handleError(string $item, Throwable $throwable, $logger): void
