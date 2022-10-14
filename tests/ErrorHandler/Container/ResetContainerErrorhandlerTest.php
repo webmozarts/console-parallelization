@@ -11,10 +11,12 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization\ErrorHandler;
+namespace Webmozarts\Console\Parallelization\ErrorHandler\Container;
 
 use Error;
 use PHPUnit\Framework\TestCase;
+use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 
 /**
@@ -47,7 +49,7 @@ final class ResetContainerErrorhandlerTest extends TestCase
         self::assertTrue($container->reset);
     }
 
-    private static function handleError(ItemProcessingErrorHandler $errorHandler): void
+    private static function handleError(ErrorHandler $errorHandler): void
     {
         $errorHandler->handleError(
             'item0',

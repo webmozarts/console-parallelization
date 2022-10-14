@@ -33,8 +33,8 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
@@ -1042,7 +1042,7 @@ final class ParallelExecutorTest extends TestCase
      */
     private static function createChildProcessExecutor(
         callable $runSingleCommand,
-        ItemProcessingErrorHandler $errorHandler,
+        ErrorHandler $errorHandler,
         $childSourceStream,
         int $batchSize,
         callable $runBeforeFirstCommand,
@@ -1087,7 +1087,7 @@ final class ParallelExecutorTest extends TestCase
     private static function createMainProcessExecutor(
         array $items,
         callable $runSingleCommand,
-        ItemProcessingErrorHandler $errorHandler,
+        ErrorHandler $errorHandler,
         int $batchSize,
         int $segmentSize,
         callable $runBeforeFirstCommand,

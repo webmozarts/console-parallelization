@@ -17,7 +17,7 @@ use function func_get_args;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
-final class DummyErrorHandler implements ItemProcessingErrorHandler
+final class DummyErrorHandler implements ErrorHandler
 {
     public array $calls = [];
 

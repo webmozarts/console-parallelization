@@ -23,7 +23,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -78,7 +78,7 @@ final class ImportMoviesCommand extends Command
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler
+        ErrorHandler $errorHandler
     ): ParallelExecutorFactory {
         return $this
             ->getOriginalParallelExecutableFactory(

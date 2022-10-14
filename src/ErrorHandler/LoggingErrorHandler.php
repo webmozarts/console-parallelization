@@ -15,11 +15,11 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Throwable;
 
-final class ItemProcessingErrorHandlerLogger implements ItemProcessingErrorHandler
+final class LoggingErrorHandler implements ErrorHandler
 {
-    private ItemProcessingErrorHandler $decoratedErrorHandler;
+    private ErrorHandler $decoratedErrorHandler;
 
-    public function __construct(ItemProcessingErrorHandler $decoratedErrorHandler)
+    public function __construct(ErrorHandler $decoratedErrorHandler)
     {
         $this->decoratedErrorHandler = $decoratedErrorHandler;
     }

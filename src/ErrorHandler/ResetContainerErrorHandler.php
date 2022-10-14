@@ -20,7 +20,7 @@ use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Symfony\ResettableContainerInterface;
 
-final class ResetContainerErrorHandler implements ItemProcessingErrorHandler
+final class ResetContainerErrorHandler implements ErrorHandler
 {
     /**
      * @var (ContainerInterface&ResetInterface)|null

@@ -20,7 +20,7 @@ use const STDIN;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
@@ -46,7 +46,7 @@ final class ParallelExecutorFactory
 
     private InputDefinition $commandDefinition;
 
-    private ItemProcessingErrorHandler $errorHandler;
+    private ErrorHandler $errorHandler;
 
     /**
      * @var resource
@@ -117,7 +117,7 @@ final class ParallelExecutorFactory
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler,
+        ErrorHandler $errorHandler,
         $childSourceStream,
         int $batchSize,
         int $segmentSize,
@@ -164,7 +164,7 @@ final class ParallelExecutorFactory
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler
+        ErrorHandler $errorHandler
     ): self {
         return new self(
             $fetchItems,
