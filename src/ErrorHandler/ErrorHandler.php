@@ -16,7 +16,7 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
-interface ItemProcessingErrorHandler
+interface ErrorHandler
 {
     public function handleError(string $item, Throwable $throwable, Logger $logger): void;
 }

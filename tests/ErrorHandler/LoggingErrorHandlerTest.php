@@ -19,9 +19,9 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger
+ * @covers \Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler
  */
-final class ItemProcessingErrorHandlerLoggerTest extends TestCase
+final class LoggingErrorHandlerTest extends TestCase
 {
     use ProphecyTrait;
 
@@ -30,13 +30,13 @@ final class ItemProcessingErrorHandlerLoggerTest extends TestCase
         $item = 'item1';
         $throwable = new Error('An error occurred.');
 
-        $decoratedErrorHandlerProphecy = $this->prophesize(ItemProcessingErrorHandler::class);
+        $decoratedErrorHandlerProphecy = $this->prophesize(ErrorHandler::class);
         $decoratedErrorHandler = $decoratedErrorHandlerProphecy->reveal();
 
         $loggerProphecy = $this->prophesize(Logger::class);
         $logger = $loggerProphecy->reveal();
 
-        $errorHandler = new ItemProcessingErrorHandlerLogger($decoratedErrorHandler);
+        $errorHandler = new LoggingErrorHandler($decoratedErrorHandler);
 
         $decoratedErrorHandlerProphecy
             ->handleError($item, $throwable, $logger)

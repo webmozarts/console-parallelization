@@ -17,7 +17,7 @@ use DomainException;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
-final class FakeErrorHandler implements ItemProcessingErrorHandler
+final class FakeErrorHandler implements ErrorHandler
 {
     public function handleError(string $item, Throwable $throwable, Logger $logger): void
     {

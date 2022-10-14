@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use function usleep;
 use Webmozart\Assert\Assert;
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Input\InputOptionsSerializer;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -58,7 +58,7 @@ final class ParallelExecutor
 
     private InputDefinition $commandDefinition;
 
-    private ItemProcessingErrorHandler $errorHandler;
+    private ErrorHandler $errorHandler;
 
     /**
      * @var resource
@@ -129,7 +129,7 @@ final class ParallelExecutor
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler,
+        ErrorHandler $errorHandler,
         $childSourceStream,
         int $batchSize,
         int $segmentSize,

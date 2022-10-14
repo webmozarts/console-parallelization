@@ -20,8 +20,8 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandler;
-use Webmozarts\Console\Parallelization\ErrorHandler\ItemProcessingErrorHandlerLogger;
+use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
@@ -145,7 +145,7 @@ trait Parallelization
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ItemProcessingErrorHandler $errorHandler
+        ErrorHandler $errorHandler
     ): ParallelExecutorFactory {
         return ParallelExecutorFactory::create(
             $fetchItems,
@@ -157,9 +157,9 @@ trait Parallelization
         );
     }
 
-    protected function createItemErrorHandler(): ItemProcessingErrorHandler
+    protected function createItemErrorHandler(): ErrorHandler
     {
-        return new ItemProcessingErrorHandlerLogger(
+        return new LoggingErrorHandler(
             new ResetContainerErrorHandler($this->getContainer()),
         );
     }
