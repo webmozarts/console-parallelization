@@ -19,6 +19,7 @@ use function array_keys;
 use function array_map;
 use function implode;
 use function is_string;
+use function method_exists;
 use function preg_match;
 use function sprintf;
 use function str_replace;
@@ -67,7 +68,8 @@ final class InputOptionsSerializer
         string $name,
         $value
     ): string {
-        if ($option->isNegatable()) {
+        // TODO: remove the method exists check once we drop support for Symfony 4.4
+        if (method_exists(InputOption::class, 'isNegatable') && $option->isNegatable()) {
             return sprintf(
                 '--%s%s',
                 $value ? '' : 'no-',

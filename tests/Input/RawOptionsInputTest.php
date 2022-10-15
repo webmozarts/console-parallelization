@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Webmozarts\Console\Parallelization\SymfonyVersion;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Input\RawOptionsInput
@@ -38,6 +39,8 @@ final class RawOptionsInputTest extends TestCase
 
     public static function inputOptionProvider(): iterable
     {
+        $isSymfony4 = SymfonyVersion::isSymfony4();
+
         yield 'input with no options' => [
             new ArrayInput([], null),
             [],
@@ -63,11 +66,6 @@ final class RawOptionsInputTest extends TestCase
                         InputOption::VALUE_REQUIRED,
                     ),
                     new InputOption(
-                        'opt4',
-                        null,
-                        InputOption::VALUE_NEGATABLE,
-                    ),
-                    new InputOption(
                         'opt5',
                         null,
                         InputOption::VALUE_NONE,
@@ -76,6 +74,23 @@ final class RawOptionsInputTest extends TestCase
             ),
             [],
         ];
+
+        if (!$isSymfony4) {
+            // TODO: move this within the test up once we drop support for Symfony 4.4
+            yield 'input with negatable options default options' => [
+                new ArrayInput(
+                    [],
+                    new InputDefinition([
+                        new InputOption(
+                            'opt4',
+                            null,
+                            InputOption::VALUE_NEGATABLE,
+                        ),
+                    ]),
+                ),
+                [],
+            ];
+        }
 
         yield 'input with options' => [
             new ArrayInput(
@@ -101,11 +116,6 @@ final class RawOptionsInputTest extends TestCase
                         InputOption::VALUE_REQUIRED,
                     ),
                     new InputOption(
-                        'opt4',
-                        null,
-                        InputOption::VALUE_NEGATABLE,
-                    ),
-                    new InputOption(
                         'opt5',
                         null,
                         InputOption::VALUE_NONE,
@@ -118,6 +128,27 @@ final class RawOptionsInputTest extends TestCase
                 'opt5' => true,
             ],
         ];
+
+        if (!$isSymfony4) {
+            // TODO: move this within the test up once we drop support for Symfony 4.4
+            yield 'input with negatable options' => [
+                new ArrayInput(
+                    [
+                        '--opt1' => 'value1',
+                        '--opt3' => 'value3',
+                        '--opt5' => null,
+                    ],
+                    new InputDefinition([
+                        new InputOption(
+                            'opt4',
+                            null,
+                            InputOption::VALUE_NEGATABLE,
+                        ),
+                    ]),
+                ),
+                [],
+            ];
+        }
 
         yield 'non standard input' => [
             new FakeInput(),

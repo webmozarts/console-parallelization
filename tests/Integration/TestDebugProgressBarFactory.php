@@ -24,10 +24,11 @@ final class TestDebugProgressBarFactory implements ProgressBarFactory
         OutputInterface $output,
         int $numberOfItems
     ): ProgressBar {
-        // Put the lowest time between redraws to ensure they we see all elements
+        // Put the lowest time between redraws to ensure they see all elements
         // of progress.
         $progressBar = new ProgressBar($output, $numberOfItems, PHP_FLOAT_MIN);
-        $progressBar->setFormat(ProgressBar::FORMAT_DEBUG);
+        // TODO: use the constant once we drop support for Symfony 4.4
+        $progressBar->setFormat(/* ProgressBar::FORMAT_DEBUG */ 'debug');
         $progressBar->start();
 
         return $progressBar;

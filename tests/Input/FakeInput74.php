@@ -29,12 +29,12 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function hasParameterOption($values, bool $onlyParams = false): bool
+    public function hasParameterOption($values, $onlyParams = false): bool
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function getParameterOption($values, $default = false, bool $onlyParams = false)
+    public function getParameterOption($values, $default = false, $onlyParams = false)
     {
         throw new DomainException('Not implemented.');
     }
@@ -54,17 +54,17 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function getArgument(string $name)
+    public function getArgument($name)
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function setArgument(string $name, $value)
+    public function setArgument($name, $value)
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function hasArgument(string $name): bool
+    public function hasArgument($name): bool
     {
         throw new DomainException('Not implemented.');
     }
@@ -74,17 +74,17 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function getOption(string $name)
+    public function getOption($name)
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function setOption(string $name, $value)
+    public function setOption($name, $value)
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function hasOption(string $name): bool
+    public function hasOption($name): bool
     {
         throw new DomainException('Not implemented.');
     }
@@ -94,7 +94,7 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function setInteractive(bool $interactive)
+    public function setInteractive($interactive)
     {
         throw new DomainException('Not implemented.');
     }

@@ -9,7 +9,7 @@
             "email": "bernhard.schussek@webmozarts.com"
         },
         {
-            "name": "Théo Fidry",
+            "name": "Th\u00e9o Fidry",
             "email": "theo.fidry@webmozarts.com"
         }
     ],
@@ -55,5 +55,23 @@
             "forward-command": false
         },
         "sort-packages": true
+    },
+    "conflict": {
+        "symfony/cache": ">=5.0",
+        "symfony/config": ">=5.0",
+        "symfony/console": ">=5.0",
+        "symfony/dependency-injection": ">=5.0",
+        "symfony/error-handler": ">=5.0",
+        "symfony/event-dispatcher": ">=5.0",
+        "symfony/filesystem": ">=5.0",
+        "symfony/finder": ">=5.0",
+        "symfony/framework-bundle": ">=5.0",
+        "symfony/http-foundation": ">=5.0",
+        "symfony/http-kernel": ">=5.0",
+        "symfony/process": ">=5.0",
+        "symfony/routing": ">=5.0",
+        "symfony/string": ">=5.0",
+        "symfony/var-dumper": ">=5.0",
+        "symfony/var-exporter": ">=5.0"
     }
 }
