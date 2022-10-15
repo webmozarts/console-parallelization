@@ -23,6 +23,7 @@ final class SymfonyVersion
 
     public static function isSymfony4(): bool
     {
+        // @phpstan-ignore-next-line
         return Kernel::MAJOR_VERSION === 4;
     }
 }
