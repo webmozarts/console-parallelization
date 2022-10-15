@@ -278,7 +278,7 @@ final class ParallelExecutor
     /**
      * Executes the child process.
      *
-     * This method reads the items from the standard input that the master process
+     * This method reads the items from the standard input that the main process
      * piped into the process. These items are passed to runSingleCommand() one
      * by one.
      */
@@ -414,7 +414,7 @@ final class ParallelExecutor
     }
 
     /**
-     * Called whenever data is received in the master process from a child process.
+     * Called whenever data is received in the main process from a child process.
      *
      * @param string $buffer The received data
      */

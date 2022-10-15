@@ -7,7 +7,7 @@ How it works
 ------------
 
 When you launch a command with multiprocessing enabled (`--processes 2`), a
-master process fetches *items* and distributes them across the given number of
+main process fetches *items* and distributes them across the given number of
 child processes. Child processes are killed after a fixed number of items
 (a *segment*) in order to prevent them from slowing down over time.
 
@@ -101,7 +101,7 @@ Processed 2768 movies.
 Items
 -----
 
-The master process fetches all the items that need to be processed and passes
+The main process fetches all the items that need to be processed and passes
 them to the child processes through their Standard Input. Hence, items must
 fulfill two requirements:
 
@@ -109,10 +109,10 @@ fulfill two requirements:
 * Items must not contain newlines
 
 Typically, you want to keep items small in order to offload processing from the
-master process to the child process. Some typical examples for items:
+main process to the child process. Some typical examples for items:
 
-* The master process reads a file and passes the lines to the child processes
-* The master processes fetches IDs of database rows that need to be updated and passes them to the child processes
+* The main process reads a file and passes the lines to the child processes
+* The main processes fetches IDs of database rows that need to be updated and passes them to the child processes
 
 Segments
 --------
