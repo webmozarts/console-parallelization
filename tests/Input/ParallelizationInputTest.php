@@ -90,6 +90,20 @@ final class ParallelizationInputTest extends TestCase
         ParallelizationInput::fromInput($input);
     }
 
+    public function test_it_can_be_instantiated_from_an_input_with_an_item_for_a_child_process(): void
+    {
+        $input = new ArrayInput([
+            'item' => 'item1',
+            '--child' => null,
+        ]);
+        self::bindInput($input);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot have an item passed to a child process as an argument. Got "item1"');
+
+        ParallelizationInput::fromInput($input);
+    }
+
     public function test_it_can_be_instantiated_from_an_input_with_an_invalid_number_of_processes(): void
     {
         $input = new ArrayInput([
@@ -191,11 +205,11 @@ final class ParallelizationInputTest extends TestCase
         ];
 
         yield 'nominal' => [
-            new StringInput('item15 --child --processes 15'),
+            new StringInput('--child --processes 15'),
             new ParallelizationInput(
                 true,
                 15,
-                'item15',
+                null,
                 true,
             ),
         ];
