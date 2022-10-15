@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_keys;
@@ -23,9 +26,6 @@ use function method_exists;
 use function preg_match;
 use function sprintf;
 use function str_replace;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 
 final class InputOptionsSerializer
 {
@@ -133,6 +133,7 @@ final class InputOptionsSerializer
 
     /**
      * Validate whether a command option requires quoting.
+     * @param mixed $value
      */
     private static function isValueRequiresQuoting($value): bool
     {

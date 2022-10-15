@@ -23,6 +23,8 @@ use Symfony\Component\Console\Input\StringInput;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Input\ParallelizationInput
+ *
+ * @internal
  */
 final class ParallelizationInputTest extends TestCase
 {

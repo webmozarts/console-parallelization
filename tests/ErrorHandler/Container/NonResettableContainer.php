@@ -18,7 +18,7 @@ use Psr\Container\ContainerInterface;
 
 final class NonResettableContainer implements ContainerInterface
 {
-    public function get(string $id)
+    public function get(string $id): void
     {
         throw new DomainException('Unexpected call.');
     }

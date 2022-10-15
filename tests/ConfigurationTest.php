@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function func_get_args;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use function func_get_args;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Configuration
+ *
+ * @internal
  */
 final class ConfigurationTest extends TestCase
 {

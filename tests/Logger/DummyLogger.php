@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Logger;
 
-use function func_get_args;
 use Throwable;
+use function func_get_args;
 
 final class DummyLogger implements Logger
 {

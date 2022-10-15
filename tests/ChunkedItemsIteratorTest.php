@@ -13,13 +13,15 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function fclose;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use function fclose;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ChunkedItemsIterator
+ *
+ * @internal
  */
 final class ChunkedItemsIteratorTest extends TestCase
 {

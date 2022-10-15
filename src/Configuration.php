@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Webmozart\Assert\Assert;
 use function ceil;
 use function sprintf;
-use Webmozart\Assert\Assert;
 
 final class Configuration
 {

@@ -19,7 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 
 final class FakeInput74 implements InputInterface
 {
-    public function __call($name, $arguments)
+    public function __call($name, $arguments): void
     {
         throw new DomainException('Not implemented.');
     }
@@ -34,17 +34,17 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function getParameterOption($values, $default = false, $onlyParams = false)
+    public function getParameterOption($values, $default = false, $onlyParams = false): void
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function bind(InputDefinition $definition)
+    public function bind(InputDefinition $definition): void
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function validate()
+    public function validate(): void
     {
         throw new DomainException('Not implemented.');
     }
@@ -54,12 +54,12 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function getArgument($name)
+    public function getArgument($name): void
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function setArgument($name, $value)
+    public function setArgument($name, $value): void
     {
         throw new DomainException('Not implemented.');
     }
@@ -74,12 +74,12 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function getOption($name)
+    public function getOption($name): void
     {
         throw new DomainException('Not implemented.');
     }
 
-    public function setOption($name, $value)
+    public function setOption($name, $value): void
     {
         throw new DomainException('Not implemented.');
     }
@@ -94,7 +94,7 @@ final class FakeInput74 implements InputInterface
         throw new DomainException('Not implemented.');
     }
 
-    public function setInteractive($interactive)
+    public function setInteractive($interactive): void
     {
         throw new DomainException('Not implemented.');
     }

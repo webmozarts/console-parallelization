@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Webmozart\Assert\Assert;
 use function array_chunk;
 use function array_filter;
 use function array_values;
@@ -22,10 +23,9 @@ use function get_class;
 use function gettype;
 use function is_numeric;
 use function is_object;
-use const PHP_EOL;
 use function sprintf;
 use function stream_get_contents;
-use Webmozart\Assert\Assert;
+use const PHP_EOL;
 
 final class ChunkedItemsIterator
 {

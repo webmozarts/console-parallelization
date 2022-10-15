@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
-use function interface_exists;
 use Psr\Container\ContainerInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Symfony\ResettableContainerInterface;
+use function interface_exists;
 
 final class ResetContainerErrorHandler implements ErrorHandler
 {
@@ -46,7 +46,8 @@ final class ResetContainerErrorHandler implements ErrorHandler
             && $container instanceof ResetInterface
         )
             // TODO: to remove once we drop Symfony 4.4 support.
-            || (interface_exists(ResettableContainerInterface::class)
+            || (
+                interface_exists(ResettableContainerInterface::class)
             && $container instanceof ResettableContainerInterface
             );
     }

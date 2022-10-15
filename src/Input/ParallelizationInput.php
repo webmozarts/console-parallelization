@@ -13,14 +13,14 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
-use function gettype;
-use function is_numeric;
-use function sprintf;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
+use function gettype;
+use function is_numeric;
+use function sprintf;
 
 final class ParallelizationInput
 {

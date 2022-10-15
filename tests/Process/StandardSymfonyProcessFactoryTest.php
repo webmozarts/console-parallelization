@@ -18,6 +18,8 @@ use Symfony\Component\Process\InputStream;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory
+ *
+ * @internal
  */
 final class StandardSymfonyProcessFactoryTest extends TestCase
 {
@@ -34,7 +36,7 @@ final class StandardSymfonyProcessFactoryTest extends TestCase
 
         // Do not use a Fake callback here as it would otherwise throw an
         // exception at a random time during cleanup.
-        $callback = static function () use (&$callbackCalled) {
+        $callback = static function () use (&$callbackCalled): void {
             $callbackCalled = true;
         };
 

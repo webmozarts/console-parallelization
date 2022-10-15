@@ -22,6 +22,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Logger\StandardLogger
+ *
+ * @internal
  */
 final class StandardLoggerTest extends TestCase
 {
@@ -161,7 +163,7 @@ final class StandardLoggerTest extends TestCase
         $this->logger->advance();
 
         $expected = <<<'TXT'
-            
+
               1/10 [==>-------------------------]  10%
             TXT;
 
@@ -184,7 +186,7 @@ final class StandardLoggerTest extends TestCase
         $this->logger->advance(4);
 
         $expected = <<<'TXT'
-            
+
               4/10 [===========>----------------]  40%
             TXT;
 
@@ -199,7 +201,7 @@ final class StandardLoggerTest extends TestCase
         $this->logger->finish('tokens');
 
         $expected = <<<'TXT'
-            
+
              10/10 [============================] 100%
 
             Processed 10 tokens.
@@ -229,7 +231,7 @@ final class StandardLoggerTest extends TestCase
         );
 
         $expected = <<<'TXT'
-            
+
             ================= Process Output =================
             An error occurred.
 
@@ -251,7 +253,7 @@ final class StandardLoggerTest extends TestCase
         );
 
         $expected = <<<'TXT'
-            
+
             ================= Process Output =================
             An error occurred.
 

@@ -13,17 +13,19 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use function count;
-use function explode;
 use PHPUnit\Framework\TestCase;
-use function sprintf;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Webmozarts\Console\Parallelization\FakeCallable;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
+use function count;
+use function explode;
+use function sprintf;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncher
+ *
+ * @internal
  */
 final class SymfonyProcessLauncherTest extends TestCase
 {
@@ -71,7 +73,7 @@ final class SymfonyProcessLauncherTest extends TestCase
             2,
             $logger,
             $callback,
-            static function () {},
+            static function (): void {},
             $processFactory,
         );
 

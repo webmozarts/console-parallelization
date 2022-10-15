@@ -13,20 +13,22 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Input\InputDefinition;
+use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
+use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function chr;
 use function getcwd;
-use PHPUnit\Framework\TestCase;
 use function Safe\chdir;
 use function Safe\putenv;
-use Symfony\Component\Console\Input\InputDefinition;
-use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
-use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutorFactory
+ *
+ * @internal
  */
 final class ParallelExecutorFactoryTest extends TestCase
 {
@@ -220,7 +222,7 @@ final class ParallelExecutorFactoryTest extends TestCase
 
             $restoreServer = static fn () => $_SERVER[$name] = $previousValue;
         } else {
-            $restoreServer = static function () use ($name) {
+            $restoreServer = static function () use ($name): void {
                 unset($_SERVER[$name]);
             };
         }
@@ -230,7 +232,7 @@ final class ParallelExecutorFactoryTest extends TestCase
 
             $restoreEnv = static fn () => $_SERVER[$name] = $previousValue;
         } else {
-            $restoreEnv = static function () use ($name) {
+            $restoreEnv = static function () use ($name): void {
                 unset($_ENV[$name]);
             };
         }

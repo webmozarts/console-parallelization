@@ -20,6 +20,8 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler
+ *
+ * @internal
  */
 final class LoggingErrorHandlerTest extends TestCase
 {

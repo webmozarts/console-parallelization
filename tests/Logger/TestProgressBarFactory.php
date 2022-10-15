@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Logger;
 
-use const PHP_FLOAT_MIN;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
+use const PHP_FLOAT_MIN;
 
 // Since we cannot mock the ProgressBar, we have no choice but to use a simpler
 // version of it instead to be able to use its output in a more predicable way

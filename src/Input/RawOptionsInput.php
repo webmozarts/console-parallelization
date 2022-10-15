@@ -53,6 +53,8 @@ final class RawOptionsInput extends Input
 
     /**
      * @codeCoverageIgnore
+     * @param mixed $values
+     * @param mixed $onlyParams
      */
     public function hasParameterOption($values, $onlyParams = false): bool
     {
@@ -61,8 +63,11 @@ final class RawOptionsInput extends Input
 
     /**
      * @codeCoverageIgnore
+     * @param mixed $values
+     * @param mixed $default
+     * @param mixed $onlyParams
      */
-    public function getParameterOption($values, $default = false, $onlyParams = false)
+    public function getParameterOption($values, $default = false, $onlyParams = false): void
     {
         throw new DomainException('Not implemented.');
     }

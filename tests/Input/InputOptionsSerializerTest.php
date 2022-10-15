@@ -27,6 +27,8 @@ use Webmozarts\Console\Parallelization\SymfonyVersion;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Input\InputOptionsSerializer
+ *
+ * @internal
  */
 final class InputOptionsSerializerTest extends TestCase
 {
