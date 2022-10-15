@@ -13,16 +13,25 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Iterator;
 use Webmozart\Assert\Assert;
 use function array_chunk;
 use function array_filter;
+use function array_keys;
+use function array_map;
 use function array_values;
 use function count;
 use function explode;
 use function get_class;
 use function gettype;
+use function is_array;
+use function is_iterable;
 use function is_numeric;
 use function is_object;
+use function iter\chunk;
+use function iter\map;
+use function iter\mapWithKeys;
+use function iter\values;
 use function sprintf;
 use function stream_get_contents;
 use const PHP_EOL;
@@ -30,29 +39,29 @@ use const PHP_EOL;
 final class ChunkedItemsIterator
 {
     /**
-     * @var list<string>
+     * @var list<string>|Iterator<string>
      */
-    private array $items;
+    private iterable $items;
 
     /**
-     * @var list<list<string>>
+     * @var Iterator<list<string>>
      */
-    private array $itemsChunks;
+    private Iterator $itemsChunks;
 
     /**
-     * @var 0|positive-int
+     * @var 0|positive-int|null
      */
-    private int $numberOfItems;
+    private ?int $numberOfItems;
 
     /**
-     * @param list<string> $items
+     * @param list<string>|Iterator<string> $items
      * @param positive-int $batchSize
      */
-    public function __construct(array $items, int $batchSize)
+    public function __construct(iterable $items, int $batchSize)
     {
         $this->items = $items;
-        $this->itemsChunks = array_chunk($this->items, $batchSize);
-        $this->numberOfItems = count($this->items);
+        $this->itemsChunks = chunk($items, $batchSize);
+        $this->numberOfItems = is_array($items) ? count($items) : null;
     }
 
     /**
@@ -74,51 +83,43 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @param callable():list<string> $fetchItems
+     * @param callable():iterable<string> $fetchItems
      */
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
         if (null !== $item) {
-            $items = [$item];
+            $validatedItems = [$item];
         } else {
             $items = $fetchItems();
 
-            Assert::isArray(
-                $items,
-                sprintf(
-                    'Expected the fetched items to be a list of strings. Got "%s".',
-                    // TODO: use get_debug_type when dropping support for PHP 7.4
-                    gettype($items),
-                ),
-            );
+            $validatedItems = is_array($items)
+                ? self::normalizeItems($items)
+                : self::normalizeItemStream($items);
         }
 
-        return new self(
-            self::normalizeItems($items),
-            $batchSize,
-        );
+        return new self($validatedItems, $batchSize);
     }
 
     /**
-     * @return list<string>
+     * @return list<string>|Iterator<string>
      */
-    public function getItems(): array
+    public function getItems(): iterable
     {
         return $this->items;
     }
 
     /**
-     * @return array<list<string>>
+     * @return Iterator<list<string>>
      */
-    public function getItemChunks(): array
+    public function getItemChunks(): Iterator
     {
         return $this->itemsChunks;
     }
 
     /**
-     * @return 0|positive-int
+     * @return 0|positive-int|null
      */
-    public function getNumberOfItems(): int
+    public function getNumberOfItems(): ?int
     {
         return $this->numberOfItems;
     }
@@ -130,24 +131,58 @@ final class ChunkedItemsIterator
      */
     private static function normalizeItems(array $items): array
     {
-        foreach ($items as $index => $item) {
-            if (is_numeric($item)) {
-                $items[$index] = (string) $item;
+        return array_values(
+            array_map(
+                static fn ($index) => self::normalizeItem($items[$index], $index),
+                array_keys($items),
+            ),
+        );
+    }
 
-                continue;
-            }
+    /**
+     * @param mixed $items
+     *
+     * @return Iterator<string>
+     */
+    private static function normalizeItemStream($items): Iterator
+    {
+        Assert::isIterable(
+            $items,
+            sprintf(
+                'Expected the fetched items to be a list or an iterable of strings. Got "%s".',
+                // TODO: use get_debug_type when dropping PHP 7.4 support
+                is_object($items) ? get_class($items) : gettype($items),
+            ),
+        );
 
-            Assert::string(
-                $item,
-                sprintf(
-                    'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
-                    // TODO: use get_debug_type when dropping PHP 7.4 support
-                    is_object($item) ? get_class($item) : gettype($item),
-                    $index,
-                ),
-            );
+        return values(
+            mapWithKeys(
+                static fn ($item, $index) => self::normalizeItem($item, $index),
+                $items,
+            ),
+        );
+    }
+
+    /**
+     * @param mixed $item
+     * @param array-key $index
+     */
+    private static function normalizeItem($item, $index): string
+    {
+        if (is_numeric($item)) {
+            return (string) $item;
         }
 
-        return array_values($items);
+        Assert::string(
+            $item,
+            sprintf(
+                'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
+                // TODO: use get_debug_type when dropping PHP 7.4 support
+                is_object($item) ? get_class($item) : gettype($item),
+                $index,
+            ),
+        );
+
+        return $item;
     }
 }

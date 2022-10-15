@@ -17,6 +17,8 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use function fclose;
+use function iter\toArrayWithKeys;
+use function iter\toIter;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ChunkedItemsIterator
@@ -29,13 +31,13 @@ final class ChunkedItemsIteratorTest extends TestCase
      * @dataProvider valuesProvider
      *
      * @param list<string>        $expectedItems
-     * @param array<list<string>> $expectedItemChunks
+     * @param list<list<string>> $expectedItemChunks
      */
     public function test_it_can_be_instantiated(
-        array $items,
+        iterable $items,
         int $batchSize,
         array $expectedItems,
-        int $expectedNumberOfItems,
+        ?int $expectedNumberOfItems,
         array $expectedItemChunks
     ): void {
         $iterator = new ChunkedItemsIterator($items, $batchSize);
@@ -78,21 +80,61 @@ final class ChunkedItemsIteratorTest extends TestCase
     ): void {
         $iterator = ChunkedItemsIterator::fromItemOrCallable($item, $fetchItems, 10);
 
-        self::assertSame($expectedItems, $iterator->getItems());
+        self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
     }
 
     public function test_it_validates_the_items_provided_by_the_closure(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected the fetched items to be a list of strings. Got "object".');
+        $this->expectExceptionMessage('Expected the fetched items to be a list or an iterable of strings. Got "stdClass".');
 
         ChunkedItemsIterator::fromItemOrCallable(
             null,
+            static fn () => new stdClass(),
+            1,
+        );
+    }
+
+    public function test_it_lazily_validates_the_items_provided_by_the_closure_when_it_is_not_an_array(): void
+    {
+        $iterator = ChunkedItemsIterator::fromItemOrCallable(
+            null,
             static function () {
-                yield from [];
+                yield new stdClass();
             },
             1,
         );
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass" for the item "0".');
+
+        // Trigger the loading
+        toArrayWithKeys($iterator->getItems());
+    }
+
+    public function test_it_lazily_evaluates_non_array_iterables(): void
+    {
+        $itemsFetched = false;
+
+        $iterator = ChunkedItemsIterator::fromItemOrCallable(
+            null,
+            static function () use (&$itemsFetched) {
+                $itemsFetched = true;
+
+                yield 'item1';
+                yield 'item2';
+            },
+            10,
+        );
+
+        // Sanity check
+        self::assertFalse($itemsFetched);
+
+        self::assertNull($iterator->getNumberOfItems());
+        self::assertFalse($itemsFetched);
+
+        self::assertSame(['item1', 'item2'], toArrayWithKeys($iterator->getItems()));
+        self::assertTrue($itemsFetched);
     }
 
     /**
@@ -154,6 +196,17 @@ final class ChunkedItemsIteratorTest extends TestCase
             [
                 ['item0', 'item1'],
                 ['item3'],
+            ],
+        ];
+
+        yield 'unknown number of items' => [
+            toIter(['item0', 'item1', 'item3', 'item4']),
+            2,
+            ['item0', 'item1', 'item3', 'item4'],
+            null,
+            [
+                ['item0', 'item1'],
+                ['item3', 'item4'],
             ],
         ];
     }
@@ -227,9 +280,15 @@ final class ChunkedItemsIteratorTest extends TestCase
             ['item0', 'item1'],
         ];
 
-        yield 'item closure; non string stringeable values' => [
+        yield 'item closure; non string string values' => [
             null,
             static fn () => [0, -.5, 7.3, 'item1'],
+            ['0', '-0.5', '7.3', 'item1'],
+        ];
+
+        yield 'item closure with iterator; non string string values' => [
+            null,
+            static fn () => toIter([0, -.5, 7.3, 'item1']),
             ['0', '-0.5', '7.3', 'item1'],
         ];
     }
@@ -258,11 +317,11 @@ final class ChunkedItemsIteratorTest extends TestCase
     private static function assertStateIs(
         ChunkedItemsIterator $iterator,
         array $expectedItems,
-        int $expectedNumberOfItems,
+        ?int $expectedNumberOfItems,
         array $expectedItemChunks
     ): void {
-        self::assertSame($expectedItems, $iterator->getItems());
+        self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
-        self::assertSame($expectedItemChunks, $iterator->getItemChunks());
+        self::assertSame($expectedItemChunks, toArrayWithKeys($iterator->getItemChunks()));
     }
 }
