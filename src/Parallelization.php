@@ -80,7 +80,7 @@ trait Parallelization
      * Typically, you will fetch all the items of the database objects that
      * you want to process here. These will be passed to runSingleCommand().
      *
-     * This method is called exactly once in the master process.
+     * This method is called exactly once in the main process.
      *
      * @param InputInterface $input The console input
      *
