@@ -50,7 +50,7 @@ $decodedComposerJson = json_decode(file_get_contents($composerJsonPath));
 set_composer_conflicts(
     $decodedComposerJson,
     $packagesToFix,
-    '<=4.0',
+    $argv[1] ?? null,
 );
 
 file_put_contents($composerJsonPath, json_encode($decodedComposerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
