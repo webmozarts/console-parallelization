@@ -19,6 +19,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 interface ProgressBarFactory
 {
     /**
+     * Creates a started progress bar.
+     *
      * @param 0|positive-int $numberOfItems
      */
     public function create(
