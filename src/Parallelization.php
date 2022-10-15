@@ -123,7 +123,7 @@ trait Parallelization
                 fn (int $count) => $this->getItemName($count),
                 $this->getName(),
                 $this->getDefinition(),
-                $this->createItemErrorHandler(),
+                $this->createErrorHandler(),
             )
             ->build()
             ->execute(
@@ -157,7 +157,7 @@ trait Parallelization
         );
     }
 
-    protected function createItemErrorHandler(): ErrorHandler
+    protected function createErrorHandler(): ErrorHandler
     {
         return new LoggingErrorHandler(
             new ResetContainerErrorHandler($this->getContainer()),
