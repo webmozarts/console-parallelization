@@ -23,6 +23,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use Webmozarts\Console\Parallelization\Integration\Kernel;
 use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
+use Webmozarts\Console\Parallelization\SymfonyVersion;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Input\InputOptionsSerializer
@@ -51,6 +52,8 @@ final class InputOptionsSerializerTest extends TestCase
 
     public static function optionsProvider(): iterable
     {
+        $isSymfony4 = SymfonyVersion::isSymfony4();
+
         $completeInputDefinition = new InputDefinition([
             new InputArgument(
                 'arg1',
@@ -171,6 +174,8 @@ final class InputOptionsSerializerTest extends TestCase
 
     private static function optionSerializationProvider(): iterable
     {
+        $isSymfony4 = SymfonyVersion::isSymfony4();
+
         $createSet = static fn (
             InputOption $option,
             array $input,
@@ -252,25 +257,27 @@ final class InputOptionsSerializerTest extends TestCase
             ['--opt=v1--opt=v2--opt=v3'],
         );
 
-        yield 'negatable option (positive)' => $createSet(
-            new InputOption(
-                'opt',
-                null,
-                InputOption::VALUE_NEGATABLE,
-            ),
-            ['--opt' => null],
-            ['--opt'],
-        );
+        if (!$isSymfony4) {
+            yield 'negatable option (positive)' => $createSet(
+                new InputOption(
+                    'opt',
+                    null,
+                    InputOption::VALUE_NEGATABLE,
+                ),
+                ['--opt' => null],
+                ['--opt'],
+            );
 
-        yield 'negatable option (negative)' => $createSet(
-            new InputOption(
-                'opt',
-                null,
-                InputOption::VALUE_NEGATABLE,
-            ),
-            ['--no-opt' => null],
-            ['--no-opt'],
-        );
+            yield 'negatable option (negative)' => $createSet(
+                new InputOption(
+                    'opt',
+                    null,
+                    InputOption::VALUE_NEGATABLE,
+                ),
+                ['--no-opt' => null],
+                ['--no-opt'],
+            );
+        }
 
         yield from PHPUnitProviderUtil::prefixWithLabel(
             '[escape token] ',

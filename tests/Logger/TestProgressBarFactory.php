@@ -25,7 +25,8 @@ final class TestProgressBarFactory implements ProgressBarFactory
     public function create(OutputInterface $output, int $numberOfItems): ProgressBar
     {
         $progressBar = new ProgressBar($output, $numberOfItems, PHP_FLOAT_MIN);
-        $progressBar->setFormat(ProgressBar::FORMAT_NORMAL);
+        // TODO: use the constant once we drop support for Symfony 4.4
+        $progressBar->setFormat(/* ProgressBar::FORMAT_NORMAL */ 'normal');
         $progressBar->start();
 
         return $progressBar;

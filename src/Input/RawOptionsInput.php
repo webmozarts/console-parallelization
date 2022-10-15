@@ -54,7 +54,7 @@ final class RawOptionsInput extends Input
     /**
      * @codeCoverageIgnore
      */
-    public function hasParameterOption($values, bool $onlyParams = false): bool
+    public function hasParameterOption($values, $onlyParams = false): bool
     {
         throw new DomainException('Not implemented.');
     }
@@ -62,7 +62,7 @@ final class RawOptionsInput extends Input
     /**
      * @codeCoverageIgnore
      */
-    public function getParameterOption($values, $default = false, bool $onlyParams = false)
+    public function getParameterOption($values, $default = false, $onlyParams = false)
     {
         throw new DomainException('Not implemented.');
     }
