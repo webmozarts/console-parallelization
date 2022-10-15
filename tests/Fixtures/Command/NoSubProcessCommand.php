@@ -22,6 +22,7 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
+use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
@@ -30,9 +31,7 @@ use Webmozarts\Console\Parallelization\Parallelization;
 
 final class NoSubProcessCommand extends Command
 {
-    use Parallelization {
-        getParallelExecutableFactory as getOriginalParallelExecutableFactory;
-    }
+    use Parallelization;
 
     protected static $defaultName = 'test:no-subprocess';
 
@@ -40,7 +39,7 @@ final class NoSubProcessCommand extends Command
 
     protected function configure(): void
     {
-        self::configureParallelization($this);
+        ParallelizationInput::configureParallelization($this);
     }
 
     /**
@@ -65,15 +64,14 @@ final class NoSubProcessCommand extends Command
         InputDefinition $commandDefinition,
         ErrorHandler $errorHandler
     ): ParallelExecutorFactory {
-        return $this
-            ->getOriginalParallelExecutableFactory(
-                $fetchItems,
-                $runSingleCommand,
-                $getItemName,
-                $commandName,
-                $commandDefinition,
-                $errorHandler,
-            )
+        return ParallelExecutorFactory::create(
+            $fetchItems,
+            $runSingleCommand,
+            $getItemName,
+            $commandName,
+            $commandDefinition,
+            $errorHandler,
+        )
             ->withBatchSize(2)
             ->withSegmentSize(2)
             ->withRunBeforeFirstCommand(

@@ -33,16 +33,20 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\Parallelization;
+use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 
 class ImportMoviesCommand extends Command
 {
     use Parallelization;
 
-    protected static $defaultName = 'import:movies';
+    public function __construct()
+    {
+        parent::__construct('import:movies');
+    }
 
     protected function configure(): void
     {
-        self::configureParallelization($this);
+        ParallelizationInput::configureParallelization($this);
     }
 
     protected function fetchItems(InputInterface $input): array
@@ -59,7 +63,7 @@ class ImportMoviesCommand extends Command
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
     {
-        $movieData = unserialize($item);
+        $movieData = json_decode($item);
    
         // insert into the database
     }
