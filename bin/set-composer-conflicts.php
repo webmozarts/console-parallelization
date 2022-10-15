@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\CI;
 
-use function count;
 use stdClass;
+use function count;
 
 /**
  * @param list<non-empty-string> $packageNames
@@ -29,15 +29,15 @@ function set_composer_conflicts(
         return;
     }
 
-    $decodedComposerJson->conflict = $decodedComposerJson->conflict ?? new stdClass();
+    $decodedComposerJson->conflict ??= new stdClass();
 
     if (null === $conflict) {
         foreach ($packageNames as $packageName) {
-            unset($decodedComposerJson->conflict->$packageName);
+            unset($decodedComposerJson->conflict->{$packageName});
         }
     } else {
         foreach ($packageNames as $packageName) {
-            $decodedComposerJson->conflict->$packageName = $conflict;
+            $decodedComposerJson->conflict->{$packageName} = $conflict;
         }
     }
 }

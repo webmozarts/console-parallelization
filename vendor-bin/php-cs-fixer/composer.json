@@ -1,5 +1,8 @@
 {
     "require": {
         "friendsofphp/php-cs-fixer": "^v3.0"
+    },
+    "require-dev": {
+        "theofidry/php-cs-fixer-config": "^1.0"
     }
 }

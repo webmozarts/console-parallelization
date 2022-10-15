@@ -21,6 +21,8 @@ use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler
+ *
+ * @internal
  */
 final class ResetContainerErrorhandlerTest extends TestCase
 {

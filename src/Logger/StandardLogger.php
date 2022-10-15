@@ -14,14 +14,14 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Psr\Log\LoggerInterface;
-use function sprintf;
-use function str_pad;
-use const STR_PAD_BOTH;
-use function str_replace;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
+use function sprintf;
+use function str_pad;
+use function str_replace;
+use const STR_PAD_BOTH;
 
 final class StandardLogger implements Logger
 {

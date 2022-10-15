@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
-use const PHP_FLOAT_MIN;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\Logger\ProgressBarFactory;
+use const PHP_FLOAT_MIN;
 
 final class TestDebugProgressBarFactory implements ProgressBarFactory
 {

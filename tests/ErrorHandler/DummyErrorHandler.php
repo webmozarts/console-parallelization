@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
-use function func_get_args;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use function func_get_args;
 
 final class DummyErrorHandler implements ErrorHandler
 {

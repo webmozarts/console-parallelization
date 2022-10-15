@@ -15,13 +15,15 @@ namespace Webmozarts\Console\Parallelization;
 
 require_once __DIR__.'/../bin/set-composer-conflicts.php';
 
-use function is_array;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use function is_array;
 use function Webmozarts\Console\Parallelization\CI\set_composer_conflicts;
 
 /**
  * @coversNothing
+ *
+ * @internal
  */
 final class SetComposerConflictsTest extends TestCase
 {

@@ -13,21 +13,23 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
-use function array_keys;
-use function getcwd;
-use const PHP_EOL;
 use PHPUnit\Framework\TestCase;
-use function preg_replace;
-use function str_replace;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
+use function array_keys;
+use function getcwd;
+use function preg_replace;
+use function str_replace;
+use const PHP_EOL;
 
 /**
  * @coversNothing
+ *
+ * @internal
  */
 class ParallelizationIntegrationTest extends TestCase
 {

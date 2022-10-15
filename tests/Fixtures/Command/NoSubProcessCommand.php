@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use DomainException;
-use function realpath;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,6 +27,7 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
+use function realpath;
 
 final class NoSubProcessCommand extends Command
 {
@@ -75,7 +75,7 @@ final class NoSubProcessCommand extends Command
             ->withBatchSize(2)
             ->withSegmentSize(2)
             ->withRunBeforeFirstCommand(
-                function () {
+                function (): void {
                     $this->mainProcess = true;
                 },
             )

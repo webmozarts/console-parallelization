@@ -13,10 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function chr;
-use const DIRECTORY_SEPARATOR;
-use function getcwd;
-use const STDIN;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,6 +20,10 @@ use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
+use function chr;
+use function getcwd;
+use const DIRECTORY_SEPARATOR;
+use const STDIN;
 
 final class ParallelExecutorFactory
 {
@@ -390,7 +390,7 @@ final class ParallelExecutorFactory
 
         // @codeCoverageIgnoreStart
         if (!isset($noop)) {
-            $noop = static function () {};
+            $noop = static function (): void {};
         }
         // @codeCoverageIgnoreEnd
 

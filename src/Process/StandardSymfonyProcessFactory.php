@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use function method_exists;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
+use function method_exists;
 
 final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
 {

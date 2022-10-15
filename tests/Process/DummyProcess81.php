@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Process;
 
 use DomainException;
-use function func_get_args;
 use Generator;
-use function implode;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
+use function func_get_args;
+use function implode;
 
 final class DummyProcess81 extends Process
 {
@@ -271,12 +271,12 @@ final class DummyProcess81 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function addOutput(string $line)
+    public function addOutput(string $line): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function addErrorOutput(string $line)
+    public function addErrorOutput(string $line): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -331,7 +331,7 @@ final class DummyProcess81 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function getInput()
+    public function getInput(): void
     {
         throw new DomainException('Unexpected call.');
     }

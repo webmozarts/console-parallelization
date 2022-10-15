@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Process;
 
 use DomainException;
-use function func_get_args;
 use Generator;
-use function implode;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
+use function func_get_args;
+use function implode;
 
 final class DummyProcess74 extends Process
 {
@@ -166,17 +166,17 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function signal($signal)
+    public function signal($signal): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function disableOutput()
+    public function disableOutput(): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function enableOutput()
+    public function enableOutput(): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -196,12 +196,12 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function getIterator($flags = 0)
+    public function getIterator($flags = 0): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function clearOutput()
+    public function clearOutput(): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -216,7 +216,7 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function clearErrorOutput()
+    public function clearErrorOutput(): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -271,12 +271,12 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function addOutput(string $line)
+    public function addOutput(string $line): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function addErrorOutput(string $line)
+    public function addErrorOutput(string $line): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -301,12 +301,12 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function setIdleTimeout($timeout)
+    public function setIdleTimeout($timeout): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function setTty($tty)
+    public function setTty($tty): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -316,7 +316,7 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function setPty($bool)
+    public function setPty($bool): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -326,12 +326,12 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function setWorkingDirectory($cwd)
+    public function setWorkingDirectory($cwd): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function getInput()
+    public function getInput(): void
     {
         throw new DomainException('Unexpected call.');
     }

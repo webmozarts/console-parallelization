@@ -13,19 +13,11 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function array_slice;
-use function implode;
-use function mb_strlen;
-use function sprintf;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
-use function usleep;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Input\InputOptionsSerializer;
@@ -34,6 +26,14 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function array_slice;
+use function implode;
+use function mb_strlen;
+use function sprintf;
+use function usleep;
 
 final class ParallelExecutor
 {

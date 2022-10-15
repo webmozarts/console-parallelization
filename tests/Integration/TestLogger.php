@@ -17,9 +17,9 @@ use function explode;
 use function fclose;
 use function fopen;
 use function fwrite;
-use const PHP_EOL;
 use function sprintf;
 use function unlink;
+use const PHP_EOL;
 
 final class TestLogger
 {

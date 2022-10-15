@@ -13,10 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
-use function file_get_contents;
-use function json_decode;
-use const JSON_THROW_ON_ERROR;
-use function realpath;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,6 +27,10 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
+use function file_get_contents;
+use function json_decode;
+use function realpath;
+use const JSON_THROW_ON_ERROR;
 
 final class ImportMoviesCommand extends Command
 {

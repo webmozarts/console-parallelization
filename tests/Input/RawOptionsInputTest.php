@@ -22,6 +22,8 @@ use Webmozarts\Console\Parallelization\SymfonyVersion;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Input\RawOptionsInput
+ *
+ * @internal
  */
 final class RawOptionsInputTest extends TestCase
 {

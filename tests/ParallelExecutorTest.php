@@ -13,13 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function array_fill;
 use Error;
-use function func_get_args;
-use function getcwd;
-use function implode;
 use InvalidArgumentException;
-use const PHP_EOL;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -42,9 +37,16 @@ use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
+use function array_fill;
+use function func_get_args;
+use function getcwd;
+use function implode;
+use const PHP_EOL;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutor
+ *
+ * @internal
  */
 final class ParallelExecutorTest extends TestCase
 {
@@ -393,7 +395,7 @@ final class ParallelExecutorTest extends TestCase
         $errorHandler = new DummyErrorHandler();
         $logger = new DummyLogger();
 
-        $noop = static function () {};
+        $noop = static function (): void {};
 
         $items = ['item0', 'item1', 'item2'];
         $commandName = 'import:something';
@@ -475,7 +477,7 @@ final class ParallelExecutorTest extends TestCase
         array $items,
         bool $expected
     ): void {
-        $noop = static function () {};
+        $noop = static function (): void {};
 
         $processLauncherFactory = $this->createProcessLauncherFactory($expected);
 
