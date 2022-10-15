@@ -28,17 +28,19 @@ $ composer require webmozarts/console-parallelization
 Example
 -------
 
+Add add parallelization capabilities to your project, you can either extend the
+`ParallelCommand` class or use the `Parallelization` trait:
+
 ```php
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\Parallelization;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 
-class ImportMoviesCommand extends Command
+class ImportMoviesCommand extends ParallelCommand
 {
-    use Parallelization;
-
     public function __construct()
     {
         parent::__construct('import:movies');
@@ -46,7 +48,10 @@ class ImportMoviesCommand extends Command
 
     protected function configure(): void
     {
-        ParallelizationInput::configureParallelization($this);
+        // If you are using the trait do not forget to use ParallelizationInput::configureParallelization($this);
+        parent::configure();
+        
+        // ...
     }
 
     protected function fetchItems(InputInterface $input): array
@@ -66,11 +71,6 @@ class ImportMoviesCommand extends Command
         $movieData = json_decode($item);
    
         // insert into the database
-    }
-
-    protected function runAfterBatch(InputInterface $input, OutputInterface $output, array $items): void
-    {
-        // flush the database and clear the entity manager
     }
 
     protected function getItemName(int $count): string
