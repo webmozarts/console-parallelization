@@ -60,6 +60,9 @@ jobs:
                     php-version: "${{ matrix.php }}"
                     tools: "composer"
 
+            -   name: "Debug"
+                run: "pwd; ls -l"
+
             -   name: "Fix the Symfony versions"
                 run: "./.github/fix-symfony-versions ${{ matrix.symfony.conflict }}"
 
