@@ -36,19 +36,24 @@ jobs:
 
     symfony-version:
         runs-on: "ubuntu-latest"
-        name: "Test ${{ matrix.php }} with Symfony ${{ matrix.symfony.version }}"
+        name: "Test ${{ matrix.php }} with Symfony ${{ matrix.symfony_version }}"
         strategy:
             fail-fast: false
             matrix:
-                php:
-                    - "7.4"
-                    - "8.0"
-                    - "8.1"
-                symfony:
-                    - version: "4.4"
-                      conflict: ">=5.0"
-                    - version: "5.4"
-                      conflict: ">=6.0,<5.0"
+                - php: "7.4"
+                  symfony_version: "4.4"
+                  symfony_conflict: ">=5.0"
+                - php: "7.4"
+                  symfony_version: "5.4"
+                  symfony_conflict: ">=6.0,<5.0"
+                # The case of Symfony 4.4 with PHP 8 is just too impractical to
+                # bother with.
+                - php: "8.0"
+                  symfony_version: "5.4"
+                  symfony_conflict: "<=5.0,>=6.0"
+                - php: "8.1"
+                  symfony_version: "5.4"
+                  symfony_conflict: "<=5.0,>=6.0"
 
         steps:
             -   name: "Check out repository code"
@@ -61,7 +66,7 @@ jobs:
                     tools: "composer"
 
             -   name: "Fix the Symfony versions"
-                run: "bin/fix-symfony-versions \"${{ matrix.symfony.conflict }}\""
+                run: "bin/fix-symfony-versions \"${{ matrix.symfony_conflict }}\""
 
             -   name: "Install Composer dependencies"
                 uses: "ramsey/composer-install@v2"
