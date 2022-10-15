@@ -32,7 +32,42 @@ jobs:
                 uses: "ramsey/composer-install@v2"
 
             -   name: "Run tests"
-                run: "make test"
+                run: "make phpunit"
+
+    symfony-version:
+        runs-on: "ubuntu-latest"
+        name: "Test ${{ matrix.php }} with Symfony ${{ matrix.symfony.version }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                php:
+                    - "7.4"
+                    - "8.0"
+                    - "8.1"
+                symfony:
+                    - version: "4.4"
+                      conflict: ">=5.0"
+                    - version: "5.4"
+                      conflict: ">=6.0,<5.0"
+
+        steps:
+            -   name: "Check out repository code"
+                uses: "actions/checkout@v2"
+
+            -   name: "Setup PHP"
+                uses: "shivammathur/setup-php@v2"
+                with:
+                    php-version: "${{ matrix.php }}"
+                    tools: "composer"
+
+            -   name: "Fix the Symfony versions"
+                run: "bin/fix-symfony-versions \"${{ matrix.symfony.conflict }}\""
+
+            -   name: "Install Composer dependencies"
+                uses: "ramsey/composer-install@v2"
+
+            -   name: "Run tests"
+                run: "make phpunit"
 
     infection:
         runs-on: "ubuntu-latest"
