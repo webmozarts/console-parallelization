@@ -357,6 +357,10 @@ final class ParallelExecutor
             && ($numberOfProcesses > 1 || $numberOfProcessesDefined);
     }
 
+    /**
+     * @param int<1,max> $segmentSize
+     * @param int<1,max> $numberOfProcesses
+     */
     private function createProcessLauncher(
         int $segmentSize,
         int $numberOfProcesses,

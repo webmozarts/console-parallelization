@@ -27,6 +27,9 @@ interface Logger
         string $itemName
     ): void;
 
+    /**
+     * @param 0|positive-int $numberOfItems
+     */
     public function startProgress(int $numberOfItems): void;
 
     public function advance(int $steps = 1): void;

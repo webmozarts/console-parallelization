@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization;
 
 use Webmozart\Assert\Assert;
 use function ceil;
+use function max;
 use function sprintf;
 
 final class Configuration
@@ -59,11 +60,20 @@ final class Configuration
             ),
         );
 
+        // TODO
         $this->segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined
-            ? $numberOfItems
+            ? max($numberOfItems, 1)
             : $segmentSize;
-        $this->numberOfSegments = (int) (1 === $numberOfProcesses ? 1 : ceil($numberOfItems / $segmentSize));
-        $this->numberOfBatches = (int) (ceil($segmentSize / $batchSize) * $this->numberOfSegments);
+        $this->numberOfSegments = self::calculateNumberOfSegments(
+            $numberOfProcesses,
+            $numberOfItems,
+            $segmentSize,
+        );
+        $this->numberOfBatches = self::calculateNumberOfBatches(
+            $segmentSize,
+            $batchSize,
+            $this->numberOfSegments,
+        );
     }
 
     /**
@@ -88,5 +98,45 @@ final class Configuration
     public function getNumberOfBatches(): int
     {
         return $this->numberOfBatches;
+    }
+
+    /**
+     * @param positive-int   $numberOfProcesses
+     * @param 0|positive-int $numberOfItems
+     * @param positive-int   $segmentSize
+     *
+     * @return positive-int
+     */
+    private static function calculateNumberOfSegments(
+        int $numberOfProcesses,
+        int $numberOfItems,
+        int $segmentSize
+    ): int {
+        if (1 === $numberOfProcesses) {
+            return 1;
+        }
+
+        $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
+        Assert::positiveInteger($numberOfSegments);
+
+        return $numberOfSegments;
+    }
+
+    /**
+     * @param positive-int $segmentSize
+     * @param positive-int $batchSize
+     * @param positive-int $numberOfSegments
+     *
+     * @return positive-int
+     */
+    private static function calculateNumberOfBatches(
+        int $segmentSize,
+        int $batchSize,
+        int $numberOfSegments
+    ): int {
+        $numberOfBatches = (int) ceil($segmentSize / $batchSize * $numberOfSegments);
+        Assert::positiveInteger($numberOfBatches);
+
+        return $numberOfBatches;
     }
 }

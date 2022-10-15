@@ -32,6 +32,7 @@
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^1.8",
         "phpstan/phpstan-phpunit": "^1.1",
+        "phpstan/phpstan-symfony": "^1.2",
         "phpstan/phpstan-webmozart-assert": "^1.2",
         "phpunit/phpunit": "^9.0",
         "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.0"
