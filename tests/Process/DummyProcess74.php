@@ -65,7 +65,7 @@ final class DummyProcess74 extends Process
     {
     }
 
-    public function setTimeout(?float $timeout)
+    public function setTimeout($timeout)
     {
         parent::setTimeout($timeout);
 
@@ -132,7 +132,7 @@ final class DummyProcess74 extends Process
         return true;
     }
 
-    public function stop(float $timeout = 10, ?int $signal = null): ?int
+    public function stop($timeout = 10, $signal = null): ?int
     {
     }
 
@@ -166,7 +166,7 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function signal(int $signal)
+    public function signal($signal)
     {
         throw new DomainException('Unexpected call.');
     }
@@ -196,7 +196,7 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function getIterator(int $flags = 0): Generator
+    public function getIterator($flags = 0)
     {
         throw new DomainException('Unexpected call.');
     }
@@ -301,12 +301,12 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function setIdleTimeout(?float $timeout)
+    public function setIdleTimeout($timeout)
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function setTty(bool $tty)
+    public function setTty($tty)
     {
         throw new DomainException('Unexpected call.');
     }
@@ -316,7 +316,7 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function setPty(bool $bool)
+    public function setPty($bool)
     {
         throw new DomainException('Unexpected call.');
     }
@@ -326,7 +326,7 @@ final class DummyProcess74 extends Process
         throw new DomainException('Unexpected call.');
     }
 
-    public function setWorkingDirectory(string $cwd)
+    public function setWorkingDirectory($cwd)
     {
         throw new DomainException('Unexpected call.');
     }
