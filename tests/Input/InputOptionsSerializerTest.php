@@ -34,6 +34,9 @@ final class InputOptionsSerializerTest extends TestCase
 {
     /**
      * @dataProvider optionsProvider
+     *
+     * @param list<string> $excludedParameters
+     * @param list<string> $expected
      */
     public function test_it_can_reverse_the_options_parsing(
         InputDefinition $commandDefinition,
@@ -54,8 +57,6 @@ final class InputOptionsSerializerTest extends TestCase
 
     public static function optionsProvider(): iterable
     {
-        $isSymfony4 = SymfonyVersion::isSymfony4();
-
         $completeInputDefinition = new InputDefinition([
             new InputArgument(
                 'arg1',

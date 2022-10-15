@@ -36,9 +36,9 @@ final class InputOptionsSerializer
     }
 
     /**
-     * @param string[] $excludedOptionNames
+     * @param list<string> $excludedOptionNames
      *
-     * @return string[]
+     * @return list<string>
      */
     public static function serialize(
         InputDefinition $commandDefinition,

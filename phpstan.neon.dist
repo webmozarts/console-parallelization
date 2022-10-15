@@ -1,5 +1,5 @@
 parameters:
-    level: 5
+    level: 6
     paths:
         - bin/set-composer-conflicts.php
         - src
@@ -13,6 +13,9 @@ parameters:
         - tests/Process/DummyProcess74.php
         - tests/Process/DummyProcess81.php
     ignoreErrors:
+        # I personally have no interest in documented the PHPUnit providers
+        - message: '#Test::.+Provider\(\) return type#'
+
         - path: tests/Integration/TestLogger.php
           message: '#TestLogger::\$outputHandler#'
 

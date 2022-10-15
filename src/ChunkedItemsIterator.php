@@ -124,7 +124,7 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @psalm-assert string[] $items
+     * @param mixed[] $items
      *
      * @return list<string>
      */

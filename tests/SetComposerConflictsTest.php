@@ -111,6 +111,9 @@ final class SetComposerConflictsTest extends TestCase
         ];
     }
 
+    /**
+     * @param mixed[] $value
+     */
     private static function toStdClass(array $value): stdClass
     {
         foreach ($value as $key => $item) {

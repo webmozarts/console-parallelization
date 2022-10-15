@@ -107,6 +107,8 @@ final class ParallelExecutorFactoryTest extends TestCase
 
     /**
      * @dataProvider defaultValuesProvider
+     *
+     * @param array<string, string> $environmentVariables
      */
     public function test_it_can_create_an_executor_with_default_values(
         array $environmentVariables,

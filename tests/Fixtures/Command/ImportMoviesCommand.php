@@ -125,6 +125,9 @@ final class ImportMoviesCommand extends Command
         );
     }
 
+    /**
+     * @param list<string> $movieFileNames
+     */
     private function runBeforeBatch(
         array $movieFileNames
     ): void {

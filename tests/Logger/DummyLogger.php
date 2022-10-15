@@ -18,6 +18,9 @@ use function func_get_args;
 
 final class DummyLogger implements Logger
 {
+    /**
+     * @var list<array{string, mixed[]}>
+     */
     public array $records = [];
 
     public function logConfiguration(

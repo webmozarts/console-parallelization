@@ -19,6 +19,12 @@ final class PHPUnitProviderUtil
     {
     }
 
+    /**
+     * @template V
+     * @param iterable<V> $provider
+     *
+     * @return iterable<string, V>
+     */
     public static function prefixWithLabel(
         string $label,
         iterable $provider

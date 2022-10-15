@@ -29,6 +29,8 @@ final class RawOptionsInputTest extends TestCase
 {
     /**
      * @dataProvider inputOptionProvider
+     *
+     * @param list<string> $expected
      */
     public function test_it_can_get_an_input_options(
         InputInterface $input,
