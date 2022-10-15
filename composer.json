@@ -9,7 +9,7 @@
             "email": "bernhard.schussek@webmozarts.com"
         },
         {
-            "name": "Th\u00e9o Fidry",
+            "name": "Théo Fidry",
             "email": "theo.fidry@webmozarts.com"
         }
     ],
@@ -33,7 +33,6 @@
         "phpunit/phpunit": "^9.0",
         "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.0"
     },
-    "conflict": {},
     "autoload": {
         "psr-4": {
             "Webmozarts\\Console\\Parallelization\\": "src/"

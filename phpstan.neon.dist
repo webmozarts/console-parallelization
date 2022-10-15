@@ -1,6 +1,7 @@
 parameters:
     level: 5
     paths:
+        - bin/set-composer-conflicts.php
         - src
         - tests
     excludePaths:

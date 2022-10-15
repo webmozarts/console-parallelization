@@ -27,6 +27,9 @@ final class SetComposerConflictsTest extends TestCase
 {
     /**
      * @dataProvider conflictProvider
+     *
+     * @param list<non-empty-string> $packageNames
+     * @param non-empty-string|null  $conflict
      */
     public function test_it_can_the_desired_packages_to_the_composer_conflict_section(
         stdClass $decodedComposerJson,
