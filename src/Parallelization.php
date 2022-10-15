@@ -182,8 +182,8 @@ trait Parallelization
         //
         // If no such behaviour is desired, ::createItemErrorHandler() can be
         // overridden to provide a different error handler.
-        // @phpstan-ignore-next-line
         // TODO: it should be fine to not provide the Container
+        // @phpstan-ignore-next-line
         return $this->getApplication()->getKernel()->getContainer();
     }
 }
