@@ -140,13 +140,37 @@ final class RawOptionsInputTest extends TestCase
                     ],
                     new InputDefinition([
                         new InputOption(
+                            'opt1',
+                            null,
+                            InputOption::VALUE_OPTIONAL,
+                        ),
+                        new InputOption(
+                            'opt2',
+                            null,
+                            InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+                        ),
+                        new InputOption(
+                            'opt3',
+                            null,
+                            InputOption::VALUE_REQUIRED,
+                        ),
+                        new InputOption(
                             'opt4',
                             null,
                             InputOption::VALUE_NEGATABLE,
                         ),
+                        new InputOption(
+                            'opt5',
+                            null,
+                            InputOption::VALUE_NONE,
+                        ),
                     ]),
                 ),
-                [],
+                [
+                    'opt1' => 'value1',
+                    'opt3' => 'value3',
+                    'opt5' => true,
+                ],
             ];
         }
 
