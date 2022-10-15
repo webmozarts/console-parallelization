@@ -61,7 +61,7 @@ jobs:
                     tools: "composer"
 
             -   name: "Fix the Symfony versions"
-                run: "bin/fix-symfony-versions ${{ matrix.symfony.conflict }}"
+                run: "bin/fix-symfony-versions \"${{ matrix.symfony.conflict }}\""
 
             -   name: "Install Composer dependencies"
                 uses: "ramsey/composer-install@v2"
