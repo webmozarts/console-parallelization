@@ -1,0 +1,57 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the Webmozarts Console Parallelization package.
+ *
+ * (c) Webmozarts GmbH <office@webmozarts.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace Webmozarts\Console\Parallelization\CI;
+
+use function file_get_contents;
+use function file_put_contents;
+use function json_decode;
+use function json_encode;
+use function shell_exec;
+use const JSON_PRETTY_PRINT;
+use const JSON_UNESCAPED_SLASHES;
+
+require_once __DIR__.'/set-composer-conflicts.php';
+
+$composerJsonPath = __DIR__.'/../composer.json';
+
+$packagesToFix = [
+    'symfony/cache',
+    'symfony/config',
+    'symfony/console',
+    'symfony/dependency-injection',
+    'symfony/error-handler',
+    'symfony/event-dispatcher',
+    'symfony/filesystem',
+    'symfony/finder',
+    'symfony/framework-bundle',
+    'symfony/http-foundation',
+    'symfony/http-kernel',
+    'symfony/process',
+    'symfony/routing',
+    'symfony/string',
+    'symfony/var-dumper',
+    'symfony/var-exporter',
+];
+
+$decodedComposerJson = json_decode(file_get_contents($composerJsonPath));
+
+set_composer_conflicts(
+    $decodedComposerJson,
+    $packagesToFix,
+    '<=4.0',
+);
+
+file_put_contents($composerJsonPath, json_encode($decodedComposerJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+shell_exec('composer normalize');

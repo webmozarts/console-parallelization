@@ -123,6 +123,10 @@ return (new Config())
     ->setFinder(
         Finder::create()
             ->in(__DIR__)
+            ->append([
+                '.github/fix-symfony-versions',
+                'set-composer-conflicts.php',
+            ])
             ->exclude([
                 'dist',
                 'tests/Integration/var',
