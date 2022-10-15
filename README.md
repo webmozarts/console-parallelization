@@ -8,7 +8,7 @@ How it works
 
 When you launch a command with multiprocessing enabled, a
 main process fetches *items* and distributes them across the given number of
-child processes over the STDIN. Child processes are killed after a fixed number of items
+child processes over the standard input. Child processes are killed after a fixed number of items
 (a *segment*) in order to prevent them from slowing down over time.
 
 Optionally, the work of child processes can be split down into further chunks
