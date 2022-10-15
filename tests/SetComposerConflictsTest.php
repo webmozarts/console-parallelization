@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-require_once __DIR__.'/../.github/set-composer-conflicts.php';
+require_once __DIR__.'/../bin/set-composer-conflicts.php';
 
 use function is_array;
 use PHPUnit\Framework\TestCase;
