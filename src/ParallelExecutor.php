@@ -404,6 +404,7 @@ final class ParallelExecutor
                 // TODO: this looks suspicious: why do we need to take the first arg?
                 //      why is this not a specific arg?
                 //      why do we include optional arguments? (cf. options)
+                //      maybe has to do with the item arg but in that case it is incorrect...
                 array_filter(
                     array_slice(
                         array_map('strval', $input->getArguments()),

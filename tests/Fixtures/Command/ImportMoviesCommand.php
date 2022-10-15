@@ -36,8 +36,6 @@ final class ImportMoviesCommand extends Command
 {
     use Parallelization;
 
-    protected static $defaultName = 'import:movies';
-
     private TestLogger $logger;
 
     /**
@@ -47,7 +45,7 @@ final class ImportMoviesCommand extends Command
 
     public function __construct()
     {
-        parent::__construct(self::$defaultName);
+        parent::__construct('import:movies');
 
         $this->logger = new TestLogger();
     }
