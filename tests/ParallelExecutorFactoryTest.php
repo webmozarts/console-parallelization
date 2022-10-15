@@ -21,7 +21,7 @@ use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function chr;
-use function Safe\getcwd;
+use function getcwd;
 use function Safe\chdir;
 use function Safe\putenv;
 
@@ -107,8 +107,6 @@ final class ParallelExecutorFactoryTest extends TestCase
 
     /**
      * @dataProvider defaultValuesProvider
-     *
-     * @param array<string, string> $environmentVariables
      */
     public function test_it_can_create_an_executor_with_default_values(
         array $environmentVariables,

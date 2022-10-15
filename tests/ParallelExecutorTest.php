@@ -54,9 +54,6 @@ final class ParallelExecutorTest extends TestCase
 
     /**
      * @dataProvider childProcessProvider
-     *
-     * @param int<1,max> $batchSize
-     * @param list<array{string, mixed[]}> $expectedCalls
      */
     public function test_it_can_execute_a_child_process(
         ParallelizationInput $parallelizationInput,
@@ -473,9 +470,6 @@ final class ParallelExecutorTest extends TestCase
 
     /**
      * @dataProvider childProcessSpawnerProvider
-     *
-     *                                          @param int<1,max> $segmentSize
-     * @param list<string> $items
      */
     public function test_it_can_can_launch_child_processes_or_process_within_the_main_process(
         ParallelizationInput $parallelizationInput,
@@ -606,12 +600,6 @@ final class ParallelExecutorTest extends TestCase
 
     /**
      * @dataProvider mainProcessProvider
-     *
-     * @param list<string> $items
-     *                           @param int<1,max> $batchSize
-     *                           @param int<1,max> $segmentSize
-     * @param list<array{string, mixed[]}> $expectedCalls
-     * @param list<array{string, mixed[]}> $expectedLogRecords
      */
     public function test_it_can_execute_a_main_process(
         ParallelizationInput $parallelizationInput,

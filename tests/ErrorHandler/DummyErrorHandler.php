@@ -19,9 +19,6 @@ use function func_get_args;
 
 final class DummyErrorHandler implements ErrorHandler
 {
-    /**
-     * @var list<array{string, Throwable, Logger}>
-     */
     public array $calls = [];
 
     public function handleError(string $item, Throwable $throwable, Logger $logger): void

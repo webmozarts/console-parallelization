@@ -252,9 +252,6 @@ final class ConfigurationTest extends TestCase
         ];
     }
 
-    /**
-     * @return mixed[]
-     */
     private static function createInputArgs(
         bool $numberOfProcessesDefined,
         int $numberOfProcesses,

@@ -28,7 +28,6 @@ final class ChunkedItemsIteratorTest extends TestCase
     /**
      * @dataProvider valuesProvider
      *
-     * @param list<string>        $items
      * @param list<string>        $expectedItems
      * @param array<list<string>> $expectedItemChunks
      */
@@ -98,8 +97,6 @@ final class ChunkedItemsIteratorTest extends TestCase
 
     /**
      * @dataProvider invalidValuesProvider
-     *
-     * @param list<string> $items
      */
     public function test_it_cannot_be_instantiated_with_invalid_data(
         array $items,
@@ -258,10 +255,6 @@ final class ChunkedItemsIteratorTest extends TestCase
         ];
     }
 
-    /**
-     * @param list<string>       $expectedItems
-     * @param list<list<string>> $expectedItemChunks
-     */
     private static function assertStateIs(
         ChunkedItemsIterator $iterator,
         array $expectedItems,
