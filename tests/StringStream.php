@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use function fopen;
+use function Safe\fopen;
 use function fwrite;
 use function rewind;
 

@@ -27,9 +27,9 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
-use function file_get_contents;
-use function json_decode;
-use function realpath;
+use function Safe\file_get_contents;
+use function Safe\json_decode;
+use function Safe\realpath;
 use const JSON_THROW_ON_ERROR;
 
 final class ImportMoviesCommand extends Command
@@ -157,7 +157,7 @@ final class ImportMoviesCommand extends Command
 
             $decodedContent = json_decode(
                 file_get_contents($moviePath),
-                null,
+                false,
                 512,
                 JSON_THROW_ON_ERROR,
             );

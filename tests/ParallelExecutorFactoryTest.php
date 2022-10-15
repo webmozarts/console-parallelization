@@ -21,7 +21,7 @@ use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function chr;
-use function getcwd;
+use function Safe\getcwd;
 use function Safe\chdir;
 use function Safe\putenv;
 

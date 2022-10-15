@@ -132,6 +132,8 @@ final class SymfonyProcessLauncherTest extends TestCase
     /**
      * @dataProvider inputProvider
      *
+     * @param int<1,max> $numberOfProcesses
+     * @param int<1,max> $segmentSize
      * @param list<string>       $items
      * @param list<list<string>> $expectedProcessedItemsPerProcess
      */

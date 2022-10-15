@@ -27,7 +27,7 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
-use function realpath;
+use function Safe\realpath;
 
 final class NoSubProcessCommand extends Command
 {
