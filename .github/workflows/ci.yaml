@@ -63,7 +63,7 @@ jobs:
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
                 with:
-                    php-version: "${{ matrix.php }}"
+                    php-version: "${{ matrix.config.php }}"
                     tools: "composer"
 
             -   name: "Fix the Symfony versions"
