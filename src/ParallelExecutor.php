@@ -383,7 +383,9 @@ final class ParallelExecutor
             $segmentSize,
             $logger,
             fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
+            // TODO: make this configurable?
             static fn () => usleep(self::CHILD_POLLING_IN_MICRO_SECONDS),
+            // TODO: make this configurable?
             new StandardSymfonyProcessFactory(),
         );
     }
@@ -402,6 +404,7 @@ final class ParallelExecutor
                 // TODO: this looks suspicious: why do we need to take the first arg?
                 //      why is this not a specific arg?
                 //      why do we include optional arguments? (cf. options)
+                //      maybe has to do with the item arg but in that case it is incorrect...
                 array_filter(
                     array_slice(
                         array_map('strval', $input->getArguments()),

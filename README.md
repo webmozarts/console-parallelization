@@ -1,14 +1,27 @@
-Parallelization for the Symfony Console
-=======================================
+# Parallelization for the Symfony Console
 
 This library supports the parallelization of Symfony Console commands. 
 
-How it works
-------------
+- [How it works](#how-it-works)
+- [Installation](#installation)
+- [Usage](#usage)
+- [The API](#the-api)
+  - [Items](#items)
+  - [Segments](#segments)
+  - [Batches](#batches)
+  - [Configuration](#configuration)
+  - [Hooks](#hooks)
+- [Contribute](#contribute)
+- [Upgrade](#upgrade)
+- [Authors](#authors)
+- [License](#license)
 
-When you launch a command with multiprocessing enabled (`--processes 2`), a
+
+## How it works
+
+When you launch a command with multiprocessing enabled, a
 main process fetches *items* and distributes them across the given number of
-child processes. Child processes are killed after a fixed number of items
+child processes over the standard input. Child processes are killed after a fixed number of items
 (a *segment*) in order to prevent them from slowing down over time.
 
 Optionally, the work of child processes can be split down into further chunks
@@ -16,8 +29,8 @@ Optionally, the work of child processes can be split down into further chunks
 (for example flushing changes to the database) in order to optimize the
 performance of your command.
 
-Installation
-------------
+
+## Installation
 
 Use [Composer] to install the package:
 
@@ -25,8 +38,8 @@ Use [Composer] to install the package:
 $ composer require webmozarts/console-parallelization
 ```
 
-Example
--------
+
+## Usage
 
 Add add parallelization capabilities to your project, you can either extend the
 `ParallelCommand` class or use the `Parallelization` trait:
@@ -102,11 +115,13 @@ Processing 2768 movies in segments of 50, batches of 50, 56 rounds, 56 batches i
 Processed 2768 movies.
 ```
 
-Items
------
+
+## The API
+
+### Items
 
 The main process fetches all the items that need to be processed and passes
-them to the child processes through their Standard Input. Hence, items must
+them to the child processes through their Standard Input (STDIN). Hence, items must
 fulfill two requirements:
 
 * Items must be strings
@@ -118,8 +133,8 @@ main process to the child process. Some typical examples for items:
 * The main process reads a file and passes the lines to the child processes
 * The main processes fetches IDs of database rows that need to be updated and passes them to the child processes
 
-Segments
---------
+
+### Segments
 
 When you run a command with multiprocessing enabled, the items returned by
 `fetchItems()` are split into segments of a fixed size. Each child processes
@@ -137,10 +152,10 @@ protected function getSegmentSize(): int
 }
 ```
 
-Batches
--------
 
-By default, the batch size and the segment size is the same. If desired, you can
+### Batches
+
+By default, the batch size and the segment size are the same. If desired, you can
 however choose a smaller batch size than the segment size and run custom code
 before or after each batch. You will typically do so in order to flush changes
 to the database or free resources that you don't need anymore.
@@ -170,28 +185,38 @@ protected function getBatchSize(): int
 }
 ```
 
-Hooks
------
 
-The `Parallelization` trait supports more hooks than the one mentioned in the
-last section. In the table below you can find a complete list of them:
+### Configuration
 
-| Method                                    | Scope          | Description                                  |
-|-------------------------------------------|----------------|----------------------------------------------|
-| `runBeforeFirstCommand($input, $output)`  | Master process | Run before any child process is spawned      |
-| `runAfterLastCommand($input, $output)`    | Master process | Run after all child processes have completed |
-| `runBeforeBatch($input, $output, $items)` | Child process  | Run before each batch in the child process   |
-| `runAfterBatch($input, $output, $items)`  | Child process  | Run after each batch in the child process    |
+The library offers a wide variety of configuration settings:
 
-Authors
--------
+- `::getParallelExecutableFactory()` allows you to completely configure the
+  `ParallelExecutorFactory` factory which goes from fragment, batch sizes, which
+  PHP executable is used or any of the [process handling hooks](#hooks)
+- `::getContainer()` allows you to configure which container is used. By default,
+  it passes the application's kernel's container if there is one. This is used
+  by the default error handler which resets the container in-between each item
+  failure to avoid things such as a broken Doctrine entity manager.
+  If you are not using a kernel (e.g. outside a Symfony application), no
+  container will be returned by default.
+- `::createErrorHandler()` allows you to configure the error handler you want to use. 
+- `::createLogger()` allows you to completely configure the logger you want.
 
-* [Bernhard Schussek]
-* [Théo Fidry]
-* [The Community Contributors]
 
-Contribute
-----------
+### Hooks
+
+The library supports several process hooks which can be configured via
+`::getParallelExecutableFactory()`:
+
+| Method                                    | Scope         | Description                                                                         |
+|-------------------------------------------|---------------|-------------------------------------------------------------------------------------|
+| `runBeforeFirstCommand($input, $output)`  | Main process  | Run before any child process is spawned                                             |
+| `runAfterLastCommand($input, $output)`    | Main process  | Run after all child processes have completed                                        |
+| `runBeforeBatch($input, $output, $items)` | Child process | Run before each batch in the child process (or main if no child process is spawned) |
+| `runAfterBatch($input, $output, $items)`  | Child process | Run after each batch in the child process (or main if no child process is spawned)  |
+
+
+## Contribute
 
 Contributions to the package are always welcome!
 
@@ -201,11 +226,23 @@ Contributions to the package are always welcome!
 To run the CS fixer and tests you can use the command `make`. More details
 available with `make help`.
 
+## Upgrade
 
-License
+See the [upgrade guide](UPGRADE.md).
+
+
+Authors
 -------
 
+* [Bernhard Schussek]
+* [Théo Fidry]
+* [The Community Contributors]
+
+
+## License
+
 All contents of this package are licensed under the [MIT license].
+
 
 [Composer]: https://getcomposer.org
 [Bernhard Schussek]: http://webmozarts.com

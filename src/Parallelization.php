@@ -157,6 +157,7 @@ trait Parallelization
         );
     }
 
+    // TODO: probably worth passing the output here in case
     protected function createErrorHandler(): ErrorHandler
     {
         return new LoggingErrorHandler(
@@ -181,6 +182,7 @@ trait Parallelization
         //
         // If no such behaviour is desired, ::createItemErrorHandler() can be
         // overridden to provide a different error handler.
+        // TODO: it should be fine to not provide the Container
         // @phpstan-ignore-next-line
         return $this->getApplication()->getKernel()->getContainer();
     }

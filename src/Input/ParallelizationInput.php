@@ -49,7 +49,7 @@ final class ParallelizationInput
     ) {
         $this->numberOfProcessesDefined = $numberOfProcessesDefined;
         $this->numberOfProcesses = $numberOfProcesses;
-        $this->item = $item;
+        $this->item = $item;    // TODO: validate there is no child item when it is a child process
         $this->childProcess = $childProcess;
     }
 
