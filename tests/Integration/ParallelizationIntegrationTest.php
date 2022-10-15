@@ -64,19 +64,17 @@ class ParallelizationIntegrationTest extends TestCase
             Processing 5 items in segments of 2, batches of 2, 1 round, 1 batch in 1 process
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-             1/5 [=====>----------------------]  20% 10 secs/10 secs 10.0 MiB
-             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB
-             3/5 [================>-----------]  60% 10 secs/10 secs 10.0 MiB
-             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
             Processed 5 items.
 
             EOF;
 
-        $actual = $this->getOutput($commandTester);
+        $actual = self::normalizeIntermediateProgressBars(
+            $this->getOutput($commandTester),
+        );
 
-        self::assertSame($expected, $actual);
+        self::assertSame($expected, $actual, $actual);
     }
 
     public function test_it_uses_a_sub_process_if_only_one_process_is_used(): void
@@ -112,15 +110,15 @@ class ParallelizationIntegrationTest extends TestCase
             Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB
-             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
             Processed 5 movies.
 
             EOF;
 
-        $actual = $this->getOutput($commandTester);
+        $actual = self::normalizeIntermediateProgressBars(
+            $this->getOutput($commandTester),
+        );
 
         self::assertSame($expected, $actual, $actual);
     }
@@ -144,8 +142,6 @@ class ParallelizationIntegrationTest extends TestCase
             Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-             2/5 [===========>----------------]  40% 10 secs/10 secs 10.0 MiB
-             4/5 [======================>-----]  80% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
             Processed 5 movies.
@@ -158,10 +154,12 @@ class ParallelizationIntegrationTest extends TestCase
         $expectedCommandStartedLine = "[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n";
         $expectedCommandFinishedLine = "[debug] Command finished\n";
 
-        $outputWithoutExtraDebugInfo = str_replace(
-            [$expectedCommandStartedLine, $expectedCommandFinishedLine],
-            ['', ''],
-            $actual,
+        $outputWithoutExtraDebugInfo = self::normalizeIntermediateProgressBars(
+            str_replace(
+                [$expectedCommandStartedLine, $expectedCommandFinishedLine],
+                ['', ''],
+                $actual,
+            ),
         );
 
         self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $outputWithoutExtraDebugInfo);
@@ -213,6 +211,15 @@ class ParallelizationIntegrationTest extends TestCase
         return preg_replace(
             '~'.getcwd().'.+?console~',
             '/path/to/work-dir/bin/console',
+            $output,
+        );
+    }
+
+    private static function normalizeIntermediateProgressBars(string $output): string
+    {
+        return preg_replace(
+            '# *?[1-4]/5 \[[=>-]+\]  \d+% 10 secs/10 secs 10.0 MiB\n#',
+            '',
             $output,
         );
     }
