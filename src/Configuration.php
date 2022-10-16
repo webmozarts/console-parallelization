@@ -116,14 +116,12 @@ final class Configuration
         int $numberOfSegments
     ): int {
         if ($numberOfSegments >= 2) {
-            $numberOfCompleteSegments = $numberOfSegments - 1;
-            $totalNumberOfBatches = ((int) ceil($segmentSize / $batchSize)) * $numberOfCompleteSegments;
+            $totalNumberOfBatches = ((int) ceil($segmentSize / $batchSize)) * $numberOfSegments;
         } else {
-            $numberOfCompleteSegments = 0;
             $totalNumberOfBatches = 0;
         }
 
-        $totalNumberOfBatches += (int) ceil(($numberOfItems - $numberOfCompleteSegments * $segmentSize) / $batchSize);
+        $totalNumberOfBatches += (int) ceil(($numberOfItems - $numberOfSegments * $segmentSize) / $batchSize);
 
         return $totalNumberOfBatches;
     }
