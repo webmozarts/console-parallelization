@@ -3,15 +3,7 @@ parameters:
     paths:
         - bin/set-composer-conflicts.php
         - src
-        - tests
     excludePaths:
-        - tests/Integration/var
-        - tests/Input/FakeInput.php
-        - tests/Input/FakeInput74.php
-        - tests/Input/FakeInput81.php
-        - tests/Process/DummyProcess.php
-        - tests/Process/DummyProcess74.php
-        - tests/Process/DummyProcess81.php
     ignoreErrors:
         - path: tests/Integration/TestLogger.php
           message: '#TestLogger::\$outputHandler#'
