@@ -226,16 +226,16 @@ final class ParallelExecutor
             $parallelizationInput->isNumberOfProcessesDefined(),
         );
 
-        $config = new Configuration(
+        $configuration = Configuration::create(
             $shouldSpawnChildProcesses,
             $numberOfItems,
             $desiredSegmentSize,
             $batchSize,
         );
 
-        $segmentSize = $config->getSegmentSize();
-        $numberOfSegments = $config->getNumberOfSegments();
-        $totalNumberOfBatches = $config->getTotalNumberOfBatches();
+        $segmentSize = $configuration->getSegmentSize();
+        $numberOfSegments = $configuration->getNumberOfSegments();
+        $totalNumberOfBatches = $configuration->getTotalNumberOfBatches();
         $itemName = ($this->getItemName)($numberOfItems);
 
         $logger->logConfiguration(
