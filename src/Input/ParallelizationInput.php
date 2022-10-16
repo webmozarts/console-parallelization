@@ -33,7 +33,7 @@ final class ParallelizationInput
     /**
      * @var positive-int
      */
-    private int $numberOfProcesses;
+    private int $maxNumberOfProcesses;
 
     private ?string $item;
     private bool $childProcess;
@@ -48,7 +48,7 @@ final class ParallelizationInput
         bool $childProcess
     ) {
         $this->numberOfProcessesDefined = $numberOfProcessesDefined;
-        $this->numberOfProcesses = $numberOfProcesses;
+        $this->maxNumberOfProcesses = $numberOfProcesses;
         $this->item = $item;
         $this->childProcess = $childProcess;
     }
@@ -168,9 +168,9 @@ final class ParallelizationInput
     /**
      * @return positive-int
      */
-    public function getNumberOfProcesses(): int
+    public function getMaxNumberOfProcesses(): int
     {
-        return $this->numberOfProcesses;
+        return $this->maxNumberOfProcesses;
     }
 
     public function getItem(): ?string

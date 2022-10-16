@@ -58,7 +58,7 @@ final class ParallelizationInputTest extends TestCase
         );
 
         self::assertTrue($input->isNumberOfProcessesDefined());
-        self::assertSame(5, $input->getNumberOfProcesses());
+        self::assertSame(5, $input->getMaxNumberOfProcesses());
         self::assertSame('item', $input->getItem());
         self::assertTrue($input->isChildProcess());
     }

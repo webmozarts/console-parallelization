@@ -205,8 +205,7 @@ final class ParallelExecutor
     ): int {
         ($this->runBeforeFirstCommand)($input, $output);
 
-        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
-        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
+        $numberOfProcesses = $parallelizationInput->getMaxNumberOfProcesses();
 
         $batchSize = $this->batchSize;
         $desiredSegmentSize = $this->segmentSize;
@@ -246,6 +245,7 @@ final class ParallelExecutor
             $totalNumberOfBatches,
             $numberOfProcesses,
             $itemName,
+            $shouldSpawnChildProcesses,
         );
 
         $logger->startProgress($numberOfItems);
