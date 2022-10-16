@@ -219,8 +219,17 @@ final class ParallelExecutor
 
         $numberOfItems = $itemIterator->getNumberOfItems();
 
+        $itemName = ($this->getItemName)($numberOfItems);
+
+        $shouldSpawnChildProcesses = self::shouldSpawnChildProcesses(
+            $numberOfItems,
+            $segmentSize,
+            $numberOfProcesses,
+            $parallelizationInput->isNumberOfProcessesDefined(),
+        );
+
         $config = new Configuration(
-            $isNumberOfProcessesDefined,
+            $shouldSpawnChildProcesses,
             $numberOfProcesses,
             $numberOfItems,
             $segmentSize,
@@ -228,8 +237,7 @@ final class ParallelExecutor
         );
 
         $numberOfSegments = $config->getNumberOfSegments();
-        $numberOfBatches = $config->getNumberOfBatches();
-        $itemName = ($this->getItemName)($numberOfItems);
+        $numberOfBatches = $config->getTotalNumberOfBatches();
 
         $logger->logConfiguration(
             $segmentSize,
@@ -243,12 +251,30 @@ final class ParallelExecutor
 
         $logger->startProgress($numberOfItems);
 
-        if (self::shouldSpawnChildProcesses(
-            $numberOfItems,
-            $segmentSize,
-            $numberOfProcesses,
-            $parallelizationInput->isNumberOfProcessesDefined(),
-        )) {
+        if ($shouldSpawnChildProcesses) {
+            $config = new Configuration(
+                $shouldSpawnChildProcesses,
+                $numberOfProcesses,
+                $numberOfItems,
+                $segmentSize,
+                $batchSize,
+            );
+
+            $numberOfSegments = $config->getNumberOfSegments();
+            $numberOfBatches = $config->getTotalNumberOfBatches();
+
+            $logger->logConfiguration(
+                $segmentSize,
+                $batchSize,
+                $numberOfItems,
+                $numberOfSegments,
+                $numberOfBatches,
+                $numberOfProcesses,
+                $itemName,
+            );
+
+            $logger->startProgress($numberOfItems);
+
             $this
                 ->createProcessLauncher(
                     $segmentSize,
@@ -258,6 +284,8 @@ final class ParallelExecutor
                 )
                 ->run($itemIterator->getItems());
         } else {
+            $logger->startProgress($numberOfItems);
+
             $this->processItems(
                 $itemIterator,
                 $input,

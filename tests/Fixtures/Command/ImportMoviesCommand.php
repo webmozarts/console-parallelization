@@ -60,6 +60,7 @@ final class ImportMoviesCommand extends Command
      */
     protected function fetchItems(InputInterface $input): array
     {
+        return [];
         return [
             'movie-1.json',
             'movie-2.json',
