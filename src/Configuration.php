@@ -116,12 +116,19 @@ final class Configuration
         int $numberOfSegments
     ): int {
         if ($numberOfSegments >= 2) {
+            // It "should" be `$numberOfSegments - 1`. However, it actually does
+            // not matter as the expression L128 is just going to give a
+            // negative number adjusting the final result correctly.
+            // So we keep this simpler expression, although a bit less intuitive,
+            // to avoid to have to configure Infection to not mutate this piece.
+            $numberOfCompleteSegments = $numberOfSegments;
             $totalNumberOfBatches = ((int) ceil($segmentSize / $batchSize)) * $numberOfSegments;
         } else {
+            $numberOfCompleteSegments = 0;
             $totalNumberOfBatches = 0;
         }
 
-        $totalNumberOfBatches += (int) ceil(($numberOfItems - $numberOfSegments * $segmentSize) / $batchSize);
+        $totalNumberOfBatches += (int) ceil(($numberOfItems - $numberOfCompleteSegments * $segmentSize) / $batchSize);
 
         return $totalNumberOfBatches;
     }
