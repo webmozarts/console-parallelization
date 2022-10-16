@@ -999,7 +999,7 @@ final class ParallelExecutorTest extends TestCase
                 [
                     'logConfiguration',
                     [
-                        $segmentSize,
+                        1,
                         $batchSize,
                         3,
                         $numberOfSegments,
