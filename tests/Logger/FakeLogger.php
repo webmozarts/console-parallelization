@@ -25,7 +25,8 @@ final class FakeLogger implements Logger
         int $numberOfSegments,
         int $totalNumberOfBatches,
         int $numberOfProcesses,
-        string $itemName
+        string $itemName,
+        bool $shouldSpawnChildProcesses
     ): void {
         throw new DomainException('Unexpected call.');
     }

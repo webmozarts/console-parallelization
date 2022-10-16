@@ -50,21 +50,34 @@ final class StandardLogger implements Logger
         int $numberOfSegments,
         int $totalNumberOfBatches,
         int $numberOfProcesses,
-        string $itemName
+        string $itemName,
+        bool $shouldSpawnChildProcesses
     ): void {
-        $this->output->writeln(sprintf(
-            'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
-            $numberOfItems,
-            $itemName,
-            $segmentSize,
-            $batchSize,
-            $numberOfSegments,
-            1 === $numberOfSegments ? 'round' : 'rounds',
-            $totalNumberOfBatches,
-            1 === $totalNumberOfBatches ? 'batch' : 'batches',
-            $numberOfProcesses,
-            1 === $numberOfProcesses ? 'process' : 'processes',
-        ));
+        if ($shouldSpawnChildProcesses) {
+            $this->output->writeln(sprintf(
+                'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
+                $numberOfItems,
+                $itemName,
+                $segmentSize,
+                $batchSize,
+                $numberOfSegments,
+                1 === $numberOfSegments ? 'round' : 'rounds',
+                $totalNumberOfBatches,
+                1 === $totalNumberOfBatches ? 'batch' : 'batches',
+                $numberOfProcesses,
+                1 === $numberOfProcesses ? 'process' : 'processes',
+            ));
+        } else {
+            $this->output->writeln(sprintf(
+                'Processing %d %s, batches of %d, %d %s',
+                $numberOfItems,
+                $itemName,
+                $batchSize,
+                $totalNumberOfBatches,
+                1 === $totalNumberOfBatches ? 'batch' : 'batches',
+            ));
+        }
+
         $this->output->writeln('');
     }
 

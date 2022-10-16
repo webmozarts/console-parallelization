@@ -27,7 +27,8 @@ final class DummyLogger implements Logger
         int $numberOfSegments,
         int $totalNumberOfBatches,
         int $numberOfProcesses,
-        string $itemName
+        string $itemName,
+        bool $shouldSpawnChildProcesses
     ): void {
         $this->records[] = [
             __FUNCTION__,

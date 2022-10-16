@@ -24,7 +24,8 @@ interface Logger
         int $numberOfSegments,
         int $totalNumberOfBatches,
         int $numberOfProcesses,
-        string $itemName
+        string $itemName,
+        bool $shouldSpawnChildProcesses
     ): void;
 
     public function startProgress(int $numberOfItems): void;

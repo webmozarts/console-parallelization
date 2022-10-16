@@ -24,7 +24,8 @@ final class NullLogger implements Logger
         int $numberOfSegments,
         int $totalNumberOfBatches,
         int $numberOfProcesses,
-        string $itemName
+        string $itemName,
+        bool $shouldSpawnChildProcesses
     ): void {
         // Do nothing.
     }
