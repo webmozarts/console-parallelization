@@ -18,6 +18,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\Configuration;
 use function sprintf;
 use function str_pad;
 use function str_replace;
@@ -44,19 +45,20 @@ final class StandardLogger implements Logger
     }
 
     public function logConfiguration(
-        int $segmentSize,
+        Configuration $configuration,
         int $batchSize,
         int $numberOfItems,
-        int $numberOfSegments,
-        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName
     ): void {
+        $numberOfSegments = $configuration->getNumberOfSegments();
+        $totalNumberOfBatches = $configuration->getTotalNumberOfBatches();
+
         $this->output->writeln(sprintf(
             'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
             $numberOfItems,
             $itemName,
-            $segmentSize,
+            $configuration->getSegmentSize(),
             $batchSize,
             $numberOfSegments,
             1 === $numberOfSegments ? 'round' : 'rounds',

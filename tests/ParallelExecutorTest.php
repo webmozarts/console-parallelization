@@ -999,6 +999,9 @@ final class ParallelExecutorTest extends TestCase
                 [
                     'logConfiguration',
                     [
+                        new Configuration(
+
+                        ),
                         1,
                         $batchSize,
                         3,
