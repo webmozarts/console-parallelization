@@ -109,6 +109,12 @@ final class ConfigurationTest extends TestCase
             2,
             3,
         );
+
+        yield 'several batches are needed to process the items (not exact - lower)' => $createSet(
+            10,
+            3,
+            4,
+        );
     }
 
     private static function childValuesProvider(): iterable
@@ -185,6 +191,14 @@ final class ConfigurationTest extends TestCase
             2,
             2,
             5,
+        );
+
+        yield 'the items need to be processed within multiple batches of a segment (not exact - lower)' => $createSet(
+            50,
+            10,
+            3,
+            5,
+            20,
         );
 
         yield 'the items need to be processed within multiple batches of a segment (edge case)' => $createSet(
