@@ -14,14 +14,15 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Throwable;
-use Webmozarts\Console\Parallelization\Configuration;
 
 interface Logger
 {
     public function logConfiguration(
-        Configuration $configuration,
+        int $segmentSize,
         int $batchSize,
         int $numberOfItems,
+        int $numberOfSegments,
+        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName
     ): void;

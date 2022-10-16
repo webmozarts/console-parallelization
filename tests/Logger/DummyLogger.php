@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Throwable;
-use Webmozarts\Console\Parallelization\Configuration;
 use function func_get_args;
 
 final class DummyLogger implements Logger
@@ -22,9 +21,11 @@ final class DummyLogger implements Logger
     public array $records = [];
 
     public function logConfiguration(
-        Configuration $configuration,
+        int $segmentSize,
         int $batchSize,
         int $numberOfItems,
+        int $numberOfSegments,
+        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName
     ): void {

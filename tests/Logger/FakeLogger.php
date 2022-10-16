@@ -15,14 +15,15 @@ namespace Webmozarts\Console\Parallelization\Logger;
 
 use DomainException;
 use Throwable;
-use Webmozarts\Console\Parallelization\Configuration;
 
 final class FakeLogger implements Logger
 {
     public function logConfiguration(
-        Configuration $configuration,
+        int $segmentSize,
         int $batchSize,
         int $numberOfItems,
+        int $numberOfSegments,
+        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName
     ): void {
