@@ -35,14 +35,12 @@ final class Configuration
     private int $totalNumberOfBatches;
 
     /**
-     * @param positive-int   $numberOfProcesses
      * @param 0|positive-int $numberOfItems
      * @param positive-int   $segmentSize
      * @param positive-int   $batchSize
      */
     public function __construct(
-        bool $numberOfProcessesDefined,
-        int $numberOfProcesses,
+        bool $shouldSpawnChildProcesses,
         int $numberOfItems,
         int $segmentSize,
         int $batchSize
@@ -59,11 +57,24 @@ final class Configuration
             ),
         );
 
-        $this->segmentSize = 1 === $numberOfProcesses && !$numberOfProcessesDefined
-            ? $numberOfItems
-            : $segmentSize;
-        $this->numberOfSegments = (int) (1 === $numberOfProcesses ? 1 : ceil($numberOfItems / $segmentSize));
-        $this->totalNumberOfBatches = (int) (ceil($segmentSize / $batchSize) * $this->numberOfSegments);
+        if ($shouldSpawnChildProcesses) {
+            $this->segmentSize = $segmentSize;
+            $this->numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
+            $this->totalNumberOfBatches = self::calculateTotalNumberOfBatches(
+                $numberOfItems,
+                $segmentSize,
+                $batchSize,
+                $this->numberOfSegments,
+            );
+        } else {
+            // The segments are what define the sizes of the sub-processes. When
+            // executing only the main process, then there is no use for
+            // segments.
+            // See https://github.com/webmozarts/console-parallelization#segments
+            $this->segmentSize = 1;
+            $this->numberOfSegments = 1;
+            $this->totalNumberOfBatches = (int) ceil($numberOfItems / $batchSize);
+        }
     }
 
     /**
@@ -88,5 +99,37 @@ final class Configuration
     public function getTotalNumberOfBatches(): int
     {
         return $this->totalNumberOfBatches;
+    }
+
+    /**
+     * @param 0|positive-int $numberOfItems
+     * @param positive-int   $segmentSize
+     * @param positive-int   $batchSize
+     * @param positive-int   $numberOfSegments
+     *
+     * @return positive-int
+     */
+    private static function calculateTotalNumberOfBatches(
+        int $numberOfItems,
+        int $segmentSize,
+        int $batchSize,
+        int $numberOfSegments
+    ): int {
+        if ($numberOfSegments >= 2) {
+            // It "should" be `$numberOfSegments - 1`. However, it actually does
+            // not matter as the expression L128 is just going to give a
+            // negative number adjusting the final result correctly.
+            // So we keep this simpler expression, although a bit less intuitive,
+            // to avoid to have to configure Infection to not mutate this piece.
+            $numberOfCompleteSegments = $numberOfSegments;
+            $totalNumberOfBatches = ((int) ceil($segmentSize / $batchSize)) * $numberOfSegments;
+        } else {
+            $numberOfCompleteSegments = 0;
+            $totalNumberOfBatches = 0;
+        }
+
+        $totalNumberOfBatches += (int) ceil(($numberOfItems - $numberOfCompleteSegments * $segmentSize) / $batchSize);
+
+        return $totalNumberOfBatches;
     }
 }

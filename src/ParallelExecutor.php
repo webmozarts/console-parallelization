@@ -219,9 +219,15 @@ final class ParallelExecutor
 
         $numberOfItems = $itemIterator->getNumberOfItems();
 
-        $config = new Configuration(
-            $isNumberOfProcessesDefined,
+        $shouldSpawnChildProcesses = self::shouldSpawnChildProcesses(
+            $numberOfItems,
+            $segmentSize,
             $numberOfProcesses,
+            $parallelizationInput->isNumberOfProcessesDefined(),
+        );
+
+        $config = new Configuration(
+            $shouldSpawnChildProcesses,
             $numberOfItems,
             $segmentSize,
             $batchSize,
@@ -243,12 +249,7 @@ final class ParallelExecutor
 
         $logger->startProgress($numberOfItems);
 
-        if (self::shouldSpawnChildProcesses(
-            $numberOfItems,
-            $segmentSize,
-            $numberOfProcesses,
-            $parallelizationInput->isNumberOfProcessesDefined(),
-        )) {
+        if ($shouldSpawnChildProcesses) {
             $this
                 ->createProcessLauncher(
                     $segmentSize,
