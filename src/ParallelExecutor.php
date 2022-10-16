@@ -225,7 +225,7 @@ final class ParallelExecutor
             $parallelizationInput->isNumberOfProcessesDefined(),
         );
 
-        $configuration = new Configuration(
+        $configuration = Configuration::create(
             $shouldSpawnChildProcesses,
             $numberOfItems,
             $desiredSegmentSize,
