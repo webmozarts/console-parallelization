@@ -32,7 +32,7 @@ final class Configuration
     /**
      * @var positive-int
      */
-    private int $numberOfBatches;
+    private int $totalNumberOfBatches;
 
     /**
      * @param positive-int   $numberOfProcesses
@@ -63,7 +63,7 @@ final class Configuration
             ? $numberOfItems
             : $segmentSize;
         $this->numberOfSegments = (int) (1 === $numberOfProcesses ? 1 : ceil($numberOfItems / $segmentSize));
-        $this->numberOfBatches = (int) (ceil($segmentSize / $batchSize) * $this->numberOfSegments);
+        $this->totalNumberOfBatches = (int) (ceil($segmentSize / $batchSize) * $this->numberOfSegments);
     }
 
     /**
@@ -85,8 +85,8 @@ final class Configuration
     /**
      * @return positive-int
      */
-    public function getNumberOfBatches(): int
+    public function getTotalNumberOfBatches(): int
     {
-        return $this->numberOfBatches;
+        return $this->totalNumberOfBatches;
     }
 }

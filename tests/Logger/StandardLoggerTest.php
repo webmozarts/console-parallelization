@@ -53,7 +53,7 @@ final class StandardLoggerTest extends TestCase
         int $batchSize,
         int $numberOfItems,
         int $numberOfSegments,
-        int $numberOfBatches,
+        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName,
         string $expected
@@ -63,7 +63,7 @@ final class StandardLoggerTest extends TestCase
             $batchSize,
             $numberOfItems,
             $numberOfSegments,
-            $numberOfBatches,
+            $totalNumberOfBatches,
             $numberOfProcesses,
             $itemName,
         );

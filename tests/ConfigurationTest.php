@@ -47,7 +47,7 @@ final class ConfigurationTest extends TestCase
 
         self::assertSame($expectedSegmentSize, $config->getSegmentSize());
         self::assertSame($expectedNumberOfSegments, $config->getNumberOfSegments());
-        self::assertSame($expectedNumberOfBatches, $config->getNumberOfBatches());
+        self::assertSame($expectedNumberOfBatches, $config->getTotalNumberOfBatches());
     }
 
     /**

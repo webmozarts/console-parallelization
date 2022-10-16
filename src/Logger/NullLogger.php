@@ -22,7 +22,7 @@ final class NullLogger implements Logger
         int $batchSize,
         int $numberOfItems,
         int $numberOfSegments,
-        int $numberOfBatches,
+        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName
     ): void {
