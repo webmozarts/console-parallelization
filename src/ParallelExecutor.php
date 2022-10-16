@@ -209,7 +209,7 @@ final class ParallelExecutor
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
 
         $batchSize = $this->batchSize;
-        $segmentSize = $this->segmentSize;
+        $desiredSegmentSize = $this->segmentSize;
 
         $itemIterator = ChunkedItemsIterator::fromItemOrCallable(
             $parallelizationInput->getItem(),
@@ -221,7 +221,7 @@ final class ParallelExecutor
 
         $shouldSpawnChildProcesses = self::shouldSpawnChildProcesses(
             $numberOfItems,
-            $segmentSize,
+            $desiredSegmentSize,
             $numberOfProcesses,
             $parallelizationInput->isNumberOfProcessesDefined(),
         );
@@ -229,10 +229,11 @@ final class ParallelExecutor
         $config = new Configuration(
             $shouldSpawnChildProcesses,
             $numberOfItems,
-            $segmentSize,
+            $desiredSegmentSize,
             $batchSize,
         );
 
+        $segmentSize = $config->getSegmentSize();
         $numberOfSegments = $config->getNumberOfSegments();
         $totalNumberOfBatches = $config->getTotalNumberOfBatches();
         $itemName = ($this->getItemName)($numberOfItems);
