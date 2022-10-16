@@ -19,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozarts\Console\Parallelization\Configuration;
 use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
 
 /**
@@ -50,22 +51,18 @@ final class StandardLoggerTest extends TestCase
      * @dataProvider configurationProvider
      */
     public function test_it_can_log_the_configuration(
-        int $segmentSize,
+        Configuration $configuration,
         int $batchSize,
         int $numberOfItems,
-        int $numberOfSegments,
-        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses,
         string $expected
     ): void {
         $this->logger->logConfiguration(
-            $segmentSize,
+            $configuration,
             $batchSize,
             $numberOfItems,
-            $numberOfSegments,
-            $totalNumberOfBatches,
             $numberOfProcesses,
             $itemName,
             $shouldSpawnChildProcesses,
@@ -77,12 +74,12 @@ final class StandardLoggerTest extends TestCase
     public static function configurationProvider(): iterable
     {
         yield from PHPUnitProviderUtil::prefixWithLabel(
-            '[without child processes',
+            '[without child processes] ',
             self::withoutChildConfigurationProvider(),
         );
 
         yield from PHPUnitProviderUtil::prefixWithLabel(
-            '[with child process(es)',
+            '[with child process(es)] ',
             self::withChildConfigurationProvider(),
         );
     }
@@ -90,64 +87,54 @@ final class StandardLoggerTest extends TestCase
     private static function withoutChildConfigurationProvider(): iterable
     {
         yield 'nominal' => [
-            5,
+            new Configuration(
+                5,
+                8,
+                2,
+            ),
             3,
-            8,
-            2,
             4,
             2,
-            false,
             'tokens',
-            <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 2 processes
-
-
-                TXT,
-        ];
-
-        yield 'single segment' => [
-            5,
-            3,
-            8,
-            1,
-            4,
-            2,
             false,
-            'tokens',
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 1 round, 4 batches in 2 processes
+                Processing 4 tokens, batches of 3, 2 batches
 
 
                 TXT,
         ];
 
         yield 'single batch' => [
-            5,
+            new Configuration(
+                5,
+                2,
+                1,
+            ),
             3,
             8,
             2,
-            1,
-            2,
-            false,
             'tokens',
+            false,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 1 batch in 2 processes
+                Processing 8 tokens, batches of 3, 1 batch
 
 
                 TXT,
         ];
 
         yield 'single process' => [
-            5,
+            new Configuration(
+                5,
+                2,
+                4,
+            ),
             3,
             8,
-            2,
-            4,
             1,
-            false,
             'tokens',
+            false,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 1 process
+                Processing 8 tokens, batches of 3, 4 batches
 
 
                 TXT,
@@ -157,14 +144,16 @@ final class StandardLoggerTest extends TestCase
     private static function withChildConfigurationProvider(): iterable
     {
         yield 'nominal' => [
-            5,
+            new Configuration(
+                5,
+                2,
+                4,
+            ),
             3,
             8,
             2,
-            4,
-            2,
-            true,
             'tokens',
+            true,
             <<<'TXT'
                 Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 2 processes
 
@@ -173,14 +162,16 @@ final class StandardLoggerTest extends TestCase
         ];
 
         yield 'single segment' => [
-            5,
+            new Configuration(
+                5,
+                1,
+                4,
+            ),
             3,
             8,
-            1,
-            4,
             2,
-            true,
             'tokens',
+            true,
             <<<'TXT'
                 Processing 8 tokens in segments of 5, batches of 3, 1 round, 4 batches in 2 processes
 
@@ -189,14 +180,16 @@ final class StandardLoggerTest extends TestCase
         ];
 
         yield 'single batch' => [
-            5,
+            new Configuration(
+                5,
+                2,
+                1,
+            ),
             3,
             8,
             2,
-            1,
-            2,
-            true,
             'tokens',
+            true,
             <<<'TXT'
                 Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 1 batch in 2 processes
 
@@ -205,14 +198,16 @@ final class StandardLoggerTest extends TestCase
         ];
 
         yield 'single process' => [
-            5,
+            new Configuration(
+                5,
+                2,
+                4,
+            ),
             3,
             8,
-            2,
-            4,
             1,
-            true,
             'tokens',
+            true,
             <<<'TXT'
                 Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 1 process
 

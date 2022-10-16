@@ -14,15 +14,14 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Throwable;
+use Webmozarts\Console\Parallelization\Configuration;
 
 final class NullLogger implements Logger
 {
     public function logConfiguration(
-        int $segmentSize,
+        Configuration $configuration,
         int $batchSize,
         int $numberOfItems,
-        int $numberOfSegments,
-        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses

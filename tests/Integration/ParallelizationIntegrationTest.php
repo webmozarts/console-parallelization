@@ -63,7 +63,7 @@ class ParallelizationIntegrationTest extends TestCase
 
         // TODO: note that the "in 1 process is incorrect here..."
         $expected = <<<'EOF'
-            Processing 5 items in segments of 1, batches of 2, 1 round, 3 batches in 1 process
+            Processing 5 items, batches of 2, 3 batches
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB

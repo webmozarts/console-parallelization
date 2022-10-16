@@ -233,16 +233,12 @@ final class ParallelExecutor
         );
 
         $segmentSize = $configuration->getSegmentSize();
-        $numberOfSegments = $configuration->getNumberOfSegments();
-        $totalNumberOfBatches = $configuration->getTotalNumberOfBatches();
         $itemName = ($this->getItemName)($numberOfItems);
 
         $logger->logConfiguration(
-            $segmentSize,
+            $configuration,
             $batchSize,
             $numberOfItems,
-            $numberOfSegments,
-            $totalNumberOfBatches,
             $numberOfProcesses,
             $itemName,
             $shouldSpawnChildProcesses,
