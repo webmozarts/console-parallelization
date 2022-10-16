@@ -219,8 +219,6 @@ final class ParallelExecutor
 
         $numberOfItems = $itemIterator->getNumberOfItems();
 
-        $itemName = ($this->getItemName)($numberOfItems);
-
         $shouldSpawnChildProcesses = self::shouldSpawnChildProcesses(
             $numberOfItems,
             $segmentSize,
@@ -230,7 +228,6 @@ final class ParallelExecutor
 
         $config = new Configuration(
             $shouldSpawnChildProcesses,
-            $numberOfProcesses,
             $numberOfItems,
             $segmentSize,
             $batchSize,
@@ -238,6 +235,7 @@ final class ParallelExecutor
 
         $numberOfSegments = $config->getNumberOfSegments();
         $numberOfBatches = $config->getTotalNumberOfBatches();
+        $itemName = ($this->getItemName)($numberOfItems);
 
         $logger->logConfiguration(
             $segmentSize,
@@ -252,29 +250,6 @@ final class ParallelExecutor
         $logger->startProgress($numberOfItems);
 
         if ($shouldSpawnChildProcesses) {
-            $config = new Configuration(
-                $shouldSpawnChildProcesses,
-                $numberOfProcesses,
-                $numberOfItems,
-                $segmentSize,
-                $batchSize,
-            );
-
-            $numberOfSegments = $config->getNumberOfSegments();
-            $numberOfBatches = $config->getTotalNumberOfBatches();
-
-            $logger->logConfiguration(
-                $segmentSize,
-                $batchSize,
-                $numberOfItems,
-                $numberOfSegments,
-                $numberOfBatches,
-                $numberOfProcesses,
-                $itemName,
-            );
-
-            $logger->startProgress($numberOfItems);
-
             $this
                 ->createProcessLauncher(
                     $segmentSize,
@@ -284,8 +259,6 @@ final class ParallelExecutor
                 )
                 ->run($itemIterator->getItems());
         } else {
-            $logger->startProgress($numberOfItems);
-
             $this->processItems(
                 $itemIterator,
                 $input,

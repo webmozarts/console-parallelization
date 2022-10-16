@@ -15,7 +15,6 @@ namespace Webmozarts\Console\Parallelization;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use function func_get_args;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Configuration

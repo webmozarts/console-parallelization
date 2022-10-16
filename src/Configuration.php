@@ -36,8 +36,8 @@ final class Configuration
 
     /**
      * @param 0|positive-int $numberOfItems
-     * @param positive-int $segmentSize
-     * @param positive-int $batchSize
+     * @param positive-int   $segmentSize
+     * @param positive-int   $batchSize
      */
     public function __construct(
         bool $shouldSpawnChildProcesses,
@@ -103,9 +103,9 @@ final class Configuration
 
     /**
      * @param 0|positive-int $numberOfItems
-     * @param positive-int $segmentSize
-     * @param positive-int $batchSize
-     * @param positive-int $numberOfSegments
+     * @param positive-int   $segmentSize
+     * @param positive-int   $batchSize
+     * @param positive-int   $numberOfSegments
      *
      * @return positive-int
      */
@@ -114,8 +114,7 @@ final class Configuration
         int $segmentSize,
         int $batchSize,
         int $numberOfSegments
-    ): int
-    {
+    ): int {
         if ($numberOfSegments >= 2) {
             $numberOfCompleteSegments = $numberOfSegments - 1;
             $totalNumberOfBatches = ((int) ceil($segmentSize / $batchSize)) * $numberOfCompleteSegments;
