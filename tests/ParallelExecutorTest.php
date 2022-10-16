@@ -868,7 +868,7 @@ final class ParallelExecutorTest extends TestCase
         $numberOfProcesses = 5;
         $numberOfProcessesDefined = true;
         $numberOfSegments = 2;
-        $numberOfBatches = 2;
+        $totalNumberOfBatches = 2;
 
         $input = new StringInput('');
         $output = new BufferedOutput();
@@ -912,7 +912,7 @@ final class ParallelExecutorTest extends TestCase
                         $batchSize,
                         3,
                         $numberOfSegments,
-                        $numberOfBatches,
+                        $totalNumberOfBatches,
                         $numberOfProcesses,
                         'items',
                     ],
@@ -937,7 +937,7 @@ final class ParallelExecutorTest extends TestCase
         $segmentSize = 3;
         $numberOfProcesses = 1;
         $numberOfSegments = 1;
-        $numberOfBatches = 2;
+        $totalNumberOfBatches = 2;
 
         $input = new StringInput('');
         $output = new BufferedOutput();
@@ -1003,7 +1003,7 @@ final class ParallelExecutorTest extends TestCase
                         $batchSize,
                         3,
                         $numberOfSegments,
-                        $numberOfBatches,
+                        $totalNumberOfBatches,
                         $numberOfProcesses,
                         'items',
                     ],
