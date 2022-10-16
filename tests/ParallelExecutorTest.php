@@ -652,7 +652,7 @@ final class ParallelExecutorTest extends TestCase
 
         self::assertSame($expectedOutput, $output->fetch());
         self::assertSame($expectedCalls, $calls);
-        self::assertSame($expectedLogRecords, $logger->records);
+        self::assertEquals($expectedLogRecords, $logger->records);
         self::assertSame([], $errorHandler->calls);
         self::assertSame($expectedExitCode, $exitCode);
     }
@@ -751,13 +751,16 @@ final class ParallelExecutorTest extends TestCase
             [
                 'logConfiguration',
                 [
-                    $segmentSize,
+                    new Configuration(
+                        $segmentSize,
+                        3,
+                        3,
+                    ),
                     $batchSize,
                     5,
-                    3,
-                    3,
                     2,
                     'items',
+                    true,
                 ],
             ],
             [
@@ -804,7 +807,7 @@ final class ParallelExecutorTest extends TestCase
 
         self::assertSame($expectedOutput, $output->fetch());
         self::assertSame($expectedCalls, $calls);
-        self::assertSame($expectedLogRecords, $logger->records);
+        self::assertEquals($expectedLogRecords, $logger->records);
         self::assertSame([], $errorHandler->calls);
         self::assertSame($expectedExitCode, $exitCode);
     }
@@ -868,7 +871,7 @@ final class ParallelExecutorTest extends TestCase
         $numberOfProcesses = 5;
         $numberOfProcessesDefined = true;
         $numberOfSegments = 2;
-        $numberOfBatches = 2;
+        $totalNumberOfBatches = 2;
 
         $input = new StringInput('');
         $output = new BufferedOutput();
@@ -908,13 +911,16 @@ final class ParallelExecutorTest extends TestCase
                 [
                     'logConfiguration',
                     [
-                        $segmentSize,
+                        new Configuration(
+                            $segmentSize,
+                            $numberOfSegments,
+                            $totalNumberOfBatches,
+                        ),
                         $batchSize,
                         3,
-                        $numberOfSegments,
-                        $numberOfBatches,
                         $numberOfProcesses,
                         'items',
+                        true,
                     ],
                 ],
                 [
@@ -937,7 +943,7 @@ final class ParallelExecutorTest extends TestCase
         $segmentSize = 3;
         $numberOfProcesses = 1;
         $numberOfSegments = 1;
-        $numberOfBatches = 2;
+        $totalNumberOfBatches = 2;
 
         $input = new StringInput('');
         $output = new BufferedOutput();
@@ -999,13 +1005,16 @@ final class ParallelExecutorTest extends TestCase
                 [
                     'logConfiguration',
                     [
-                        $segmentSize,
+                        new Configuration(
+                            1,
+                            $numberOfSegments,
+                            $totalNumberOfBatches,
+                        ),
                         $batchSize,
                         3,
-                        $numberOfSegments,
-                        $numberOfBatches,
                         $numberOfProcesses,
                         'items',
+                        false,
                     ],
                 ],
                 [
