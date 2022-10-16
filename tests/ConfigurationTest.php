@@ -33,7 +33,7 @@ final class ConfigurationTest extends TestCase
         int $batchSize,
         int $expectedSegmentSize,
         int $expectedNumberOfSegments,
-        int $expectedNumberOfBatches
+        int $expectedTotalNumberOfBatches
     ): void {
         $config = new Configuration(
             $shouldSpawnChildProcesses,
@@ -44,7 +44,7 @@ final class ConfigurationTest extends TestCase
 
         self::assertSame($expectedSegmentSize, $config->getSegmentSize());
         self::assertSame($expectedNumberOfSegments, $config->getNumberOfSegments());
-        self::assertSame($expectedNumberOfBatches, $config->getTotalNumberOfBatches());
+        self::assertSame($expectedTotalNumberOfBatches, $config->getTotalNumberOfBatches());
     }
 
     public static function valuesProvider(): iterable
@@ -65,7 +65,7 @@ final class ConfigurationTest extends TestCase
         $createSet = static fn (
             int $numberOfItems,
             int $batchSize,
-            int $expectedNumberOfBatches
+            int $expectedTotalNumberOfBatches
         ) => [
             false,
             $numberOfItems,
@@ -73,7 +73,7 @@ final class ConfigurationTest extends TestCase
             $batchSize,
             1,
             1,
-            $expectedNumberOfBatches,
+            $expectedTotalNumberOfBatches,
         ];
 
         yield 'there is only one segment & one round' => [
@@ -118,7 +118,7 @@ final class ConfigurationTest extends TestCase
             int $segmentSize,
             int $batchSize,
             int $expectedNumberOfSegments,
-            int $expectedNumberOfBatches
+            int $expectedTotalNumberOfBatches
         ) => [
             true,
             $numberOfItems,
@@ -126,7 +126,7 @@ final class ConfigurationTest extends TestCase
             $batchSize,
             $segmentSize,
             $expectedNumberOfSegments,
-            $expectedNumberOfBatches,
+            $expectedTotalNumberOfBatches,
         ];
 
         yield 'nominal' => [

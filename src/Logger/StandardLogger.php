@@ -48,7 +48,7 @@ final class StandardLogger implements Logger
         int $batchSize,
         int $numberOfItems,
         int $numberOfSegments,
-        int $numberOfBatches,
+        int $totalNumberOfBatches,
         int $numberOfProcesses,
         string $itemName
     ): void {
@@ -60,8 +60,8 @@ final class StandardLogger implements Logger
             $batchSize,
             $numberOfSegments,
             1 === $numberOfSegments ? 'round' : 'rounds',
-            $numberOfBatches,
-            1 === $numberOfBatches ? 'batch' : 'batches',
+            $totalNumberOfBatches,
+            1 === $totalNumberOfBatches ? 'batch' : 'batches',
             $numberOfProcesses,
             1 === $numberOfProcesses ? 'process' : 'processes',
         ));
