@@ -205,11 +205,10 @@ final class ParallelExecutor
     ): int {
         ($this->runBeforeFirstCommand)($input, $output);
 
-        $isNumberOfProcessesDefined = $parallelizationInput->isNumberOfProcessesDefined();
         $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
 
         $batchSize = $this->batchSize;
-        $segmentSize = $this->segmentSize;
+        $desiredSegmentSize = $this->segmentSize;
 
         $itemIterator = ChunkedItemsIterator::fromItemOrCallable(
             $parallelizationInput->getItem(),
@@ -219,36 +218,35 @@ final class ParallelExecutor
 
         $numberOfItems = $itemIterator->getNumberOfItems();
 
-        $config = new Configuration(
-            $isNumberOfProcessesDefined,
-            $numberOfProcesses,
+        $shouldSpawnChildProcesses = self::shouldSpawnChildProcesses(
             $numberOfItems,
-            $segmentSize,
+            $desiredSegmentSize,
+            $numberOfProcesses,
+            $parallelizationInput->isNumberOfProcessesDefined(),
+        );
+
+        $configuration = Configuration::create(
+            $shouldSpawnChildProcesses,
+            $numberOfItems,
+            $desiredSegmentSize,
             $batchSize,
         );
 
-        $numberOfSegments = $config->getNumberOfSegments();
-        $numberOfBatches = $config->getNumberOfBatches();
+        $segmentSize = $configuration->getSegmentSize();
         $itemName = ($this->getItemName)($numberOfItems);
 
         $logger->logConfiguration(
-            $segmentSize,
+            $configuration,
             $batchSize,
             $numberOfItems,
-            $numberOfSegments,
-            $numberOfBatches,
             $numberOfProcesses,
             $itemName,
+            $shouldSpawnChildProcesses,
         );
 
         $logger->startProgress($numberOfItems);
 
-        if (self::shouldSpawnChildProcesses(
-            $numberOfItems,
-            $segmentSize,
-            $numberOfProcesses,
-            $parallelizationInput->isNumberOfProcessesDefined(),
-        )) {
+        if ($shouldSpawnChildProcesses) {
             $this
                 ->createProcessLauncher(
                     $segmentSize,

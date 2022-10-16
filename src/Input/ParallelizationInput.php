@@ -49,7 +49,7 @@ final class ParallelizationInput
     ) {
         $this->numberOfProcessesDefined = $numberOfProcessesDefined;
         $this->numberOfProcesses = $numberOfProcesses;
-        $this->item = $item;    // TODO: validate there is no child item when it is a child process
+        $this->item = $item;
         $this->childProcess = $childProcess;
     }
 
@@ -111,6 +111,16 @@ final class ParallelizationInput
                     'Invalid item type. Expected a string, got "%s".',
                     // TODO: change to get_debug_type() once dropping PHP 7.4
                     gettype($input),
+                ),
+            );
+        }
+
+        if ($isChild) {
+            Assert::false(
+                $hasItem,
+                sprintf(
+                    'Cannot have an item passed to a child process as an argument. Got "%s"',
+                    $item,
                 ),
             );
         }
