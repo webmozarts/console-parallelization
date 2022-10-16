@@ -39,12 +39,12 @@ final class Configuration
      * @param positive-int   $segmentSize
      * @param positive-int   $batchSize
      */
-    public function __construct(
+    public static function create(
         bool $shouldSpawnChildProcesses,
         int $numberOfItems,
         int $segmentSize,
         int $batchSize
-    ) {
+    ): self {
         // We always check those (and not the calculated ones) since they come from the command
         // configuration so an issue there hints on a misconfiguration which should be fixed.
         Assert::greaterThanEq(
@@ -58,23 +58,44 @@ final class Configuration
         );
 
         if ($shouldSpawnChildProcesses) {
-            $this->segmentSize = $segmentSize;
-            $this->numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
-            $this->totalNumberOfBatches = self::calculateTotalNumberOfBatches(
+            $segmentSize = $segmentSize;
+            $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
+            $totalNumberOfBatches = self::calculateTotalNumberOfBatches(
                 $numberOfItems,
                 $segmentSize,
                 $batchSize,
-                $this->numberOfSegments,
+                $numberOfSegments,
             );
         } else {
             // The segments are what define the sizes of the sub-processes. When
             // executing only the main process, then there is no use for
             // segments.
             // See https://github.com/webmozarts/console-parallelization#segments
-            $this->segmentSize = 1;
-            $this->numberOfSegments = 1;
-            $this->totalNumberOfBatches = (int) ceil($numberOfItems / $batchSize);
+            $segmentSize = 1;
+            $numberOfSegments = 1;
+            $totalNumberOfBatches = (int) ceil($numberOfItems / $batchSize);
         }
+
+        return new self(
+            $segmentSize,
+            $numberOfSegments,
+            $totalNumberOfBatches,
+        );
+    }
+
+    /**
+     * @param positive-int $segmentSize
+     * @param positive-int $numberOfSegments
+     * @param positive-int $totalNumberOfBatches
+     */
+    public function __construct(
+        int $segmentSize,
+        int $numberOfSegments,
+        int $totalNumberOfBatches
+    ) {
+        $this->segmentSize = $segmentSize;
+        $this->numberOfSegments = $numberOfSegments;
+        $this->totalNumberOfBatches = $totalNumberOfBatches;
     }
 
     /**

@@ -31,20 +31,16 @@ final class ConfigurationTest extends TestCase
         int $numberOfItems,
         int $segmentSize,
         int $batchSize,
-        int $expectedSegmentSize,
-        int $expectedNumberOfSegments,
-        int $expectedTotalNumberOfBatches
+        Configuration $expected
     ): void {
-        $config = new Configuration(
+        $actual = Configuration::create(
             $shouldSpawnChildProcesses,
             $numberOfItems,
             $segmentSize,
             $batchSize,
         );
 
-        self::assertSame($expectedSegmentSize, $config->getSegmentSize());
-        self::assertSame($expectedNumberOfSegments, $config->getNumberOfSegments());
-        self::assertSame($expectedTotalNumberOfBatches, $config->getTotalNumberOfBatches());
+        self::assertEquals($expected, $actual);
     }
 
     public static function valuesProvider(): iterable
@@ -71,9 +67,11 @@ final class ConfigurationTest extends TestCase
             $numberOfItems,
             10,
             $batchSize,
-            1,
-            1,
-            $expectedTotalNumberOfBatches,
+            new Configuration(
+                1,
+                1,
+                $expectedTotalNumberOfBatches,
+            ),
         ];
 
         yield 'there is only one segment & one round' => [
@@ -81,9 +79,11 @@ final class ConfigurationTest extends TestCase
             10,
             7,
             5,
-            1,
-            1,
-            2,  // not interested in this value for this set
+            new Configuration(
+                1,
+                1,
+                2,  // not interested in this value for this set
+            ),
         ];
 
         yield 'no item' => $createSet(
@@ -130,9 +130,11 @@ final class ConfigurationTest extends TestCase
             $numberOfItems,
             $segmentSize,
             $batchSize,
-            $segmentSize,
-            $expectedNumberOfSegments,
-            $expectedTotalNumberOfBatches,
+            new Configuration(
+                $segmentSize,
+                $expectedNumberOfSegments,
+                $expectedTotalNumberOfBatches,
+            ),
         ];
 
         yield 'nominal' => [
@@ -140,9 +142,11 @@ final class ConfigurationTest extends TestCase
             10,
             3,
             2,
-            3,
-            4,  // not interested in this value for this set
-            7,  // not interested in this value for this set
+            new Configuration(
+                3,
+                4,  // not interested in this value for this set
+                7,  // not interested in this value for this set
+            ),
         ];
 
         yield 'all items can be processed within a single segment' => $createSet(
@@ -223,7 +227,7 @@ final class ConfigurationTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        new Configuration(
+        Configuration::create(
             $shouldSpawnChildProcesses,
             $numberOfItems,
             $segmentSize,
