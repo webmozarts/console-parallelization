@@ -36,7 +36,8 @@
         "phpstan/phpstan-symfony": "^1.2",
         "phpstan/phpstan-webmozart-assert": "^1.2",
         "phpunit/phpunit": "^9.0",
-        "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.0"
+        "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.0",
+        "webmozarts/strict-phpunit": "^7.3"
     },
     "autoload": {
         "psr-4": {

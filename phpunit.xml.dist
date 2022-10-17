@@ -8,6 +8,10 @@
          colors="true"
          executionOrder="random">
 
+    <extensions>
+        <extension class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
+    </extensions>
+
     <testsuites>
         <testsuite name="Test Suite">
             <directory>tests/</directory>

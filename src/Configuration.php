@@ -58,29 +58,42 @@ final class Configuration
         );
 
         if ($shouldSpawnChildProcesses) {
-            $segmentSize = $segmentSize;
+            if (null === $numberOfItems) {
+                return new self(
+                    $segmentSize,
+                    null,
+                    null,
+                );
+            }
+
             /** @var positive-int $numberOfSegments */
             $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
-            $totalNumberOfBatches = self::calculateTotalNumberOfBatches(
-                $numberOfItems,
+
+            return new self(
                 $segmentSize,
-                $batchSize,
                 $numberOfSegments,
+                self::calculateTotalNumberOfBatches(
+                    $numberOfItems,
+                    $segmentSize,
+                    $batchSize,
+                    $numberOfSegments,
+                ),
             );
-        } else {
-            // The segments are what define the sizes of the sub-processes. When
-            // executing only the main process, then there is no use for
-            // segments.
-            // See https://github.com/webmozarts/console-parallelization#segments
-            $segmentSize = 1;
-            $numberOfSegments = 1;
-            /** @var positive-int|0 $totalNumberOfBatches */
-            $totalNumberOfBatches = (int) ceil($numberOfItems / $batchSize);
         }
 
+        // The segments are what define the sizes of the sub-processes. When
+        // executing only the main process, then there is no use for
+        // segments.
+        // See https://github.com/webmozarts/console-parallelization#segments
+
+        /** @var positive-int|0|null $totalNumberOfBatches */
+        $totalNumberOfBatches = null === $numberOfItems
+            ? null
+            : (int) ceil($numberOfItems / $batchSize);
+
         return new self(
-            $segmentSize,
-            $numberOfSegments,
+            1,
+            1,
             $totalNumberOfBatches,
         );
     }
@@ -130,16 +143,16 @@ final class Configuration
      * @param positive-int        $batchSize
      * @param positive-int        $numberOfSegments
      *
-     * @return 0|positive-int
+     * @return 0|positive-int|null
      */
     private static function calculateTotalNumberOfBatches(
         ?int $numberOfItems,
         int $segmentSize,
         int $batchSize,
         int $numberOfSegments
-    ): int {
-        if (null == $numberOfItems) {
-            return 0;
+    ): ?int {
+        if (null === $numberOfItems) {
+            return null;
         }
 
         if ($numberOfSegments >= 2) {

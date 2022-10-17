@@ -18,7 +18,6 @@ use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_keys;
 use function array_map;
-use function array_values;
 use function count;
 use function explode;
 use function get_class;
@@ -130,11 +129,9 @@ final class ChunkedItemsIterator
      */
     private static function normalizeItems(array $items): array
     {
-        return array_values(
-            array_map(
-                static fn ($index) => self::normalizeItem($items[$index], $index),
-                array_keys($items),
-            ),
+        return array_map(
+            static fn ($index) => self::normalizeItem($items[$index], $index),
+            array_keys($items),
         );
     }
 

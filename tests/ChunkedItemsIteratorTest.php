@@ -286,6 +286,12 @@ final class ChunkedItemsIteratorTest extends TestCase
             ['item0', 'item1'],
         ];
 
+        yield 'indexed items' => [
+            null,
+            static fn () => ['i0' => 'item0', 'i1' => 'item1'],
+            ['item0', 'item1'],
+        ];
+
         yield 'item closure; non string string values' => [
             null,
             static fn () => [0, -.5, 7.3, 'item1'],
@@ -296,6 +302,12 @@ final class ChunkedItemsIteratorTest extends TestCase
             null,
             static fn () => toIter([0, -.5, 7.3, 'item1']),
             ['0', '-0.5', '7.3', 'item1'],
+        ];
+
+        yield 'item closure with indexed iterator; non string string values' => [
+            null,
+            static fn () => toIter(['i0' => 'item0', 'i1' => 'item1']),
+            ['item0', 'item1'],
         ];
     }
 
