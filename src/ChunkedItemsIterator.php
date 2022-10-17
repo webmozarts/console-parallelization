@@ -56,7 +56,7 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @param resource $stream
+     * @param resource     $stream
      * @param positive-int $batchSize
      */
     public static function fromStream($stream, int $batchSize): self
@@ -76,7 +76,7 @@ final class ChunkedItemsIterator
 
     /**
      * @param callable():list<string> $fetchItems
-     * @param positive-int $batchSize
+     * @param positive-int            $batchSize
      */
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {

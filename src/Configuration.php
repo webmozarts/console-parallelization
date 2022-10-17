@@ -86,8 +86,8 @@ final class Configuration
     }
 
     /**
-     * @param positive-int $segmentSize
-     * @param positive-int $numberOfSegments
+     * @param positive-int   $segmentSize
+     * @param positive-int   $numberOfSegments
      * @param positive-int|0 $totalNumberOfBatches
      */
     public function __construct(
