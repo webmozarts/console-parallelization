@@ -24,7 +24,7 @@ final class DummyLogger implements Logger
     public function logConfiguration(
         Configuration $configuration,
         int $batchSize,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
@@ -35,7 +35,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function startProgress(int $numberOfItems): void
+    public function startProgress(?int $numberOfItems): void
     {
         $this->records[] = [
             __FUNCTION__,

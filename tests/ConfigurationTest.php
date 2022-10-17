@@ -28,7 +28,7 @@ final class ConfigurationTest extends TestCase
      */
     public function test_it_can_be_instantiated(
         bool $shouldSpawnChildProcesses,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $segmentSize,
         int $batchSize,
         Configuration $expected
@@ -59,9 +59,9 @@ final class ConfigurationTest extends TestCase
     private static function mainProcessValuesProvider(): iterable
     {
         $createSet = static fn (
-            int $numberOfItems,
+            ?int $numberOfItems,
             int $batchSize,
-            int $expectedTotalNumberOfBatches
+            ?int $expectedTotalNumberOfBatches
         ) => [
             false,
             $numberOfItems,
@@ -115,16 +115,22 @@ final class ConfigurationTest extends TestCase
             3,
             4,
         );
+
+        yield 'unknown number of items' => $createSet(
+            null,
+            3,
+            null,
+        );
     }
 
     private static function childValuesProvider(): iterable
     {
         $createSet = static fn (
-            int $numberOfItems,
+            ?int $numberOfItems,
             int $segmentSize,
             int $batchSize,
-            int $expectedNumberOfSegments,
-            int $expectedTotalNumberOfBatches
+            ?int $expectedNumberOfSegments,
+            ?int $expectedTotalNumberOfBatches
         ) => [
             true,
             $numberOfItems,
@@ -211,6 +217,14 @@ final class ConfigurationTest extends TestCase
             1,
             2,
             10,
+        );
+
+        yield 'unknown number of items' => $createSet(
+            null,
+            5,
+            1,
+            null,
+            null,
         );
     }
 

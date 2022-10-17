@@ -22,7 +22,7 @@ final class FakeLogger implements Logger
     public function logConfiguration(
         Configuration $configuration,
         int $batchSize,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
@@ -30,7 +30,7 @@ final class FakeLogger implements Logger
         throw new DomainException('Unexpected call.');
     }
 
-    public function startProgress(int $numberOfItems): void
+    public function startProgress(?int $numberOfItems): void
     {
         throw new DomainException('Unexpected call.');
     }

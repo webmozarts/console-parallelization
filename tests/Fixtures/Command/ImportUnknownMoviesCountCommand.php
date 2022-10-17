@@ -13,29 +13,25 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
-use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
-use Webmozarts\Console\Parallelization\Parallelization;
 use function file_get_contents;
 use function json_decode;
 use function realpath;
 use const JSON_THROW_ON_ERROR;
 
-final class ImportMoviesCommand extends Command
+final class ImportUnknownMoviesCountCommand extends ParallelCommand
 {
-    use Parallelization;
-
     private TestLogger $logger;
 
     /**
@@ -45,22 +41,14 @@ final class ImportMoviesCommand extends Command
 
     public function __construct()
     {
-        parent::__construct('import:movies');
+        parent::__construct('import:movies-unknown-count');
 
         $this->logger = new TestLogger();
     }
 
-    protected function configure(): void
+    protected function fetchItems(InputInterface $input): iterable
     {
-        ParallelizationInput::configureParallelization($this);
-    }
-
-    /**
-     * @return list<string>
-     */
-    protected function fetchItems(InputInterface $input): array
-    {
-        return [
+        return yield from [
             'movie-1.json',
             'movie-2.json',
             'movie-3.json',

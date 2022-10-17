@@ -18,10 +18,14 @@ parameters:
         - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$importMoviesCommand#'
         - path: tests/Integration/ParallelizationIntegrationTest.php
+          message: '#ParallelizationIntegrationTest::\$importUnknownMoviesCountCommand#'
+        - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
 
         - path: tests/ChunkedItemsIteratorTest.php
           message: '#Parameter \#2 \$fetchItems of static method .+ChunkedItemsIterator::fromItemOrCallable\(\) expects callable\(\)#'
+        - path: tests/ChunkedItemsIteratorTest.php
+          message: '#assertTrue\(\) with false will always evaluate to false\.#'
 
         - path: src/ErrorHandler/ResetContainerErrorHandler.php
           message: '#Property .*ResetContainerErrorHandler::\$container.*does not accept.*ContainerInterface\|null\.#'

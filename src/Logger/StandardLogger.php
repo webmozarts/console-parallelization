@@ -47,18 +47,19 @@ final class StandardLogger implements Logger
     public function logConfiguration(
         Configuration $configuration,
         int $batchSize,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
     ): void {
+        $numberOfItems ??= '???';
         $segmentSize = $configuration->getSegmentSize();
-        $numberOfSegments = $configuration->getNumberOfSegments();
-        $totalNumberOfBatches = $configuration->getTotalNumberOfBatches();
+        $numberOfSegments = $configuration->getNumberOfSegments() ?? '???';
+        $totalNumberOfBatches = $configuration->getTotalNumberOfBatches() ?? '???';
 
         if ($shouldSpawnChildProcesses) {
             $this->output->writeln(sprintf(
-                'Processing %d %s in segments of %d, batches of %d, %d %s, %d %s in %d %s',
+                'Processing %s %s in segments of %d, batches of %d, %s %s, %s %s in %d %s',
                 $numberOfItems,
                 $itemName,
                 $segmentSize,
@@ -72,7 +73,7 @@ final class StandardLogger implements Logger
             ));
         } else {
             $this->output->writeln(sprintf(
-                'Processing %d %s, batches of %d, %d %s',
+                'Processing %s %s, batches of %d, %s %s',
                 $numberOfItems,
                 $itemName,
                 $batchSize,
@@ -84,7 +85,7 @@ final class StandardLogger implements Logger
         $this->output->writeln('');
     }
 
-    public function startProgress(int $numberOfItems): void
+    public function startProgress(?int $numberOfItems): void
     {
         Assert::false(
             isset($this->progressBar),
@@ -93,7 +94,7 @@ final class StandardLogger implements Logger
 
         $this->progressBar = $this->progressBarFactory->create(
             $this->output,
-            $numberOfItems,
+            $numberOfItems ?? 0,
         );
     }
 

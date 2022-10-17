@@ -89,7 +89,7 @@ final class NoSubProcessCommand extends Command
         }
     }
 
-    protected function getItemName(int $count): string
+    protected function getItemName(?int $count): string
     {
         return 0 === $count ? 'item' : 'items';
     }

@@ -30,7 +30,13 @@
         "CloneRemoval": false,
         "DecrementInteger": {
             "ignoreSourceCodeByRegex": [
-                ".*\\$numberOfStreamedItems = .*"
+                ".*\\$numberOfStreamedItems = .*",
+                ".*\\$numberOfItems \\?\\? 0.*"
+            ]
+        },
+        "IncrementInteger": {
+            "ignoreSourceCodeByRegex": [
+                ".*\\$numberOfItems \\?\\? 0.*"
             ]
         },
         "MBString": false,
