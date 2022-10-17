@@ -38,7 +38,7 @@ final class ParallelExecutorFactory
     private $runSingleCommand;
 
     /**
-     * @var callable(int): string
+     * @var callable(positive-int|0|null): string
      */
     private $getItemName;
 
@@ -101,7 +101,7 @@ final class ParallelExecutorFactory
     /**
      * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(int):string                                         $getItemName
+     * @param callable(positive-int|0|null):string                         $getItemName
      * @param resource                                                     $childSourceStream
      * @param positive-int                                                 $batchSize
      * @param positive-int                                                 $segmentSize
@@ -156,7 +156,7 @@ final class ParallelExecutorFactory
     /**
      * @param callable(InputInterface):list<string>                  $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
-     * @param callable(int):string                                   $getItemName
+     * @param callable(positive-int|0|null):string                   $getItemName
      */
     public static function create(
         callable $fetchItems,

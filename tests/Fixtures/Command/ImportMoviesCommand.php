@@ -110,7 +110,7 @@ final class ImportMoviesCommand extends Command
         );
     }
 
-    protected function getItemName(int $count): string
+    protected function getItemName(?int $count): string
     {
         return 1 === $count ? 'movie' : 'movies';
     }

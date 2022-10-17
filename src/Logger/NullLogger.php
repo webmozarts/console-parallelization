@@ -21,7 +21,7 @@ final class NullLogger implements Logger
     public function logConfiguration(
         Configuration $configuration,
         int $batchSize,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
@@ -29,7 +29,7 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function startProgress(int $numberOfItems): void
+    public function startProgress(?int $numberOfItems): void
     {
         // Do nothing.
     }

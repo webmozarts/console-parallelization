@@ -18,19 +18,24 @@ use Webmozarts\Console\Parallelization\Configuration;
 
 interface Logger
 {
+    /**
+     * @param positive-int        $batchSize
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $numberOfProcesses
+     */
     public function logConfiguration(
         Configuration $configuration,
         int $batchSize,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
     ): void;
 
     /**
-     * @param 0|positive-int $numberOfItems
+     * @param 0|positive-int|null $numberOfItems
      */
-    public function startProgress(int $numberOfItems): void;
+    public function startProgress(?int $numberOfItems): void;
 
     public function advance(int $steps = 1): void;
 

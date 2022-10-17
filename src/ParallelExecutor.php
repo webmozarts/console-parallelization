@@ -50,7 +50,7 @@ final class ParallelExecutor
     private $runSingleCommand;
 
     /**
-     * @var callable(int): string
+     * @var callable(positive-int|0|null): string
      */
     private $getItemName;
 
@@ -113,7 +113,7 @@ final class ParallelExecutor
     /**
      * @param callable(InputInterface):list<string>                        $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(int):string                                         $getItemName
+     * @param callable(positive-int|0|null):string                         $getItemName
      * @param resource                                                     $childSourceStream
      * @param positive-int                                                 $batchSize
      * @param positive-int                                                 $segmentSize
@@ -341,17 +341,17 @@ final class ParallelExecutor
     }
 
     /**
-     * @param 0|positive-int $numberOfItems
-     * @param positive-int   $segmentSize
-     * @param positive-int   $numberOfProcesses
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $segmentSize
+     * @param positive-int        $numberOfProcesses
      */
     private static function shouldSpawnChildProcesses(
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $segmentSize,
         int $numberOfProcesses,
         bool $numberOfProcessesDefined
     ): bool {
-        return $numberOfItems > $segmentSize
+        return (null === $numberOfItems || $numberOfItems > $segmentSize)
             && ($numberOfProcesses > 1 || $numberOfProcessesDefined);
     }
 

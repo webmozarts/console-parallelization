@@ -30,7 +30,7 @@ final class ChunkedItemsIteratorTest extends TestCase
     /**
      * @dataProvider valuesProvider
      *
-     * @param list<string>        $expectedItems
+     * @param list<string>       $expectedItems
      * @param list<list<string>> $expectedItemChunks
      */
     public function test_it_can_be_instantiated(
@@ -234,34 +234,40 @@ final class ChunkedItemsIteratorTest extends TestCase
         ];
 
         yield 'several items' => [
-            StringStream::fromString(<<<'STDIN'
-                item0
-                item1
-                item3
-                STDIN),
+            StringStream::fromString(
+                <<<'STDIN'
+                    item0
+                    item1
+                    item3
+                    STDIN,
+            ),
             ['item0', 'item1', 'item3'],
         ];
 
         yield 'several items with blank values' => [
-            StringStream::fromString(<<<'STDIN'
-                item0
-                item1
+            StringStream::fromString(
+                <<<'STDIN'
+                    item0
+                    item1
 
-                item3
+                    item3
 
-                item4
-                STDIN),
+                    item4
+                    STDIN,
+            ),
             ['item0', 'item1', 'item3', 'item4'],
         ];
 
         yield 'numerical items – items are kept as strings' => [
-            StringStream::fromString(<<<'STDIN'
-                string item
-                10
-                .5
-                0x1A
-                0b11111111
-                STDIN),
+            StringStream::fromString(
+                <<<'STDIN'
+                    string item
+                    10
+                    .5
+                    0x1A
+                    0b11111111
+                    STDIN,
+            ),
             ['string item', '10', '.5', '0x1A', '0b11111111'],
         ];
     }

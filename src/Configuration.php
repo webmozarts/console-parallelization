@@ -25,23 +25,23 @@ final class Configuration
     private int $segmentSize;
 
     /**
-     * @var positive-int
+     * @var positive-int|null
      */
-    private int $numberOfSegments;
+    private ?int $numberOfSegments;
 
     /**
-     * @var positive-int|0
+     * @var positive-int|0|null
      */
-    private int $totalNumberOfBatches;
+    private ?int $totalNumberOfBatches;
 
     /**
-     * @param 0|positive-int $numberOfItems
-     * @param positive-int   $segmentSize
-     * @param positive-int   $batchSize
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $segmentSize
+     * @param positive-int        $batchSize
      */
     public static function create(
         bool $shouldSpawnChildProcesses,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $segmentSize,
         int $batchSize
     ): self {
@@ -86,14 +86,14 @@ final class Configuration
     }
 
     /**
-     * @param positive-int   $segmentSize
-     * @param positive-int   $numberOfSegments
-     * @param positive-int|0 $totalNumberOfBatches
+     * @param positive-int        $segmentSize
+     * @param positive-int|null   $numberOfSegments
+     * @param positive-int|0|null $totalNumberOfBatches
      */
     public function __construct(
         int $segmentSize,
-        int $numberOfSegments,
-        int $totalNumberOfBatches
+        ?int $numberOfSegments,
+        ?int $totalNumberOfBatches
     ) {
         $this->segmentSize = $segmentSize;
         $this->numberOfSegments = $numberOfSegments;
@@ -109,35 +109,39 @@ final class Configuration
     }
 
     /**
-     * @return positive-int
+     * @return positive-int|null
      */
-    public function getNumberOfSegments(): int
+    public function getNumberOfSegments(): ?int
     {
         return $this->numberOfSegments;
     }
 
     /**
-     * @return positive-int|0
+     * @return positive-int|0|null
      */
-    public function getTotalNumberOfBatches(): int
+    public function getTotalNumberOfBatches(): ?int
     {
         return $this->totalNumberOfBatches;
     }
 
     /**
-     * @param 0|positive-int $numberOfItems
-     * @param positive-int   $segmentSize
-     * @param positive-int   $batchSize
-     * @param positive-int   $numberOfSegments
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $segmentSize
+     * @param positive-int        $batchSize
+     * @param positive-int        $numberOfSegments
      *
      * @return 0|positive-int
      */
     private static function calculateTotalNumberOfBatches(
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $segmentSize,
         int $batchSize,
         int $numberOfSegments
     ): int {
+        if (null == $numberOfItems) {
+            return 0;
+        }
+
         if ($numberOfSegments >= 2) {
             // It "should" be `$numberOfSegments - 1`. However, it actually does
             // not matter as the expression L128 is just going to give a

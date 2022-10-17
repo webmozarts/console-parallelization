@@ -13,13 +13,15 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
+use Iterator;
+
 interface ProcessLauncher
 {
     /**
      * Runs child processes to process the given items.
      *
-     * @param list<string> $items The items to process. None of the items must
-     *                            contain newlines
+     * @param list<string>|Iterator<string> $items The items to process. None of the items must
+     *                                             contain newlines
      */
-    public function run(array $items): void;
+    public function run(iterable $items): void;
 }

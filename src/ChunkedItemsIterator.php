@@ -15,7 +15,6 @@ namespace Webmozarts\Console\Parallelization;
 
 use Iterator;
 use Webmozart\Assert\Assert;
-use function array_chunk;
 use function array_filter;
 use function array_keys;
 use function array_map;
@@ -25,11 +24,9 @@ use function explode;
 use function get_class;
 use function gettype;
 use function is_array;
-use function is_iterable;
 use function is_numeric;
 use function is_object;
 use function iter\chunk;
-use function iter\map;
 use function iter\mapWithKeys;
 use function iter\values;
 use function Safe\stream_get_contents;
@@ -55,7 +52,7 @@ final class ChunkedItemsIterator
 
     /**
      * @param list<string>|Iterator<string> $items
-     * @param positive-int $batchSize
+     * @param positive-int                  $batchSize
      */
     public function __construct(iterable $items, int $batchSize)
     {
@@ -85,7 +82,7 @@ final class ChunkedItemsIterator
 
     /**
      * @param callable():iterable<string> $fetchItems
-     * @param positive-int            $batchSize
+     * @param positive-int                $batchSize
      */
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
@@ -166,7 +163,7 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @param mixed $item
+     * @param mixed     $item
      * @param array-key $index
      */
     private static function normalizeItem($item, $index): string

@@ -98,7 +98,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         $this->processFactory = $processFactory;
     }
 
-    public function run(array $items): void
+    public function run(iterable $items): void
     {
         /** @var InputStream|null $currentInputStream */
         $currentInputStream = null;

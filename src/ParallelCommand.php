@@ -68,11 +68,11 @@ abstract class ParallelCommand extends Command
      * For example, this method could return "contact" if the count is one and
      * "contacts" otherwise.
      *
-     * @param int $count The number of items
+     * @param positive-int|0|null $count The number of items (null if unknown)
      *
      * @return string The name of the item in the correct plurality
      */
-    abstract protected function getItemName(int $count): string;
+    abstract protected function getItemName(?int $count): string;
 
     /**
      * Executes the parallelized command.
@@ -88,7 +88,7 @@ abstract class ParallelCommand extends Command
             ->getParallelExecutableFactory(
                 fn (InputInterface $input) => $this->fetchItems($input),
                 fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
-                fn (int $count) => $this->getItemName($count),
+                [$this, 'getItemName'],
                 $commandName,
                 $this->getDefinition(),
                 $this->createErrorHandler(),
@@ -105,7 +105,7 @@ abstract class ParallelCommand extends Command
     /**
      * @param callable(InputInterface):list<string>                  $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
-     * @param callable(int):string                                   $getItemName
+     * @param callable(positive-int|0|null):string                   $getItemName
      */
     protected function getParallelExecutableFactory(
         callable $fetchItems,

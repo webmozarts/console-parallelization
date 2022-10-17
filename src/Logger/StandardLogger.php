@@ -47,7 +47,7 @@ final class StandardLogger implements Logger
     public function logConfiguration(
         Configuration $configuration,
         int $batchSize,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
@@ -84,7 +84,7 @@ final class StandardLogger implements Logger
         $this->output->writeln('');
     }
 
-    public function startProgress(int $numberOfItems): void
+    public function startProgress(?int $numberOfItems): void
     {
         Assert::false(
             isset($this->progressBar),
@@ -93,7 +93,7 @@ final class StandardLogger implements Logger
 
         $this->progressBar = $this->progressBarFactory->create(
             $this->output,
-            $numberOfItems,
+            $numberOfItems ?? 0,
         );
     }
 
