@@ -23,8 +23,8 @@ use function get_class;
 use function gettype;
 use function is_numeric;
 use function is_object;
+use function Safe\stream_get_contents;
 use function sprintf;
-use function stream_get_contents;
 use const PHP_EOL;
 
 final class ChunkedItemsIterator
@@ -56,7 +56,8 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @param resource$stream
+     * @param resource     $stream
+     * @param positive-int $batchSize
      */
     public static function fromStream($stream, int $batchSize): self
     {
@@ -75,6 +76,7 @@ final class ChunkedItemsIterator
 
     /**
      * @param callable():list<string> $fetchItems
+     * @param positive-int            $batchSize
      */
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
@@ -124,7 +126,7 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @psalm-assert string[] $items
+     * @param mixed[] $items
      *
      * @return list<string>
      */

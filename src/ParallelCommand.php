@@ -20,6 +20,7 @@ use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
@@ -80,12 +81,15 @@ abstract class ParallelCommand extends Command
     {
         $parallelizationInput = ParallelizationInput::fromInput($input);
 
+        $commandName = $this->getName();
+        Assert::notNull($commandName);
+
         return $this
             ->getParallelExecutableFactory(
                 fn (InputInterface $input) => $this->fetchItems($input),
                 fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
                 fn (int $count) => $this->getItemName($count),
-                $this->getName(),
+                $commandName,
                 $this->getDefinition(),
                 $this->createErrorHandler(),
             )

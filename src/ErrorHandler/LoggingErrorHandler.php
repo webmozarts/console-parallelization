@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Throwable;
+use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class LoggingErrorHandler implements ErrorHandler
 {
@@ -24,7 +25,7 @@ final class LoggingErrorHandler implements ErrorHandler
         $this->decoratedErrorHandler = $decoratedErrorHandler ?? new NullErrorHandler();
     }
 
-    public function handleError(string $item, Throwable $throwable, $logger): void
+    public function handleError(string $item, Throwable $throwable, Logger $logger): void
     {
         $logger->logItemProcessingFailed($item, $throwable);
 
