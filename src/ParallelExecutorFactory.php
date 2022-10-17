@@ -28,7 +28,7 @@ use const STDIN;
 final class ParallelExecutorFactory
 {
     /**
-     * @var callable(InputInterface):list<string>
+     * @var callable(InputInterface):iterable<string>
      */
     private $fetchItems;
 
@@ -99,7 +99,7 @@ final class ParallelExecutorFactory
     private ProcessLauncherFactory $processLauncherFactory;
 
     /**
-     * @param callable(InputInterface):list<string>                        $fetchItems
+     * @param callable(InputInterface):iterable<string>                    $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(positive-int|0|null):string                         $getItemName
      * @param resource                                                     $childSourceStream
@@ -154,7 +154,7 @@ final class ParallelExecutorFactory
     }
 
     /**
-     * @param callable(InputInterface):list<string>                  $fetchItems
+     * @param callable(InputInterface):iterable<string>              $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
      * @param callable(positive-int|0|null):string                   $getItemName
      */

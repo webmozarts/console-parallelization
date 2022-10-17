@@ -53,7 +53,7 @@ final class StandardLoggerTest extends TestCase
     public function test_it_can_log_the_configuration(
         Configuration $configuration,
         int $batchSize,
-        int $numberOfItems,
+        ?int $numberOfItems,
         int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses,
@@ -139,6 +139,60 @@ final class StandardLoggerTest extends TestCase
 
                 TXT,
         ];
+
+        yield 'unknown number of batches' => [
+            new Configuration(
+                5,
+                2,
+                null,
+            ),
+            3,
+            8,
+            1,
+            'tokens',
+            false,
+            <<<'TXT'
+                Processing 8 tokens, batches of 3, ??? batches
+
+
+                TXT,
+        ];
+
+        yield 'unknown number of items' => [
+            new Configuration(
+                5,
+                2,
+                4,
+            ),
+            3,
+            null,
+            1,
+            'tokens',
+            false,
+            <<<'TXT'
+                Processing ??? tokens, batches of 3, 4 batches
+
+
+                TXT,
+        ];
+
+        yield 'unknown number of rounds' => [
+            new Configuration(
+                5,
+                null,
+                4,
+            ),
+            3,
+            8,
+            1,
+            'tokens',
+            false,
+            <<<'TXT'
+                Processing 8 tokens, batches of 3, 4 batches
+
+
+                TXT,
+        ];
     }
 
     private static function withChildConfigurationProvider(): iterable
@@ -210,6 +264,60 @@ final class StandardLoggerTest extends TestCase
             true,
             <<<'TXT'
                 Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 1 process
+
+
+                TXT,
+        ];
+
+        yield 'unknown number of batches' => [
+            new Configuration(
+                5,
+                2,
+                null,
+            ),
+            3,
+            8,
+            1,
+            'tokens',
+            true,
+            <<<'TXT'
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, ??? batches in 1 process
+
+
+                TXT,
+        ];
+
+        yield 'unknown number of items' => [
+            new Configuration(
+                5,
+                2,
+                4,
+            ),
+            3,
+            null,
+            1,
+            'tokens',
+            true,
+            <<<'TXT'
+                Processing ??? tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 1 process
+
+
+                TXT,
+        ];
+
+        yield 'unknown number of rounds' => [
+            new Configuration(
+                5,
+                null,
+                4,
+            ),
+            3,
+            8,
+            1,
+            'tokens',
+            true,
+            <<<'TXT'
+                Processing 8 tokens in segments of 5, batches of 3, ??? rounds, 4 batches in 1 process
 
 
                 TXT,

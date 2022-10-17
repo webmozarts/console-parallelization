@@ -31,6 +31,8 @@
     - `::getSegmentSize()`
     - `::getBatchSize()`
     - `::getConsolePath()`
+- `::fetchItems()` can now return an `iterable` instead of `array`
+- `::getItemName()` can now take `null` for an unknown number of items
 
 
 ## New extension points

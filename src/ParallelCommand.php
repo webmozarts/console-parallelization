@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Closure;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -49,9 +50,9 @@ abstract class ParallelCommand extends Command
      *
      * @param InputInterface $input The console input
      *
-     * @return string[] The items to process
+     * @return iterable<string> The items to process
      */
-    abstract protected function fetchItems(InputInterface $input): array;
+    abstract protected function fetchItems(InputInterface $input): iterable;
 
     /**
      * Processes an item in the child process.
@@ -88,7 +89,7 @@ abstract class ParallelCommand extends Command
             ->getParallelExecutableFactory(
                 fn (InputInterface $input) => $this->fetchItems($input),
                 fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
-                [$this, 'getItemName'],
+                Closure::fromCallable([$this, 'getItemName']),
                 $commandName,
                 $this->getDefinition(),
                 $this->createErrorHandler(),
@@ -103,7 +104,7 @@ abstract class ParallelCommand extends Command
     }
 
     /**
-     * @param callable(InputInterface):list<string>                  $fetchItems
+     * @param callable(InputInterface):iterable<string>              $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
      * @param callable(positive-int|0|null):string                   $getItemName
      */

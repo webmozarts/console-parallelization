@@ -67,7 +67,7 @@ class ImportMoviesCommand extends ParallelCommand
         // ...
     }
 
-    protected function fetchItems(InputInterface $input): array
+    protected function fetchItems(InputInterface $input): iterable
     {
         // open up the file and read movie data...
 

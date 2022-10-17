@@ -19,6 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
+use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use function array_keys;
 use function getcwd;
@@ -35,6 +36,10 @@ class ParallelizationIntegrationTest extends TestCase
 {
     private ImportMoviesCommand $importMoviesCommand;
     private CommandTester $importMoviesCommandTester;
+
+    private ImportUnknownMoviesCountCommand $importUnknownMoviesCountCommand;
+    private CommandTester $importUnknownMoviesCountCommandTester;
+
     private NoSubProcessCommand $noSubProcessCommand;
     private CommandTester $noSubProcessCommandTester;
 
@@ -42,6 +47,9 @@ class ParallelizationIntegrationTest extends TestCase
     {
         $this->importMoviesCommand = (new Application(new Kernel()))->add(new ImportMoviesCommand());
         $this->importMoviesCommandTester = new CommandTester($this->importMoviesCommand);
+
+        $this->importUnknownMoviesCountCommand = (new Application(new Kernel()))->add(new ImportUnknownMoviesCountCommand());
+        $this->importUnknownMoviesCountCommandTester = new CommandTester($this->importUnknownMoviesCountCommand);
 
         $this->noSubProcessCommand = (new Application(new Kernel()))->add(new NoSubProcessCommand());
         $this->noSubProcessCommandTester = new CommandTester($this->noSubProcessCommand);
@@ -72,7 +80,7 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateProgressBars(
+        $actual = self::normalizeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -118,7 +126,36 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateProgressBars(
+        $actual = self::normalizeIntermediateFixedProgressBars(
+            $this->getOutput($commandTester),
+        );
+
+        self::assertSame($expected, $actual, $actual);
+    }
+
+    public function test_it_can_run_the_command_with_multiple_processes_without_knowing_the_number_of_items_to_import(): void
+    {
+        $commandTester = $this->importUnknownMoviesCountCommandTester;
+
+        $commandTester->execute(
+            [
+                'command' => 'import:movies-unknown-count',
+                '--processes' => 2,
+            ],
+            ['interactive' => true],
+        );
+
+        $expected = <<<'EOF'
+            Processing ??? movies in segments of 2, batches of 2, ??? rounds, ??? batches in 2 processes
+
+                0 [>---------------------------] 10 secs 10.0 MiB
+                5 [----->----------------------] 10 secs 10.0 MiB
+
+            Processed 5 movies.
+
+            EOF;
+
+        $actual = self::normalizeIntermediateDynamicProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -156,7 +193,7 @@ class ParallelizationIntegrationTest extends TestCase
         $expectedCommandStartedLine = "[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n";
         $expectedCommandFinishedLine = "[debug] Command finished\n";
 
-        $outputWithoutExtraDebugInfo = self::normalizeIntermediateProgressBars(
+        $outputWithoutExtraDebugInfo = self::normalizeIntermediateFixedProgressBars(
             str_replace(
                 [$expectedCommandStartedLine, $expectedCommandFinishedLine],
                 ['', ''],
@@ -194,6 +231,7 @@ class ParallelizationIntegrationTest extends TestCase
         $replaceMap = [
             '%  10 secs' => '% 10 secs',
             'secs  10.0 MiB' => 'secs 10.0 MiB',
+            ']  10 secs' => '] 10 secs',
             PHP_EOL => "\n",
             (new PhpExecutableFinder())->find() => '/path/to/php',
             getcwd() => '/path/to/work-dir',
@@ -217,10 +255,19 @@ class ParallelizationIntegrationTest extends TestCase
         );
     }
 
-    private static function normalizeIntermediateProgressBars(string $output): string
+    private static function normalizeIntermediateFixedProgressBars(string $output): string
     {
         return preg_replace(
             '# *?[1-4]/5 \[[=>-]+\]  \d+% 10 secs/10 secs 10.0 MiB\n#',
+            '',
+            $output,
+        );
+    }
+
+    private static function normalizeIntermediateDynamicProgressBars(string $output): string
+    {
+        return preg_replace(
+            '# *?[1-4] \[[>-]+\]  ?10 secs 10.0 MiB\n#',
             '',
             $output,
         );

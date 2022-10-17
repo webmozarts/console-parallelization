@@ -18,6 +18,8 @@ parameters:
         - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$importMoviesCommand#'
         - path: tests/Integration/ParallelizationIntegrationTest.php
+          message: '#ParallelizationIntegrationTest::\$importUnknownMoviesCountCommand#'
+        - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
 
         - path: tests/ChunkedItemsIteratorTest.php

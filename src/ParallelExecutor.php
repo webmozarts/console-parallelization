@@ -40,7 +40,7 @@ final class ParallelExecutor
     private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
 
     /**
-     * @var callable(InputInterface):list<string>
+     * @var callable(InputInterface):iterable<string>
      */
     private $fetchItems;
 
@@ -111,7 +111,7 @@ final class ParallelExecutor
     private ProcessLauncherFactory $processLauncherFactory;
 
     /**
-     * @param callable(InputInterface):list<string>                        $fetchItems
+     * @param callable(InputInterface):iterable<string>                    $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(positive-int|0|null):string                         $getItemName
      * @param resource                                                     $childSourceStream
