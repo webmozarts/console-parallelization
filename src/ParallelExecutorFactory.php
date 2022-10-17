@@ -21,7 +21,7 @@ use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
-use function getcwd;
+use function Safe\getcwd;
 use const DIRECTORY_SEPARATOR;
 use const STDIN;
 

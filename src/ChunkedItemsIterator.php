@@ -32,8 +32,8 @@ use function iter\chunk;
 use function iter\map;
 use function iter\mapWithKeys;
 use function iter\values;
+use function Safe\stream_get_contents;
 use function sprintf;
-use function stream_get_contents;
 use const PHP_EOL;
 
 final class ChunkedItemsIterator
@@ -65,7 +65,8 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @param resource$stream
+     * @param resource     $stream
+     * @param positive-int $batchSize
      */
     public static function fromStream($stream, int $batchSize): self
     {
@@ -84,6 +85,7 @@ final class ChunkedItemsIterator
 
     /**
      * @param callable():iterable<string> $fetchItems
+     * @param positive-int            $batchSize
      */
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
@@ -125,7 +127,7 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @psalm-assert string[] $items
+     * @param mixed[] $items
      *
      * @return list<string>
      */

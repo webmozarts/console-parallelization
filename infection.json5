@@ -20,6 +20,9 @@
             ]
         },
         "CastString": {
+            "ignore": [
+                "Webmozarts\\Console\\Parallelization\\Input\\InputOptionsSerializer::quoteOptionValue"
+            ],
             "ignoreSourceCodeByRegex": [
                 "\\(string\\) \\$numberOfProcesses.*"
             ]

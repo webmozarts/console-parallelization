@@ -62,10 +62,15 @@ test: validate-package phpstan phpunit
 
 .PHONY: phpstan
 phpstan: 	  ## Runs PHPStan
-phpstan: $(PHPSTAN_BIN) vendor
-ifndef SKIP_PHPSTAN
-	$(PHPSTAN) analyze
-endif
+phpstan: phpstan_src phpstan_tests
+
+.PHONY: phpstan_src
+phpstan_src: $(PHPSTAN_BIN) vendor
+	$(PHPSTAN) analyze --configuration phpstan-src.neon.dist
+
+.PHONY: phpstan_tests
+phpstan_tests: $(PHPSTAN_BIN) vendor
+	$(PHPSTAN) analyze --configuration phpstan-tests.neon.dist
 
 .PHONY: phpunit
 phpunit:	  ## Runs PHPUnit

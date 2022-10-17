@@ -36,9 +36,9 @@ final class InputOptionsSerializer
     }
 
     /**
-     * @param string[] $excludedOptionNames
+     * @param list<string> $excludedOptionNames
      *
-     * @return string[]
+     * @return list<string>
      */
     public static function serialize(
         InputDefinition $commandDefinition,
@@ -85,6 +85,7 @@ final class InputOptionsSerializer
         }
 
         if ($option->isArray()) {
+            /** @var array<string|bool|int|float|null> $value */
             return implode(
                 '',
                 array_map(
@@ -94,11 +95,12 @@ final class InputOptionsSerializer
             );
         }
 
+        /** @var string|bool|int|float|null $value */
         return self::serializeOptionWithValue($name, $value);
     }
 
     /**
-     * @param string|bool|int|float|null|array<string|bool|int|float|null> $value
+     * @param string|bool|int|float|null $value
      */
     private static function serializeOptionWithValue(
         string $name,
@@ -124,7 +126,7 @@ final class InputOptionsSerializer
         if (self::isValueRequiresQuoting($value)) {
             return sprintf(
                 '"%s"',
-                str_replace('"', '\"', $value),
+                str_replace('"', '\"', (string) $value),
             );
         }
 

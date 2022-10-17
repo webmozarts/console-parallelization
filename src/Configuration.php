@@ -30,7 +30,7 @@ final class Configuration
     private int $numberOfSegments;
 
     /**
-     * @var positive-int
+     * @var positive-int|0
      */
     private int $totalNumberOfBatches;
 
@@ -59,6 +59,7 @@ final class Configuration
 
         if ($shouldSpawnChildProcesses) {
             $segmentSize = $segmentSize;
+            /** @var positive-int $numberOfSegments */
             $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
             $totalNumberOfBatches = self::calculateTotalNumberOfBatches(
                 $numberOfItems,
@@ -73,6 +74,7 @@ final class Configuration
             // See https://github.com/webmozarts/console-parallelization#segments
             $segmentSize = 1;
             $numberOfSegments = 1;
+            /** @var positive-int|0 $totalNumberOfBatches */
             $totalNumberOfBatches = (int) ceil($numberOfItems / $batchSize);
         }
 
@@ -84,9 +86,9 @@ final class Configuration
     }
 
     /**
-     * @param positive-int $segmentSize
-     * @param positive-int $numberOfSegments
-     * @param positive-int $totalNumberOfBatches
+     * @param positive-int   $segmentSize
+     * @param positive-int   $numberOfSegments
+     * @param positive-int|0 $totalNumberOfBatches
      */
     public function __construct(
         int $segmentSize,
@@ -115,7 +117,7 @@ final class Configuration
     }
 
     /**
-     * @return positive-int
+     * @return positive-int|0
      */
     public function getTotalNumberOfBatches(): int
     {
@@ -128,7 +130,7 @@ final class Configuration
      * @param positive-int   $batchSize
      * @param positive-int   $numberOfSegments
      *
-     * @return positive-int
+     * @return 0|positive-int
      */
     private static function calculateTotalNumberOfBatches(
         int $numberOfItems,
@@ -150,6 +152,7 @@ final class Configuration
         }
 
         $totalNumberOfBatches += (int) ceil(($numberOfItems - $numberOfCompleteSegments * $segmentSize) / $batchSize);
+        Assert::natural($totalNumberOfBatches);
 
         return $totalNumberOfBatches;
     }
