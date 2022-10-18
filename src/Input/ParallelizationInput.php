@@ -31,7 +31,7 @@ final class ParallelizationInput
     private const MAIN_PROCESS_OPTION = 'main-process';
     private const CHILD_OPTION = 'child';
 
-    private bool $numberOfProcessesDefined;
+    private bool $mainProcess;
 
     /**
      * @var positive-int
@@ -50,12 +50,12 @@ final class ParallelizationInput
      * @param positive-int|callable():positive-int $numberOfOrFindNumberOfProcesses
      */
     public function __construct(
-        bool $numberOfProcessesDefined,
+        bool $mainProcess,
         $numberOfOrFindNumberOfProcesses,
         ?string $item,
         bool $childProcess
     ) {
-        $this->numberOfProcessesDefined = $numberOfProcessesDefined;
+        $this->mainProcess = $mainProcess;
         $this->item = $item;
         $this->childProcess = $childProcess;
 
@@ -77,45 +77,12 @@ final class ParallelizationInput
         /** @var bool $isChild */
         $isChild = $input->getOption(self::CHILD_OPTION);
 
-        $numberOfProcessesDefined = null !== $numberOfProcesses;
-
         if ($mainProcess) {
-            $numberOfProcessesDefined = false;
             $validatedNumberOfProcesses = 1;
-        } elseif ($numberOfProcessesDefined) {
-            Assert::numeric(
-                $numberOfProcesses,
-                sprintf(
-                    'Expected the number of process defined to be a valid numeric value. Got "%s".',
-                    $numberOfProcesses,
-                ),
-            );
-
-            $castedNumberOfProcesses = (int) $numberOfProcesses;
-
-            Assert::same(
-                // We cast it again in string to make sure since it is more convenient to pass an
-                // int in the tests or when calling the command directly without passing by the CLI
-                (string) $numberOfProcesses,
-                (string) $castedNumberOfProcesses,
-                sprintf(
-                    'Expected the number of process defined to be an integer. Got "%s".',
-                    $numberOfProcesses,
-                ),
-            );
-
-            Assert::greaterThan(
-                $castedNumberOfProcesses,
-                0,
-                sprintf(
-                    'Expected the number of processes to be 1 or greater. Got "%s".',
-                    $castedNumberOfProcesses,
-                ),
-            );
-
-            $validatedNumberOfProcesses = $castedNumberOfProcesses;
         } else {
-            $validatedNumberOfProcesses = static fn () => CpuCoreCounter::getNumberOfCpuCores();
+            $validatedNumberOfProcesses = null !== $numberOfProcesses
+                ? self::coerceNumberOfProcesses($numberOfProcesses)
+                : static fn () => CpuCoreCounter::getNumberOfCpuCores();
         }
 
         $hasItem = null !== $item;
@@ -144,7 +111,7 @@ final class ParallelizationInput
         }
 
         return new self(
-            $numberOfProcessesDefined,
+            $mainProcess,
             $validatedNumberOfProcesses,
             $hasItem ? (string) $item : null,
             $isChild,
@@ -184,9 +151,9 @@ final class ParallelizationInput
             );
     }
 
-    public function isNumberOfProcessesDefined(): bool
+    public function shouldBeProcessedInMainProcess(): bool
     {
-        return $this->numberOfProcessesDefined;
+        return $this->mainProcess;
     }
 
     /**
@@ -209,5 +176,43 @@ final class ParallelizationInput
     public function isChildProcess(): bool
     {
         return $this->childProcess;
+    }
+
+    /**
+     * @return positive-int
+     */
+    private static function coerceNumberOfProcesses(string $numberOfProcesses): int
+    {
+        Assert::numeric(
+            $numberOfProcesses,
+            sprintf(
+                'Expected the number of process defined to be a valid numeric value. Got "%s".',
+                $numberOfProcesses,
+            ),
+        );
+
+        $castedNumberOfProcesses = (int) $numberOfProcesses;
+
+        Assert::same(
+            // We cast it again in string to make sure since it is more convenient to pass an
+            // int in the tests or when calling the command directly without passing by the CLI
+            (string) $numberOfProcesses,
+            (string) $castedNumberOfProcesses,
+            sprintf(
+                'Expected the number of process defined to be an integer. Got "%s".',
+                $numberOfProcesses,
+            ),
+        );
+
+        Assert::greaterThan(
+            $castedNumberOfProcesses,
+            0,
+            sprintf(
+                'Expected the number of processes to be 1 or greater. Got "%s".',
+                $castedNumberOfProcesses,
+            ),
+        );
+
+        return $castedNumberOfProcesses;
     }
 }

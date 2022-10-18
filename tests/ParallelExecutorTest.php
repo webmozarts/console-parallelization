@@ -344,7 +344,7 @@ final class ParallelExecutorTest extends TestCase
         $segmentSize = 2;
 
         $parallelizationInput = new ParallelizationInput(
-            true,
+            false,
             $numberOfProcesses,
             null,
             false,
@@ -509,13 +509,13 @@ final class ParallelExecutorTest extends TestCase
     {
         $createSet = static fn (
             int $itemCount,
-            bool $numberOfProcessesDefined,
+            bool $mainProcess,
             int $segmentSize,
             int $numberOfProcesses,
             bool $expectedChildProcessesSpawned
         ) => [
             new ParallelizationInput(
-                $numberOfProcessesDefined,
+                false,
                 $numberOfProcesses,
                 null,
                 false,
@@ -525,76 +525,12 @@ final class ParallelExecutorTest extends TestCase
             $expectedChildProcessesSpawned,
         ];
 
-        yield 'more items than segment size; more than one process; number of processes defined' => $createSet(
-            3,
-            true,
-            2,
-            2,
-            true,
-        );
-
-        yield 'more items than segment size; more than one process; number of processes NOT defined' => $createSet(
+        yield 'do not execute in main process' => $createSet(
             3,
             false,
             2,
             2,
             true,
-        );
-
-        yield 'more items than segment size; one process; number of processes defined' => $createSet(
-            3,
-            true,
-            2,
-            1,
-            true,
-        );
-
-        yield 'more items than segment size; one process; number of processes NOT defined' => $createSet(
-            3,
-            false,
-            2,
-            1,
-            false,
-        );
-
-        yield 'more items than segment size; two processes; number of processes NOT defined' => $createSet(
-            3,
-            false,
-            2,
-            2,
-            true,
-        );
-
-        yield 'as many items as segment size; more than one process; number of processes defined' => $createSet(
-            3,
-            true,
-            3,
-            2,
-            false,
-        );
-
-        yield 'as many items as segment size; more than one process; number of processes NOT defined' => $createSet(
-            3,
-            false,
-            3,
-            2,
-            false,
-        );
-
-        yield 'as many items as segment size; one process; number of processes defined' => $createSet(
-            3,
-            true,
-            3,
-            1,
-            false,
-        );
-
-        yield 'as many items as segment size; one process; number of processes NOT defined' => $createSet(
-            3,
-            false,
-            3,
-            1,
-            false,
         );
     }
 
@@ -673,7 +609,7 @@ final class ParallelExecutorTest extends TestCase
     public function test_it_processes_the_child_processes_output(): void
     {
         $parallelizationInput = new ParallelizationInput(
-            true,
+            false,
             2,
             null,
             false,
@@ -869,7 +805,7 @@ final class ParallelExecutorTest extends TestCase
         $batchSize = 2;
         $segmentSize = 2;
         $numberOfProcesses = 5;
-        $numberOfProcessesDefined = true;
+        $mainProcess = false;
         $numberOfSegments = 2;
         $totalNumberOfBatches = 2;
 
@@ -884,7 +820,7 @@ final class ParallelExecutorTest extends TestCase
 
         yield [
             new ParallelizationInput(
-                $numberOfProcessesDefined,
+                $mainProcess,
                 $numberOfProcesses,
                 null,
                 false,
@@ -950,7 +886,7 @@ final class ParallelExecutorTest extends TestCase
 
         yield [
             new ParallelizationInput(
-                false,
+                true,
                 $numberOfProcesses,
                 null,
                 false,

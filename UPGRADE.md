@@ -7,6 +7,9 @@
   based on the maximum number of cores detected. Note that the execution within
   the main process instead of spawning child processes can be guaranteed by
   passing `--main-process`.
+- Child processes will always be spawned regardless of the number of items
+  (known or not), the number of processes defined (or not defined). Instead
+  the processing will occur only if the `--main-process` option is passed. 
 - `ContainerAwareCommand` has been removed. `Parallelization` instead provides a
   `::getContainer()` method which by defaults returns the Symfony Application
   Kernel's container when available.
