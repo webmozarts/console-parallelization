@@ -218,12 +218,7 @@ final class ParallelExecutor
 
         $numberOfItems = $itemIterator->getNumberOfItems();
 
-        $shouldSpawnChildProcesses = self::shouldSpawnChildProcesses(
-            $numberOfItems,
-            $desiredSegmentSize,
-            $numberOfProcesses,
-            $parallelizationInput->isNumberOfProcessesDefined(),
-        );
+        $shouldSpawnChildProcesses = !$parallelizationInput->shouldBeProcessedInMainProcess();
 
         $configuration = Configuration::create(
             $shouldSpawnChildProcesses,
@@ -338,21 +333,6 @@ final class ParallelExecutor
         } catch (Throwable $throwable) {
             $this->errorHandler->handleError($item, $throwable, $logger);
         }
-    }
-
-    /**
-     * @param 0|positive-int|null $numberOfItems
-     * @param positive-int        $segmentSize
-     * @param positive-int        $numberOfProcesses
-     */
-    private static function shouldSpawnChildProcesses(
-        ?int $numberOfItems,
-        int $segmentSize,
-        int $numberOfProcesses,
-        bool $numberOfProcessesDefined
-    ): bool {
-        return (null === $numberOfItems || $numberOfItems > $segmentSize)
-            && ($numberOfProcesses > 1 || $numberOfProcessesDefined);
     }
 
     /**

@@ -114,7 +114,7 @@ class ParallelizationIntegrationTest extends TestCase
         $commandTester->execute(
             [
                 'command' => 'import:movies',
-                '--processes' => 2,
+                '--processes' => '2',
             ],
             ['interactive' => true],
         );
@@ -143,7 +143,7 @@ class ParallelizationIntegrationTest extends TestCase
         $commandTester->execute(
             [
                 'command' => 'import:movies-unknown-count',
-                '--processes' => 2,
+                '--processes' => '2',
             ],
             ['interactive' => true],
         );
@@ -172,7 +172,7 @@ class ParallelizationIntegrationTest extends TestCase
         $commandTester->execute(
             [
                 'command' => 'import:movies',
-                '--processes' => 2,
+                '--processes' => '2',
             ],
             [
                 'interactive' => true,

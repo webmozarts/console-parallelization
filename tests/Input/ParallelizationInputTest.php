@@ -60,7 +60,7 @@ final class ParallelizationInputTest extends TestCase
             true,
         );
 
-        self::assertTrue($input->isNumberOfProcessesDefined());
+        self::assertTrue($input->shouldBeProcessedInMainProcess());
         self::assertSame(5, $input->getNumberOfProcesses());
         self::assertSame('item', $input->getItem());
         self::assertTrue($input->isChildProcess());
@@ -81,7 +81,7 @@ final class ParallelizationInputTest extends TestCase
             true,
         );
 
-        self::assertTrue($input->isNumberOfProcessesDefined());
+        self::assertTrue($input->shouldBeProcessedInMainProcess());
         self::assertSame('item', $input->getItem());
         self::assertTrue($input->isChildProcess());
 
@@ -131,10 +131,10 @@ final class ParallelizationInputTest extends TestCase
         ParallelizationInput::fromInput($input);
     }
 
-    public function test_it_can_be_instantiated_from_an_input_with_an_invalid_number_of_processes(): void
+    public function test_it_cannot_be_instantiated_from_an_input_with_an_invalid_number_of_processes(): void
     {
         $input = new ArrayInput([
-            '--processes' => 0,
+            '--processes' => '0',
         ]);
         self::bindInput($input);
 
@@ -176,7 +176,7 @@ final class ParallelizationInputTest extends TestCase
         yield 'number of process defined: 1' => [
             new StringInput('--processes=1'),
             new ParallelizationInput(
-                true,
+                false,
                 1,
                 null,
                 false,
@@ -186,7 +186,7 @@ final class ParallelizationInputTest extends TestCase
         yield 'number of process defined: 4' => [
             new StringInput('--processes=4'),
             new ParallelizationInput(
-                true,
+                false,
                 4,
                 null,
                 false,
@@ -233,10 +233,30 @@ final class ParallelizationInputTest extends TestCase
             ),
         ];
 
+        yield 'do processing in the main process' => [
+            new StringInput('--main-process --processes 15'),
+            new ParallelizationInput(
+                true,
+                1,
+                null,
+                false,
+            ),
+        ];
+
+        yield 'do processing in the main process without number of processes specified' => [
+            new StringInput('--main-process'),
+            new ParallelizationInput(
+                true,
+                1,
+                null,
+                false,
+            ),
+        ];
+
         yield 'nominal' => [
             new StringInput('--child --processes 15'),
             new ParallelizationInput(
-                true,
+                false,
                 15,
                 null,
                 true,
