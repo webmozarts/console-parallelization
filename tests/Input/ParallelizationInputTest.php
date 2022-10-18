@@ -20,6 +20,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
+use Webmozarts\Console\Parallelization\CpuCoreCounter;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Input\ParallelizationInput
@@ -37,6 +38,7 @@ final class ParallelizationInputTest extends TestCase
         // Sanity check
         self::assertFalse($initialDefinition->hasArgument('item'));
         self::assertFalse($initialDefinition->hasOption('processes'));
+        self::assertFalse($initialDefinition->hasOption('main-process'));
         self::assertFalse($initialDefinition->hasOption('child'));
 
         ParallelizationInput::configureParallelization($command);
@@ -45,6 +47,7 @@ final class ParallelizationInputTest extends TestCase
 
         self::assertTrue($configuredDefinition->hasArgument('item'));
         self::assertTrue($configuredDefinition->hasOption('processes'));
+        self::assertTrue($initialDefinition->hasOption('main-process'));
         self::assertTrue($configuredDefinition->hasOption('child'));
     }
 
@@ -61,6 +64,30 @@ final class ParallelizationInputTest extends TestCase
         self::assertSame(5, $input->getNumberOfProcesses());
         self::assertSame('item', $input->getItem());
         self::assertTrue($input->isChildProcess());
+    }
+
+    public function test_it_can_be_instantiated_with_a_lazily_evaluated_closure_for_the_number_of_processes(): void
+    {
+        $closureEvaluated = false;
+
+        $input = new ParallelizationInput(
+            true,
+            static function () use (&$closureEvaluated): int {
+                $closureEvaluated = true;
+
+                return 5;
+            },
+            'item',
+            true,
+        );
+
+        self::assertTrue($input->isNumberOfProcessesDefined());
+        self::assertSame('item', $input->getItem());
+        self::assertTrue($input->isChildProcess());
+
+        self::assertFalse($closureEvaluated);
+        self::assertSame(5, $input->getNumberOfProcesses());
+        self::assertTrue($closureEvaluated);
     }
 
     /**
@@ -134,11 +161,13 @@ final class ParallelizationInputTest extends TestCase
 
     public static function inputProvider(): iterable
     {
+        $findNumberOfProcesses = static fn () => CpuCoreCounter::getNumberOfCpuCores();
+
         yield 'empty input' => [
             new StringInput(''),
             new ParallelizationInput(
                 false,
-                1,
+                $findNumberOfProcesses,
                 null,
                 false,
             ),
@@ -168,7 +197,7 @@ final class ParallelizationInputTest extends TestCase
             new StringInput('item15'),
             new ParallelizationInput(
                 false,
-                1,
+                $findNumberOfProcesses,
                 'item15',
                 false,
             ),
@@ -178,7 +207,7 @@ final class ParallelizationInputTest extends TestCase
             new ArrayInput(['item' => 10]),
             new ParallelizationInput(
                 false,
-                1,
+                $findNumberOfProcesses,
                 '10',
                 false,
             ),
@@ -188,7 +217,7 @@ final class ParallelizationInputTest extends TestCase
             new ArrayInput(['item' => -.5]),
             new ParallelizationInput(
                 false,
-                1,
+                $findNumberOfProcesses,
                 '-0.5',
                 false,
             ),
@@ -198,7 +227,7 @@ final class ParallelizationInputTest extends TestCase
             new StringInput('--child'),
             new ParallelizationInput(
                 false,
-                1,
+                $findNumberOfProcesses,
                 null,
                 true,
             ),
