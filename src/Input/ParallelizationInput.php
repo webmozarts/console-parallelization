@@ -18,7 +18,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\CpuCoreCounter;
 use function gettype;
+use function is_int;
 use function is_numeric;
 use function sprintf;
 
@@ -26,6 +28,7 @@ final class ParallelizationInput
 {
     private const ITEM_ARGUMENT = 'item';
     private const PROCESSES_OPTION = 'processes';
+    private const MAIN_PROCESS_OPTION = 'main-process';
     private const CHILD_OPTION = 'child';
 
     private bool $numberOfProcessesDefined;
@@ -35,22 +38,32 @@ final class ParallelizationInput
      */
     private int $numberOfProcesses;
 
+    /**
+     * @var callable():positive-int
+     */
+    private $findNumberOfProcesses;
+
     private ?string $item;
     private bool $childProcess;
 
     /**
-     * @param positive-int $numberOfProcesses
+     * @param positive-int|callable():positive-int $numberOfOrFindNumberOfProcesses
      */
     public function __construct(
         bool $numberOfProcessesDefined,
-        int $numberOfProcesses,
+        $numberOfOrFindNumberOfProcesses,
         ?string $item,
         bool $childProcess
     ) {
         $this->numberOfProcessesDefined = $numberOfProcessesDefined;
-        $this->numberOfProcesses = $numberOfProcesses;
         $this->item = $item;
         $this->childProcess = $childProcess;
+
+        if (is_int($numberOfOrFindNumberOfProcesses)) {
+            $this->numberOfProcesses = $numberOfOrFindNumberOfProcesses;
+        } else {
+            $this->findNumberOfProcesses = $numberOfOrFindNumberOfProcesses;
+        }
     }
 
     public static function fromInput(InputInterface $input): self
@@ -59,12 +72,17 @@ final class ParallelizationInput
         $numberOfProcesses = $input->getOption(self::PROCESSES_OPTION);
         /** @var string|null $item */
         $item = $input->getArgument(self::ITEM_ARGUMENT);
+        /** @var bool $mainProcess */
+        $mainProcess = $input->getOption(self::MAIN_PROCESS_OPTION);
         /** @var bool $isChild */
         $isChild = $input->getOption(self::CHILD_OPTION);
 
         $numberOfProcessesDefined = null !== $numberOfProcesses;
 
-        if ($numberOfProcessesDefined) {
+        if ($mainProcess) {
+            $numberOfProcessesDefined = false;
+            $validatedNumberOfProcesses = 1;
+        } elseif ($numberOfProcessesDefined) {
             Assert::numeric(
                 $numberOfProcesses,
                 sprintf(
@@ -86,19 +104,19 @@ final class ParallelizationInput
                 ),
             );
 
+            Assert::greaterThan(
+                $castedNumberOfProcesses,
+                0,
+                sprintf(
+                    'Expected the number of processes to be 1 or greater. Got "%s".',
+                    $castedNumberOfProcesses,
+                ),
+            );
+
             $validatedNumberOfProcesses = $castedNumberOfProcesses;
         } else {
-            $validatedNumberOfProcesses = 1;
+            $validatedNumberOfProcesses = static fn () => CpuCoreCounter::getNumberOfCpuCores();
         }
-
-        Assert::greaterThan(
-            $validatedNumberOfProcesses,
-            0,
-            sprintf(
-                'Expected the number of processes to be 1 or greater. Got "%s".',
-                $validatedNumberOfProcesses,
-            ),
-        );
 
         $hasItem = null !== $item;
 
@@ -153,6 +171,12 @@ final class ParallelizationInput
                 'The number of parallel processes to run',
             )
             ->addOption(
+                self::MAIN_PROCESS_OPTION,
+                'm',
+                InputOption::VALUE_NONE,
+                'To execute the processing in the main process (no child processes will be spawned)',
+            )
+            ->addOption(
                 self::CHILD_OPTION,
                 null,
                 InputOption::VALUE_NONE,
@@ -170,6 +194,10 @@ final class ParallelizationInput
      */
     public function getNumberOfProcesses(): int
     {
+        if (!isset($this->numberOfProcesses)) {
+            $this->numberOfProcesses = ($this->findNumberOfProcesses)();
+        }
+
         return $this->numberOfProcesses;
     }
 

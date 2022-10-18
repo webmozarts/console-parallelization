@@ -2,6 +2,11 @@
 
 - A lot more type-safety and validation has been added with a comprehensive
   message upon failure.
+- When no number of process is given (via `-p|--processes`), the command is no
+  longer executed in the main process. Instead, the number of processes is guessed
+  based on the maximum number of cores detected. Note that the execution within
+  the main process instead of spawning child processes can be guaranteed by
+  passing `--main-process`.
 - `ContainerAwareCommand` has been removed. `Parallelization` instead provides a
   `::getContainer()` method which by defaults returns the Symfony Application
   Kernel's container when available.

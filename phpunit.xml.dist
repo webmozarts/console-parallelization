@@ -8,6 +8,10 @@
          colors="true"
          executionOrder="random">
 
+    <php>
+        <env name="WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT" value="2"/>
+    </php>
+
     <extensions>
         <extension class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
     </extensions>
@@ -23,6 +27,7 @@
             <directory>src</directory>
         </include>
         <exclude>
+            <file>src/CpuCoreCounter.php</file>
             <file>src/Logger/DebugProgressBarFactory.php</file>
             <file>src/Parallelization.php</file>
             <file>src/Process/PhpExecutableFinder.php</file>

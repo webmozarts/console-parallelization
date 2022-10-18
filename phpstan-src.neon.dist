@@ -6,3 +6,6 @@ parameters:
     ignoreErrors:
         - path: src/ErrorHandler/ResetContainerErrorHandler.php
           message: '#Property .*ResetContainerErrorHandler::\$container.*does not accept.*ContainerInterface\|null\.#'
+
+        - path: src/CpuCoreCounter.php
+          message: '#getNumberOfCpuCores\(\) should return#'

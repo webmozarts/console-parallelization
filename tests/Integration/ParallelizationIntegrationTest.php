@@ -65,7 +65,10 @@ class ParallelizationIntegrationTest extends TestCase
         $commandTester = $this->noSubProcessCommandTester;
 
         $commandTester->execute(
-            ['command' => 'test:no-subprocess'],
+            [
+                'command' => 'test:no-subprocess',
+                '--main-process' => null,
+            ],
             ['interactive' => true],
         );
 
