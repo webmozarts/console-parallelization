@@ -340,7 +340,7 @@ final class ParallelExecutorTest extends TestCase
 
     public function test_it_can_launch_configured_child_processes(): void
     {
-        $numberOfProcesses = 3;
+        $numberOfProcesses = 2;
         $segmentSize = 2;
 
         $parallelizationInput = new ParallelizationInput(
@@ -688,13 +688,13 @@ final class ParallelExecutorTest extends TestCase
                 'logConfiguration',
                 [
                     new Configuration(
+                        2,
                         $segmentSize,
                         3,
                         3,
                     ),
                     $batchSize,
                     5,
-                    2,
                     'items',
                     true,
                 ],
@@ -804,7 +804,7 @@ final class ParallelExecutorTest extends TestCase
     {
         $batchSize = 2;
         $segmentSize = 2;
-        $numberOfProcesses = 5;
+        $numberOfProcesses = 2;
         $mainProcess = false;
         $numberOfSegments = 2;
         $totalNumberOfBatches = 2;
@@ -848,13 +848,13 @@ final class ParallelExecutorTest extends TestCase
                     'logConfiguration',
                     [
                         new Configuration(
+                            $numberOfProcesses,
                             $segmentSize,
                             $numberOfSegments,
                             $totalNumberOfBatches,
                         ),
                         $batchSize,
                         3,
-                        $numberOfProcesses,
                         'items',
                         true,
                     ],
@@ -942,13 +942,13 @@ final class ParallelExecutorTest extends TestCase
                     'logConfiguration',
                     [
                         new Configuration(
+                            $numberOfProcesses,
                             1,
                             $numberOfSegments,
                             $totalNumberOfBatches,
                         ),
                         $batchSize,
                         3,
-                        $numberOfProcesses,
                         'items',
                         false,
                     ],
