@@ -4,8 +4,8 @@ parameters:
         - bin/set-composer-conflicts.php
         - src
     ignoreErrors:
-        - path: src/ErrorHandler/ResetContainerErrorHandler.php
-          message: '#Property .*ResetContainerErrorHandler::\$container.*does not accept.*ContainerInterface\|null\.#'
+        - path: src/ErrorHandler/ResetServiceErrorHandler.php
+          message: '#ResettableContainerInterface#'
 
         - path: src/CpuCoreCounter.php
           message: '#getNumberOfCpuCores\(\) should return#'
