@@ -61,7 +61,6 @@ class ImportMoviesCommand extends ParallelCommand
 
     protected function configure(): void
     {
-        // If you are using the trait do not forget to use ParallelizationInput::configureParallelization($this);
         parent::configure();
         
         // ...
@@ -96,7 +95,7 @@ class ImportMoviesCommand extends ParallelCommand
 You can run this command like a regular Symfony Console command:
 
 ```
-$ bin/console import:movies
+$ bin/console import:movies --main-process
 Processing 2768 movies in segments of 2768, batches of 50, 1 round, 56 batches in 1 process
 
  2768/2768 [============================] 100% 56 secs/56 secs 32.0 MiB
@@ -107,6 +106,8 @@ Processed 2768 movies.
 Or, if you want, you can run the command using parallelization:
 
 ```
+$ bin/console import:movies
+# or with a specific number of processes instead:
 $ bin/console import:movies --processes 2
 Processing 2768 movies in segments of 50, batches of 50, 56 rounds, 56 batches in 2 processes
 

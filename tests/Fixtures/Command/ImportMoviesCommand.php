@@ -52,7 +52,7 @@ final class ImportMoviesCommand extends Command
 
     protected function configure(): void
     {
-        ParallelizationInput::configureParallelization($this);
+        ParallelizationInput::configureCommand($this);
     }
 
     /**

@@ -41,7 +41,7 @@ final class ParallelizationInputTest extends TestCase
         self::assertFalse($initialDefinition->hasOption('main-process'));
         self::assertFalse($initialDefinition->hasOption('child'));
 
-        ParallelizationInput::configureParallelization($command);
+        ParallelizationInput::configureCommand($command);
 
         $configuredDefinition = $command->getDefinition();
 
@@ -281,7 +281,7 @@ final class ParallelizationInputTest extends TestCase
     {
         $command = new Command();
 
-        ParallelizationInput::configureParallelization($command);
+        ParallelizationInput::configureCommand($command);
 
         $input->bind($command->getDefinition());
     }
