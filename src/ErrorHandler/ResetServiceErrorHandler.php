@@ -14,29 +14,37 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
-use Webmozarts\Console\Parallelization\Symfony\ResettableContainerInterface;
 use function interface_exists;
 
-final class ResetContainerErrorHandler implements ErrorHandler
+final class ResetServiceErrorHandler implements ErrorHandler
 {
     /**
-     * @var (ContainerInterface&ResetInterface)|null
+     * @var ResetInterface|ResettableContainerInterface
      */
-    private ?ContainerInterface $container;
+    private $resettable;
 
-    public function __construct(ContainerInterface $container)
+    /**
+     * @param ResetInterface|ResettableContainerInterface $resettable
+     */
+    public function __construct($resettable)
     {
-        $this->container = self::isResettable($container) ? $container : null;
+        $this->resettable = $resettable;
+    }
+
+    public static function forContainer(?ContainerInterface $container): ErrorHandler
+    {
+        return null !== $container && self::isResettable($container)
+            ? new self($container)
+            : new NullErrorHandler();
     }
 
     public function handleError(string $item, Throwable $throwable, Logger $logger): void
     {
-        if (null !== $this->container) {
-            $this->container->reset();
-        }
+        $this->resettable->reset();
     }
 
     private static function isResettable(ContainerInterface $container): bool

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Closure;
+use Symfony\Bundle\FrameworkBundle\Console\Application as FrameworkBundleApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,7 +24,7 @@ use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
-use Webmozarts\Console\Parallelization\ErrorHandler\ResetContainerErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -274,11 +275,11 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            return new ResetContainerErrorHandler($this->getContainer());
+            return ResetServiceErrorHandler::forContainer($this->getContainer());
         }
 
         return new LoggingErrorHandler(
-            new ResetContainerErrorHandler($this->getContainer()),
+            ResetServiceErrorHandler::forContainer($this->getContainer()),
         );
     }
 
@@ -292,16 +293,20 @@ trait Parallelization
         );
     }
 
-    protected function getContainer(): ContainerInterface
+    protected function getContainer(): ?ContainerInterface
     {
         // The container is required to reset the container upon failure to
         // avoid things such as a broken UoW or entity manager.
         //
         // If no such behaviour is desired, ::createItemErrorHandler() can be
         // overridden to provide a different error handler.
-        // TODO: it should be fine to not provide the Container
-        // @phpstan-ignore-next-line
-        return $this->getApplication()->getKernel()->getContainer();
+        $application = $this->getApplication();
+
+        if ($application instanceof FrameworkBundleApplication) {
+            return $application->getKernel()->getContainer();
+        }
+
+        return null;
     }
 
     /**
