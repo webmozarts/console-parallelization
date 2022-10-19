@@ -72,7 +72,7 @@ final class ParallelizationInput
     {
         /** @var string|null $numberOfProcesses */
         $numberOfProcesses = $input->getOption(self::PROCESSES_OPTION);
-        /** @var string|bool|int|float|array<string|bool|int|float>|null $item */
+        /** @var mixed|null $item */
         $item = $input->getArgument(self::ITEM_ARGUMENT);
         $hasItem = null !== $item;
         /** @var bool $mainProcess */
@@ -175,7 +175,7 @@ final class ParallelizationInput
     }
 
     /**
-     * @param string|bool|int|float|array<string|bool|int|float>|null $item
+     * @param mixed $item
      */
     private static function validateItem($item): string
     {
