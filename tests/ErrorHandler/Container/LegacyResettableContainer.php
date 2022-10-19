@@ -42,7 +42,7 @@ final class LegacyResettableContainer implements ResettableContainerInterface
         throw new DomainException('Unexpected call.');
     }
 
-    public function has(string $id): bool
+    public function has(string $id)
     {
         throw new DomainException('Unexpected call.');
     }
