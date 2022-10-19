@@ -24,6 +24,17 @@ final class PhpExecutableFinder
     {
     }
 
+    /**
+     * TODO: Remove this in 3.x. This is purely for the BC layer.
+     * @internal
+     */
+    public static function tryToFind(): ?string
+    {
+        $phpExecutable = self::getFinder()->find();
+
+        return false === $phpExecutable ? null : $phpExecutable;
+    }
+
     public static function find(): string
     {
         $phpExecutable = self::getFinder()->find();

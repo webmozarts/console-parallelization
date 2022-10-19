@@ -217,6 +217,8 @@ final class ParallelExecutorFactory
     }
 
     /**
+     * TODO: restore the behaviour that the default batch size is the segment size.
+     *
      * The number of items to process per child process. This is done in order
      * to circumvent some issues recurring to long living processes such as
      * memory leaks.
@@ -302,6 +304,7 @@ final class ParallelExecutorFactory
     }
 
     /**
+     * TODO: although it is a string maybe it has additional options, ensure those are escaped
      * The path of the PHP executable. It is the executable that will be used
      * to spawn the child process(es).
      */

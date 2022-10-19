@@ -10,35 +10,47 @@
 - Child processes will always be spawned regardless of the number of items
   (known or not), the number of processes defined (or not defined). Instead
   the processing will occur only if the `--main-process` option is passed. 
+- `ParallelizationInput` should be created from the new factory `::fromInput()`
 - `ContainerAwareCommand` has been removed. `Parallelization` instead provides a
   `::getContainer()` method which by defaults returns the Symfony Application
   Kernel's container when available.
+- The `Parallelization#logError` property has been deprecated. Override the new
+  `::createErrorHandler()` method instead.
+- The `Parallelization::configureParallelization()` method has been deprecated.
+  Use `ParallelizationInput::configureParallelization()` directly instead.
 - Most of the execution of the `Parallelization` trait has been moved to the
   `ParallelExecutor`. Certain pieces are no longer overridable, but each key
   element should remain configurable. Since creating the `ParallelExecutor` is
   quite complex, a `ParallelExecutorFactory` has been introduced allowing to
-  create an executor whilst overriding only the necessary bits. The following
-  methods no longer have any effect:
-    - `::executeMasterProcess()`
-    - `::executeChildProcess()`
-    - `::processChildOutput()`
-    - `::runTolerantSingleCommand()`
-    - `::serializeInputOptions()`
-    - `::quoteOptionValue()`
-    - `::isValueRequiresQuoting()`
-- A number of methods are no longer overrideable by default. Each option can
-  still be configured, but via the `::getParallelExecutableFactory()` method instead.
-  The affected methods are:
+  create an executor whilst overriding only the necessary bits. All the following
+  methods have been deprecated in favour of overriding `::getParallelExecutableFactory()`
+  to configure the factory instead:
     - `::getProgressSymbol()`
     - `::detectPhpExecutable()`
+    - `::getWorkingDirectory()`
     - `::getEnvironmentVariables()`
+    - `::getSegmentSize()`
+    - `::getBatchSize()`
+    - `::getConsolePath()`
+- As part of the previous point, the following methods will no longer be declared
+  in the `Parallelization` trait in 3.0. It is perfectly fine to still have a
+  method with those names, but you need to register them to the factory (it will
+  no longer be done automatically in 3.0) and you should not extend the current
+  ones. The following methods are affected:
     - `::runBeforeFirstCommand()`
     - `::runAfterLastCommand()`
     - `::runBeforeBatch()`
     - `::runAfterBatch()`
-    - `::getSegmentSize()`
-    - `::getBatchSize()`
-    - `::getConsolePath()`
+- The following methods have been removed from `Parallelization` and have no
+  replacement (the existing and new extension points should be enough to cover
+  those): 
+   - `::executeMasterProcess()`
+   - `::executeChildProcess()`
+   - `::processChildOutput()`
+   - `::runTolerantSingleCommand()`
+   - `::serializeInputOptions()`
+   - `::quoteOptionValue()`
+   - `::isValueRequiresQuoting()`
 - `::fetchItems()` can now return an `iterable` instead of `array`
 - `::getItemName()` can now take `null` for an unknown number of items
 
