@@ -46,6 +46,3 @@ parameters:
 
         - path: tests/Fixtures/Command/LegacyCommand.php
           message: '#Static method .* is unused#'
-
-        - path: tests/ErrorHandler/Container/LegacyResettableContainer.php
-          message: '#has\(\) is not covariant with return type bool of#'

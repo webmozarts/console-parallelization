@@ -18,7 +18,6 @@ $finder = Finder::create()
         '.github/fix-symfony-versions',
         'set-composer-conflicts.php',
     ])
-    ->notPath('tests/ErrorHandler/Container/LegacyResettableContainer.php')
     ->exclude([
         'dist',
         'tests/Integration/var',
