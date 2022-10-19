@@ -38,7 +38,7 @@ abstract class ParallelCommand extends Command
 
     protected function configure(): void
     {
-        ParallelizationInput::configureParallelization($this);
+        ParallelizationInput::configureCommand($this);
     }
 
     /**

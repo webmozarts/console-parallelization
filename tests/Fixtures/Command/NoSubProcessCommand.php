@@ -39,7 +39,7 @@ final class NoSubProcessCommand extends Command
 
     protected function configure(): void
     {
-        ParallelizationInput::configureParallelization($this);
+        ParallelizationInput::configureCommand($this);
     }
 
     /**

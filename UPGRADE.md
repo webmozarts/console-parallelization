@@ -16,8 +16,9 @@
   Kernel's container when available.
 - The `Parallelization#logError` property has been deprecated. Override the new
   `::createErrorHandler()` method instead.
+- Rename `ParallelizationInput::configureParallelization()` to `::configureCommand()`
 - The `Parallelization::configureParallelization()` method has been deprecated.
-  Use `ParallelizationInput::configureParallelization()` directly instead.
+  Use `ParallelizationInput::configureCommand()` directly instead.
 - Most of the execution of the `Parallelization` trait has been moved to the
   `ParallelExecutor`. Certain pieces are no longer overridable, but each key
   element should remain configurable. Since creating the `ParallelExecutor` is

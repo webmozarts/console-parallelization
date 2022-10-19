@@ -119,12 +119,11 @@ final class ParallelizationInput
     }
 
     /**
-     * TODO: rename to ::configureCommand()
      * Adds the command configuration specific to parallelization.
      *
      * Call this method in your configure() method.
      */
-    public static function configureParallelization(Command $command): void
+    public static function configureCommand(Command $command): void
     {
         $command
             ->addArgument(
