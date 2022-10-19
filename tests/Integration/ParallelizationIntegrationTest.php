@@ -413,9 +413,15 @@ class ParallelizationIntegrationTest extends TestCase
 
     private static function normalizeIntermediateDynamicProgressBars(string $output): string
     {
-        return preg_replace(
+        $output = preg_replace(
             '# *?[1-4] \[[>-]+\]  ?10 secs 10.0 MiB\n#',
             '',
+            $output,
+        );
+
+        return str_replace(
+            '\[[->]+?\]',
+            '[----->----------------------]',
             $output,
         );
     }
