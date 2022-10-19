@@ -60,11 +60,6 @@ final class ResetServiceErrorHandlerTest extends TestCase
             new ResettableContainer(),
             true,
         ];
-
-        yield 'legacy resettable container' => [
-            new LegacyResettableContainer(),
-            true,
-        ];
     }
 
     public function test_it_resets_the_container_if_the_container_is_resettable(): void
