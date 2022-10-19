@@ -21,6 +21,8 @@ parameters:
           message: '#ParallelizationIntegrationTest::\$importUnknownMoviesCountCommand#'
         - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
+        - path: tests/Integration/ParallelizationIntegrationTest.php
+          message: '#ParallelizationIntegrationTest::\$legacyCommand#'
 
         - path: tests/ChunkedItemsIteratorTest.php
           message: '#Parameter \#2 \$fetchItems of static method .+ChunkedItemsIterator::fromItemOrCallable\(\) expects callable\(\)#'
@@ -44,3 +46,6 @@ parameters:
 
         - path: tests/ParallelExecutorFactoryTest.php
           message: '#ParallelExecutorFactory::create\(\) expects callable#'
+
+        - path: tests/Fixtures/Command/LegacyCommand.php
+          message: '#Static method .* is unused#'

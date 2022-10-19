@@ -119,6 +119,7 @@ final class ParallelizationInput
     }
 
     /**
+     * TODO: rename to ::configureCommand()
      * Adds the command configuration specific to parallelization.
      *
      * Call this method in your configure() method.
