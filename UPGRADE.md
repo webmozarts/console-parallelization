@@ -54,6 +54,8 @@
    - `::isValueRequiresQuoting()`
 - `::fetchItems()` can now return an `iterable` instead of `array`
 - `::getItemName()` can now take `null` for an unknown number of items
+- Ensures that if an item is given, then the processing is done in the main
+  process. An item also cannot be passed to a child process (via the argument).
 
 
 ## New extension points

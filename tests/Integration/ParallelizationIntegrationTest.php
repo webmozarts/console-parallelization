@@ -102,6 +102,36 @@ class ParallelizationIntegrationTest extends TestCase
         self::assertSame($expected, $actual, $actual);
     }
 
+    public function test_it_processes_the_item_in_the_main_process_if_an_item_is_passed(): void
+    {
+        $commandTester = $this->noSubProcessCommandTester;
+
+        $commandTester->execute(
+            [
+                'command' => 'test:no-subprocess',
+                'item' => 'item0',
+            ],
+            ['interactive' => true],
+        );
+
+        // TODO: note that the "in 1 process is incorrect here..."
+        $expected = <<<'EOF'
+            Processing 1 item, batches of 2, 1 batch
+
+             0/1 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+             1/1 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+            Processed 1 item.
+
+            EOF;
+
+        $actual = self::normalizeIntermediateFixedProgressBars(
+            $this->getOutput($commandTester),
+        );
+
+        self::assertSame($expected, $actual, $actual);
+    }
+
     public function test_it_uses_a_sub_process_if_only_one_process_is_used(): void
     {
         $commandTester = $this->noSubProcessCommandTester;

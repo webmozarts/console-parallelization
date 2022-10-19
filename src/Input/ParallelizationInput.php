@@ -19,9 +19,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\CpuCoreCounter;
+use function get_class;
 use function gettype;
 use function is_int;
 use function is_numeric;
+use function is_object;
 use function sprintf;
 
 final class ParallelizationInput
@@ -70,34 +72,28 @@ final class ParallelizationInput
     {
         /** @var string|null $numberOfProcesses */
         $numberOfProcesses = $input->getOption(self::PROCESSES_OPTION);
-        /** @var string|null $item */
+        /** @var mixed|null $item */
         $item = $input->getArgument(self::ITEM_ARGUMENT);
+        $hasItem = null !== $item;
         /** @var bool $mainProcess */
         $mainProcess = $input->getOption(self::MAIN_PROCESS_OPTION);
         /** @var bool $isChild */
         $isChild = $input->getOption(self::CHILD_OPTION);
 
+        if ($hasItem) {
+            $item = self::validateItem($item);
+            // When there is a single item passed, we do not want to spawn
+            // child processes.
+            $mainProcess = true;
+        }
+
         if ($mainProcess) {
+            // TODO: add this to the logger
             $validatedNumberOfProcesses = 1;
         } else {
             $validatedNumberOfProcesses = null !== $numberOfProcesses
                 ? self::coerceNumberOfProcesses($numberOfProcesses)
                 : static fn () => CpuCoreCounter::getNumberOfCpuCores();
-        }
-
-        $hasItem = null !== $item;
-
-        if ($hasItem && !is_numeric($item)) {
-            // Safeguard in case an invalid type is accidentally passed in tests when invoking the
-            // command directly
-            Assert::string(
-                $item,
-                sprintf(
-                    'Invalid item type. Expected a string, got "%s".',
-                    // TODO: change to get_debug_type() once dropping PHP 7.4
-                    gettype($input),
-                ),
-            );
         }
 
         if ($isChild) {
@@ -113,7 +109,7 @@ final class ParallelizationInput
         return new self(
             $mainProcess,
             $validatedNumberOfProcesses,
-            $hasItem ? (string) $item : null,
+            $hasItem ? $item : null,
             $isChild,
         );
     }
@@ -176,6 +172,29 @@ final class ParallelizationInput
     public function isChildProcess(): bool
     {
         return $this->childProcess;
+    }
+
+    /**
+     * @param mixed $item
+     */
+    private static function validateItem($item): string
+    {
+        if (is_numeric($item)) {
+            return (string) $item;
+        }
+
+        // Safeguard in case an invalid type is accidentally passed in tests when invoking the
+        // command directly
+        Assert::string(
+            $item,
+            sprintf(
+                'Invalid item type. Expected a string, got "%s".',
+                // TODO: use get_debug_type when dropping PHP 7.4 support
+                is_object($item) ? get_class($item) : gettype($item),
+            ),
+        );
+
+        return $item;
     }
 
     /**

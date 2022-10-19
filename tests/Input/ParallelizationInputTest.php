@@ -112,7 +112,7 @@ final class ParallelizationInputTest extends TestCase
         self::bindInput($input);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid item type. Expected a string, got "object".');
+        $this->expectExceptionMessage('Invalid item type. Expected a string, got "stdClass".');
 
         ParallelizationInput::fromInput($input);
     }
@@ -196,8 +196,8 @@ final class ParallelizationInputTest extends TestCase
         yield 'item passed' => [
             new StringInput('item15'),
             new ParallelizationInput(
-                false,
-                $findNumberOfProcesses,
+                true,
+                1,
                 'item15',
                 false,
             ),
@@ -206,8 +206,8 @@ final class ParallelizationInputTest extends TestCase
         yield 'integer item passed' => [
             new ArrayInput(['item' => 10]),
             new ParallelizationInput(
-                false,
-                $findNumberOfProcesses,
+                true,
+                1,
                 '10',
                 false,
             ),
@@ -216,8 +216,8 @@ final class ParallelizationInputTest extends TestCase
         yield 'float item passed' => [
             new ArrayInput(['item' => -.5]),
             new ParallelizationInput(
-                false,
-                $findNumberOfProcesses,
+                true,
+                1,
                 '-0.5',
                 false,
             ),
