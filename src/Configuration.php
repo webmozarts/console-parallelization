@@ -40,6 +40,24 @@ final class Configuration
     private ?int $totalNumberOfBatches;
 
     /**
+     * @param positive-int        $numberOfProcesses
+     * @param positive-int        $segmentSize
+     * @param positive-int|null   $numberOfSegments
+     * @param positive-int|0|null $totalNumberOfBatches
+     */
+    public function __construct(
+        int $numberOfProcesses,
+        int $segmentSize,
+        ?int $numberOfSegments,
+        ?int $totalNumberOfBatches
+    ) {
+        $this->numberOfProcesses = $numberOfProcesses;
+        $this->segmentSize = $segmentSize;
+        $this->numberOfSegments = $numberOfSegments;
+        $this->totalNumberOfBatches = $totalNumberOfBatches;
+    }
+
+    /**
      * @param 0|positive-int|null $numberOfItems
      * @param positive-int        $segmentSize
      * @param positive-int        $batchSize
@@ -64,28 +82,11 @@ final class Configuration
         );
 
         if ($shouldSpawnChildProcesses) {
-            if (null === $numberOfItems) {
-                return new self(
-                    $numberOfProcesses,
-                    $segmentSize,
-                    null,
-                    null,
-                );
-            }
-
-            /** @var positive-int $numberOfSegments */
-            $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
-
-            return new self(
+            return self::createForChildProcess(
+                $numberOfItems,
                 $numberOfProcesses,
                 $segmentSize,
-                $numberOfSegments,
-                self::calculateTotalNumberOfBatches(
-                    $numberOfItems,
-                    $segmentSize,
-                    $batchSize,
-                    $numberOfSegments,
-                ),
+                $batchSize,
             );
         }
 
@@ -100,29 +101,11 @@ final class Configuration
             : (int) ceil($numberOfItems / $batchSize);
 
         return new self(
-            $numberOfProcesses,
+            1,
             1,
             1,
             $totalNumberOfBatches,
         );
-    }
-
-    /**
-     * @param positive-int        $numberOfProcesses
-     * @param positive-int        $segmentSize
-     * @param positive-int|null   $numberOfSegments
-     * @param positive-int|0|null $totalNumberOfBatches
-     */
-    public function __construct(
-        int $numberOfProcesses,
-        int $segmentSize,
-        ?int $numberOfSegments,
-        ?int $totalNumberOfBatches
-    ) {
-        $this->numberOfProcesses = $numberOfProcesses;
-        $this->segmentSize = $segmentSize;
-        $this->numberOfSegments = $numberOfSegments;
-        $this->totalNumberOfBatches = $totalNumberOfBatches;
     }
 
     /**
@@ -155,6 +138,42 @@ final class Configuration
     public function getTotalNumberOfBatches(): ?int
     {
         return $this->totalNumberOfBatches;
+    }
+
+    /**
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $segmentSize
+     * @param positive-int        $batchSize
+     */
+    private static function createForChildProcess(
+        ?int $numberOfItems,
+        int $numberOfProcesses,
+        int $segmentSize,
+        int $batchSize
+    ): self {
+        if (null === $numberOfItems) {
+            return new self(
+                $numberOfProcesses,
+                $segmentSize,
+                null,
+                null,
+            );
+        }
+
+        /** @var positive-int $numberOfSegments */
+        $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
+
+        return new self(
+            $numberOfProcesses,
+            $segmentSize,
+            $numberOfSegments,
+            self::calculateTotalNumberOfBatches(
+                $numberOfItems,
+                $segmentSize,
+                $batchSize,
+                $numberOfSegments,
+            ),
+        );
     }
 
     /**

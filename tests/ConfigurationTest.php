@@ -64,7 +64,6 @@ final class ConfigurationTest extends TestCase
             ?int $numberOfItems,
             int $numberOfProcesses,
             int $batchSize,
-            int $expectedNumberOfProcesses,
             ?int $expectedTotalNumberOfBatches
         ) => [
             false,
@@ -73,7 +72,7 @@ final class ConfigurationTest extends TestCase
             10,
             $batchSize,
             new Configuration(
-                $expectedNumberOfProcesses,
+                1,
                 1,
                 1,
                 $expectedTotalNumberOfBatches,
@@ -87,7 +86,7 @@ final class ConfigurationTest extends TestCase
             7,
             5,
             new Configuration(
-                8,
+                1,
                 1,
                 1,
                 2,  // not interested in this value for this set
@@ -98,7 +97,6 @@ final class ConfigurationTest extends TestCase
             0,
             8,
             3,
-            8,
             0,
         );
 
@@ -106,7 +104,6 @@ final class ConfigurationTest extends TestCase
             1,
             8,
             2,
-            8,
             1,
         );
 
@@ -114,7 +111,6 @@ final class ConfigurationTest extends TestCase
             4,
             8,
             2,
-            8,
             2,
         );
 
@@ -122,7 +118,6 @@ final class ConfigurationTest extends TestCase
             5,
             8,
             2,
-            8,
             3,
         );
 
@@ -130,7 +125,6 @@ final class ConfigurationTest extends TestCase
             10,
             8,
             3,
-            8,
             4,
         );
 
@@ -138,7 +132,6 @@ final class ConfigurationTest extends TestCase
             null,
             8,
             3,
-            8,
             null,
         );
     }
