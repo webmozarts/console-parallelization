@@ -81,31 +81,17 @@ final class Configuration
             ),
         );
 
-        if ($shouldSpawnChildProcesses) {
-            return self::createForChildProcess(
+        return $shouldSpawnChildProcesses
+            ? self::createForWithChildProcesses(
                 $numberOfItems,
                 $numberOfProcesses,
                 $segmentSize,
                 $batchSize,
+            )
+            : self::createForInMainProcesses(
+                $numberOfItems,
+                $batchSize,
             );
-        }
-
-        // The segments are what define the sizes of the sub-processes. When
-        // executing only the main process, then there is no use for
-        // segments.
-        // See https://github.com/webmozarts/console-parallelization#segments
-
-        /** @var positive-int|0|null $totalNumberOfBatches */
-        $totalNumberOfBatches = null === $numberOfItems
-            ? null
-            : (int) ceil($numberOfItems / $batchSize);
-
-        return new self(
-            1,
-            1,
-            1,
-            $totalNumberOfBatches,
-        );
     }
 
     /**
@@ -142,10 +128,37 @@ final class Configuration
 
     /**
      * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $batchSize
+     */
+    private static function createForInMainProcesses(
+        ?int $numberOfItems,
+        int $batchSize
+    ): self {
+        // The segments are what define the sizes of the sub-processes. When
+        // executing only the main process, then there is no use for
+        // segments.
+        // See https://github.com/webmozarts/console-parallelization#segments
+
+        /** @var positive-int|0|null $totalNumberOfBatches */
+        $totalNumberOfBatches = null === $numberOfItems
+            ? null
+            : (int) ceil($numberOfItems / $batchSize);
+
+        return new self(
+            1,
+            1,
+            1,
+            $totalNumberOfBatches,
+        );
+    }
+
+    /**
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $numberOfProcesses
      * @param positive-int        $segmentSize
      * @param positive-int        $batchSize
      */
-    private static function createForChildProcess(
+    private static function createForWithChildProcesses(
         ?int $numberOfItems,
         int $numberOfProcesses,
         int $segmentSize,
