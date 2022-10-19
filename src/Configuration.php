@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization;
 
 use Webmozart\Assert\Assert;
 use function ceil;
+use function min;
 use function sprintf;
 
 final class Configuration
@@ -59,6 +60,7 @@ final class Configuration
 
     /**
      * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $numberOfProcesses
      * @param positive-int        $segmentSize
      * @param positive-int        $batchSize
      */
@@ -139,10 +141,10 @@ final class Configuration
         // segments.
         // See https://github.com/webmozarts/console-parallelization#segments
 
-        /** @var positive-int|0|null $totalNumberOfBatches */
         $totalNumberOfBatches = null === $numberOfItems
             ? null
             : (int) ceil($numberOfItems / $batchSize);
+        Assert::nullOrNatural($totalNumberOfBatches);
 
         return new self(
             1,
@@ -173,11 +175,17 @@ final class Configuration
             );
         }
 
-        /** @var positive-int $numberOfSegments */
         $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
+        Assert::positiveInteger($numberOfSegments);
+
+        $numberOfSegmentsRequired = (int) ceil($numberOfItems / $segmentSize);
+        Assert::positiveInteger($numberOfSegmentsRequired);
+
+        $requiredNumberOfProcesses = min($numberOfProcesses, $numberOfSegmentsRequired);
+        Assert::positiveInteger($requiredNumberOfProcesses);
 
         return new self(
-            $numberOfProcesses,
+            $requiredNumberOfProcesses,
             $segmentSize,
             $numberOfSegments,
             self::calculateTotalNumberOfBatches(

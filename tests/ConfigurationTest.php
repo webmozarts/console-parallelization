@@ -167,7 +167,7 @@ final class ConfigurationTest extends TestCase
             3,
             2,
             new Configuration(
-                8,  // not interested in this value for this set
+                4,  // not interested in this value for this set
                 3,
                 4,  // not interested in this value for this set
                 7,  // not interested in this value for this set
@@ -179,7 +179,7 @@ final class ConfigurationTest extends TestCase
             8,
             5,
             5,
-            8,
+            1,
             1,
             1,
         );
@@ -189,7 +189,7 @@ final class ConfigurationTest extends TestCase
             8,
             5,
             5,
-            8,
+            2,
             2,
             2,
         );
@@ -199,7 +199,7 @@ final class ConfigurationTest extends TestCase
             8,
             5,
             5,
-            8,
+            3,
             3,
             3,
         );
@@ -209,7 +209,7 @@ final class ConfigurationTest extends TestCase
             8,
             5,
             5,
-            8,
+            2,
             2,
             2,
         );
@@ -219,7 +219,7 @@ final class ConfigurationTest extends TestCase
             8,
             5,
             2,
-            8,
+            2,
             2,
             6,
         );
@@ -229,17 +229,17 @@ final class ConfigurationTest extends TestCase
             8,
             5,
             2,
-            8,
+            2,
             2,
             5,
         );
 
         yield 'the items need to be processed within multiple batches of a segment (not exact - lower)' => $createSet(
             50,
-            8,
+            5,
             10,
             3,
-            8,
+            5,
             5,
             20,
         );
@@ -249,7 +249,7 @@ final class ConfigurationTest extends TestCase
             8,
             5,
             1,
-            8,
+            2,
             2,
             10,
         );
@@ -262,6 +262,36 @@ final class ConfigurationTest extends TestCase
             8,
             null,
             null,
+        );
+
+        yield 'the number of processes is higher than the required number of processes' => $createSet(
+            10,
+            8,
+            5,
+            5,
+            2,
+            2,
+            2,
+        );
+
+        yield 'the number of processes is the same as the required number of processes' => $createSet(
+            10,
+            2,
+            5,
+            5,
+            2,
+            2,
+            2,
+        );
+
+        yield 'the number of processes is lower than the required number of processes' => $createSet(
+            10,
+            1,
+            5,
+            5,
+            1,
+            2,
+            2,
         );
     }
 

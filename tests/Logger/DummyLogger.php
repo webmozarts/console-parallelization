@@ -25,7 +25,6 @@ final class DummyLogger implements Logger
         Configuration $configuration,
         int $batchSize,
         ?int $numberOfItems,
-        int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
     ): void {

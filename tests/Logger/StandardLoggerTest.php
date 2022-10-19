@@ -54,7 +54,6 @@ final class StandardLoggerTest extends TestCase
         Configuration $configuration,
         int $batchSize,
         ?int $numberOfItems,
-        int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses,
         string $expected
@@ -63,7 +62,6 @@ final class StandardLoggerTest extends TestCase
             $configuration,
             $batchSize,
             $numberOfItems,
-            $numberOfProcesses,
             $itemName,
             $shouldSpawnChildProcesses,
         );
@@ -88,13 +86,13 @@ final class StandardLoggerTest extends TestCase
     {
         yield 'nominal' => [
             new Configuration(
+                2,
                 5,
                 8,
                 2,
             ),
             3,
             4,
-            2,
             'tokens',
             false,
             <<<'TXT'
@@ -106,13 +104,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'single batch' => [
             new Configuration(
+                2,
                 5,
                 2,
                 1,
             ),
             3,
             8,
-            2,
             'tokens',
             false,
             <<<'TXT'
@@ -124,13 +122,31 @@ final class StandardLoggerTest extends TestCase
 
         yield 'single process' => [
             new Configuration(
+                1,
                 5,
                 2,
                 4,
             ),
             3,
             8,
-            1,
+            'tokens',
+            false,
+            <<<'TXT'
+                Processing 8 tokens, batches of 3, 4 batches
+
+
+                TXT,
+        ];
+
+        yield 'multiple process' => [
+            new Configuration(
+                1,
+                5,
+                2,
+                4,
+            ),
+            3,
+            8,
             'tokens',
             false,
             <<<'TXT'
@@ -142,13 +158,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'unknown number of batches' => [
             new Configuration(
+                1,
                 5,
                 2,
                 null,
             ),
             3,
             8,
-            1,
             'tokens',
             false,
             <<<'TXT'
@@ -160,13 +176,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'unknown number of items' => [
             new Configuration(
+                1,
                 5,
                 2,
                 4,
             ),
             3,
             null,
-            1,
             'tokens',
             false,
             <<<'TXT'
@@ -178,13 +194,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'unknown number of rounds' => [
             new Configuration(
+                1,
                 5,
                 null,
                 4,
             ),
             3,
             8,
-            1,
             'tokens',
             false,
             <<<'TXT'
@@ -199,13 +215,13 @@ final class StandardLoggerTest extends TestCase
     {
         yield 'nominal' => [
             new Configuration(
+                2,
                 5,
                 2,
                 4,
             ),
             3,
             8,
-            2,
             'tokens',
             true,
             <<<'TXT'
@@ -217,13 +233,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'single segment' => [
             new Configuration(
+                2,
                 5,
                 1,
                 4,
             ),
             3,
             8,
-            2,
             'tokens',
             true,
             <<<'TXT'
@@ -235,13 +251,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'single batch' => [
             new Configuration(
+                2,
                 5,
                 2,
                 1,
             ),
             3,
             8,
-            2,
             'tokens',
             true,
             <<<'TXT'
@@ -253,13 +269,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'single process' => [
             new Configuration(
+                1,
                 5,
                 2,
                 4,
             ),
             3,
             8,
-            1,
             'tokens',
             true,
             <<<'TXT'
@@ -271,13 +287,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'unknown number of batches' => [
             new Configuration(
+                1,
                 5,
                 2,
                 null,
             ),
             3,
             8,
-            1,
             'tokens',
             true,
             <<<'TXT'
@@ -289,13 +305,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'unknown number of items' => [
             new Configuration(
+                1,
                 5,
                 2,
                 4,
             ),
             3,
             null,
-            1,
             'tokens',
             true,
             <<<'TXT'
@@ -307,13 +323,13 @@ final class StandardLoggerTest extends TestCase
 
         yield 'unknown number of rounds' => [
             new Configuration(
+                1,
                 5,
                 null,
                 4,
             ),
             3,
             8,
-            1,
             'tokens',
             true,
             <<<'TXT'

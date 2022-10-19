@@ -48,7 +48,6 @@ final class StandardLogger implements Logger
         Configuration $configuration,
         int $batchSize,
         ?int $numberOfItems,
-        int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
     ): void {
@@ -56,6 +55,7 @@ final class StandardLogger implements Logger
         $segmentSize = $configuration->getSegmentSize();
         $numberOfSegments = $configuration->getNumberOfSegments() ?? '???';
         $totalNumberOfBatches = $configuration->getTotalNumberOfBatches() ?? '???';
+        $numberOfProcesses = $configuration->getNumberOfProcesses();
 
         if ($shouldSpawnChildProcesses) {
             $this->output->writeln(sprintf(

@@ -234,7 +234,6 @@ final class ParallelExecutor
             $configuration,
             $batchSize,
             $numberOfItems,
-            $numberOfProcesses,
             $itemName,
             $shouldSpawnChildProcesses,
         );
