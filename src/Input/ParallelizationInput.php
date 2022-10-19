@@ -109,7 +109,7 @@ final class ParallelizationInput
         return new self(
             $mainProcess,
             $validatedNumberOfProcesses,
-            $hasItem ? (string) $item : null,
+            $hasItem ? $item : null,
             $isChild,
         );
     }
