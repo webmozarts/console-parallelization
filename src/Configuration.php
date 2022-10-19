@@ -15,10 +15,16 @@ namespace Webmozarts\Console\Parallelization;
 
 use Webmozart\Assert\Assert;
 use function ceil;
+use function min;
 use function sprintf;
 
 final class Configuration
 {
+    /**
+     * @var positive-int
+     */
+    private int $numberOfProcesses;
+
     /**
      * @var positive-int
      */
@@ -35,13 +41,33 @@ final class Configuration
     private ?int $totalNumberOfBatches;
 
     /**
+     * @param positive-int        $numberOfProcesses
+     * @param positive-int        $segmentSize
+     * @param positive-int|null   $numberOfSegments
+     * @param positive-int|0|null $totalNumberOfBatches
+     */
+    public function __construct(
+        int $numberOfProcesses,
+        int $segmentSize,
+        ?int $numberOfSegments,
+        ?int $totalNumberOfBatches
+    ) {
+        $this->numberOfProcesses = $numberOfProcesses;
+        $this->segmentSize = $segmentSize;
+        $this->numberOfSegments = $numberOfSegments;
+        $this->totalNumberOfBatches = $totalNumberOfBatches;
+    }
+
+    /**
      * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $numberOfProcesses
      * @param positive-int        $segmentSize
      * @param positive-int        $batchSize
      */
     public static function create(
         bool $shouldSpawnChildProcesses,
         ?int $numberOfItems,
+        int $numberOfProcesses,
         int $segmentSize,
         int $batchSize
     ): self {
@@ -57,60 +83,25 @@ final class Configuration
             ),
         );
 
-        if ($shouldSpawnChildProcesses) {
-            if (null === $numberOfItems) {
-                return new self(
-                    $segmentSize,
-                    null,
-                    null,
-                );
-            }
-
-            /** @var positive-int $numberOfSegments */
-            $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
-
-            return new self(
+        return $shouldSpawnChildProcesses
+            ? self::createForWithChildProcesses(
+                $numberOfItems,
+                $numberOfProcesses,
                 $segmentSize,
-                $numberOfSegments,
-                self::calculateTotalNumberOfBatches(
-                    $numberOfItems,
-                    $segmentSize,
-                    $batchSize,
-                    $numberOfSegments,
-                ),
+                $batchSize,
+            )
+            : self::createForInMainProcesses(
+                $numberOfItems,
+                $batchSize,
             );
-        }
-
-        // The segments are what define the sizes of the sub-processes. When
-        // executing only the main process, then there is no use for
-        // segments.
-        // See https://github.com/webmozarts/console-parallelization#segments
-
-        /** @var positive-int|0|null $totalNumberOfBatches */
-        $totalNumberOfBatches = null === $numberOfItems
-            ? null
-            : (int) ceil($numberOfItems / $batchSize);
-
-        return new self(
-            1,
-            1,
-            $totalNumberOfBatches,
-        );
     }
 
     /**
-     * @param positive-int        $segmentSize
-     * @param positive-int|null   $numberOfSegments
-     * @param positive-int|0|null $totalNumberOfBatches
+     * @return positive-int
      */
-    public function __construct(
-        int $segmentSize,
-        ?int $numberOfSegments,
-        ?int $totalNumberOfBatches
-    ) {
-        $this->segmentSize = $segmentSize;
-        $this->numberOfSegments = $numberOfSegments;
-        $this->totalNumberOfBatches = $totalNumberOfBatches;
+    public function getNumberOfProcesses(): int
+    {
+        return $this->numberOfProcesses;
     }
 
     /**
@@ -135,6 +126,75 @@ final class Configuration
     public function getTotalNumberOfBatches(): ?int
     {
         return $this->totalNumberOfBatches;
+    }
+
+    /**
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $batchSize
+     */
+    private static function createForInMainProcesses(
+        ?int $numberOfItems,
+        int $batchSize
+    ): self {
+        // The segments are what define the sizes of the sub-processes. When
+        // executing only the main process, then there is no use for
+        // segments.
+        // See https://github.com/webmozarts/console-parallelization#segments
+
+        $totalNumberOfBatches = null === $numberOfItems
+            ? null
+            : (int) ceil($numberOfItems / $batchSize);
+        Assert::nullOrNatural($totalNumberOfBatches);
+
+        return new self(
+            1,
+            1,
+            1,
+            $totalNumberOfBatches,
+        );
+    }
+
+    /**
+     * @param 0|positive-int|null $numberOfItems
+     * @param positive-int        $numberOfProcesses
+     * @param positive-int        $segmentSize
+     * @param positive-int        $batchSize
+     */
+    private static function createForWithChildProcesses(
+        ?int $numberOfItems,
+        int $numberOfProcesses,
+        int $segmentSize,
+        int $batchSize
+    ): self {
+        if (null === $numberOfItems) {
+            return new self(
+                $numberOfProcesses,
+                $segmentSize,
+                null,
+                null,
+            );
+        }
+
+        $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
+        Assert::positiveInteger($numberOfSegments);
+
+        $numberOfSegmentsRequired = (int) ceil($numberOfItems / $segmentSize);
+        Assert::positiveInteger($numberOfSegmentsRequired);
+
+        $requiredNumberOfProcesses = min($numberOfProcesses, $numberOfSegmentsRequired);
+        Assert::positiveInteger($requiredNumberOfProcesses);
+
+        return new self(
+            $requiredNumberOfProcesses,
+            $segmentSize,
+            $numberOfSegments,
+            self::calculateTotalNumberOfBatches(
+                $numberOfItems,
+                $segmentSize,
+                $batchSize,
+                $numberOfSegments,
+            ),
+        );
     }
 
     /**

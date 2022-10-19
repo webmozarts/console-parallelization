@@ -205,8 +205,6 @@ final class ParallelExecutor
     ): int {
         ($this->runBeforeFirstCommand)($input, $output);
 
-        $numberOfProcesses = $parallelizationInput->getNumberOfProcesses();
-
         $batchSize = $this->batchSize;
         $desiredSegmentSize = $this->segmentSize;
 
@@ -223,10 +221,12 @@ final class ParallelExecutor
         $configuration = Configuration::create(
             $shouldSpawnChildProcesses,
             $numberOfItems,
+            $parallelizationInput->getNumberOfProcesses(),
             $desiredSegmentSize,
             $batchSize,
         );
 
+        $numberOfProcesses = $configuration->getNumberOfProcesses();
         $segmentSize = $configuration->getSegmentSize();
         $itemName = ($this->getItemName)($numberOfItems);
 
@@ -234,7 +234,6 @@ final class ParallelExecutor
             $configuration,
             $batchSize,
             $numberOfItems,
-            $numberOfProcesses,
             $itemName,
             $shouldSpawnChildProcesses,
         );

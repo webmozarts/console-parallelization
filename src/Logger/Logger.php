@@ -21,13 +21,11 @@ interface Logger
     /**
      * @param positive-int        $batchSize
      * @param 0|positive-int|null $numberOfItems
-     * @param positive-int        $numberOfProcesses
      */
     public function logConfiguration(
         Configuration $configuration,
         int $batchSize,
         ?int $numberOfItems,
-        int $numberOfProcesses,
         string $itemName,
         bool $shouldSpawnChildProcesses
     ): void;
