@@ -22,6 +22,11 @@ final class Configuration
     /**
      * @var positive-int
      */
+    private int $numberOfProcesses;
+
+    /**
+     * @var positive-int
+     */
     private int $segmentSize;
 
     /**
@@ -42,6 +47,7 @@ final class Configuration
     public static function create(
         bool $shouldSpawnChildProcesses,
         ?int $numberOfItems,
+        int $numberOfProcesses,
         int $segmentSize,
         int $batchSize
     ): self {
@@ -60,6 +66,7 @@ final class Configuration
         if ($shouldSpawnChildProcesses) {
             if (null === $numberOfItems) {
                 return new self(
+                    $numberOfProcesses,
                     $segmentSize,
                     null,
                     null,
@@ -70,6 +77,7 @@ final class Configuration
             $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
 
             return new self(
+                $numberOfProcesses,
                 $segmentSize,
                 $numberOfSegments,
                 self::calculateTotalNumberOfBatches(
@@ -92,6 +100,7 @@ final class Configuration
             : (int) ceil($numberOfItems / $batchSize);
 
         return new self(
+            $numberOfProcesses,
             1,
             1,
             $totalNumberOfBatches,
@@ -99,18 +108,29 @@ final class Configuration
     }
 
     /**
+     * @param positive-int        $numberOfProcesses
      * @param positive-int        $segmentSize
      * @param positive-int|null   $numberOfSegments
      * @param positive-int|0|null $totalNumberOfBatches
      */
     public function __construct(
+        int $numberOfProcesses,
         int $segmentSize,
         ?int $numberOfSegments,
         ?int $totalNumberOfBatches
     ) {
+        $this->numberOfProcesses = $numberOfProcesses;
         $this->segmentSize = $segmentSize;
         $this->numberOfSegments = $numberOfSegments;
         $this->totalNumberOfBatches = $totalNumberOfBatches;
+    }
+
+    /**
+     * @return positive-int
+     */
+    public function getNumberOfProcesses(): int
+    {
+        return $this->numberOfProcesses;
     }
 
     /**
