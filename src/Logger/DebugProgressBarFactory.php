@@ -23,7 +23,8 @@ final class DebugProgressBarFactory implements ProgressBarFactory
         int $numberOfItems
     ): ProgressBar {
         $progressBar = new ProgressBar($output, $numberOfItems);
-        $progressBar->setFormat(ProgressBar::FORMAT_DEBUG);
+        // TODO: use the constant once we drop support for Symfony 4.4
+        $progressBar->setFormat(/* ProgressBar::FORMAT_DEBUG */ 'debug');
         $progressBar->start();
 
         return $progressBar;
