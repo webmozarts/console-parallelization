@@ -91,7 +91,7 @@ final class NoSubProcessCommand extends Command
 
     protected function getItemName(?int $count): string
     {
-        return 0 === $count ? 'item' : 'items';
+        return 1 === $count ? 'item' : 'items';
     }
 
     protected function createLogger(OutputInterface $output): Logger

@@ -88,6 +88,7 @@ final class ParallelizationInput
         }
 
         if ($mainProcess) {
+            // TODO: add this to the logger
             $validatedNumberOfProcesses = 1;
         } else {
             $validatedNumberOfProcesses = null !== $numberOfProcesses
