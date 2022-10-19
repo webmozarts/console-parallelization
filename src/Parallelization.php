@@ -39,7 +39,7 @@ use function realpath;
 /**
  * Adds parallelization capabilities to console commands.
  *
- * Make sure to call configureParallelization() in your configure() method!
+ * Make sure to call configureCommand() in your configure() method!
  *
  * You must implement the following methods in your command:
  *
@@ -78,11 +78,11 @@ trait Parallelization
     abstract public function getName();
 
     /**
-     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Use ParallelizationInput::configureParallelization() instead.
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Use ParallelizationInput::configureCommand() instead.
      */
     protected static function configureParallelization(Command $command): void
     {
-        ParallelizationInput::configureParallelization($command);
+        ParallelizationInput::configureCommand($command);
     }
 
     /**
