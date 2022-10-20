@@ -61,6 +61,8 @@ final class ParallelExecutorFactory
      */
     private int $batchSize;
 
+    private bool $useDefaultBatchSize = true;
+
     /**
      * @var positive-int
      */
@@ -226,13 +228,12 @@ final class ParallelExecutorFactory
     {
         $clone = clone $this;
         $clone->batchSize = $batchSize;
+        $clone->useDefaultBatchSize = false;
 
         return $clone;
     }
 
     /**
-     * TODO: restore the behaviour that the default batch size is the segment size.
-     *
      * The number of items to process per child process. This is done in order
      * to circumvent some issues recurring to long living processes such as
      * memory leaks.
@@ -397,7 +398,7 @@ final class ParallelExecutorFactory
             $this->commandDefinition,
             $this->errorHandler,
             $this->childSourceStream,
-            $this->batchSize,
+            $this->useDefaultBatchSize ? $this->segmentSize : $this->batchSize,
             $this->segmentSize,
             $this->runBeforeFirstCommand,
             $this->runAfterLastCommand,
