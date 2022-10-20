@@ -151,8 +151,8 @@ final class ParallelExecutor
         ProcessLauncherFactory $processLauncherFactory,
         callable $processTick
     ) {
-        self::validateBatchSize($batchSize);
         self::validateSegmentSize($segmentSize);
+        self::validateBatchSize($batchSize);
         self::validateScriptPath($scriptPath);
         self::validateProgressSymbol($progressSymbol);
 

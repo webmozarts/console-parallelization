@@ -108,6 +108,84 @@ final class ParallelExecutorFactoryTest extends TestCase
         self::assertEquals($expected, $executor);
     }
 
+    public function test_it_sets_the_batch_size_to_the_segment_size_by_default(): void
+    {
+        $commandName = 'import:items';
+        $definition = new InputDefinition();
+        $errorHandler = new FakeErrorHandler();
+
+        $callable0 = self::createCallable(0);
+        $callable1 = self::createCallable(1);
+        $callable2 = self::createCallable(2);
+
+        $segmentSize = 20;
+
+        $executor = ParallelExecutorFactory::create(
+            $callable0,
+            $callable1,
+            $callable2,
+            $commandName,
+            $definition,
+            $errorHandler,
+        )
+            ->withSegmentSize($segmentSize)
+            ->build();
+
+        $expected = ParallelExecutorFactory::create(
+            $callable0,
+            $callable1,
+            $callable2,
+            $commandName,
+            $definition,
+            $errorHandler,
+        )
+            ->withSegmentSize($segmentSize)
+            ->withBatchSize($segmentSize)
+            ->build();
+
+        self::assertEquals($expected, $executor);
+    }
+
+    public function test_it_keeps_the_batch_size_set_if_changed(): void
+    {
+        $commandName = 'import:items';
+        $definition = new InputDefinition();
+        $errorHandler = new FakeErrorHandler();
+
+        $callable0 = self::createCallable(0);
+        $callable1 = self::createCallable(1);
+        $callable2 = self::createCallable(2);
+
+        $batchSize = 10;
+        $segmentSize = 20;
+
+        $executor = ParallelExecutorFactory::create(
+            $callable0,
+            $callable1,
+            $callable2,
+            $commandName,
+            $definition,
+            $errorHandler,
+        )
+            ->withBatchSize($batchSize)
+            ->withSegmentSize($segmentSize)
+            ->build();
+
+        $expected = ParallelExecutorFactory::create(
+            $callable0,
+            $callable1,
+            $callable2,
+            $commandName,
+            $definition,
+            $errorHandler,
+        )
+            ->withSegmentSize($segmentSize)
+            ->withBatchSize($batchSize)
+            ->build();
+
+        self::assertEquals($expected, $executor);
+    }
+
     /**
      * @dataProvider defaultValuesProvider
      */
