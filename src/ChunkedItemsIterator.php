@@ -30,6 +30,7 @@ use function iter\mapWithKeys;
 use function iter\values;
 use function Safe\stream_get_contents;
 use function sprintf;
+use function str_replace;
 use const PHP_EOL;
 
 final class ChunkedItemsIterator
@@ -86,7 +87,7 @@ final class ChunkedItemsIterator
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
         if (null !== $item) {
-            $validatedItems = [$item];
+            $validatedItems = [self::normalizeItem($item, 0)];
         } else {
             $items = $fetchItems();
 
@@ -175,6 +176,14 @@ final class ChunkedItemsIterator
                 'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
                 // TODO: use get_debug_type when dropping PHP 7.4 support
                 is_object($item) ? get_class($item) : gettype($item),
+                $index,
+            ),
+        );
+        Assert::false(
+            '' !== PHP_EOL && false !== mb_strpos($item, PHP_EOL),
+            sprintf(
+                'An item cannot contain a line return. Got one for "%s" for the item "%s".',
+                str_replace(PHP_EOL, '<lineReturn>', $item),
                 $index,
             ),
         );
