@@ -17,6 +17,13 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
 {
+    private SymfonyProcessFactory $processFactory;
+
+    public function __construct(SymfonyProcessFactory $processFactory)
+    {
+        $this->processFactory = $processFactory;
+    }
+
     /**
      * @param list<string>                   $command
      * @param array<string, string>|null     $extraEnvironmentVariables
@@ -33,8 +40,7 @@ final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
         int $segmentSize,
         Logger $logger,
         callable $callback,
-        callable $tick,
-        SymfonyProcessFactory $processFactory
+        callable $tick
     ): ProcessLauncher {
         return new SymfonyProcessLauncher(
             $command,
@@ -45,7 +51,7 @@ final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
             $logger,
             $callback,
             $tick,
-            $processFactory,
+            $this->processFactory,
         );
     }
 }

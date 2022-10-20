@@ -49,6 +49,7 @@ final class ParallelExecutorFactoryTest extends TestCase
         $callable4 = self::createCallable(4);
         $callable5 = self::createCallable(5);
         $callable6 = self::createCallable(6);
+        $callable7 = self::createCallable(7);
 
         $childSourceStream = StringStream::fromString('');
         $batchSize = 10;
@@ -78,6 +79,7 @@ final class ParallelExecutorFactoryTest extends TestCase
             ->withWorkingDirectory(self::FILE_3)
             ->withExtraEnvironmentVariables($extraEnvironmentVariables)
             ->withProcessLauncherFactory($processLauncherFactory)
+            ->withProcessTick($callable7)
             ->build();
 
         $expected = new ParallelExecutor(
@@ -100,6 +102,7 @@ final class ParallelExecutorFactoryTest extends TestCase
             self::FILE_3,
             $extraEnvironmentVariables,
             $processLauncherFactory,
+            $callable7,
         );
 
         self::assertEquals($expected, $executor);

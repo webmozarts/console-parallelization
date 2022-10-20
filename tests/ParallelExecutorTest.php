@@ -36,7 +36,6 @@ use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
-use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use function array_fill;
 use function func_get_args;
 use function getcwd;
@@ -427,7 +426,6 @@ final class ParallelExecutorTest extends TestCase
                 $logger,
                 Argument::type('callable'),
                 Argument::type('callable'),
-                Argument::type(StandardSymfonyProcessFactory::class),
             )
             ->willReturn($processLauncherProphecy->reveal());
 
@@ -451,6 +449,7 @@ final class ParallelExecutorTest extends TestCase
             $workingDirectory,
             $extraEnvironmentVariables,
             $processLauncherFactoryProphecy->reveal(),
+            static function (): void {},
         );
 
         $executor->execute(
@@ -1018,6 +1017,7 @@ final class ParallelExecutorTest extends TestCase
             __DIR__,
             null,
             new FakeProcessLauncherFactory(),
+            static function (): void {},
         );
     }
 
@@ -1069,6 +1069,7 @@ final class ParallelExecutorTest extends TestCase
             __DIR__,
             null,
             $processLauncherFactory,
+            static function (): void {},
         );
     }
 

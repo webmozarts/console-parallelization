@@ -33,7 +33,6 @@ interface ProcessLauncherFactory
         int $segmentSize,
         Logger $logger,
         callable $callback,
-        callable $tick,
-        SymfonyProcessFactory $processFactory
+        callable $tick
     ): ProcessLauncher;
 }
