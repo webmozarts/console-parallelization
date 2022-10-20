@@ -84,7 +84,6 @@ class ParallelizationIntegrationTest extends TestCase
             ['interactive' => true],
         );
 
-        // TODO: note that the "in 1 process is incorrect here..."
         $expected = <<<'EOF'
             Processing 5 items, batches of 2, 3 batches
 
@@ -114,7 +113,6 @@ class ParallelizationIntegrationTest extends TestCase
             ['interactive' => true],
         );
 
-        // TODO: note that the "in 1 process is incorrect here..."
         $expected = <<<'EOF'
             Processing 1 item, batches of 2, 1 batch
 
