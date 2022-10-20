@@ -19,6 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
+use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
 use function Safe\getcwd;
@@ -27,6 +28,8 @@ use const STDIN;
 
 final class ParallelExecutorFactory
 {
+    private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
+
     /**
      * @var callable(InputInterface):iterable<string>
      */
@@ -99,6 +102,11 @@ final class ParallelExecutorFactory
     private ProcessLauncherFactory $processLauncherFactory;
 
     /**
+     * @var callable(): void
+     */
+    private $processTick;
+
+    /**
      * @param callable(InputInterface):iterable<string>                    $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(positive-int|0|null):string                         $getItemName
@@ -110,6 +118,7 @@ final class ParallelExecutorFactory
      * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
      * @param array<string, string>                                        $extraEnvironmentVariables
+     * @param callable(): void                                             $processTick
      */
     private function __construct(
         callable $fetchItems,
@@ -130,7 +139,8 @@ final class ParallelExecutorFactory
         string $scriptPath,
         string $workingDirectory,
         ?array $extraEnvironmentVariables,
-        ProcessLauncherFactory $processLauncherFactory
+        ProcessLauncherFactory $processLauncherFactory,
+        callable $processTick
     ) {
         $this->fetchItems = $fetchItems;
         $this->runSingleCommand = $runSingleCommand;
@@ -151,6 +161,7 @@ final class ParallelExecutorFactory
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
         $this->processLauncherFactory = $processLauncherFactory;
+        $this->processTick = $processTick;
     }
 
     /**
@@ -185,7 +196,10 @@ final class ParallelExecutorFactory
             self::getScriptPath(),
             getcwd(),
             null,
-            new SymfonyProcessLauncherFactory(),
+            new SymfonyProcessLauncherFactory(
+                new StandardSymfonyProcessFactory(),
+            ),
+            static fn () => usleep(self::CHILD_POLLING_IN_MICRO_SECONDS),
         );
     }
 
@@ -362,6 +376,17 @@ final class ParallelExecutorFactory
         return $clone;
     }
 
+    /**
+     * @param callable(): void $processTick
+     */
+    public function withProcessTick(callable $processTick): self
+    {
+        $clone = clone $this;
+        $clone->processTick = $processTick;
+
+        return $clone;
+    }
+
     public function build(): ParallelExecutor
     {
         return new ParallelExecutor(
@@ -384,6 +409,7 @@ final class ParallelExecutorFactory
             $this->workingDirectory,
             $this->extraEnvironmentVariables,
             $this->processLauncherFactory,
+            $this->processTick,
         );
     }
 

@@ -25,7 +25,6 @@ use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
-use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use function array_filter;
 use function array_map;
 use function array_merge;
@@ -33,12 +32,9 @@ use function array_slice;
 use function implode;
 use function mb_strlen;
 use function sprintf;
-use function usleep;
 
 final class ParallelExecutor
 {
-    private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
-
     /**
      * @var callable(InputInterface):iterable<string>
      */
@@ -111,6 +107,11 @@ final class ParallelExecutor
     private ProcessLauncherFactory $processLauncherFactory;
 
     /**
+     * @var callable(): void
+     */
+    private $processTick;
+
+    /**
      * @param callable(InputInterface):iterable<string>                    $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(positive-int|0|null):string                         $getItemName
@@ -122,6 +123,7 @@ final class ParallelExecutor
      * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
      * @param array<string, string>                                        $extraEnvironmentVariables
+     * @param callable(): void                                             $processTick
      */
     public function __construct(
         callable $fetchItems,
@@ -142,7 +144,8 @@ final class ParallelExecutor
         string $scriptPath,
         string $workingDirectory,
         ?array $extraEnvironmentVariables,
-        ProcessLauncherFactory $processLauncherFactory
+        ProcessLauncherFactory $processLauncherFactory,
+        callable $processTick
     ) {
         self::validateBatchSize($batchSize);
         self::validateSegmentSize($segmentSize);
@@ -168,6 +171,7 @@ final class ParallelExecutor
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
         $this->processLauncherFactory = $processLauncherFactory;
+        $this->processTick = $processTick;
     }
 
     public function execute(
@@ -363,10 +367,7 @@ final class ParallelExecutor
             $segmentSize,
             $logger,
             fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
-            // TODO: make this configurable?
-            static fn () => usleep(self::CHILD_POLLING_IN_MICRO_SECONDS),
-            // TODO: make this configurable?
-            new StandardSymfonyProcessFactory(),
+            $this->processTick,
         );
     }
 
