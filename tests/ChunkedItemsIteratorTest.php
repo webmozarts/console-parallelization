@@ -19,6 +19,7 @@ use stdClass;
 use function fclose;
 use function iter\toArrayWithKeys;
 use function iter\toIter;
+use const PHP_EOL;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ChunkedItemsIterator
@@ -141,18 +142,23 @@ final class ChunkedItemsIteratorTest extends TestCase
      * @dataProvider invalidValuesProvider
      */
     public function test_it_cannot_be_instantiated_with_invalid_data(
-        array $items,
+        ?string $item,
+        iterable $items,
         int $batchSize,
         string $expectedErrorMessage
     ): void {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
 
-        ChunkedItemsIterator::fromItemOrCallable(
-            null,
+        $iterator = ChunkedItemsIterator::fromItemOrCallable(
+            $item,
             static fn () => $items,
             $batchSize,
         );
+
+        // In case of the iterator, since it is lazily evaluated it will not
+        // be validated when the ChunkedItemsIterator is instantiated.
+        toArrayWithKeys($iterator->getItems());
     }
 
     public static function valuesProvider(): iterable
@@ -314,21 +320,45 @@ final class ChunkedItemsIteratorTest extends TestCase
     public static function invalidValuesProvider(): iterable
     {
         yield 'stdClass item' => [
+            null,
             [new stdClass()],
             1,
             'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass" for the item "0".',
         ];
 
         yield 'closure item' => [
+            null,
             [FakeCallable::create()],
             1,
             'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "Closure" for the item "0".',
         ];
 
         yield 'boolean item' => [
+            null,
             [true],
             1,
             'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "boolean" for the item "0".',
+        ];
+
+        yield 'single item with line return' => [
+            'it'.PHP_EOL.'em',
+            [],
+            1,
+            'An item cannot contain a line return. Got one for "it<lineReturn>em" for the item "0".',
+        ];
+
+        yield 'an item with a line return' => [
+            null,
+            ['item0', 'it'.PHP_EOL.'em', 'item1'],
+            1,
+            'An item cannot contain a line return. Got one for "it<lineReturn>em" for the item "1".',
+        ];
+
+        yield 'an item with a line return (iterable)' => [
+            null,
+            toIter(['item0', 'it'.PHP_EOL.'em', 'item1']),
+            1,
+            'An item cannot contain a line return. Got one for "it<lineReturn>em" for the item "1".',
         ];
     }
 

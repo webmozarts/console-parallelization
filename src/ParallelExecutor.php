@@ -148,7 +148,6 @@ final class ParallelExecutor
         self::validateSegmentSize($segmentSize);
         self::validateScriptPath($scriptPath);
         self::validateProgressSymbol($progressSymbol);
-        // TODO: validate that fetch items do not have new lines
 
         $this->fetchItems = $fetchItems;
         $this->runSingleCommand = $runSingleCommand;
