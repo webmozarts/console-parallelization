@@ -112,6 +112,10 @@ final class ParallelExecutor
     private $processTick;
 
     /**
+     * @internal The ParallelExecutor should only be created via its factory
+     *           ParallelExecutorFactory. This method signature is not subject
+     *           to the BC policy.
+     *
      * @param callable(InputInterface):iterable<string>                    $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
      * @param callable(positive-int|0|null):string                         $getItemName
