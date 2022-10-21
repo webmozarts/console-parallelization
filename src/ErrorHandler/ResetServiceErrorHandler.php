@@ -26,13 +26,17 @@ final class ResetServiceErrorHandler implements ErrorHandler
      * @var ResetInterface|ResettableContainerInterface
      */
     private $resettable;
+    private ErrorHandler $decoratedErrorHandler;
 
     /**
      * @param ResetInterface|ResettableContainerInterface $resettable
      */
-    public function __construct($resettable)
-    {
+    public function __construct(
+        $resettable,
+        ?ErrorHandler $decoratedErrorHandler = null
+    ) {
         $this->resettable = $resettable;
+        $this->decoratedErrorHandler = $decoratedErrorHandler ?? new NullErrorHandler();
     }
 
     public static function forContainer(?ContainerInterface $container): ErrorHandler
@@ -45,6 +49,8 @@ final class ResetServiceErrorHandler implements ErrorHandler
     public function handleError(string $item, Throwable $throwable, Logger $logger): void
     {
         $this->resettable->reset();
+
+        $this->decoratedErrorHandler->handleError($item, $throwable, $logger);
     }
 
     private static function isResettable(ContainerInterface $container): bool
