@@ -16,6 +16,7 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler\Container;
 use Error;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\NullErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
@@ -74,6 +75,28 @@ final class ResetServiceErrorHandlerTest extends TestCase
         self::handleError($errorHandler);
 
         self::assertTrue($resettable->reset);
+    }
+
+    public function test_it_calls_the_decorated_handler(): void
+    {
+        $resettable = new ResettableService();
+        $innerErrorHandler = new DummyErrorHandler();
+
+        $errorHandler = new ResetServiceErrorHandler($resettable, $innerErrorHandler);
+
+        $arguments = [
+            'item0',
+            new Error(),
+            new FakeLogger(),
+        ];
+
+        $errorHandler->handleError(...$arguments);
+
+        // Sanity check
+        self::assertSame(
+            [$arguments],
+            $innerErrorHandler->calls,
+        );
     }
 
     private static function handleError(ErrorHandler $errorHandler): void
