@@ -16,6 +16,8 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler;
 use Error;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Webmozarts\Console\Parallelization\Logger\DummyLogger;
+use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
@@ -31,26 +33,27 @@ final class LoggingErrorHandlerTest extends TestCase
     {
         $item = 'item1';
         $throwable = new Error('An error occurred.');
+        $logger = new DummyLogger();
 
-        $decoratedErrorHandlerProphecy = $this->prophesize(ErrorHandler::class);
-        $decoratedErrorHandler = $decoratedErrorHandlerProphecy->reveal();
-
-        $loggerProphecy = $this->prophesize(Logger::class);
-        $logger = $loggerProphecy->reveal();
+        $expectedExitCode = 10;
+        $decoratedErrorHandler = new DummyErrorHandler($expectedExitCode);
 
         $errorHandler = new LoggingErrorHandler($decoratedErrorHandler);
 
-        $decoratedErrorHandlerProphecy
-            ->handleError($item, $throwable, $logger)
-            ->shouldBeCalledTimes(1);
-        $loggerProphecy
-            ->logItemProcessingFailed($item, $throwable)
-            ->shouldBeCalledTimes(1);
-
-        $errorHandler->handleError(
+        $actualExitCode = $errorHandler->handleError(
             $item,
             $throwable,
             $logger,
+        );
+
+        self::assertSame($expectedExitCode, $actualExitCode);
+        self::assertSame(
+            [[$item, $throwable, $logger]],
+            $decoratedErrorHandler->calls,
+        );
+        self::assertSame(
+            [['logItemProcessingFailed', [$item, $throwable]]],
+            $logger->records,
         );
     }
 
@@ -68,10 +71,12 @@ final class LoggingErrorHandlerTest extends TestCase
             ->logItemProcessingFailed($item, $throwable)
             ->shouldBeCalledTimes(1);
 
-        $errorHandler->handleError(
+        $exitCode = $errorHandler->handleError(
             $item,
             $throwable,
             $logger,
         );
+
+        self::assertSame($exitCode, 0);
     }
 }

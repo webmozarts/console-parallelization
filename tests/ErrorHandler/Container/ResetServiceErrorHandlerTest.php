@@ -80,7 +80,8 @@ final class ResetServiceErrorHandlerTest extends TestCase
     public function test_it_calls_the_decorated_handler(): void
     {
         $resettable = new ResettableService();
-        $innerErrorHandler = new DummyErrorHandler();
+        $expectedExitCode = 10;
+        $innerErrorHandler = new DummyErrorHandler($expectedExitCode);
 
         $errorHandler = new ResetServiceErrorHandler($resettable, $innerErrorHandler);
 
@@ -90,13 +91,13 @@ final class ResetServiceErrorHandlerTest extends TestCase
             new FakeLogger(),
         ];
 
-        $errorHandler->handleError(...$arguments);
+        $actualExitCode = $errorHandler->handleError(...$arguments);
 
-        // Sanity check
         self::assertSame(
             [$arguments],
             $innerErrorHandler->calls,
         );
+        self::assertSame($expectedExitCode, $actualExitCode);
     }
 
     private static function handleError(ErrorHandler $errorHandler): void

@@ -46,7 +46,7 @@ final class ResetServiceErrorHandler implements ErrorHandler
             : new NullErrorHandler();
     }
 
-    public function handleError(string $item, Throwable $throwable, Logger $logger): void
+    public function handleError(string $item, Throwable $throwable, Logger $logger): int
     {
         $this->resettable->reset();
 
