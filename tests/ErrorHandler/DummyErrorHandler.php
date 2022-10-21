@@ -21,8 +21,17 @@ final class DummyErrorHandler implements ErrorHandler
 {
     public array $calls = [];
 
-    public function handleError(string $item, Throwable $throwable, Logger $logger): void
+    private int $exitCode;
+
+    public function __construct(int $exitCode)
+    {
+        $this->exitCode = $exitCode;
+    }
+
+    public function handleError(string $item, Throwable $throwable, Logger $logger): int
     {
         $this->calls[] = func_get_args();
+
+        return $this->exitCode;
     }
 }

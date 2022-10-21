@@ -18,8 +18,9 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class NullErrorHandler implements ErrorHandler
 {
-    public function handleError(string $item, Throwable $throwable, Logger $logger): void
+    public function handleError(string $item, Throwable $throwable, Logger $logger): int
     {
         // Do nothing.
+        return 0;
     }
 }

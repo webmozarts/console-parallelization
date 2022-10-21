@@ -41,7 +41,7 @@ final class ParallelExecutor
     private $fetchItems;
 
     /**
-     * @var callable(string, InputInterface, OutputInterface):void
+     * @var callable(string, InputInterface, OutputInterface):int<0,255>
      */
     private $runSingleCommand;
 
@@ -178,6 +178,9 @@ final class ParallelExecutor
         $this->processTick = $processTick;
     }
 
+    /**
+     * @return int<0,255>
+     */
     public function execute(
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
@@ -203,6 +206,8 @@ final class ParallelExecutor
      * "--processes" option. Each of the child processes receives a segment of
      * items of the processed data set and terminates. As long as there is data
      * left to process, new child processes are spawned automatically.
+     *
+     * @return int<0,255>
      */
     private function executeMainProcess(
         ParallelizationInput $parallelizationInput,
@@ -248,7 +253,7 @@ final class ParallelExecutor
         $logger->startProgress($numberOfItems);
 
         if ($shouldSpawnChildProcesses) {
-            $this
+            $exitCode = $this
                 ->createProcessLauncher(
                     $segmentSize,
                     $numberOfProcesses,
@@ -257,7 +262,7 @@ final class ParallelExecutor
                 )
                 ->run($itemIterator->getItems());
         } else {
-            $this->processItems(
+            $exitCode = $this->processItems(
                 $itemIterator,
                 $input,
                 $output,
@@ -270,8 +275,7 @@ final class ParallelExecutor
 
         ($this->runAfterLastCommand)($input, $output);
 
-        // TODO: use the exit code constants once we drop support for Symfony 4.4
-        return 0;
+        return $exitCode;
     }
 
     /**
@@ -280,6 +284,8 @@ final class ParallelExecutor
      * This method reads the items from the standard input that the main process
      * piped into the process. These items are passed to runSingleCommand() one
      * by one.
+     *
+     * @return int<0,255>
      */
     private function executeChildProcess(
         InputInterface $input,
@@ -293,20 +299,19 @@ final class ParallelExecutor
 
         $progressSymbol = $this->progressSymbol;
 
-        $this->processItems(
+        return $this->processItems(
             $itemIterator,
             $input,
             $output,
             $logger,
             static fn () => $output->write($progressSymbol),
         );
-
-        // TODO: use the exit code constants once we drop support for Symfony 4.4
-        return 0;
     }
 
     /**
      * @param callable():void $advance
+     *
+     * @return int<0,255>
      */
     private function processItems(
         ChunkedItemsIterator $itemIterator,
@@ -314,30 +319,37 @@ final class ParallelExecutor
         OutputInterface $output,
         Logger $logger,
         callable $advance
-    ): void {
+    ): int {
+        $exitCode = 0;
+        
         foreach ($itemIterator->getItemChunks() as $items) {
             ($this->runBeforeBatch)($input, $output, $items);
 
             foreach ($items as $item) {
-                $this->runTolerantSingleCommand($item, $input, $output, $logger);
+                $exitCode += $this->runTolerantSingleCommand($item, $input, $output, $logger);
 
                 $advance();
             }
 
             ($this->runAfterBatch)($input, $output, $items);
         }
+
+        return $exitCode;
     }
 
+    /**
+     * @return int<0,255>
+     */
     private function runTolerantSingleCommand(
         string $item,
         InputInterface $input,
         OutputInterface $output,
         Logger $logger
-    ): void {
+    ): int {
         try {
-            ($this->runSingleCommand)($item, $input, $output);
+            return ($this->runSingleCommand)($item, $input, $output);
         } catch (Throwable $throwable) {
-            $this->errorHandler->handleError($item, $throwable, $logger);
+            return $this->errorHandler->handleError($item, $throwable, $logger);
         }
     }
 

@@ -42,9 +42,12 @@ final class ResetServiceErrorHandler implements ErrorHandler
             : new NullErrorHandler();
     }
 
-    public function handleError(string $item, Throwable $throwable, Logger $logger): void
+    // TODO: make it a decorator
+    public function handleError(string $item, Throwable $throwable, Logger $logger): int
     {
         $this->resettable->reset();
+
+        return 0;
     }
 
     private static function isResettable(ContainerInterface $container): bool

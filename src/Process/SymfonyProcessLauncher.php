@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization\Process;
 
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
@@ -98,11 +99,12 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         $this->processFactory = $processFactory;
     }
 
-    public function run(iterable $items): void
+    public function run(iterable $items): int
     {
         /** @var InputStream|null $currentInputStream */
         $currentInputStream = null;
         $numberOfStreamedItems = 0;
+        $exitCode = 0;
 
         foreach ($items as $item) {
             // Close the input stream if the segment is full
@@ -115,7 +117,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
             // Wait until we can launch a new process
             while (null === $currentInputStream) {
-                $this->freeTerminatedProcesses();
+                $exitCode += $this->freeTerminatedProcesses();
 
                 $maxNumberOfRunningProcessesReached = count($this->runningProcesses) >= $this->numberOfProcesses;
 
@@ -143,10 +145,12 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
         // Waiting until all running processes are terminated
         while (count($this->runningProcesses) > 0) {
-            $this->freeTerminatedProcesses();
+            $exitCode += $this->freeTerminatedProcesses();
 
             ($this->tick)();
         }
+
+        return $exitCode;
     }
 
     private function startProcess(InputStream $inputStream): void
@@ -168,19 +172,28 @@ final class SymfonyProcessLauncher implements ProcessLauncher
      * Searches for terminated processes and removes them from memory to make
      * space for new processes.
      */
-    private function freeTerminatedProcesses(): void
+    private function freeTerminatedProcesses(): int
     {
+        $exitCode = 0;
+
         foreach ($this->runningProcesses as $index => $process) {
             if (!$process->isRunning()) {
-                $this->freeProcess($index);
+                $exitCode += $this->freeProcess($index, $process);
             }
         }
+
+        return $exitCode;
     }
 
-    private function freeProcess(int $index): void
+    private function freeProcess(int $index, Process $process): int
     {
         $this->logger->logCommandFinished();
 
         unset($this->runningProcesses[$index]);
+
+        $exitCode = $process->getExitCode();
+        Assert::notNull($exitCode, 'Expected the process to be finished.');
+
+        return $exitCode;
     }
 }
