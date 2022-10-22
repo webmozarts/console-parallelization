@@ -30,6 +30,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\BinomialSumErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
+use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
@@ -456,8 +457,6 @@ final class ParallelExecutorTest extends TestCase
             static fn () => $items,
             $noop,
             static fn (int $itemCount) => 0 === $itemCount ? 'item' : 'items',
-            $commandName,
-            $commandDefinition,
             $errorHandler,
             StringStream::fromString(''),
             1,
@@ -467,8 +466,12 @@ final class ParallelExecutorTest extends TestCase
             $noop,
             $noop,
             'ø',
-            $phpExecutable,
-            $scriptPath,
+            new ChildCommandFactory(
+                $phpExecutable,
+                $scriptPath,
+                $commandName,
+                $commandDefinition,
+            ),
             $workingDirectory,
             $extraEnvironmentVariables,
             $processLauncherFactoryProphecy->reveal(),
@@ -1024,8 +1027,6 @@ final class ParallelExecutorTest extends TestCase
             FakeCallable::create(),
             $runSingleCommand,
             FakeCallable::create(),
-            '',
-            new InputDefinition(),
             $errorHandler,
             $childSourceStream,
             $batchSize,
@@ -1035,8 +1036,12 @@ final class ParallelExecutorTest extends TestCase
             $runBeforeBatch,
             $runAfterBatch,
             $progressSymbol,
-            __FILE__,
-            __FILE__,
+            new ChildCommandFactory(
+                __FILE__,
+                __FILE__,
+                '',
+                new InputDefinition(),
+            ),
             __DIR__,
             null,
             new FakeProcessLauncherFactory(),
@@ -1071,13 +1076,6 @@ final class ParallelExecutorTest extends TestCase
             static fn () => $items,
             $runSingleCommand,
             static fn (int $itemCount) => 0 === $itemCount ? 'item' : 'items',
-            'import:something',
-            new InputDefinition([
-                new InputArgument(
-                    'groupId',
-                    InputArgument::REQUIRED,
-                ),
-            ]),
             $errorHandler,
             StringStream::fromString(''),
             $batchSize,
@@ -1087,8 +1085,17 @@ final class ParallelExecutorTest extends TestCase
             $runBeforeBatch,
             $runAfterBatch,
             $progressSymbol,
-            __FILE__,
-            __FILE__,
+            new ChildCommandFactory(
+                __FILE__,
+                __FILE__,
+                'import:something',
+                new InputDefinition([
+                    new InputArgument(
+                        'groupId',
+                        InputArgument::REQUIRED,
+                    ),
+                ]),
+            ),
             __DIR__,
             null,
             $processLauncherFactory,
