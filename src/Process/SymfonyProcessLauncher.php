@@ -171,6 +171,8 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     /**
      * Searches for terminated processes and removes them from memory to make
      * space for new processes.
+     *
+     * @return 0|positive-int
      */
     private function freeTerminatedProcesses(): int
     {
@@ -185,6 +187,9 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         return $exitCode;
     }
 
+    /**
+     * @return 0|positive-int
+     */
     private function freeProcess(int $index, Process $process): int
     {
         $this->logger->logCommandFinished();
@@ -192,7 +197,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         unset($this->runningProcesses[$index]);
 
         $exitCode = $process->getExitCode();
-        Assert::notNull($exitCode, 'Expected the process to be finished.');
+        Assert::natural($exitCode, 'Expected the process to be finished and return a valid exit code.');
 
         return $exitCode;
     }

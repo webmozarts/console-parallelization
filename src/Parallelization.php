@@ -25,6 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ThrowableCodeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -275,11 +276,15 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            return ResetServiceErrorHandler::forContainer($this->getContainer());
+            return new ThrowableCodeErrorHandler(
+                ResetServiceErrorHandler::forContainer($this->getContainer()),
+            );
         }
 
         return new LoggingErrorHandler(
-            ResetServiceErrorHandler::forContainer($this->getContainer()),
+            new ThrowableCodeErrorHandler(
+                ResetServiceErrorHandler::forContainer($this->getContainer()),
+            ),
         );
     }
 

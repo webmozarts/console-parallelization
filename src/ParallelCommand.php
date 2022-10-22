@@ -26,6 +26,7 @@ use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ThrowableCodeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -130,7 +131,9 @@ abstract class ParallelCommand extends Command
     protected function createErrorHandler(): ErrorHandler
     {
         return new LoggingErrorHandler(
-            ResetServiceErrorHandler::forContainer($this->getContainer()),
+            new ThrowableCodeErrorHandler(
+                ResetServiceErrorHandler::forContainer($this->getContainer()),
+            ),
         );
     }
 

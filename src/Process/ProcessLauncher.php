@@ -23,7 +23,7 @@ interface ProcessLauncher
      * @param list<string>|Iterator<string> $items The items to process. None of the items must
      *                                             contain newlines
      *
-     * @return int<0,255>
+     * @return 0|positive-int
      */
     public function run(iterable $items): int;
 }

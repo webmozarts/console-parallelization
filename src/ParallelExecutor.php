@@ -41,7 +41,7 @@ final class ParallelExecutor
     private $fetchItems;
 
     /**
-     * @var callable(string, InputInterface, OutputInterface):int<0,255>
+     * @var callable(string, InputInterface, OutputInterface):void
      */
     private $runSingleCommand;
 
@@ -179,7 +179,7 @@ final class ParallelExecutor
     }
 
     /**
-     * @return int<0,255>
+     * @return 0|positive-int
      */
     public function execute(
         ParallelizationInput $parallelizationInput,
@@ -207,7 +207,7 @@ final class ParallelExecutor
      * items of the processed data set and terminates. As long as there is data
      * left to process, new child processes are spawned automatically.
      *
-     * @return int<0,255>
+     * @return 0|positive-int
      */
     private function executeMainProcess(
         ParallelizationInput $parallelizationInput,
@@ -285,7 +285,7 @@ final class ParallelExecutor
      * piped into the process. These items are passed to runSingleCommand() one
      * by one.
      *
-     * @return int<0,255>
+     * @return 0|positive-int
      */
     private function executeChildProcess(
         InputInterface $input,
@@ -311,7 +311,7 @@ final class ParallelExecutor
     /**
      * @param callable():void $advance
      *
-     * @return int<0,255>
+     * @return 0|positive-int
      */
     private function processItems(
         ChunkedItemsIterator $itemIterator,
@@ -321,7 +321,7 @@ final class ParallelExecutor
         callable $advance
     ): int {
         $exitCode = 0;
-        
+
         foreach ($itemIterator->getItemChunks() as $items) {
             ($this->runBeforeBatch)($input, $output, $items);
 
@@ -338,7 +338,7 @@ final class ParallelExecutor
     }
 
     /**
-     * @return int<0,255>
+     * @return 0|positive-int
      */
     private function runTolerantSingleCommand(
         string $item,
@@ -347,7 +347,9 @@ final class ParallelExecutor
         Logger $logger
     ): int {
         try {
-            return ($this->runSingleCommand)($item, $input, $output);
+            ($this->runSingleCommand)($item, $input, $output);
+
+            return 0;
         } catch (Throwable $throwable) {
             return $this->errorHandler->handleError($item, $throwable, $logger);
         }

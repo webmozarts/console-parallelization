@@ -19,7 +19,7 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 interface ErrorHandler
 {
     /**
-     * @return natural
+     * @return 0|positive-int
      */
     public function handleError(string $item, Throwable $throwable, Logger $logger): int;
 }

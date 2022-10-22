@@ -17,7 +17,6 @@ use Error;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
-use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
