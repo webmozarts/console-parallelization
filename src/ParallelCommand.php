@@ -94,7 +94,7 @@ abstract class ParallelCommand extends Command
                 Closure::fromCallable([$this, 'getItemName']),
                 $commandName,
                 $this->getDefinition(),
-                $this->createErrorHandler(),
+                $this->createErrorHandler($output),
             )
             ->build()
             ->execute(
@@ -128,7 +128,7 @@ abstract class ParallelCommand extends Command
         );
     }
 
-    protected function createErrorHandler(): ErrorHandler
+    protected function createErrorHandler(OutputInterface $output): ErrorHandler
     {
         return new LoggingErrorHandler(
             new ThrowableCodeErrorHandler(

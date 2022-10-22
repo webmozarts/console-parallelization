@@ -136,7 +136,7 @@ trait Parallelization
                 fn (int $count) => $this->getItemName($count),
                 $this->getName(),
                 $this->getDefinition(),
-                $this->createErrorHandler(),
+                $this->createErrorHandler($output),
             )
             ->build()
             ->execute(
@@ -266,8 +266,7 @@ trait Parallelization
             ->withRunAfterBatch(Closure::fromCallable([$this, 'runAfterBatch']));
     }
 
-    // TODO: probably worth passing the output here in case
-    protected function createErrorHandler(): ErrorHandler
+    protected function createErrorHandler(OutputInterface $output): ErrorHandler
     {
         $errorHandler = new ThrowableCodeErrorHandler(
             ResetServiceErrorHandler::forContainer($this->getContainer()),
