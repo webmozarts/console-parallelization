@@ -19,8 +19,6 @@ use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
 use function array_merge;
-use function array_slice;
-use function implode;
 use function Safe\getcwd;
 use function sprintf;
 
@@ -55,14 +53,7 @@ final class ChildCommandFactory
     {
         return array_merge(
             $this->createBaseCommand($input),
-            // Forward all the options except for "processes" to the children
-            // this way the children can inherit the options such as env
-            // or no-debug.
-            InputOptionsSerializer::serialize(
-                $this->commandDefinition,
-                $input,
-                ['child', 'processes'],
-            ),
+            $this->getForwardedOptions($input),
         );
     }
 
@@ -76,21 +67,41 @@ final class ChildCommandFactory
             $this->phpExecutable,
             $this->scriptPath,
             $this->commandName,
-            implode(
-                ' ',
-                // TODO: this looks suspicious: why do we need to take the first arg?
-                //      why is this not a specific arg?
-                //      why do we include optional arguments? (cf. options)
-                //      maybe has to do with the item arg but in that case it is incorrect...
-                array_filter(
-                    array_slice(
-                        array_map('strval', $input->getArguments()),
-                        1,
-                    ),
-                ),
-            ),
+            ...array_map('strval', self::getArguments($input)),
             '--child',
         ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getForwardedOptions(InputInterface $input): array
+    {
+        // Forward all the options except for "processes" to the children
+        // this way the children can inherit the options such as env
+        // or no-debug.
+        return InputOptionsSerializer::serialize(
+            $this->commandDefinition,
+            $input,
+            ParallelizationInput::OPTIONS,
+        );
+    }
+
+    /**
+     * @return list<string|bool|int|float|null|array<string|bool|int|float|null>>
+     */
+    private static function getArguments(InputInterface $input): array
+    {
+        $arguments = RawInput::getRawArguments($input);
+
+        // Remove the item: we do not want it to be passed to child processes
+        // ever.
+        unset(
+            $arguments['command'],
+            $arguments[ParallelizationInput::ITEM_ARGUMENT],
+        );
+
+        return array_values($arguments);
     }
 
     private static function validateScriptPath(string $scriptPath): void

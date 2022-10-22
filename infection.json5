@@ -58,16 +58,6 @@
             "ignoreSourceCodeByRegex": [
                 ".*ResettableContainerInterface.*"
             ]
-        },
-        "UnwrapArrayFilter": {
-            "ignore": [
-                "Webmozarts\\Console\\Parallelization\\Input\\ChildCommandFactory::createBaseCommand"
-            ]
-        },
-        "UnwrapArrayMap": {
-            "ignore": [
-                "Webmozarts\\Console\\Parallelization\\Input\\ChildCommandFactory::createBaseCommand"
-            ]
         }
     }
 }

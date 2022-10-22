@@ -21,7 +21,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Webmozarts\Console\Parallelization\SymfonyVersion;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Input\RawOptionsInput
+ * @covers \Webmozarts\Console\Parallelization\Input\RawInput
  *
  * @internal
  */
@@ -34,7 +34,7 @@ final class RawOptionsInputTest extends TestCase
         InputInterface $input,
         array $expected
     ): void {
-        $actual = RawOptionsInput::getRawOptions($input);
+        $actual = RawInput::getRawOptions($input);
 
         self::assertSame($expected, $actual);
     }

@@ -63,46 +63,46 @@ final class ChildCommandFactoryTest extends TestCase
             $scriptPath,
             $commandName
         ) {
-            $input = new ArrayInput([
-                'item' => 'item3',
-                'groupId' => 'group2',
-                '--child' => null,
-                '--processes' => '2',
-                '--opt' => 'val',
-            ]);
-
-            $commandDefinition = new InputDefinition([
-                new InputArgument(
-                    'item',
-                    InputArgument::REQUIRED,
-                ),
-                new InputArgument(
-                    'groupId',
-                    InputArgument::REQUIRED,
-                ),
-                new InputArgument(
-                    'optArg',
-                    InputArgument::OPTIONAL,
-                    '',
-                    '',
-                ),
-                new InputOption(
-                    'opt',
-                    null,
-                    InputOption::VALUE_REQUIRED,
-                ),
-                new InputOption(
-                    'child',
-                    null,
-                    InputOption::VALUE_NONE,
-                ),
-                new InputOption(
-                    'processes',
-                    null,
-                    InputOption::VALUE_REQUIRED,
-                ),
-            ]);
-            $input->bind($commandDefinition);
+            [$input, $commandDefinition] = self::createInput(
+                [
+                    'item' => 'item3',
+                    'groupId' => 'group2',
+                    '--child' => null,
+                    '--processes' => '2',
+                    '--opt' => 'val',
+                ],
+                [
+                    new InputArgument(
+                        'item',
+                        InputArgument::REQUIRED,
+                    ),
+                    new InputArgument(
+                        'groupId',
+                        InputArgument::REQUIRED,
+                    ),
+                    new InputArgument(
+                        'optArg',
+                        InputArgument::OPTIONAL,
+                        '',
+                        '',
+                    ),
+                    new InputOption(
+                        'opt',
+                        null,
+                        InputOption::VALUE_REQUIRED,
+                    ),
+                    new InputOption(
+                        'child',
+                        null,
+                        InputOption::VALUE_NONE,
+                    ),
+                    new InputOption(
+                        'processes',
+                        null,
+                        InputOption::VALUE_REQUIRED,
+                    ),
+                ],
+            );
 
             return [
                 $phpExecutable,
@@ -117,6 +117,131 @@ final class ChildCommandFactoryTest extends TestCase
                     'group2',
                     '--child',
                     '--opt=val',
+                ],
+            ];
+        })();
+
+        yield 'it removes the command & item argument' => (static function () use (
+            $phpExecutable,
+            $scriptPath,
+            $commandName
+        ) {
+            [$input, $commandDefinition] = self::createInput(
+                [
+                    'command' => 'import:something',
+                    'groupId' => 'group2',
+                    'categoryId' => 10,
+                    'item' => 'item3',
+                    'tagIds' => 'tag1 tag2 tag3',
+                ],
+                [
+                    new InputArgument(
+                        'groupId',
+                        InputArgument::REQUIRED,
+                    ),
+                    new InputArgument(
+                        'categoryId',
+                        InputArgument::REQUIRED,
+                    ),
+                    // Inverse the order to break with the old code which was
+                    // relying on item/command being the first argument.
+                    new InputArgument(
+                        'item',
+                        InputArgument::REQUIRED,
+                    ),
+                    new InputArgument(
+                        'command',
+                        InputArgument::OPTIONAL,
+                    ),
+                    new InputArgument(
+                        'tagIds',
+                        InputArgument::IS_ARRAY,
+                    ),
+                ],
+            );
+
+            return [
+                $phpExecutable,
+                $scriptPath,
+                $commandName,
+                $commandDefinition,
+                $input,
+                [
+                    $phpExecutable,
+                    $scriptPath,
+                    $commandName,
+                    'group2',
+                    '10',
+                    'tag1 tag2 tag3',
+                    '--child',
+                ],
+            ];
+        })();
+
+        yield 'it does not forward the parallel input' => (static function () use (
+            $phpExecutable,
+            $scriptPath,
+            $commandName
+        ) {
+            [$input, $commandDefinition] = self::createInput(
+                [
+                    '--processes' => '10',
+                    '--main-process' => null,
+                    '--child' => null,
+                ],
+                [
+                    new InputOption(
+                        ParallelizationInput::PROCESSES_OPTION,
+                        null,
+                        InputOption::VALUE_OPTIONAL,
+                    ),
+                    new InputOption(
+                        ParallelizationInput::MAIN_PROCESS_OPTION,
+                        null,
+                        InputOption::VALUE_NONE,
+                    ),
+                    new InputOption(
+                        ParallelizationInput::CHILD_OPTION,
+                        null,
+                        InputOption::VALUE_NONE,
+                    ),
+                ],
+            );
+
+            return [
+                $phpExecutable,
+                $scriptPath,
+                $commandName,
+                $commandDefinition,
+                $input,
+                [
+                    $phpExecutable,
+                    $scriptPath,
+                    $commandName,
+                    '--child',
+                ],
+            ];
+        })();
+
+        yield 'no PHP executable' => (static function () use (
+            $scriptPath,
+            $commandName
+        ) {
+            [$input, $commandDefinition] = self::createInput(
+                [],
+                [],
+            );
+
+            return [
+                '',
+                $scriptPath,
+                $commandName,
+                $commandDefinition,
+                $input,
+                [
+                    $scriptPath,
+                    $commandName,
+                    '--child',
                 ],
             ];
         })();
@@ -135,5 +260,17 @@ final class ChildCommandFactoryTest extends TestCase
             'import:something',
             new InputDefinition(),
         );
+    }
+
+    private static function createInput(
+        array $input,
+        array $definition
+    ): array {
+        $input = new ArrayInput($input);
+        $inputDefinition = new InputDefinition($definition);
+
+        $input->bind($inputDefinition);
+
+        return [$input, $inputDefinition];
     }
 }
