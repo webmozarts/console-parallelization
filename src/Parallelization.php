@@ -101,7 +101,6 @@ trait Parallelization
     abstract protected function fetchItems(InputInterface $input): iterable;
 
     /**
-     * TODO: return error code and sum them up
      * Processes an item in the child process.
      */
     abstract protected function runSingleCommand(
