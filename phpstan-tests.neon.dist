@@ -38,7 +38,7 @@ parameters:
         - path: tests/Process/SymfonyProcessLauncherTest.php
           message: '#DummyProcess#'
 
-        - path: tests/Input/RawOptionsInputTest.php
+        - path: tests/Input/RawInputTest.php
           message: '#FakeInput#'
 
         - path: tests/ParallelExecutorFactoryTest.php
