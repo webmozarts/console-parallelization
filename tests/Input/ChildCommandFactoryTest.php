@@ -61,7 +61,7 @@ final class ChildCommandFactoryTest extends TestCase
         yield 'nominal' => (static function () use (
             $phpExecutable,
             $scriptPath,
-            $commandName,
+            $commandName
         ) {
             $input = new ArrayInput([
                 'item' => 'item3',
