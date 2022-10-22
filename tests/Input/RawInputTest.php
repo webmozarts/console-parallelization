@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization\Input;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -25,8 +26,110 @@ use Webmozarts\Console\Parallelization\SymfonyVersion;
  *
  * @internal
  */
-final class RawOptionsInputTest extends TestCase
+final class RawInputTest extends TestCase
 {
+    /**
+     * @dataProvider inputArgumentProvider
+     */
+    public function test_it_can_get_an_input_arguments(
+        InputInterface $input,
+        array $expected
+    ): void {
+        $actual = RawInput::getRawArguments($input);
+
+        self::assertSame($expected, $actual);
+    }
+
+    public static function inputArgumentProvider(): iterable
+    {
+        $isSymfony4 = SymfonyVersion::isSymfony4();
+
+        yield 'input with no arguments' => [
+            new ArrayInput([], null),
+            [],
+        ];
+
+        yield 'input with arguments default arguments' => [
+            new ArrayInput(
+                [],
+                new InputDefinition([
+                    new InputArgument(
+                        'arg1',
+                        InputArgument::OPTIONAL,
+                    ),
+                    new InputArgument(
+                        'arg2',
+                        InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                    ),
+                ]),
+            ),
+            [],
+        ];
+
+        yield 'input with minimum arguments' => [
+            new ArrayInput(
+                [
+                    'arg1' => 'value1',
+                    'arg2' => null,
+                    'arg3' => null,
+                ],
+                new InputDefinition([
+                    new InputArgument(
+                        'arg1',
+                        InputArgument::REQUIRED,
+                    ),
+                    new InputArgument(
+                        'arg2',
+                        InputArgument::OPTIONAL,
+                    ),
+                    new InputArgument(
+                        'arg3',
+                        InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                    ),
+                ]),
+            ),
+            [
+                'arg1' => 'value1',
+                'arg2' => null,
+                'arg3' => null,
+            ],
+        ];
+
+        yield 'input with all arguments' => [
+            new ArrayInput(
+                [
+                    'arg1' => 'value1',
+                    'arg2' => 'value2',
+                    'arg3' => 'value3 value4',
+                ],
+                new InputDefinition([
+                    new InputArgument(
+                        'arg1',
+                        InputArgument::REQUIRED,
+                    ),
+                    new InputArgument(
+                        'arg2',
+                        InputArgument::OPTIONAL,
+                    ),
+                    new InputArgument(
+                        'arg3',
+                        InputArgument::OPTIONAL | InputArgument::IS_ARRAY,
+                    ),
+                ]),
+            ),
+            [
+                'arg1' => 'value1',
+                'arg2' => 'value2',
+                'arg3' => 'value3 value4',
+            ],
+        ];
+
+        yield 'non standard input' => [
+            new FakeInput(),
+            [],
+        ];
+    }
+
     /**
      * @dataProvider inputOptionProvider
      */

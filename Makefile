@@ -135,7 +135,7 @@ $(PHPSTAN_BIN): vendor
 $(PHPUNIT_BIN): vendor
 	touch -c $@
 
-$(COVERAGE_DIR): $(PHPUNIT_BIN) src tests phpunit.xml.dist
+$(COVERAGE_DIR): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
 	$(MAKE) phpunit_coverage_infection
 	touch -c "$@"
 
