@@ -80,7 +80,7 @@ phpunit: $(PHPUNIT_BIN)
 
 .PHONY: phpunit_coverage_infection
 phpunit_coverage_infection: ## Runs PHPUnit with code coverage for Infection
-phpunit_coverage_infection: $(PHPUNIT_BIN) $(SRC_TESTS_FILES) vendor
+phpunit_coverage_infection: $(PHPUNIT_BIN) vendor
 	$(PHPUNIT_COVERAGE_INFECTION)
 
 .PHONY: phpunit_coverage_html
