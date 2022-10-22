@@ -21,7 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 /**
  * @internal
  */
-final class RawOptionsInput extends Input
+final class RawInput extends Input
 {
     /**
      * @codeCoverageIgnore
@@ -29,6 +29,18 @@ final class RawOptionsInput extends Input
     private function __construct(?InputDefinition $definition)
     {
         parent::__construct($definition);
+    }
+
+    /**
+     * Returns all the given arguments NOT merged with the default values.
+     *
+     * @return array<string|bool|int|float|null|array<string|bool|int|float|null>>
+     */
+    public static function getRawArguments(InputInterface $input): array
+    {
+        return $input instanceof Input
+            ? $input->arguments
+            : [];
     }
 
     /**
