@@ -132,7 +132,7 @@ final class SymfonyProcessLauncherTest extends TestCase
     /**
      * @dataProvider inputProvider
      */
-    public function test_it_can_start_a_single_process_to_process_all_items(
+    public function test_it_can_start_processes_to_process_all_items(
         int $numberOfProcesses,
         int $segmentSize,
         array $items,

@@ -36,6 +36,7 @@ final class DummyProcess81 extends Process
     private array $command;
     private bool $started = false;
     private bool $stopped = false;
+    private bool $sleep = false;
     private InputStream $input;
 
     /**
@@ -129,6 +130,14 @@ final class DummyProcess81 extends Process
             $this->stopped = true;
 
             return false;
+        }
+
+        if ($this->sleep) {
+            $this->sleep = false;
+
+            // Do nothing: this is to mimic that the process does not
+            // necessarily process immediately the input
+            return true;
         }
 
         $this->inputIterator->next();

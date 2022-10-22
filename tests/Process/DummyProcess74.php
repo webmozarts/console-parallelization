@@ -126,6 +126,8 @@ final class DummyProcess74 extends Process
         $item = $this->inputIterator->current();
 
         if ('' === $item) {
+            $this->stopped = true;
+
             return false;
         }
 

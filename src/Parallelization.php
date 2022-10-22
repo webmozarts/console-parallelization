@@ -269,6 +269,10 @@ trait Parallelization
     // TODO: probably worth passing the output here in case
     protected function createErrorHandler(): ErrorHandler
     {
+        $errorHandler = new ThrowableCodeErrorHandler(
+            ResetServiceErrorHandler::forContainer($this->getContainer()),
+        );
+
         if (!$this->logError) {
             Deprecation::trigger(
                 'The %s#logError property is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to produce the desired error handler.',
@@ -276,16 +280,10 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            return new ThrowableCodeErrorHandler(
-                ResetServiceErrorHandler::forContainer($this->getContainer()),
-            );
+            return $errorHandler;
         }
 
-        return new LoggingErrorHandler(
-            new ThrowableCodeErrorHandler(
-                ResetServiceErrorHandler::forContainer($this->getContainer()),
-            ),
-        );
+        return new LoggingErrorHandler($errorHandler);
     }
 
     protected function createLogger(OutputInterface $output): Logger
