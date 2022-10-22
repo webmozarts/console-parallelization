@@ -28,10 +28,16 @@ use function sprintf;
 
 final class ParallelizationInput
 {
-    private const ITEM_ARGUMENT = 'item';
-    private const PROCESSES_OPTION = 'processes';
-    private const MAIN_PROCESS_OPTION = 'main-process';
-    private const CHILD_OPTION = 'child';
+    public const ITEM_ARGUMENT = 'item';
+    public const PROCESSES_OPTION = 'processes';
+    public const MAIN_PROCESS_OPTION = 'main-process';
+    public const CHILD_OPTION = 'child';
+
+    public const OPTIONS = [
+        self::PROCESSES_OPTION,
+        self::MAIN_PROCESS_OPTION,
+        self::CHILD_OPTION,
+    ];
 
     private bool $mainProcess;
 
