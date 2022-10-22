@@ -18,5 +18,8 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 interface ErrorHandler
 {
-    public function handleError(string $item, Throwable $throwable, Logger $logger): void;
+    /**
+     * @return 0|positive-int
+     */
+    public function handleError(string $item, Throwable $throwable, Logger $logger): int;
 }

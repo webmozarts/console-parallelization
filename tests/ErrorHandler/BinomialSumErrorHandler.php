@@ -14,24 +14,24 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Throwable;
+use Webmozarts\Console\Parallelization\BinomialSum;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use function func_get_args;
 
-final class DummyErrorHandler implements ErrorHandler
+final class BinomialSumErrorHandler implements ErrorHandler
 {
     public array $calls = [];
 
-    private int $exitCode;
-
-    public function __construct(int $exitCode)
-    {
-        $this->exitCode = $exitCode;
-    }
+    private int $exitCodeIndex = 0;
 
     public function handleError(string $item, Throwable $throwable, Logger $logger): int
     {
         $this->calls[] = func_get_args();
 
-        return $this->exitCode;
+        $exitCode = BinomialSum::A000079[$this->exitCodeIndex];
+
+        ++$this->exitCodeIndex;
+
+        return $exitCode;
     }
 }

@@ -36,6 +36,7 @@ final class DummyProcess81 extends Process
     private array $command;
     private bool $started = false;
     private bool $stopped = false;
+    private bool $sleep = false;
     private InputStream $input;
 
     /**
@@ -48,8 +49,11 @@ final class DummyProcess81 extends Process
      */
     private $callback;
 
+    private int $exitCode;
+
     public function __construct(
         array $command,
+        int $exitCode,
         ?string $cwd = null,
         ?array $env = null,
         $input = null,
@@ -58,6 +62,7 @@ final class DummyProcess81 extends Process
         parent::__construct($command, $cwd, $env, $input, $timeout);
 
         $this->command = $command;
+        $this->exitCode = $exitCode;
     }
 
     /** @noinspection MagicMethodsValidityInspection */
@@ -122,7 +127,17 @@ final class DummyProcess81 extends Process
         $item = $this->inputIterator->current();
 
         if ('' === $item) {
+            $this->stopped = true;
+
             return false;
+        }
+
+        if ($this->sleep) {
+            $this->sleep = false;
+
+            // Do nothing: this is to mimic that the process does not
+            // necessarily process immediately the input
+            return true;
         }
 
         $this->inputIterator->next();
@@ -223,7 +238,7 @@ final class DummyProcess81 extends Process
 
     public function getExitCode(): ?int
     {
-        throw new DomainException('Unexpected call.');
+        return $this->stopped ? $this->exitCode : null;
     }
 
     public function getExitCodeText(): ?string

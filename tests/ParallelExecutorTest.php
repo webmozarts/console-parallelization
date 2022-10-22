@@ -27,7 +27,7 @@ use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\BinomialSumErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
@@ -40,6 +40,7 @@ use function array_fill;
 use function func_get_args;
 use function getcwd;
 use function implode;
+use function str_repeat;
 use const PHP_EOL;
 
 /**
@@ -66,7 +67,7 @@ final class ParallelExecutorTest extends TestCase
         array $expectedCalls
     ): void {
         $calls = [];
-        $errorHandler = new DummyErrorHandler();
+        $errorHandler = new FakeErrorHandler();
         $sourceStream = StringStream::fromString($sourceStreamString);
 
         $createCallable = static function (string $name) use (&$calls) {
@@ -96,7 +97,6 @@ final class ParallelExecutorTest extends TestCase
 
         self::assertSame($expectedOutput, $output->fetch());
         self::assertSame($expectedCalls, $calls);
-        self::assertSame([], $errorHandler->calls);
         self::assertSame($expectedExitCode, $exitCode);
     }
 
@@ -250,12 +250,14 @@ final class ParallelExecutorTest extends TestCase
             'item1',
             'item2',
             'item3',
+            'item4',
+            'item5',
         ];
         $sourceStreamString = implode(PHP_EOL, $items);
         $batchSize = 2;
         $progressSymbol = '👉';
         $calls = [];
-        $errorHandler = new DummyErrorHandler();
+        $errorHandler = new BinomialSumErrorHandler();
         $sourceStream = StringStream::fromString($sourceStreamString);
         $error = new Error('Processing failed.');
         $logger = new FakeLogger();
@@ -270,7 +272,7 @@ final class ParallelExecutorTest extends TestCase
             static function (string $item) use ($error, &$calls): void {
                 $calls[] = ['runSingleCommand', func_get_args()];
 
-                if ('item2' === $item) {
+                if ('item2' === $item || 'item4' === $item) {
                     throw $error;
                 }
             },
@@ -284,8 +286,8 @@ final class ParallelExecutorTest extends TestCase
             $progressSymbol,
         );
 
-        $expectedOutput = $progressSymbol.$progressSymbol.$progressSymbol;
-        $expectedExitCode = 0;  // TODO: since a child failed shouldn't it fail?
+        $expectedOutput = str_repeat($progressSymbol, 5);
+        $expectedExitCode = 3;
         $expectedCalls = [
             [
                 'runBeforeBatch',
@@ -305,20 +307,41 @@ final class ParallelExecutorTest extends TestCase
             ],
             [
                 'runBeforeBatch',
-                [$input, $output, ['item3']],
+                [$input, $output, ['item3', 'item4']],
             ],
             [
                 'runSingleCommand',
                 ['item3', $input, $output],
             ],
             [
+                'runSingleCommand',
+                ['item4', $input, $output],
+            ],
+            [
                 'runAfterBatch',
-                [$input, $output, ['item3']],
+                [$input, $output, ['item3', 'item4']],
+            ],
+            [
+                'runBeforeBatch',
+                [$input, $output, ['item5']],
+            ],
+            [
+                'runSingleCommand',
+                ['item5', $input, $output],
+            ],
+            [
+                'runAfterBatch',
+                [$input, $output, ['item5']],
             ],
         ];
         $expectedErrors = [
             [
                 'item2',
+                $error,
+                $logger,
+            ],
+            [
+                'item4',
                 $error,
                 $logger,
             ],
@@ -391,7 +414,7 @@ final class ParallelExecutorTest extends TestCase
         $input->bind($commandDefinition);
 
         $output = new NullOutput();
-        $errorHandler = new DummyErrorHandler();
+        $errorHandler = new FakeErrorHandler();
         $logger = new DummyLogger();
 
         $noop = static function (): void {};
@@ -483,7 +506,7 @@ final class ParallelExecutorTest extends TestCase
         $executor = self::createMainProcessExecutor(
             $items,
             $noop,
-            new DummyErrorHandler(),
+            new FakeErrorHandler(),
             2,
             $segmentSize,
             $noop,
@@ -551,7 +574,7 @@ final class ParallelExecutorTest extends TestCase
         bool $expectedChildProcessesSpawned
     ): void {
         $calls = [];
-        $errorHandler = new DummyErrorHandler();
+        $errorHandler = new BinomialSumErrorHandler();
         $logger = new DummyLogger();
 
         $createCallable = static function (string $name) use (&$calls) {
@@ -588,7 +611,6 @@ final class ParallelExecutorTest extends TestCase
         self::assertSame($expectedOutput, $output->fetch());
         self::assertSame($expectedCalls, $calls);
         self::assertEquals($expectedLogRecords, $logger->records);
-        self::assertSame([], $errorHandler->calls);
         self::assertSame($expectedExitCode, $exitCode);
     }
 
@@ -626,7 +648,7 @@ final class ParallelExecutorTest extends TestCase
         ];
         $progressSymbol = '👉';
         $calls = [];
-        $errorHandler = new DummyErrorHandler();
+        $errorHandler = new FakeErrorHandler();
         $logger = new DummyLogger();
 
         $createCallable = static function (string $name) use (&$calls) {
@@ -640,12 +662,14 @@ final class ParallelExecutorTest extends TestCase
         $processLauncherProphecy = $this->prophesize(ProcessLauncher::class);
         $processLauncherProphecy
             ->run(Argument::cetera())
-            ->will(static function () use ($progressSymbol, &$processCallback): void {
+            ->will(static function () use ($progressSymbol, &$processCallback): int {
                 $processCallback('test', $progressSymbol);
                 $processCallback('test', 'FOO');    // unexpected output
                 $processCallback('test', $progressSymbol);
                 $processCallback('test', $progressSymbol.$progressSymbol.$progressSymbol);  // multi-step
                 $processCallback('test', $progressSymbol);
+
+                return 0;
             });
 
         $processLauncherFactoryProphecy = $this->prophesize(ProcessLauncherFactory::class);
@@ -731,7 +755,7 @@ final class ParallelExecutorTest extends TestCase
                 ['items'],
             ],
         ];
-        $expectedExitCode = 0;  // TODO: should return since a child process failed
+        $expectedExitCode = 0;
 
         $exitCode = $executor->execute(
             $parallelizationInput,
@@ -743,7 +767,6 @@ final class ParallelExecutorTest extends TestCase
         self::assertSame($expectedOutput, $output->fetch());
         self::assertSame($expectedCalls, $calls);
         self::assertEquals($expectedLogRecords, $logger->records);
-        self::assertSame([], $errorHandler->calls);
         self::assertSame($expectedExitCode, $exitCode);
     }
 

@@ -132,13 +132,14 @@ final class SymfonyProcessLauncherTest extends TestCase
     /**
      * @dataProvider inputProvider
      */
-    public function test_it_can_start_a_single_process_to_process_all_items(
+    public function test_it_can_start_processes_to_process_all_items(
         int $numberOfProcesses,
         int $segmentSize,
         array $items,
         string $expectedOutput,
         array $expectedProcessedItemsPerProcess,
-        int $expectedNumberOfTicks
+        int $expectedNumberOfTicks,
+        int $expectedExitCode
     ): void {
         $output = new BufferedOutput();
 
@@ -166,7 +167,7 @@ final class SymfonyProcessLauncherTest extends TestCase
             $processFactory,
         );
 
-        $launcher->run($items);
+        $exitCode = $launcher->run($items);
 
         self::assertSame($expectedOutput, $output->fetch());
 
@@ -189,6 +190,7 @@ final class SymfonyProcessLauncherTest extends TestCase
             $numberOfTicksRecorded,
             'Number of ticks recorded does not match.',
         );
+        self::assertSame($expectedExitCode, $exitCode);
     }
 
     public static function inputProvider(): iterable
@@ -216,6 +218,7 @@ final class SymfonyProcessLauncherTest extends TestCase
                 ["item5\n"],
             ],
             3,
+            7,
         ];
 
         yield 'single parallel process' => [
@@ -245,6 +248,7 @@ final class SymfonyProcessLauncherTest extends TestCase
                 ],
             ],
             6,
+            1,
         ];
 
         yield 'single parallel process with segment size smaller than the number of items' => [
@@ -270,6 +274,7 @@ final class SymfonyProcessLauncherTest extends TestCase
                 ["item5\n"],
             ],
             6,
+            7,
         ];
     }
 }

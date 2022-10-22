@@ -15,9 +15,12 @@ namespace Webmozarts\Console\Parallelization\Process;
 
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
+use Webmozarts\Console\Parallelization\BinomialSum;
 
 final class DummyProcessFactory implements SymfonyProcessFactory
 {
+    private int $exitCodeIndex = 0;
+
     /**
      * @var list<DummyProcess>
      */
@@ -32,6 +35,7 @@ final class DummyProcessFactory implements SymfonyProcessFactory
     ): Process {
         $process = new DummyProcess(
             $command,
+            BinomialSum::A000079[$this->exitCodeIndex],
             $workingDirectory,
             $environmentVariables,
             $inputStream,
@@ -39,6 +43,8 @@ final class DummyProcessFactory implements SymfonyProcessFactory
         $this->processes[] = $process;
 
         $process->start($callback);
+
+        ++$this->exitCodeIndex;
 
         return $process;
     }

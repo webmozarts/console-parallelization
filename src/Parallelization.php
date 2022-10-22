@@ -25,6 +25,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
+use Webmozarts\Console\Parallelization\ErrorHandler\ThrowableCodeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
@@ -268,6 +269,10 @@ trait Parallelization
     // TODO: probably worth passing the output here in case
     protected function createErrorHandler(): ErrorHandler
     {
+        $errorHandler = new ThrowableCodeErrorHandler(
+            ResetServiceErrorHandler::forContainer($this->getContainer()),
+        );
+
         if (!$this->logError) {
             Deprecation::trigger(
                 'The %s#logError property is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to produce the desired error handler.',
@@ -275,12 +280,10 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            return ResetServiceErrorHandler::forContainer($this->getContainer());
+            return $errorHandler;
         }
 
-        return new LoggingErrorHandler(
-            ResetServiceErrorHandler::forContainer($this->getContainer()),
-        );
+        return new LoggingErrorHandler($errorHandler);
     }
 
     protected function createLogger(OutputInterface $output): Logger

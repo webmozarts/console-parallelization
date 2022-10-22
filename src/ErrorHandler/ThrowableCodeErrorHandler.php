@@ -14,9 +14,10 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Throwable;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
-final class LoggingErrorHandler implements ErrorHandler
+final class ThrowableCodeErrorHandler implements ErrorHandler
 {
     private ErrorHandler $decoratedErrorHandler;
 
@@ -27,8 +28,13 @@ final class LoggingErrorHandler implements ErrorHandler
 
     public function handleError(string $item, Throwable $throwable, Logger $logger): int
     {
-        $logger->logItemProcessingFailed($item, $throwable);
+        $exitCode = $this->decoratedErrorHandler->handleError($item, $throwable, $logger);
 
-        return $this->decoratedErrorHandler->handleError($item, $throwable, $logger);
+        // Ensures the code is at minima 1 since we do not want 0 here (as it
+        // means success) and it is common for throwables to have a 0 code.
+        $throwableCode = max(1, $throwable->getCode());
+        Assert::natural($throwableCode);
+
+        return $exitCode + $throwableCode;
     }
 }

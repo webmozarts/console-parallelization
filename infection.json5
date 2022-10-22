@@ -14,6 +14,12 @@
             "Assert::.*"
         ],
         "@default": true,
+        "Assignment": {
+            "ignore": [
+                // This is a perfectly valid case but too hard to test.
+                "Webmozarts\\Console\\Parallelization\\Process\\SymfonyProcessLauncher::freeTerminatedProcesses"
+            ]
+        },
         "Break_": {
             "ignore": [
                 "Webmozarts\\Console\\Parallelization\\Process\\SymfonyProcessLauncher::run"
