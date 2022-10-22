@@ -13,6 +13,7 @@ CCYELLOW=\033[0;33m
 CCEND=\033[0m
 
 # PHP specific variables
+SRC_TESTS_FILES=$(shell find src/ tests/ -type f)
 COVERAGE_DIR = dist/coverage
 COVERAGE_XML = $(COVERAGE_DIR)/xml
 COVERAGE_HTML = $(COVERAGE_DIR)/html
@@ -79,7 +80,7 @@ phpunit: $(PHPUNIT_BIN)
 
 .PHONY: phpunit_coverage_infection
 phpunit_coverage_infection: ## Runs PHPUnit with code coverage for Infection
-phpunit_coverage_infection: $(PHPUNIT_BIN) vendor
+phpunit_coverage_infection: $(PHPUNIT_BIN) $(SRC_TESTS_FILES) vendor
 	$(PHPUNIT_COVERAGE_INFECTION)
 
 .PHONY: phpunit_coverage_html
