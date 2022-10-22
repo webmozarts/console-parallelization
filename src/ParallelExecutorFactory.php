@@ -320,7 +320,6 @@ final class ParallelExecutorFactory
     }
 
     /**
-     * TODO: although it is a string maybe it has additional options, ensure those are escaped
      * The path of the PHP executable. It is the executable that will be used
      * to spawn the child process(es).
      */
