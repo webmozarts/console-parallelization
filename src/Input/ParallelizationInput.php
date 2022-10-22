@@ -32,6 +32,8 @@ final class ParallelizationInput
     public const PROCESSES_OPTION = 'processes';
     public const MAIN_PROCESS_OPTION = 'main-process';
     public const CHILD_OPTION = 'child';
+    public const BATCH_SIZE = 'batch-size';
+    public const SEGMENT_SIZE = 'segment-size';
 
     public const OPTIONS = [
         self::PROCESSES_OPTION,
@@ -55,13 +57,27 @@ final class ParallelizationInput
     private bool $childProcess;
 
     /**
+     * @var positive-int|null
+     */
+    private ?int $batchSize;
+
+    /**
+     * @var positive-int|null
+     */
+    private ?int $segmentSize;
+
+    /**
      * @param positive-int|callable():positive-int $numberOfOrFindNumberOfProcesses
+     * @param positive-int|null $batchSize
+     * @param positive-int|null $segmentSize
      */
     public function __construct(
         bool $mainProcess,
         $numberOfOrFindNumberOfProcesses,
         ?string $item,
-        bool $childProcess
+        bool $childProcess,
+        ?int $batchSize,
+        ?int $segmentSize
     ) {
         $this->mainProcess = $mainProcess;
         $this->item = $item;
@@ -72,6 +88,9 @@ final class ParallelizationInput
         } else {
             $this->findNumberOfProcesses = $numberOfOrFindNumberOfProcesses;
         }
+
+        $this->batchSize = $batchSize;
+        $this->segmentSize = $segmentSize;
     }
 
     public static function fromInput(InputInterface $input): self
@@ -85,6 +104,10 @@ final class ParallelizationInput
         $mainProcess = $input->getOption(self::MAIN_PROCESS_OPTION);
         /** @var bool $isChild */
         $isChild = $input->getOption(self::CHILD_OPTION);
+        /** @var string|int|null $isChild */
+        $batchSize = $input->getOption(self::BATCH_SIZE);
+        /** @var string|int|null $isChild */
+        $segmentSize = $input->getOption(self::SEGMENT_SIZE);
 
         if ($hasItem) {
             $item = self::validateItem($item);
@@ -112,11 +135,16 @@ final class ParallelizationInput
             );
         }
 
+        self::validateBatchSize($batchSize);
+        self::validateSegmentSize($segmentSize);
+
         return new self(
             $mainProcess,
             $validatedNumberOfProcesses,
             $hasItem ? $item : null,
             $isChild,
+            $batchSize,
+            $segmentSize,
         );
     }
 
@@ -131,25 +159,37 @@ final class ParallelizationInput
             ->addArgument(
                 self::ITEM_ARGUMENT,
                 InputArgument::OPTIONAL,
-                'The item to process',
+                'The item to process.',
             )
             ->addOption(
                 self::PROCESSES_OPTION,
                 'p',
                 InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
+                'The number of maximum parallel processes to run.',
             )
             ->addOption(
                 self::MAIN_PROCESS_OPTION,
                 'm',
                 InputOption::VALUE_NONE,
-                'To execute the processing in the main process (no child processes will be spawned)',
+                'To execute the processing in the main process (no child processes will be spawned).',
             )
             ->addOption(
                 self::CHILD_OPTION,
                 null,
                 InputOption::VALUE_NONE,
-                'Set on child processes',
+                'Set on child processes.',
+            )
+            ->addOption(
+                self::BATCH_SIZE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set the batch size.',
+            )
+            ->addOption(
+                self::SEGMENT_SIZE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set the segment size.',
             );
     }
 
@@ -178,6 +218,22 @@ final class ParallelizationInput
     public function isChildProcess(): bool
     {
         return $this->childProcess;
+    }
+
+    /**
+     * @return positive-int|null
+     */
+    public function getBatchSize(): ?int
+    {
+        return $this->batchSize;
+    }
+
+    /**
+     * @return positive-int|null
+     */
+    public function getSegmentSize(): ?int
+    {
+        return $this->segmentSize;
     }
 
     /**
@@ -239,5 +295,29 @@ final class ParallelizationInput
         );
 
         return $castedNumberOfProcesses;
+    }
+
+    private static function validateBatchSize(?int $batchSize): void
+    {
+        Assert::nullOrGreaterThan(
+            $batchSize,
+            0,
+            sprintf(
+                'Expected the batch size to be 1 or greater. Got "%s".',
+                $batchSize,
+            ),
+        );
+    }
+
+    private static function validateSegmentSize(?int $segmentSize): void
+    {
+        Assert::nullOrGreaterThan(
+            $segmentSize,
+            0,
+            sprintf(
+                'Expected the segment size to be 1 or greater. Got "%s".',
+                $segmentSize,
+            ),
+        );
     }
 }
