@@ -19,6 +19,7 @@ use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
 use function array_merge;
+use function explode;
 use function Safe\getcwd;
 use function sprintf;
 
@@ -64,7 +65,7 @@ final class ChildCommandFactory
         InputInterface $input
     ): array {
         return array_filter([
-            $this->phpExecutable,
+            ...$this->getEscapedPhpExecutable(),
             $this->scriptPath,
             $this->commandName,
             ...array_map('strval', self::getArguments($input)),
@@ -85,6 +86,14 @@ final class ChildCommandFactory
             $input,
             ParallelizationInput::OPTIONS,
         );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getEscapedPhpExecutable(): array
+    {
+        return explode(' ', $this->phpExecutable);
     }
 
     /**
