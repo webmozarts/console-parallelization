@@ -17,6 +17,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
+use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
@@ -394,8 +395,6 @@ final class ParallelExecutorFactory
             $this->fetchItems,
             $this->runSingleCommand,
             $this->getItemName,
-            $this->commandName,
-            $this->commandDefinition,
             $this->errorHandler,
             $this->childSourceStream,
             $this->useDefaultBatchSize ? $this->segmentSize : $this->batchSize,
@@ -405,8 +404,12 @@ final class ParallelExecutorFactory
             $this->runBeforeBatch,
             $this->runAfterBatch,
             $this->progressSymbol,
-            $this->phpExecutable,
-            $this->scriptPath,
+            new ChildCommandFactory(
+                $this->phpExecutable,
+                $this->scriptPath,
+                $this->commandName,
+                $this->commandDefinition,
+            ),
             $this->workingDirectory,
             $this->extraEnvironmentVariables,
             $this->processLauncherFactory,

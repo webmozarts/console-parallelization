@@ -27,6 +27,9 @@ use function preg_match;
 use function sprintf;
 use function str_replace;
 
+/**
+ * @internal
+ */
 final class InputOptionsSerializer
 {
     private const ESCAPE_TOKEN_PATTERN = '/[\s\W]/';

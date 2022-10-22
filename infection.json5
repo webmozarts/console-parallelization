@@ -61,12 +61,12 @@
         },
         "UnwrapArrayFilter": {
             "ignore": [
-                "Webmozarts\\Console\\Parallelization\\ParallelExecutor::createChildCommand"
+                "Webmozarts\\Console\\Parallelization\\Input\\ChildCommandFactory::createBaseCommand"
             ]
         },
         "UnwrapArrayMap": {
             "ignore": [
-                "Webmozarts\\Console\\Parallelization\\ParallelExecutor::createChildCommand"
+                "Webmozarts\\Console\\Parallelization\\Input\\ChildCommandFactory::createBaseCommand"
             ]
         }
     }

@@ -14,22 +14,16 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Symfony\Component\Console\Input\Input;
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
-use Webmozarts\Console\Parallelization\Input\InputOptionsSerializer;
+use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function array_slice;
-use function implode;
 use function mb_strlen;
 use function sprintf;
 
@@ -49,10 +43,6 @@ final class ParallelExecutor
      * @var callable(positive-int|0|null): string
      */
     private $getItemName;
-
-    private string $commandName;
-
-    private InputDefinition $commandDefinition;
 
     private ErrorHandler $errorHandler;
 
@@ -93,9 +83,7 @@ final class ParallelExecutor
 
     private string $progressSymbol;
 
-    private string $phpExecutable;
-
-    private string $scriptPath;
+    private ChildCommandFactory $childCommandFactory;
 
     private string $workingDirectory;
 
@@ -133,8 +121,6 @@ final class ParallelExecutor
         callable $fetchItems,
         callable $runSingleCommand,
         callable $getItemName,
-        string $commandName,
-        InputDefinition $commandDefinition,
         ErrorHandler $errorHandler,
         $childSourceStream,
         int $batchSize,
@@ -144,8 +130,7 @@ final class ParallelExecutor
         callable $runBeforeBatch,
         callable $runAfterBatch,
         string $progressSymbol,
-        string $phpExecutable,
-        string $scriptPath,
+        ChildCommandFactory $childCommandFactory,
         string $workingDirectory,
         ?array $extraEnvironmentVariables,
         ProcessLauncherFactory $processLauncherFactory,
@@ -153,14 +138,11 @@ final class ParallelExecutor
     ) {
         self::validateSegmentSize($segmentSize);
         self::validateBatchSize($batchSize);
-        self::validateScriptPath($scriptPath);
         self::validateProgressSymbol($progressSymbol);
 
         $this->fetchItems = $fetchItems;
         $this->runSingleCommand = $runSingleCommand;
         $this->getItemName = $getItemName;
-        $this->commandName = $commandName;
-        $this->commandDefinition = $commandDefinition;
         $this->errorHandler = $errorHandler;
         $this->childSourceStream = $childSourceStream;
         $this->batchSize = $batchSize;
@@ -170,8 +152,7 @@ final class ParallelExecutor
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
         $this->progressSymbol = $progressSymbol;
-        $this->phpExecutable = $phpExecutable;
-        $this->scriptPath = $scriptPath;
+        $this->childCommandFactory = $childCommandFactory;
         $this->workingDirectory = $workingDirectory;
         $this->extraEnvironmentVariables = $extraEnvironmentVariables;
         $this->processLauncherFactory = $processLauncherFactory;
@@ -365,20 +346,8 @@ final class ParallelExecutor
         InputInterface $input,
         Logger $logger
     ): ProcessLauncher {
-        $enrichedChildCommand = array_merge(
-            $this->createChildCommand($input),
-            // Forward all the options except for "processes" to the children
-            // this way the children can inherit the options such as env
-            // or no-debug.
-            InputOptionsSerializer::serialize(
-                $this->commandDefinition,
-                $input,
-                ['child', 'processes'],
-            ),
-        );
-
         return $this->processLauncherFactory->create(
-            $enrichedChildCommand,
+            $this->childCommandFactory->createChildCommand($input),
             $this->workingDirectory,
             $this->extraEnvironmentVariables,
             $numberOfProcesses,
@@ -387,32 +356,6 @@ final class ParallelExecutor
             fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
             $this->processTick,
         );
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function createChildCommand(InputInterface $input): array
-    {
-        return array_filter([
-            $this->phpExecutable,
-            $this->scriptPath,
-            $this->commandName,
-            implode(
-                ' ',
-                // TODO: this looks suspicious: why do we need to take the first arg?
-                //      why is this not a specific arg?
-                //      why do we include optional arguments? (cf. options)
-                //      maybe has to do with the item arg but in that case it is incorrect...
-                array_filter(
-                    array_slice(
-                        array_map('strval', $input->getArguments()),
-                        1,
-                    ),
-                ),
-            ),
-            '--child',
-        ]);
     }
 
     /**
@@ -455,18 +398,6 @@ final class ParallelExecutor
             sprintf(
                 'Expected the segment size to be 1 or greater. Got "%s".',
                 $segmentSize,
-            ),
-        );
-    }
-
-    private static function validateScriptPath(string $scriptPath): void
-    {
-        Assert::fileExists(
-            $scriptPath,
-            sprintf(
-                'The script file could not be found at the path "%s" (working directory: %s)',
-                $scriptPath,
-                getcwd(),
             ),
         );
     }

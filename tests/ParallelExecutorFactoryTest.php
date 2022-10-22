@@ -16,6 +16,7 @@ namespace Webmozarts\Console\Parallelization;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputDefinition;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
+use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 use function array_key_exists;
 use function array_keys;
@@ -86,8 +87,6 @@ final class ParallelExecutorFactoryTest extends TestCase
             $callable0,
             $callable1,
             $callable2,
-            $commandName,
-            $definition,
             $errorHandler,
             $childSourceStream,
             $batchSize,
@@ -97,8 +96,12 @@ final class ParallelExecutorFactoryTest extends TestCase
             $callable5,
             $callable6,
             $progressSymbol,
-            self::FILE_1,
-            self::FILE_2,
+            new ChildCommandFactory(
+                self::FILE_1,
+                self::FILE_2,
+                $commandName,
+                $definition,
+            ),
             self::FILE_3,
             $extraEnvironmentVariables,
             $processLauncherFactory,
