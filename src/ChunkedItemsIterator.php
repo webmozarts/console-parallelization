@@ -51,6 +51,8 @@ final class ChunkedItemsIterator
     private ?int $numberOfItems;
 
     /**
+     * @internal Use the static factory methods instead.
+     *
      * @param list<string>|Iterator<string> $items
      * @param positive-int                  $batchSize
      */
