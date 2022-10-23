@@ -55,6 +55,8 @@ final class ParallelizationInput
     private bool $childProcess;
 
     /**
+     * @internal Use the static factory methods instead.
+     *
      * @param positive-int|callable():positive-int $numberOfOrFindNumberOfProcesses
      */
     public function __construct(

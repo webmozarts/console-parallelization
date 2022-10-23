@@ -41,6 +41,8 @@ final class Configuration
     private ?int $totalNumberOfBatches;
 
     /**
+     * @internal Use the static factory methods instead.
+     *
      * @param positive-int        $numberOfProcesses
      * @param positive-int        $segmentSize
      * @param positive-int|null   $numberOfSegments
