@@ -17,6 +17,7 @@ use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use function count;
 
 /**
  * Launches a number of processes and distributes data among these processes.
@@ -155,17 +156,24 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
     private function startProcess(InputStream $inputStream): void
     {
+        $index = count($this->runningProcesses);
+
         $process = $this->processFactory->startProcess(
             $inputStream,
             $this->command,
             $this->workingDirectory,
             $this->environmentVariables,
             $this->callback,
+            $index,
         );
 
-        $this->logger->logCommandStarted($process->getCommandLine());
-
         $this->runningProcesses[] = $process;
+
+        $this->logger->logCommandStarted(
+            $index,
+            $process->getCommandLine(),
+            $process->getPid(),
+        );
     }
 
     /**
@@ -192,7 +200,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
      */
     private function freeProcess(int $index, Process $process): int
     {
-        $this->logger->logCommandFinished();
+        $this->logger->logCommandFinished($index);
 
         unset($this->runningProcesses[$index]);
 

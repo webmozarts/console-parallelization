@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
+use Error;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
@@ -92,6 +94,12 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
 
     protected function runSingleCommand(string $movieFileName, InputInterface $input, OutputInterface $output): void
     {
+        if ('movie-4.json' === $movieFileName) {
+            throw new Error('I FAILED!', 20);
+        }
+
+        $output->writeln('Hello there!');
+
         $this->logger->recordSingleCommand(
             $movieFileName,
             $this->batchMovies[$movieFileName],
@@ -100,16 +108,22 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
 
     protected function getItemName(?int $count): string
     {
+        if (null === $count) {
+            return 'movie(s)';
+        }
+
         return 1 === $count ? 'movie' : 'movies';
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(
+        InputInterface $input,
+        OutputInterface $output
+    ): Logger
     {
         return new StandardLogger(
-            $output,
+            $input, $output,
             (new Terminal())->getWidth(),
             new TestDebugProgressBarFactory(),
-            new ConsoleLogger($output),
         );
     }
 

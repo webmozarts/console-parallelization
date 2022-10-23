@@ -353,7 +353,7 @@ final class ParallelExecutor
             $numberOfProcesses,
             $segmentSize,
             $logger,
-            fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
+            fn (string $type, string $buffer, int $index, int $pid) => $this->processChildOutput($buffer, $logger, $index, $pid),
             $this->processTick,
         );
     }
@@ -365,14 +365,16 @@ final class ParallelExecutor
      */
     private function processChildOutput(
         string $buffer,
-        Logger $logger
+        Logger $logger,
+        int $index,
+        int $pid
     ): void {
         $progressSymbol = $this->progressSymbol;
         $charactersCount = mb_substr_count($buffer, $progressSymbol);
 
         // Display unexpected output
         if ($charactersCount !== mb_strlen($buffer)) {
-            $logger->logUnexpectedOutput($buffer, $progressSymbol);
+            $logger->logUnexpectedOutput($buffer, $progressSymbol, $index, $pid);
         }
 
         $logger->advance($charactersCount);

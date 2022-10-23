@@ -31,7 +31,8 @@ final class DummyProcessFactory implements SymfonyProcessFactory
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $callback
+        callable $callback,
+        int $index
     ): Process {
         $process = new DummyProcess(
             $command,

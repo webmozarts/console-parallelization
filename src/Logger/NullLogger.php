@@ -48,12 +48,12 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function logCommandStarted(string $commandName): void
+    public function logCommandStarted(int $index, string $commandName, int $pid): void
     {
         // Do nothing.
     }
 
-    public function logCommandFinished(): void
+    public function logCommandFinished(int $index): void
     {
         // Do nothing.
     }

@@ -24,7 +24,8 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $callback
+        callable $callback,
+        int $index
     ): Process {
         $process = new Process(
             $command,
@@ -42,7 +43,9 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
             $process->inheritEnvironmentVariables(true);
         }
         // @codeCoverageIgnoreEnd
-        $process->start($callback);
+        $process->start(
+            fn (string $type, string $buffer) => $callback($type, $buffer, $index, $process->getPid()),
+        );
 
         return $process;
     }

@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
@@ -104,6 +105,8 @@ final class ImportMoviesCommand extends Command
 
     protected function runSingleCommand(string $movieFileName, InputInterface $input, OutputInterface $output): void
     {
+        $output->writeln('Hello there!');
+
         $this->logger->recordSingleCommand(
             $movieFileName,
             $this->batchMovies[$movieFileName],
@@ -115,13 +118,16 @@ final class ImportMoviesCommand extends Command
         return 1 === $count ? 'movie' : 'movies';
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(
+        InputInterface $input,
+        OutputInterface $output
+    ): Logger
     {
         return new StandardLogger(
+            $input,
             $output,
             (new Terminal())->getWidth(),
             new TestDebugProgressBarFactory(),
-            new ConsoleLogger($output),
         );
     }
 

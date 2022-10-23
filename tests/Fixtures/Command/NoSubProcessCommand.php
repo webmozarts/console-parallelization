@@ -94,13 +94,16 @@ final class NoSubProcessCommand extends Command
         return 1 === $count ? 'item' : 'items';
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(
+        InputInterface $input,
+        OutputInterface $output
+    ): Logger
     {
         return new StandardLogger(
+            $input,
             $output,
             (new Terminal())->getWidth(),
             new TestDebugProgressBarFactory(),
-            new ConsoleLogger($output),
         );
     }
 }

@@ -24,7 +24,8 @@ final class FakeProcessFactory implements SymfonyProcessFactory
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $callback
+        callable $callback,
+        int $index
     ): Process {
         throw new DomainException('Unexpected call.');
     }

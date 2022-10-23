@@ -66,7 +66,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logCommandStarted(string $commandName): void
+    public function logCommandStarted(int $index, string $commandName, int $pid): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -74,7 +74,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logCommandFinished(): void
+    public function logCommandFinished(int $index): void
     {
         $this->records[] = [
             __FUNCTION__,

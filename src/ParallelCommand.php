@@ -20,6 +20,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Webmozart\Assert\Assert;
@@ -94,14 +95,14 @@ abstract class ParallelCommand extends Command
                 Closure::fromCallable([$this, 'getItemName']),
                 $commandName,
                 $this->getDefinition(),
-                $this->createErrorHandler($output),
+                $this->createErrorHandler($input, $output),
             )
             ->build()
             ->execute(
                 $parallelizationInput,
                 $input,
                 $output,
-                $this->createLogger($output),
+                $this->createLogger($input, $output),
             );
     }
 
@@ -128,7 +129,10 @@ abstract class ParallelCommand extends Command
         );
     }
 
-    protected function createErrorHandler(OutputInterface $output): ErrorHandler
+    protected function createErrorHandler(
+        InputInterface $input,
+        OutputInterface $output
+    ): ErrorHandler
     {
         return new LoggingErrorHandler(
             new ThrowableCodeErrorHandler(
@@ -137,13 +141,15 @@ abstract class ParallelCommand extends Command
         );
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(
+        InputInterface $input,
+        OutputInterface $output
+    ): Logger
     {
         return new StandardLogger(
-            $output,
+            $input, $output,
             (new Terminal())->getWidth(),
             new DebugProgressBarFactory(),
-            new ConsoleLogger($output),
         );
     }
 

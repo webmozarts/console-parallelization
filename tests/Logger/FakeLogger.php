@@ -49,12 +49,12 @@ final class FakeLogger implements Logger
         throw new DomainException('Unexpected call.');
     }
 
-    public function logCommandStarted(string $commandName): void
+    public function logCommandStarted(int $index, string $commandName, int $pid): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function logCommandFinished(): void
+    public function logCommandFinished(int $index): void
     {
         throw new DomainException('Unexpected call.');
     }

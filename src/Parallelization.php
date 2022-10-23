@@ -20,6 +20,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
@@ -135,14 +136,14 @@ trait Parallelization
                 fn (int $count) => $this->getItemName($count),
                 $this->getName(),
                 $this->getDefinition(),
-                $this->createErrorHandler($output),
+                $this->createErrorHandler($input, $output),
             )
             ->build()
             ->execute(
                 $parallelizationInput,
                 $input,
                 $output,
-                $this->createLogger($output),
+                $this->createLogger($input, $output),
             );
     }
 
@@ -265,7 +266,10 @@ trait Parallelization
             ->withRunAfterBatch(Closure::fromCallable([$this, 'runAfterBatch']));
     }
 
-    protected function createErrorHandler(OutputInterface $output): ErrorHandler
+    protected function createErrorHandler(
+        InputInterface $input,
+        OutputInterface $output
+    ): ErrorHandler
     {
         $errorHandler = new ThrowableCodeErrorHandler(
             ResetServiceErrorHandler::forContainer($this->getContainer()),
@@ -284,13 +288,15 @@ trait Parallelization
         return new LoggingErrorHandler($errorHandler);
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(
+        InputInterface $input,
+        OutputInterface $output
+    ): Logger
     {
         return new StandardLogger(
-            $output,
+            $input, $output,
             (new Terminal())->getWidth(),
             new DebugProgressBarFactory(),
-            new ConsoleLogger($output),
         );
     }
 

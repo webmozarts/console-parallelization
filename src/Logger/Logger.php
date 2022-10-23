@@ -39,11 +39,11 @@ interface Logger
 
     public function finish(string $itemName): void;
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void;
+    public function logUnexpectedOutput(string $buffer, string $progressSymbol, int $index, int $pid): void;
 
-    public function logCommandStarted(string $commandName): void;
+    public function logCommandStarted(int $index, string $commandName, int $pid): void;
 
-    public function logCommandFinished(): void;
+    public function logCommandFinished(int $index): void;
 
     public function logItemProcessingFailed(string $item, Throwable $throwable): void;
 }
