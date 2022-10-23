@@ -67,6 +67,8 @@ final class ParallelizationInput
     private ?int $segmentSize;
 
     /**
+     * @internal Use the static factory methods instead.
+     *
      * @param positive-int|callable():positive-int $numberOfOrFindNumberOfProcesses
      * @param positive-int|null $batchSize
      * @param positive-int|null $segmentSize
