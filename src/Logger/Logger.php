@@ -43,7 +43,7 @@ interface Logger
 
     public function logCommandStarted(int $index, string $commandName, int $pid): void;
 
-    public function logCommandFinished(int $index): void;
+    public function logCommandFinished(int $index, int $pid): void;
 
     public function logItemProcessingFailed(string $item, Throwable $throwable): void;
 }

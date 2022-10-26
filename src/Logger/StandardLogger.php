@@ -227,7 +227,7 @@ final class StandardLogger implements Logger
         $this->started[$index] = ['border' => ++$this->count % \count(self::COLORS)];
     }
 
-    public function logCommandFinished(int $index): void
+    public function logCommandFinished(int $index, int $pid): void
     {
         if ($this->advanced) {
             $this->io->newLine();
@@ -236,8 +236,9 @@ final class StandardLogger implements Logger
         if ($this->io->isVeryVerbose()) {
             $this->logger->notice(
                 sprintf(
-                    'Stopped process #%d',
+                    'Stopped process #%d (PID %d)',
                     $index,
+                    $pid,
                 ),
             );
         }

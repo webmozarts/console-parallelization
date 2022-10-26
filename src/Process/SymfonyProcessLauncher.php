@@ -200,7 +200,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
      */
     private function freeProcess(int $index, Process $process): int
     {
-        $this->logger->logCommandFinished($index);
+        $this->logger->logCommandFinished($index, 10);
 
         unset($this->runningProcesses[$index]);
 

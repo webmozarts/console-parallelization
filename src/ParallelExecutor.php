@@ -353,7 +353,7 @@ final class ParallelExecutor
             $numberOfProcesses,
             $segmentSize,
             $logger,
-            fn (string $type, string $buffer, int $index, int $pid) => $this->processChildOutput($buffer, $logger, $index, $pid),
+            fn (string $type, string $buffer, int $index, ?int $pid) => $this->processChildOutput($buffer, $logger, $index, $pid ?? -10),
             $this->processTick,
         );
     }
