@@ -1,5 +1,6 @@
 ## From 1.x to 2.x
 
+- `Parallelization::fetchItems()` now requires `OutputInterface` as a second parameter
 - A lot more type-safety and validation has been added with a comprehensive
   message upon failure.
 - When no number of process is given (via `-p|--processes`), the command is no

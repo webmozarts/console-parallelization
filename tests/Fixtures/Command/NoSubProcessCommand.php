@@ -45,7 +45,7 @@ final class NoSubProcessCommand extends Command
     /**
      * @return list<string>
      */
-    protected function fetchItems(InputInterface $input): array
+    protected function fetchItems(InputInterface $input, OutputInterface $output): array
     {
         return [
             'item1',
@@ -94,7 +94,7 @@ final class NoSubProcessCommand extends Command
         return 1 === $count ? 'item' : 'items';
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
     {
         return new StandardLogger(
             $output,
