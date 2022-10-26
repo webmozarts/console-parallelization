@@ -88,7 +88,7 @@ final class LegacyCommand extends Command
         return $this->container;
     }
 
-    public function fetchItems(InputInterface $input): array
+    public function fetchItems(InputInterface $input, OutputInterface $output): array
     {
         $items = [];
 
@@ -138,7 +138,7 @@ final class LegacyCommand extends Command
 
     private function executeDryRun(InputInterface $input, OutputInterface $output): int
     {
-        $items = $this->fetchItems($input);
+        $items = $this->fetchItems($input, $output);
 
         foreach ($items as $index => $item) {
             $output->writeln(

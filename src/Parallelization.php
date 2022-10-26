@@ -94,11 +94,9 @@ trait Parallelization
      *
      * This method is called exactly once in the main process.
      *
-     * @param InputInterface $input The console input
-     *
      * @return iterable<string> The items to process
      */
-    abstract protected function fetchItems(InputInterface $input): iterable;
+    abstract protected function fetchItems(InputInterface $input, OutputInterface $output): iterable;
 
     /**
      * Processes an item in the child process.
@@ -130,19 +128,19 @@ trait Parallelization
 
         return $this
             ->getParallelExecutableFactory(
-                fn (InputInterface $input) => $this->fetchItems($input),
+                fn (InputInterface $input) => $this->fetchItems($input, $output),
                 fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
                 fn (int $count) => $this->getItemName($count),
                 $this->getName(),
                 $this->getDefinition(),
-                $this->createErrorHandler($output),
+                $this->createErrorHandler($input, $output),
             )
             ->build()
             ->execute(
                 $parallelizationInput,
                 $input,
                 $output,
-                $this->createLogger($output),
+                $this->createLogger($input, $output),
             );
     }
 
@@ -265,7 +263,7 @@ trait Parallelization
             ->withRunAfterBatch(Closure::fromCallable([$this, 'runAfterBatch']));
     }
 
-    protected function createErrorHandler(OutputInterface $output): ErrorHandler
+    protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler
     {
         $errorHandler = new ThrowableCodeErrorHandler(
             ResetServiceErrorHandler::forContainer($this->getContainer()),
@@ -284,7 +282,7 @@ trait Parallelization
         return new LoggingErrorHandler($errorHandler);
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
     {
         return new StandardLogger(
             $output,

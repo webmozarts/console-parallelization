@@ -24,7 +24,7 @@ final class FrameworkLessCommand extends ParallelCommand
         parent::__construct('test:no-framework');
     }
 
-    protected function fetchItems(InputInterface $input): iterable
+    protected function fetchItems(InputInterface $input, OutputInterface $output): iterable
     {
         return ['item0', 'item1'];
     }

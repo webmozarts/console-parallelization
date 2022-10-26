@@ -50,11 +50,9 @@ abstract class ParallelCommand extends Command
      *
      * This method is called exactly once in the main process.
      *
-     * @param InputInterface $input The console input
-     *
      * @return iterable<string> The items to process
      */
-    abstract protected function fetchItems(InputInterface $input): iterable;
+    abstract protected function fetchItems(InputInterface $input, OutputInterface $output): iterable;
 
     /**
      * Processes an item in the child process.
@@ -89,19 +87,19 @@ abstract class ParallelCommand extends Command
 
         return $this
             ->getParallelExecutableFactory(
-                fn (InputInterface $input) => $this->fetchItems($input),
+                fn (InputInterface $input) => $this->fetchItems($input, $output),
                 fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
                 Closure::fromCallable([$this, 'getItemName']),
                 $commandName,
                 $this->getDefinition(),
-                $this->createErrorHandler($output),
+                $this->createErrorHandler($input, $output),
             )
             ->build()
             ->execute(
                 $parallelizationInput,
                 $input,
                 $output,
-                $this->createLogger($output),
+                $this->createLogger($input, $output),
             );
     }
 
@@ -128,7 +126,7 @@ abstract class ParallelCommand extends Command
         );
     }
 
-    protected function createErrorHandler(OutputInterface $output): ErrorHandler
+    protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler
     {
         return new LoggingErrorHandler(
             new ThrowableCodeErrorHandler(
@@ -137,7 +135,7 @@ abstract class ParallelCommand extends Command
         );
     }
 
-    protected function createLogger(OutputInterface $output): Logger
+    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
     {
         return new StandardLogger(
             $output,
