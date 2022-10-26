@@ -9,3 +9,7 @@ parameters:
 
         - path: src/CpuCoreCounter.php
           message: '#getNumberOfCpuCores\(\) should return#'
+
+        # https://github.com/phpstan/phpstan/issues/8222
+        - path: src/Process/SymfonyProcessLauncher.php
+          message: '#\$runningProcesses \(array<int<0, max>, .*>\) does not accept non-empty-array<int, .*>\.#'

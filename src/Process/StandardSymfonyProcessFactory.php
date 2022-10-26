@@ -20,11 +20,12 @@ use function method_exists;
 final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
 {
     public function startProcess(
+        int $index,
         InputStream $inputStream,
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $callback
+        callable $processOutput
     ): Process {
         $process = new Process(
             $command,
@@ -42,7 +43,14 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
             $process->inheritEnvironmentVariables(true);
         }
         // @codeCoverageIgnoreEnd
-        $process->start($callback);
+        $process->start(
+            fn (string $type, string $buffer) => $processOutput(
+                $index,
+                $process->getPid(),
+                $type,
+                $buffer,
+            ),
+        );
 
         return $process;
     }

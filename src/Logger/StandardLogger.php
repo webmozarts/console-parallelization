@@ -85,7 +85,7 @@ final class StandardLogger implements Logger
         $this->output->writeln('');
     }
 
-    public function startProgress(?int $numberOfItems): void
+    public function logStart(?int $numberOfItems): void
     {
         Assert::false(
             isset($this->progressBar),
@@ -98,7 +98,7 @@ final class StandardLogger implements Logger
         );
     }
 
-    public function advance(int $steps = 1): void
+    public function logAdvance(int $steps = 1): void
     {
         Assert::true(
             isset($this->progressBar),
@@ -108,7 +108,7 @@ final class StandardLogger implements Logger
         $this->progressBar->advance($steps);
     }
 
-    public function finish(string $itemName): void
+    public function logFinish(string $itemName): void
     {
         Assert::true(
             isset($this->progressBar),
@@ -128,7 +128,7 @@ final class StandardLogger implements Logger
         unset($this->progressBar);
     }
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
+    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
     {
         $this->output->writeln('');
         $this->output->writeln(sprintf(
@@ -144,12 +144,12 @@ final class StandardLogger implements Logger
         $this->output->writeln('');
     }
 
-    public function logCommandStarted(string $commandName): void
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
     {
         $this->logger->debug('Command started: '.$commandName);
     }
 
-    public function logCommandFinished(): void
+    public function logChildProcessFinished(int $index): void
     {
         $this->logger->debug('Command finished');
     }

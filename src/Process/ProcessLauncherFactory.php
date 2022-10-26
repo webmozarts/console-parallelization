@@ -15,15 +15,20 @@ namespace Webmozarts\Console\Parallelization\Process;
 
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
+/**
+ * @phpstan-type ProcessOutput callable(positive-int|0, int|null, string, string): void
+ */
 interface ProcessLauncherFactory
 {
     /**
-     * @param list<string>                   $command
-     * @param array<string, string>|null     $extraEnvironmentVariables
-     * @param positive-int                   $numberOfProcesses
-     * @param positive-int                   $segmentSize
-     * @param callable(string, string): void $callback
-     * @param callable(): void               $tick
+     * @param list<string>               $command
+     * @param array<string, string>|null $extraEnvironmentVariables
+     * @param positive-int               $numberOfProcesses
+     * @param positive-int               $segmentSize
+     * @param ProcessOutput              $processOutput             A PHP callback which is run whenever
+     *                                                              there is some output available on
+     *                                                              STDOUT or STDERR.
+     * @param callable(): void           $tick
      */
     public function create(
         array $command,
@@ -32,7 +37,7 @@ interface ProcessLauncherFactory
         int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
-        callable $callback,
+        callable $processOutput,
         callable $tick
     ): ProcessLauncher;
 }

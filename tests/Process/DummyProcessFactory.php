@@ -27,11 +27,12 @@ final class DummyProcessFactory implements SymfonyProcessFactory
     public array $processes = [];
 
     public function startProcess(
+        int $index,
         InputStream $inputStream,
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $callback
+        callable $processOutput
     ): Process {
         $process = new DummyProcess(
             $command,
@@ -42,7 +43,7 @@ final class DummyProcessFactory implements SymfonyProcessFactory
         );
         $this->processes[] = $process;
 
-        $process->start($callback);
+        $process->start($processOutput);
 
         ++$this->exitCodeIndex;
 
