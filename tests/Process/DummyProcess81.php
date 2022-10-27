@@ -252,7 +252,7 @@ final class DummyProcess81 extends Process
 
     public function getExitCodeText(): ?string
     {
-        throw new DomainException('Unexpected call.');
+        return 'No explanation, this is a dummy text.';
     }
 
     public function isSuccessful(): bool

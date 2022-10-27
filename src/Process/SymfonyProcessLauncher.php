@@ -19,6 +19,7 @@ use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use function count;
 use function sprintf;
+use const PHP_EOL;
 
 /**
  * Launches a number of processes and distributes data among these processes.
@@ -221,6 +222,11 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         unset($this->runningProcesses[$index]);
 
         $exitCode = $process->getExitCode();
+
+        if (-1 === $exitCode) {
+            \file_put_contents('php://stderr', PHP_EOL.PHP_EOL.$process->getOutput().";".$process->getErrorOutput().PHP_EOL.PHP_EOL);
+        }
+
         Assert::natural(
             $exitCode,
             sprintf(
