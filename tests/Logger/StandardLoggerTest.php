@@ -432,6 +432,32 @@ final class StandardLoggerTest extends TestCase
         $this->output->fetch();
 
         $this->logger->logUnexpectedChildProcessOutput(
+            2,
+            23123,
+            'An error occurred.',
+            self::ADVANCEMENT_CHARACTER,
+        );
+
+        $expected = <<<'TXT'
+
+            ================= Process Output =================
+            An error occurred.
+
+
+            TXT;
+
+        self::assertSame($expected, $this->output->fetch());
+    }
+
+    public function test_it_can_log_the_unexpected_output_of_a_stopped_child_process(): void
+    {
+        $this->logger->logStart(10);
+        $this->logger->logAdvance(4);
+        $this->output->fetch();
+
+        $this->logger->logUnexpectedChildProcessOutput(
+            2,
+            null,
             'An error occurred.',
             self::ADVANCEMENT_CHARACTER,
         );
@@ -454,6 +480,8 @@ final class StandardLoggerTest extends TestCase
         $this->output->fetch();
 
         $this->logger->logUnexpectedChildProcessOutput(
+            23,
+            23132,
             'An error'.self::ADVANCEMENT_CHARACTER.' occurred.',
             self::ADVANCEMENT_CHARACTER,
         );
@@ -473,7 +501,11 @@ final class StandardLoggerTest extends TestCase
     {
         $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
 
-        $this->logger->logChildProcessStarted('/path/to/bin/console foo:bar --child');
+        $this->logger->logChildProcessStarted(
+            2,
+            2132,
+            '/path/to/bin/console foo:bar --child',
+        );
 
         $expected = <<<'TXT'
             [debug] Command started: /path/to/bin/console foo:bar --child
@@ -487,7 +519,7 @@ final class StandardLoggerTest extends TestCase
     {
         $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
 
-        $this->logger->logChildProcessFinished();
+        $this->logger->logChildProcessFinished(3);
 
         $expected = <<<'TXT'
             [debug] Command finished

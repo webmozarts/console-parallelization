@@ -52,20 +52,32 @@ interface Logger
     public function logItemProcessingFailed(string $item, Throwable $throwable): void;
 
     /**
-     * @param string $commandName Executed command for the child process.To not confuse
-     *                            with the Symfony command name which is just an element of
-     *                            the command.
+     * @param positive-int|0 $index       Index of the process amoung the list of running processes.
+     * @param string         $commandName Executed command for the child process.To not confuse
+     *                                    with the Symfony command name which is just an element of
+     *                                    the command.
      */
-    public function logChildProcessStarted(string $commandName): void;
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void;
 
-    public function logChildProcessFinished(): void;
+    /**
+     * @param positive-int|0 $index Index of the process amoung the list of running processes.
+     */
+    public function logChildProcessFinished(int $index): void;
 
     /**
      * Logs the "unexpected" child output. By unexpected is meant that the main
      * process expects the child to output the progress symbol to communicate its
      * progression. Any other sort of output is considered "unexpected".
      *
-     * @param string $buffer Child process output.
+     * @param string         $buffer Child process output.
+     * @param positive-int|0 $index  Index of the process amoung the list of running processes.
+     * @param int|null       $pid    The child process PID. It can be null if the process is no
+     *                               longer running.
      */
-    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void;
+    public function logUnexpectedChildProcessOutput(
+        int $index,
+        ?int $pid,
+        string $buffer,
+        string $progressSymbol
+    ): void;
 }

@@ -66,7 +66,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logChildProcessStarted(string $commandName): void
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -74,7 +74,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logChildProcessFinished(): void
+    public function logChildProcessFinished(int $index): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -82,7 +82,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void
+    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
     {
         $this->records[] = [
             __FUNCTION__,

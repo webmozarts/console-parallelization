@@ -48,17 +48,17 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function logChildProcessStarted(string $commandName): void
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
     {
         // Do nothing.
     }
 
-    public function logChildProcessFinished(): void
+    public function logChildProcessFinished(int $index): void
     {
         // Do nothing.
     }
 
-    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void
+    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
     {
         // Do nothing.
     }
