@@ -212,6 +212,8 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
     /**
      * @param positive-int|0 $index
+     *
+     * @return positive-int|0
      */
     private function freeProcess(int $index, Process $process): int
     {
@@ -229,7 +231,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     {
         $exitCode = $process->getExitCode();
 
-// @codeCoverageIgnoreStart
+        // @codeCoverageIgnoreStart
         if (null !== $exitCode && $exitCode < 0) {
             // A negative exit code indicates the process has been terminated by
             // a signal.
