@@ -221,7 +221,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         unset($this->runningProcesses[$index]);
 
         $exitCode = $process->getExitCode();
-        Assert::natural($exitCode, 'Expected the process to be finished and return a valid exit code.');
+        Assert::natural($exitCode, 'Expected the process to be finished and return a valid exit code. Got "%s" instead');
 
         return $exitCode;
     }
