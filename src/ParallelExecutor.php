@@ -231,7 +231,7 @@ final class ParallelExecutor
             $shouldSpawnChildProcesses,
         );
 
-        $logger->startProgress($numberOfItems);
+        $logger->logStart($numberOfItems);
 
         if ($shouldSpawnChildProcesses) {
             $exitCode = $this
@@ -248,11 +248,11 @@ final class ParallelExecutor
                 $input,
                 $output,
                 $logger,
-                static fn () => $logger->advance(),
+                static fn () => $logger->logAdvance(),
             );
         }
 
-        $logger->finish($itemName);
+        $logger->logFinish($itemName);
 
         ($this->runAfterLastCommand)($input, $output);
 
@@ -372,10 +372,10 @@ final class ParallelExecutor
 
         // Display unexpected output
         if ($charactersCount !== mb_strlen($buffer)) {
-            $logger->logUnexpectedOutput($buffer, $progressSymbol);
+            $logger->logUnexpectedChildProcessOutput($buffer, $progressSymbol);
         }
 
-        $logger->advance($charactersCount);
+        $logger->logAdvance($charactersCount);
     }
 
     private static function validateBatchSize(int $batchSize): void

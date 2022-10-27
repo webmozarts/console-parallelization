@@ -342,7 +342,7 @@ final class StandardLoggerTest extends TestCase
 
     public function test_it_can_log_the_start_of_the_processing(): void
     {
-        $this->logger->startProgress(10);
+        $this->logger->logStart(10);
 
         $expected = <<<'TXT'
               0/10 [>---------------------------]   0%
@@ -353,20 +353,20 @@ final class StandardLoggerTest extends TestCase
 
     public function test_it_cannot_start_an_already_started_process(): void
     {
-        $this->logger->startProgress(10);
+        $this->logger->logStart(10);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Cannot start the progress: already started.');
 
-        $this->logger->startProgress(10);
+        $this->logger->logStart(10);
     }
 
     public function test_it_can_log_the_progress_of_the_processing(): void
     {
-        $this->logger->startProgress(10);
+        $this->logger->logStart(10);
         $this->output->fetch();
 
-        $this->logger->advance();
+        $this->logger->logAdvance();
 
         $expected = <<<'TXT'
 
@@ -381,15 +381,15 @@ final class StandardLoggerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected the progress to be started.');
 
-        $this->logger->advance();
+        $this->logger->logAdvance();
     }
 
     public function test_it_can_log_the_progress_of_the_processing_of_multiple_items(): void
     {
-        $this->logger->startProgress(10);
+        $this->logger->logStart(10);
         $this->output->fetch();
 
-        $this->logger->advance(4);
+        $this->logger->logAdvance(4);
 
         $expected = <<<'TXT'
 
@@ -401,10 +401,10 @@ final class StandardLoggerTest extends TestCase
 
     public function test_it_can_log_the_end_of_the_processing(): void
     {
-        $this->logger->startProgress(10);
+        $this->logger->logStart(10);
         $this->output->fetch();
 
-        $this->logger->finish('tokens');
+        $this->logger->logFinish('tokens');
 
         $expected = <<<'TXT'
 
@@ -422,16 +422,16 @@ final class StandardLoggerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected the progress to be started.');
 
-        $this->logger->finish('tokens');
+        $this->logger->logFinish('tokens');
     }
 
     public function test_it_can_log_the_unexpected_output_of_a_child_process(): void
     {
-        $this->logger->startProgress(10);
-        $this->logger->advance(4);
+        $this->logger->logStart(10);
+        $this->logger->logAdvance(4);
         $this->output->fetch();
 
-        $this->logger->logUnexpectedOutput(
+        $this->logger->logUnexpectedChildProcessOutput(
             'An error occurred.',
             self::ADVANCEMENT_CHARACTER,
         );
@@ -449,11 +449,11 @@ final class StandardLoggerTest extends TestCase
 
     public function test_it_removes_the_progress_character_of_the_unexpected_output_of_a_child_process(): void
     {
-        $this->logger->startProgress(10);
-        $this->logger->advance(4);
+        $this->logger->logStart(10);
+        $this->logger->logAdvance(4);
         $this->output->fetch();
 
-        $this->logger->logUnexpectedOutput(
+        $this->logger->logUnexpectedChildProcessOutput(
             'An error'.self::ADVANCEMENT_CHARACTER.' occurred.',
             self::ADVANCEMENT_CHARACTER,
         );
@@ -473,7 +473,7 @@ final class StandardLoggerTest extends TestCase
     {
         $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
 
-        $this->logger->logCommandStarted('/path/to/bin/console foo:bar --child');
+        $this->logger->logChildProcessStarted('/path/to/bin/console foo:bar --child');
 
         $expected = <<<'TXT'
             [debug] Command started: /path/to/bin/console foo:bar --child
@@ -487,7 +487,7 @@ final class StandardLoggerTest extends TestCase
     {
         $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
 
-        $this->logger->logCommandFinished();
+        $this->logger->logChildProcessFinished();
 
         $expected = <<<'TXT'
             [debug] Command finished

@@ -34,7 +34,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function startProgress(?int $numberOfItems): void
+    public function logStart(?int $numberOfItems): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -42,7 +42,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function advance(int $steps = 1): void
+    public function logAdvance(int $steps = 1): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -50,7 +50,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function finish(string $itemName): void
+    public function logFinish(string $itemName): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -66,7 +66,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logCommandStarted(string $commandName): void
+    public function logChildProcessStarted(string $commandName): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -74,7 +74,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logCommandFinished(): void
+    public function logChildProcessFinished(): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -82,7 +82,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
+    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void
     {
         $this->records[] = [
             __FUNCTION__,

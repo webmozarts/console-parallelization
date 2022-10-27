@@ -117,11 +117,11 @@ final class SymfonyProcessLauncherTest extends TestCase
         self::assertSame(
             [
                 [
-                    'logCommandStarted',
+                    'logChildProcessStarted',
                     ['php echo.php'],
                 ],
                 [
-                    'logCommandFinished',
+                    'logChildProcessFinished',
                     [],
                 ],
             ],
