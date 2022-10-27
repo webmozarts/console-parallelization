@@ -43,7 +43,7 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void
     {
         // Do nothing.
     }
@@ -58,7 +58,7 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function logItemProcessingFailed(string $item, Throwable $throwable): void
+    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
     {
         // Do nothing.
     }
