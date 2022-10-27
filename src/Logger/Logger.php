@@ -19,8 +19,12 @@ use Webmozarts\Console\Parallelization\Configuration;
 interface Logger
 {
     /**
+     * Logs the configuration before the start of the processing.
+     *
      * @param positive-int        $batchSize
      * @param 0|positive-int|null $numberOfItems
+     * @param string              $itemName      Name of the item; Already in the singular or plural
+     *                                           form.
      */
     public function logConfiguration(
         Configuration $configuration,
@@ -35,15 +39,33 @@ interface Logger
      */
     public function startProgress(?int $numberOfItems): void;
 
+    /**
+     * @param positive-int|0 $steps
+     */
     public function advance(int $steps = 1): void;
 
+    /**
+     * @param string $itemName Name of the item; Already in the singular or plural form.
+     */
     public function finish(string $itemName): void;
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void;
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void;
 
+    /**
+     * @param string $commandName Executed command for the child process.To not confuse
+     *                            with the Symfony command name which is just an element of
+     *                            the command.
+     */
     public function logCommandStarted(string $commandName): void;
 
     public function logCommandFinished(): void;
 
-    public function logItemProcessingFailed(string $item, Throwable $throwable): void;
+    /**
+     * Logs the "unexpected" child output. By unexpected is meant that the main
+     * process expects the child to output the progress symbol to communicate its
+     * progression. Any other sort of output is considered "unexpected".
+     *
+     * @param string $buffer Child process output.
+     */
+    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void;
 }
