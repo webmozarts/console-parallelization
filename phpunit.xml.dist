@@ -28,7 +28,11 @@
         </include>
         <exclude>
             <file>src/CpuCoreCounter.php</file>
+            <file>src/Deprecation.php</file>
+            <file>src/ErrorHandler/NullErrorHandler.php</file>
+            <file>src/Logger/NullLogger.php</file>
             <file>src/Logger/DebugProgressBarFactory.php</file>
+            <file>src/ParallelCommand.php</file>
             <file>src/Parallelization.php</file>
             <file>src/Process/PhpExecutableFinder.php</file>
             <file>src/Process/SymfonyProcessLauncherFactory.php</file>
