@@ -151,7 +151,7 @@ final class DummyProcess81 extends Process
 
         $this->inputIterator->next();
         $this->processedItems[] = $item;
-        ($this->callback)(1, null, 'dummy', $item);
+        ($this->callback)($this->index, $this->getPid(), 'dummy', $item);
 
         return true;
     }

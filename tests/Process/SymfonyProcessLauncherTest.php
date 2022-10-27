@@ -190,15 +190,15 @@ final class SymfonyProcessLauncherTest extends TestCase
             2,
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
-                index: 1, pid: , type: dummy; buffer: item1
+                index: 0, pid: 1000, type: dummy; buffer: item1
 
-                index: 1, pid: , type: dummy; buffer: item2
+                index: 0, pid: 1000, type: dummy; buffer: item2
 
-                index: 1, pid: , type: dummy; buffer: item3
+                index: 1, pid: 1001, type: dummy; buffer: item3
 
-                index: 1, pid: , type: dummy; buffer: item4
+                index: 1, pid: 1001, type: dummy; buffer: item4
 
-                index: 1, pid: , type: dummy; buffer: item5
+                index: 1, pid: 1002, type: dummy; buffer: item5
 
 
                 TXT,
@@ -216,15 +216,15 @@ final class SymfonyProcessLauncherTest extends TestCase
             10,
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
-                index: 1, pid: , type: dummy; buffer: item1
+                index: 0, pid: 1000, type: dummy; buffer: item1
 
-                index: 1, pid: , type: dummy; buffer: item2
+                index: 0, pid: 1000, type: dummy; buffer: item2
 
-                index: 1, pid: , type: dummy; buffer: item3
+                index: 0, pid: 1000, type: dummy; buffer: item3
 
-                index: 1, pid: , type: dummy; buffer: item4
+                index: 0, pid: 1000, type: dummy; buffer: item4
 
-                index: 1, pid: , type: dummy; buffer: item5
+                index: 0, pid: 1000, type: dummy; buffer: item5
 
 
                 TXT,
@@ -246,15 +246,15 @@ final class SymfonyProcessLauncherTest extends TestCase
             2,
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
-                index: 1, pid: , type: dummy; buffer: item1
+                index: 0, pid: 1000, type: dummy; buffer: item1
 
-                index: 1, pid: , type: dummy; buffer: item2
+                index: 0, pid: 1000, type: dummy; buffer: item2
 
-                index: 1, pid: , type: dummy; buffer: item3
+                index: 0, pid: 1001, type: dummy; buffer: item3
 
-                index: 1, pid: , type: dummy; buffer: item4
+                index: 0, pid: 1001, type: dummy; buffer: item4
 
-                index: 1, pid: , type: dummy; buffer: item5
+                index: 0, pid: 1002, type: dummy; buffer: item5
 
 
                 TXT,
