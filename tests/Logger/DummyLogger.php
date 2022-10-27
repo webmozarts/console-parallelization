@@ -58,7 +58,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -82,7 +82,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logItemProcessingFailed(string $item, Throwable $throwable): void
+    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
     {
         $this->records[] = [
             __FUNCTION__,

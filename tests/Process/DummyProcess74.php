@@ -23,6 +23,11 @@ use function implode;
 
 final class DummyProcess74 extends Process
 {
+    /** @readonly */
+    public int $index;
+
+    private int $pid;
+
     /**
      * @var array<array{string, array}>
      */
@@ -51,6 +56,8 @@ final class DummyProcess74 extends Process
     private int $exitCode;
 
     public function __construct(
+        int $index,
+        int $pid,
         array $command,
         int $exitCode,
         ?string $cwd = null,
@@ -60,6 +67,8 @@ final class DummyProcess74 extends Process
     ) {
         parent::__construct($command, $cwd, $env, $input, $timeout);
 
+        $this->index = $index;
+        $this->pid = $pid;
         $this->command = $command;
         $this->exitCode = $exitCode;
     }
@@ -169,7 +178,7 @@ final class DummyProcess74 extends Process
 
     public function getPid(): ?int
     {
-        throw new DomainException('Unexpected call.');
+        return $this->started && !$this->stopped ? $this->pid : null;
     }
 
     public function signal($signal): void
