@@ -212,8 +212,6 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
     /**
      * @param positive-int|0 $index
-     *
-     * @return 0|positive-int
      */
     private function freeProcess(int $index, Process $process): int
     {
@@ -223,16 +221,9 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
         $exitCode = $process->getExitCode();
 
-        if (-1 === $exitCode) {
-            \file_put_contents('php://stderr', PHP_EOL.PHP_EOL.$process->getOutput().";".$process->getErrorOutput().PHP_EOL.PHP_EOL);
-        }
-
-        Assert::natural(
+        Assert::notNull(
             $exitCode,
-            sprintf(
-                'Expected the process to be finished and return a valid exit code. Got "%%s" (%s) instead.',
-                $process->getExitCodeText(),
-            ),
+            'Expected the process to have an exit code. Got "null" instead.',
         );
 
         return $exitCode;
