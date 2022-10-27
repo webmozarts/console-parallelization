@@ -128,6 +128,26 @@ final class StandardLogger implements Logger
         unset($this->progressBar);
     }
 
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void
+    {
+        $this->output->writeln(sprintf(
+            "Failed to process \"%s\": %s\n%s",
+            $item,
+            $throwable->getMessage(),
+            $throwable->getTraceAsString(),
+        ));
+    }
+
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
+    {
+        $this->logger->debug('Command started: '.$commandName);
+    }
+
+    public function logChildProcessFinished(int $index): void
+    {
+        $this->logger->debug('Command finished');
+    }
+
     public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
     {
         $this->output->writeln('');
@@ -142,25 +162,5 @@ final class StandardLogger implements Logger
         ));
         $this->output->writeln(str_replace($progressSymbol, '', $buffer));
         $this->output->writeln('');
-    }
-
-    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
-    {
-        $this->logger->debug('Command started: '.$commandName);
-    }
-
-    public function logChildProcessFinished(int $index): void
-    {
-        $this->logger->debug('Command finished');
-    }
-
-    public function logItemProcessingFailed(string $item, Throwable $throwable): void
-    {
-        $this->output->writeln(sprintf(
-            "Failed to process \"%s\": %s\n%s",
-            $item,
-            $throwable->getMessage(),
-            $throwable->getTraceAsString(),
-        ));
     }
 }
