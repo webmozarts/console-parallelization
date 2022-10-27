@@ -16,6 +16,7 @@ namespace Webmozarts\Console\Parallelization;
 use function trigger_deprecation;
 
 /**
+ * @codeCoverageIgnore
  * @internal
  */
 final class Deprecation
