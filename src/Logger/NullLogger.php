@@ -28,17 +28,17 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function startProgress(?int $numberOfItems): void
+    public function logStart(?int $numberOfItems): void
     {
         // Do nothing.
     }
 
-    public function advance(int $steps = 1): void
+    public function logAdvance(int $steps = 1): void
     {
         // Do nothing.
     }
 
-    public function finish(string $itemName): void
+    public function logFinish(string $itemName): void
     {
         // Do nothing.
     }
@@ -48,17 +48,17 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function logCommandStarted(string $commandName): void
+    public function logChildProcessStarted(string $commandName): void
     {
         // Do nothing.
     }
 
-    public function logCommandFinished(): void
+    public function logChildProcessFinished(): void
     {
         // Do nothing.
     }
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
+    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void
     {
         // Do nothing.
     }

@@ -29,17 +29,17 @@ final class FakeLogger implements Logger
         throw new DomainException('Unexpected call.');
     }
 
-    public function startProgress(?int $numberOfItems): void
+    public function logStart(?int $numberOfItems): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function advance(int $steps = 1): void
+    public function logAdvance(int $steps = 1): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function finish(string $itemName): void
+    public function logFinish(string $itemName): void
     {
         throw new DomainException('Unexpected call.');
     }
@@ -49,17 +49,17 @@ final class FakeLogger implements Logger
         throw new DomainException('Unexpected call.');
     }
 
-    public function logCommandStarted(string $commandName): void
+    public function logChildProcessStarted(string $commandName): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function logCommandFinished(): void
+    public function logChildProcessFinished(): void
     {
         throw new DomainException('Unexpected call.');
     }
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
+    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void
     {
         throw new DomainException('Unexpected call.');
     }

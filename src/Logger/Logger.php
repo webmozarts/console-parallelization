@@ -37,17 +37,17 @@ interface Logger
     /**
      * @param 0|positive-int|null $numberOfItems
      */
-    public function startProgress(?int $numberOfItems): void;
+    public function logStart(?int $numberOfItems): void;
 
     /**
      * @param positive-int|0 $steps
      */
-    public function advance(int $steps = 1): void;
+    public function logAdvance(int $steps = 1): void;
 
     /**
      * @param string $itemName Name of the item; Already in the singular or plural form.
      */
-    public function finish(string $itemName): void;
+    public function logFinish(string $itemName): void;
 
     public function logItemProcessingFailed(string $item, Throwable $throwable): void;
 
@@ -56,9 +56,9 @@ interface Logger
      *                            with the Symfony command name which is just an element of
      *                            the command.
      */
-    public function logCommandStarted(string $commandName): void;
+    public function logChildProcessStarted(string $commandName): void;
 
-    public function logCommandFinished(): void;
+    public function logChildProcessFinished(): void;
 
     /**
      * Logs the "unexpected" child output. By unexpected is meant that the main
@@ -67,5 +67,5 @@ interface Logger
      *
      * @param string $buffer Child process output.
      */
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void;
+    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void;
 }
