@@ -219,7 +219,28 @@ final class SymfonyProcessLauncher implements ProcessLauncher
 
         unset($this->runningProcesses[$index]);
 
+        return self::getExitCode($process);
+    }
+
+    /**
+     * @return 0|positive-int
+     */
+    private static function getExitCode(Process $process): int
+    {
         $exitCode = $process->getExitCode();
+
+// @codeCoverageIgnoreStart
+        if (null !== $exitCode && $exitCode < 0) {
+            // A negative exit code indicates the process has been terminated by
+            // a signal.
+            // Technically it is incorrect to change the exit code sign here.
+            // However, since we sum up the exit codes here we have no choice but
+            // to do so as otherwise we could cancel out an exit code. For example
+            // a child process that has -1 and the other one 1 the result would
+            // be 0 for the main process exit code which would be incorrect.
+            return -$exitCode;
+        }
+        // @codeCoverageIgnoreEnd
 
         Assert::notNull(
             $exitCode,
