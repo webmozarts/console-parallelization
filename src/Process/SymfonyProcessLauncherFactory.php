@@ -25,12 +25,14 @@ final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
     }
 
     /**
-     * @param list<string>                   $command
-     * @param array<string, string>|null     $extraEnvironmentVariables
-     * @param positive-int                   $numberOfProcesses
-     * @param positive-int                   $segmentSize
-     * @param callable(string, string): void $callback
-     * @param callable(): void               $tick
+     * @param list<string>                                             $command
+     * @param array<string, string>|null                               $extraEnvironmentVariables
+     * @param positive-int                                             $numberOfProcesses
+     * @param positive-int                                             $segmentSize
+     * @param callable(positive-int|0, int|null, string, string): void $processOutput             A PHP callback which is run whenever
+     *                                                                                            there is some output available on
+     *                                                                                            STDOUT or STDERR.
+     * @param callable(): void                                         $tick
      */
     public function create(
         array $command,
@@ -39,7 +41,7 @@ final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
         int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
-        callable $callback,
+        callable $processOutput,
         callable $tick
     ): ProcessLauncher {
         return new SymfonyProcessLauncher(
@@ -49,7 +51,7 @@ final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
             $numberOfProcesses,
             $segmentSize,
             $logger,
-            $callback,
+            $processOutput,
             $tick,
             $this->processFactory,
         );

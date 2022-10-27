@@ -25,7 +25,7 @@ final class FakeProcessLauncherFactory implements ProcessLauncherFactory
         int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
-        callable $callback,
+        callable $processOutput,
         callable $tick
     ): ProcessLauncher {
         throw new DomainException('Unexpected call.');

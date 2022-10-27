@@ -660,17 +660,17 @@ final class ParallelExecutorTest extends TestCase
             };
         };
 
-        $processCallback = FakeCallable::create();
+        $processOutput = FakeCallable::create();
 
         $processLauncherProphecy = $this->prophesize(ProcessLauncher::class);
         $processLauncherProphecy
             ->run(Argument::cetera())
-            ->will(static function () use ($progressSymbol, &$processCallback): int {
-                $processCallback('test', $progressSymbol);
-                $processCallback('test', 'FOO');    // unexpected output
-                $processCallback('test', $progressSymbol);
-                $processCallback('test', $progressSymbol.$progressSymbol.$progressSymbol);  // multi-step
-                $processCallback('test', $progressSymbol);
+            ->will(static function () use ($progressSymbol, &$processOutput): int {
+                $processOutput(10, null, 'test', $progressSymbol);
+                $processOutput(10, null, 'test', 'FOO');    // unexpected output
+                $processOutput(10, null, 'test', $progressSymbol);
+                $processOutput(10, null, 'test', $progressSymbol.$progressSymbol.$progressSymbol);  // multi-step
+                $processOutput(10, null, 'test', $progressSymbol);
 
                 return 0;
             });
@@ -678,8 +678,8 @@ final class ParallelExecutorTest extends TestCase
         $processLauncherFactoryProphecy = $this->prophesize(ProcessLauncherFactory::class);
         $processLauncherFactoryProphecy
             ->create(Argument::cetera())
-            ->will(static function (array $arguments) use ($processLauncherProphecy, &$processCallback) {
-                $processCallback = $arguments[6];
+            ->will(static function (array $arguments) use ($processLauncherProphecy, &$processOutput) {
+                $processOutput = $arguments[6];
 
                 return $processLauncherProphecy->reveal();
             });
@@ -735,7 +735,7 @@ final class ParallelExecutorTest extends TestCase
             ],
             [
                 'logUnexpectedChildProcessOutput',
-                ['FOO', $progressSymbol],
+                [10, null, 'FOO', $progressSymbol],
             ],
             [
                 'logAdvance',

@@ -353,17 +353,28 @@ final class ParallelExecutor
             $numberOfProcesses,
             $segmentSize,
             $logger,
-            fn (string $type, string $buffer) => $this->processChildOutput($buffer, $logger),
+            fn (int $index, ?int $pid, string $type, string $buffer) => $this->processChildOutput(
+                $index,
+                $pid,
+                $buffer,
+                $logger,
+            ),
             $this->processTick,
         );
     }
 
     /**
+     * TODO: pass the type
      * Called whenever data is received in the main process from a child process.
      *
-     * @param string $buffer The received data
+     * @param positive-int|0 $index  Index of the process amoung the list of running processes.
+     * @param int|null       $pid    The child process PID. It can be null if the process is no
+     *                               longer running.
+     * @param string         $buffer The received data
      */
     private function processChildOutput(
+        int $index,
+        ?int $pid,
         string $buffer,
         Logger $logger
     ): void {
@@ -372,7 +383,12 @@ final class ParallelExecutor
 
         // Display unexpected output
         if ($charactersCount !== mb_strlen($buffer)) {
-            $logger->logUnexpectedChildProcessOutput($buffer, $progressSymbol);
+            $logger->logUnexpectedChildProcessOutput(
+                $index,
+                $pid,
+                $buffer,
+                $progressSymbol,
+            );
         }
 
         $logger->logAdvance($charactersCount);

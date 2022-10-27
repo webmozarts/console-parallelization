@@ -20,11 +20,12 @@ use Symfony\Component\Process\Process;
 final class FakeProcessFactory implements SymfonyProcessFactory
 {
     public function startProcess(
+        int $index,
         InputStream $inputStream,
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $callback
+        callable $processOutput
     ): Process {
         throw new DomainException('Unexpected call.');
     }

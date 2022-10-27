@@ -138,17 +138,17 @@ final class StandardLogger implements Logger
         ));
     }
 
-    public function logChildProcessStarted(string $commandName): void
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
     {
         $this->logger->debug('Command started: '.$commandName);
     }
 
-    public function logChildProcessFinished(): void
+    public function logChildProcessFinished(int $index): void
     {
         $this->logger->debug('Command finished');
     }
 
-    public function logUnexpectedChildProcessOutput(string $buffer, string $progressSymbol): void
+    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
     {
         $this->output->writeln('');
         $this->output->writeln(sprintf(

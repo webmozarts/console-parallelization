@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization\Process;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\FakeCallable;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
@@ -23,6 +24,7 @@ use function explode;
 use function sprintf;
 
 /**
+ * @phpstan-import-type ProcessOutput from ProcessLauncherFactory
  * @covers \Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncher
  *
  * @internal
@@ -56,13 +58,7 @@ final class SymfonyProcessLauncherTest extends TestCase
         $workingDirectory = __DIR__;
         $environmentVariables = ['TEST_SYMFONY_PROCESS' => '1'];
         $logger = new DummyLogger();
-        $callback = static fn (string $type, string $buffer) => $output->writeln(
-            sprintf(
-                'type: %s; buffer: %s',
-                $type,
-                $buffer,
-            ),
-        );
+        $processOutput = self::createProcessOutput($output);
         $processFactory = new DummyProcessFactory();
 
         $launcher = new SymfonyProcessLauncher(
@@ -72,7 +68,7 @@ final class SymfonyProcessLauncherTest extends TestCase
             2,
             2,
             $logger,
-            $callback,
+            $processOutput,
             static function (): void {},
             $processFactory,
         );
@@ -85,7 +81,7 @@ final class SymfonyProcessLauncherTest extends TestCase
             $expectedCommandLine,
             $workingDirectory,
             $environmentVariables,
-            $callback
+            $processOutput
         ): void {
             self::assertSame($expectedCommandLine, $process->getCommandLine());
             self::assertSame($workingDirectory, $process->getWorkingDirectory());
@@ -103,7 +99,7 @@ final class SymfonyProcessLauncherTest extends TestCase
                     ],
                     [
                         'start',
-                        [$callback],
+                        [$processOutput],
                     ],
                 ],
                 $process->calls,
@@ -118,11 +114,11 @@ final class SymfonyProcessLauncherTest extends TestCase
             [
                 [
                     'logChildProcessStarted',
-                    ['php echo.php'],
+                    [0, 1000, 'php echo.php'],
                 ],
                 [
                     'logChildProcessFinished',
-                    [],
+                    [0],
                 ],
             ],
             $logger->records,
@@ -143,13 +139,7 @@ final class SymfonyProcessLauncherTest extends TestCase
     ): void {
         $output = new BufferedOutput();
 
-        $callback = static fn (string $type, string $buffer) => $output->writeln(
-            sprintf(
-                'type: %s; buffer: %s',
-                $type,
-                $buffer,
-            ),
-        );
+        $processOutput = self::createProcessOutput($output);
         $processFactory = new DummyProcessFactory();
         $numberOfTicksRecorded = 0;
 
@@ -160,7 +150,7 @@ final class SymfonyProcessLauncherTest extends TestCase
             $numberOfProcesses,
             $segmentSize,
             new DummyLogger(),
-            $callback,
+            $processOutput,
             static function () use (&$numberOfTicksRecorded): void {
                 ++$numberOfTicksRecorded;
             },
@@ -200,15 +190,15 @@ final class SymfonyProcessLauncherTest extends TestCase
             2,
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
-                type: dummy; buffer: item1
+                index: 0, pid: 1000, type: dummy; buffer: item1
 
-                type: dummy; buffer: item2
+                index: 0, pid: 1000, type: dummy; buffer: item2
 
-                type: dummy; buffer: item3
+                index: 1, pid: 1001, type: dummy; buffer: item3
 
-                type: dummy; buffer: item4
+                index: 1, pid: 1001, type: dummy; buffer: item4
 
-                type: dummy; buffer: item5
+                index: 1, pid: 1002, type: dummy; buffer: item5
 
 
                 TXT,
@@ -226,15 +216,15 @@ final class SymfonyProcessLauncherTest extends TestCase
             10,
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
-                type: dummy; buffer: item1
+                index: 0, pid: 1000, type: dummy; buffer: item1
 
-                type: dummy; buffer: item2
+                index: 0, pid: 1000, type: dummy; buffer: item2
 
-                type: dummy; buffer: item3
+                index: 0, pid: 1000, type: dummy; buffer: item3
 
-                type: dummy; buffer: item4
+                index: 0, pid: 1000, type: dummy; buffer: item4
 
-                type: dummy; buffer: item5
+                index: 0, pid: 1000, type: dummy; buffer: item5
 
 
                 TXT,
@@ -256,15 +246,15 @@ final class SymfonyProcessLauncherTest extends TestCase
             2,
             ['item1', 'item2', 'item3', 'item4', 'item5'],
             <<<'TXT'
-                type: dummy; buffer: item1
+                index: 0, pid: 1000, type: dummy; buffer: item1
 
-                type: dummy; buffer: item2
+                index: 0, pid: 1000, type: dummy; buffer: item2
 
-                type: dummy; buffer: item3
+                index: 0, pid: 1001, type: dummy; buffer: item3
 
-                type: dummy; buffer: item4
+                index: 0, pid: 1001, type: dummy; buffer: item4
 
-                type: dummy; buffer: item5
+                index: 0, pid: 1002, type: dummy; buffer: item5
 
 
                 TXT,
@@ -276,5 +266,21 @@ final class SymfonyProcessLauncherTest extends TestCase
             6,
             7,
         ];
+    }
+
+    /**
+     * @return ProcessOutput
+     */
+    private static function createProcessOutput(OutputInterface $output): callable
+    {
+        return static fn (int $index, ?int $pid, string $type, string $buffer) => $output->writeln(
+            sprintf(
+                'index: %d, pid: %s, type: %s; buffer: %s',
+                $index,
+                $pid,
+                $type,
+                $buffer,
+            ),
+        );
     }
 }
