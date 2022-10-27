@@ -726,35 +726,35 @@ final class ParallelExecutorTest extends TestCase
                 ],
             ],
             [
-                'startProgress',
+                'logStart',
                 [5],
             ],
             [
-                'advance',
+                'logAdvance',
                 [1],
             ],
             [
-                'logUnexpectedOutput',
+                'logUnexpectedChildProcessOutput',
                 ['FOO', $progressSymbol],
             ],
             [
-                'advance',
+                'logAdvance',
                 [0],
             ],
             [
-                'advance',
+                'logAdvance',
                 [1],
             ],
             [
-                'advance',
+                'logAdvance',
                 [3],
             ],
             [
-                'advance',
+                'logAdvance',
                 [1],
             ],
             [
-                'finish',
+                'logFinish',
                 ['items'],
             ],
         ];
@@ -885,11 +885,11 @@ final class ParallelExecutorTest extends TestCase
                     ],
                 ],
                 [
-                    'startProgress',
+                    'logStart',
                     [3],
                 ],
                 [
-                    'finish',
+                    'logFinish',
                     ['items'],
                 ],
             ],
@@ -979,23 +979,23 @@ final class ParallelExecutorTest extends TestCase
                     ],
                 ],
                 [
-                    'startProgress',
+                    'logStart',
                     [3],
                 ],
                 [
-                    'advance',
+                    'logAdvance',
                     [],
                 ],
                 [
-                    'advance',
+                    'logAdvance',
                     [],
                 ],
                 [
-                    'advance',
+                    'logAdvance',
                     [],
                 ],
                 [
-                    'finish',
+                    'logFinish',
                     ['items'],
                 ],
             ],
