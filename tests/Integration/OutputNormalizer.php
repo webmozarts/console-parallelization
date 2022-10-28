@@ -15,15 +15,102 @@ use const PHP_EOL;
 
 final class OutputNormalizer
 {
-    private function getOutput(CommandTester $commandTester): string
+    public static function normalizeMemoryUsage(string $output): string
     {
-        $output = $commandTester->getDisplay(true);
-
-        $output = preg_replace(
+        return preg_replace(
             '/\d+(\.\d+)? ([A-Z]i)?B/',
             '10.0 MiB',
             $output,
         );
+    }
+
+    public static function normalizeProgressBarTimeTaken(string $output): string
+    {
+        $output = str_replace(
+            '< 1 sec',
+            '10 secs',
+            $output,
+        );
+
+        $output = preg_replace(
+            '/\d+ secs?/',
+            '10 secs',
+            $output,
+        );
+
+        $replaceMap = [
+            '%  10 secs' => '% 10 secs',
+            'secs  10.0 MiB' => 'secs 10.0 MiB',
+            ']  10 secs' => '] 10 secs',
+            PHP_EOL => "\n",
+            (new PhpExecutableFinder())->find() => '/path/to/php',
+            getcwd() => '/path/to/work-dir',
+        ];
+
+        return str_replace(
+            array_keys($replaceMap),
+            $replaceMap,
+            $output,
+        );
+    }
+
+    public static function normalizePhpExecutablePath(string $output): string
+    {
+        $replaceMap = [
+            (new PhpExecutableFinder())->find() => '/path/to/php',
+            getcwd() => '/path/to/work-dir',
+        ];
+
+        $output = self::normalizeConsolePath($output);
+
+        return str_replace(
+            array_keys($replaceMap),
+            $replaceMap,
+            $output,
+        );
+    }
+
+    public static function normalizeProjectPath(string $output): string
+    {
+        $replaceMap = [
+            (new PhpExecutableFinder())->find() => '/path/to/php',
+            getcwd() => '/path/to/work-dir',
+        ];
+
+        $output = self::normalizeConsolePath($output);
+
+        return str_replace(
+            array_keys($replaceMap),
+            $replaceMap,
+            $output,
+        );
+    }
+
+    public static function normalizeLineReturns(string $output): string
+    {
+        $replaceMap = [
+            (new PhpExecutableFinder())->find() => '/path/to/php',
+            getcwd() => '/path/to/work-dir',
+        ];
+
+        $output = self::normalizeConsolePath($output);
+
+        return str_replace(
+            array_keys($replaceMap),
+            $replaceMap,
+            $output,
+        );
+    }
+
+    private function getOutput(CommandTester $commandTester): string
+    {
+        $output = $commandTester->getDisplay(true);
+
+//        $output = preg_replace(
+//            '/\d+(\.\d+)? ([A-Z]i)?B/',
+//            '10.0 MiB',
+//            $output,
+//        );
 
         $output = str_replace(
             '< 1 sec',
@@ -64,7 +151,7 @@ final class OutputNormalizer
         );
     }
 
-    private static function normalizeIntermediateFixedProgressBars(
+    public static function removeIntermediateFixedProgressBars(
         string $output,
         int $expectedNumberOfItems = 5
     ): string {
@@ -81,7 +168,7 @@ final class OutputNormalizer
         );
     }
 
-    public static function normalizeIntermediateDynamicProgressBars(string $output): string
+    public static function removeIntermediateNonFixedProgressBars(string $output): string
     {
         $output = preg_replace(
             '# *?[1-4] \[[>-]+\]  ?10 secs 10.0 MiB\n#',

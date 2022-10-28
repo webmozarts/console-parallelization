@@ -85,8 +85,8 @@ final class ImportMoviesCommand extends Command
             $commandDefinition,
             $errorHandler,
         )
-            ->withBatchSize(2)
-            ->withSegmentSize(2)
+            ->withBatchSize(1)
+            ->withSegmentSize(1)
             ->withRunBeforeFirstCommand(
                 fn () => $this->logger->recordFirstCommand(),
             )
@@ -104,6 +104,7 @@ final class ImportMoviesCommand extends Command
 
     protected function runSingleCommand(string $movieFileName, InputInterface $input, OutputInterface $output): void
     {
+        sleep(2);
         $this->logger->recordSingleCommand(
             $movieFileName,
             $this->batchMovies[$movieFileName],
