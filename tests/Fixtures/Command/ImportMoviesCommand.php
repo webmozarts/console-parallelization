@@ -59,7 +59,7 @@ final class ImportMoviesCommand extends Command
     /**
      * @return list<string>
      */
-    protected function fetchItems(InputInterface $input): array
+    protected function fetchItems(InputInterface $input, OutputInterface $output): array
     {
         return [
             'movie-1.json',

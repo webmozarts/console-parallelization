@@ -153,7 +153,7 @@ final class StandardLogger implements Logger
         $this->io->newLine();
     }
 
-    public function startProgress(?int $numberOfItems): void
+    public function logStart(?int $numberOfItems): void
     {
         Assert::false(
             isset($this->progressBar),
@@ -168,7 +168,7 @@ final class StandardLogger implements Logger
         $this->advanced = true;
     }
 
-    public function advance(int $steps = 1): void
+    public function logAdvance(int $steps = 1): void
     {
         Assert::true(
             isset($this->progressBar),
@@ -179,7 +179,7 @@ final class StandardLogger implements Logger
         $this->advanced = true;
     }
 
-    public function finish(string $itemName): void
+    public function logFinish(string $itemName): void
     {
         Assert::true(
             isset($this->progressBar),
@@ -206,7 +206,7 @@ final class StandardLogger implements Logger
         unset($this->progressBar);
     }
 
-    public function logCommandStarted(int $index, string $commandName, int $pid): void
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
     {
         if ($this->advanced) {
             $this->io->newLine();
@@ -227,7 +227,7 @@ final class StandardLogger implements Logger
         $this->started[$index] = ['border' => ++$this->count % \count(self::COLORS)];
     }
 
-    public function logCommandFinished(int $index, int $pid): void
+    public function logChildProcessFinished(int $index): void
     {
         if ($this->advanced) {
             $this->io->newLine();
@@ -236,9 +236,8 @@ final class StandardLogger implements Logger
         if ($this->io->isVeryVerbose()) {
             $this->logger->notice(
                 sprintf(
-                    'Stopped process #%d (PID %d)',
+                    'Stopped process #%d',
                     $index,
-                    $pid,
                 ),
             );
         }
@@ -246,7 +245,12 @@ final class StandardLogger implements Logger
         $this->advanced = false;
     }
 
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol, int $index, int $pid): void
+    public function logUnexpectedChildProcessOutput(
+        int $index,
+        ?int $pid,
+        string $buffer,
+        string $progressSymbol
+    ): void
     {
         $this->io->newLine();
 

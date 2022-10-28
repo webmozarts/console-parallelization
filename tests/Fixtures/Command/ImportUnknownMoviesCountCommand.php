@@ -48,7 +48,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
         $this->logger = new TestLogger();
     }
 
-    protected function fetchItems(InputInterface $input): iterable
+    protected function fetchItems(InputInterface $input, OutputInterface $output): iterable
     {
         return yield from [
             'movie-1.json',
