@@ -396,4 +396,62 @@ final class OutputNormalizerTest extends TestCase
                 TXT,
         ];
     }
+
+    /**
+     * @dataProvider outputProvider
+     */
+    public function test_it_can_normalize_output(string $output, string $expected): void
+    {
+        $actual = OutputNormalizer::normalize($output);
+
+        self::assertSame($expected, $actual);
+    }
+
+    public static function outputProvider(): iterable
+    {
+        yield 'standard non-fixed sized progress bar line' => [
+            ' 4 [--->------------------------] < 1 sec 8.0 MiB',
+            ' 4 [--->------------------------] 10 secs 10.0 MiB',
+        ];
+
+        yield 'standard non-fixed sized progress bar line with extra padding' => [
+            '     4 [--->------------------------] < 1 sec 8.0 MiB',
+            '     4 [--->------------------------] 10 secs 10.0 MiB',
+        ];
+
+        yield 'standard non-fixed sized progress bar line with extra content no spacing' => [
+            ' 4 [--->------------------------] < 1 sec 8.0 MiB[debug] Command started:',
+            ' 4 [--->------------------------] 10 secs 10.0 MiB[debug] Command started:',
+        ];
+
+        yield 'standard non-fixed sized progress bar line with extra content with spacing' => [
+            ' 4 [--->------------------------] < 1 sec 8.0 MiB [debug] Command started:',
+            ' 4 [--->------------------------] 10 secs 10.0 MiB [debug] Command started:',
+        ];
+
+        yield 'standard fixed sized progress bar line' => [
+            ' 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB',
+            ' 0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB',
+        ];
+
+        yield 'standard fixed sized progress bar line with extra padding' => [
+            '     0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB',
+            '     0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB',
+        ];
+
+        yield 'standard fixed sized progress bar line with extra content no spacing' => [
+            ' 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB[debug] Command started:',
+            ' 0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB[debug] Command started:',
+        ];
+
+        yield 'standard fixed sized progress bar line with extra content with spacing' => [
+            ' 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB [debug] Command started:',
+            ' 0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB [debug] Command started:',
+        ];
+
+        yield 'standard line with extra spacing' => [
+            ' 5/5 [============================] 100%  1 sec/1 sec  14.0 MiB[debug] Command finished',
+            ' 5/5 [============================] 100% 10 secs/10 secs 10.0 MiB[debug] Command finished',
+        ];
+    }
 }

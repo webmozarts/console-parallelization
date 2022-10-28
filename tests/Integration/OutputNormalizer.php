@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Integration;
 
 use Symfony\Component\Process\PhpExecutableFinder;
+use function array_keys;
+use function array_values;
 use function bin2hex;
 use function getcwd;
 use function preg_match;
@@ -23,6 +25,32 @@ use function str_replace;
 
 final class OutputNormalizer
 {
+    public static function normalize(string $output): string
+    {
+        $output = self::normalizeProgressBarTimeTaken(
+            self::normalizeMemoryUsage(
+                self::normalizeProjectPath(
+                    self::normalizePhpExecutablePath(
+                        self::normalizeLineReturns($output),
+                    ),
+                ),
+            ),
+        );
+
+        // We may still have some unstable cases due to extra spacing added
+        // depending on the overall result
+        $replaceMap = [
+            '%  10 secs' => '% 10 secs',
+            'secs  10.0 MiB' => 'secs 10.0 MiB',
+        ];
+
+        return str_replace(
+            array_keys($replaceMap),
+            array_values($replaceMap),
+            $output,
+        );
+    }
+
     public static function normalizeMemoryUsage(string $output): string
     {
         return preg_replace(

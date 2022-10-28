@@ -239,7 +239,7 @@ class ParallelizationIntegrationTest extends TestCase
             ),
         );
 
-        self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $outputWithoutExtraDebugInfo);
+        self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $commandTester->getDisplay());
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandStartedLine));
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandFinishedLine));
     }
@@ -370,16 +370,6 @@ class ParallelizationIntegrationTest extends TestCase
     {
         $output = $commandTester->getDisplay(true);
 
-        $output = OutputNormalizer::normalizeProgressBarTimeTaken(
-            OutputNormalizer::normalizeMemoryUsage(
-                OutputNormalizer::normalizeProjectPath(
-                    OutputNormalizer::normalizePhpExecutablePath(
-                        OutputNormalizer::normalizeLineReturns($output),
-                    ),
-                ),
-            ),
-        );
-
-        return str_replace('100%  10 secs', '100% 10 secs', $output);
+        return OutputNormalizer::normalize($output);
     }
 }
