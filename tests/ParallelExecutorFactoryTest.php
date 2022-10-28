@@ -18,13 +18,9 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
-use function array_key_exists;
-use function array_keys;
-use function array_map;
 use function chr;
 use function getcwd;
 use function Safe\chdir;
-use function Safe\putenv;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutorFactory

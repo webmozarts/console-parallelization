@@ -17,20 +17,14 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use function array_column;
-use function array_keys;
 use function array_map;
-use function getcwd;
-use function preg_replace;
 use function spl_object_id;
-use function sprintf;
 use function str_replace;
-use const PHP_EOL;
 
 /**
  * @coversNothing
@@ -94,7 +88,7 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -123,7 +117,7 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -169,7 +163,7 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -182,7 +176,7 @@ class ParallelizationIntegrationTest extends TestCase
 
         $commandTester->execute(
             [
-                'command' => 'import:movies-unknown-count',
+                'command' => 's',
                 '--processes' => '2',
             ],
             ['interactive' => true],
@@ -198,8 +192,9 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateDynamicProgressBars(
+        $actual = OutputNormalizer::removeIntermediateNonFixedProgressBars(
             $this->getOutput($commandTester),
+            5,
         );
 
         self::assertSame($expected, $actual, $actual);
@@ -236,7 +231,7 @@ class ParallelizationIntegrationTest extends TestCase
         $expectedCommandStartedLine = "[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n";
         $expectedCommandFinishedLine = "[debug] Command finished\n";
 
-        $outputWithoutExtraDebugInfo = self::normalizeIntermediateFixedProgressBars(
+        $outputWithoutExtraDebugInfo = OutputNormalizer::removeIntermediateFixedProgressBars(
             str_replace(
                 [$expectedCommandStartedLine, $expectedCommandFinishedLine],
                 ['', ''],
@@ -313,9 +308,8 @@ class ParallelizationIntegrationTest extends TestCase
             ],
         ];
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
-            20,
         );
 
         self::assertSame($expected, $actual, $actual);
@@ -365,9 +359,8 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
-            20,
         );
 
         self::assertSame($expected, $actual, $actual);
@@ -377,80 +370,16 @@ class ParallelizationIntegrationTest extends TestCase
     {
         $output = $commandTester->getDisplay(true);
 
-        $output = preg_replace(
-            '/\d+(\.\d+)? ([A-Z]i)?B/',
-            '10.0 MiB',
-            $output,
+        $output = OutputNormalizer::normalizeProgressBarTimeTaken(
+            OutputNormalizer::normalizeMemoryUsage(
+                OutputNormalizer::normalizeProjectPath(
+                    OutputNormalizer::normalizePhpExecutablePath(
+                        OutputNormalizer::normalizeLineReturns($output),
+                    ),
+                ),
+            ),
         );
 
-        $output = str_replace(
-            '< 1 sec',
-            '10 secs',
-            $output,
-        );
-
-        $output = preg_replace(
-            '/\d+ secs?/',
-            '10 secs',
-            $output,
-        );
-
-        $replaceMap = [
-            '%  10 secs' => '% 10 secs',
-            'secs  10.0 MiB' => 'secs 10.0 MiB',
-            ']  10 secs' => '] 10 secs',
-            PHP_EOL => "\n",
-            (new PhpExecutableFinder())->find() => '/path/to/php',
-            getcwd() => '/path/to/work-dir',
-        ];
-
-        $output = self::normalizeConsolePath($output);
-
-        return str_replace(
-            array_keys($replaceMap),
-            $replaceMap,
-            $output,
-        );
-    }
-
-    private static function normalizeConsolePath(string $output): string
-    {
-        return preg_replace(
-            '~'.getcwd().'.+?console~',
-            '/path/to/work-dir/bin/console',
-            $output,
-        );
-    }
-
-    private static function normalizeIntermediateFixedProgressBars(
-        string $output,
-        int $expectedNumberOfItems = 5
-    ): string {
-        $intermediateItemRange = sprintf(
-            '[1-%d]/%d',
-            $expectedNumberOfItems - 1,
-            $expectedNumberOfItems,
-        );
-
-        return preg_replace(
-            '# *?'.$intermediateItemRange.' \[[=>-]+\]  \d+% 10 secs/10 secs 10.0 MiB\n#',
-            '',
-            $output,
-        );
-    }
-
-    private static function normalizeIntermediateDynamicProgressBars(string $output): string
-    {
-        $output = preg_replace(
-            '# *?[1-4] \[[>-]+\]  ?10 secs 10.0 MiB\n#',
-            '',
-            $output,
-        );
-
-        return str_replace(
-            '\[[->]+?\]',
-            '[----->----------------------]',
-            $output,
-        );
+        return str_replace('100%  10 secs', '100% 10 secs', $output);
     }
 }

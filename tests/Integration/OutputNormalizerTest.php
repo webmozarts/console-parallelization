@@ -1,16 +1,26 @@
 <?php
 
+/*
+ * This file is part of the Webmozarts Console Parallelization package.
+ *
+ * (c) Webmozarts GmbH <office@webmozarts.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\EnvironmentVariables;
 use function Safe\getcwd;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Integration\OutputNormalizer
+ *
+ * @internal
  */
 final class OutputNormalizerTest extends TestCase
 {
@@ -88,12 +98,12 @@ final class OutputNormalizerTest extends TestCase
 
         yield '[fixed size bar] single digit' => [
             ' 4 secs/7 secs',
-            ' 10 secs/10 secs ',
+            ' 10 secs/10 secs',
         ];
 
         yield '[fixed size bar] mixed' => [
             ' < 1 sec/18 secs',
-            ' 10 secs/10 secs ',
+            ' 10 secs/10 secs',
         ];
 
         yield 'fixed size bar' => [
@@ -126,24 +136,23 @@ final class OutputNormalizerTest extends TestCase
 
     public static function phpExecutableProvider(): iterable
     {
-        $environmentVariables = [
-            'PHP_BINARY' => 'Users/myaccount/.phpbrew/php/php-9.3.2/bin/php',
-        ];
+        $phpBinary = __DIR__.'/php-dummy';
+        $environmentVariables = ['PHP_BINARY' => $phpBinary];
 
         yield 'escaped path' => [
-            ' \'/Users/myaccount/.phpbrew/php/php-9.3.2/bin/php\' ',
+            ' \''.$phpBinary.'\' ',
             $environmentVariables,
             ' \'/path/to/php\' ',
         ];
 
         yield 'non escaped-path' => [
-            ' /Users/myaccount/.phpbrew/php/php-9.3.2/bin/php ',
+            ' '.$phpBinary.' ',
             $environmentVariables,
             ' /path/to/php ',
         ];
 
         yield 'escaped path longer path' => [
-            ' \'/Users/myaccount/.phpbrew/php/php-9.3.2/bin/php/phar\' ',
+            ' \''.$phpBinary.'/phar\' ',
             $environmentVariables,
             ' \'/path/to/php/phar\' ',
         ];
@@ -166,7 +175,7 @@ final class OutputNormalizerTest extends TestCase
         $cwd = getcwd();
 
         yield 'escaped path' => [
-            ' \'/'.$cwd.'\' ',
+            ' \''.$cwd.'\' ',
             ' \'/path/to/work-dir\' ',
         ];
 
@@ -196,11 +205,8 @@ final class OutputNormalizerTest extends TestCase
     public static function lineReturnsProvider(): iterable
     {
         yield 'linux return paths' => [
-            <<<'TXT'
-            
-            
-            TXT,
-            ' \'/path/to/work-dir\' ',
+            "\n \n",
+            "\n \n",
         ];
 
         yield 'windows return paths' => [
@@ -235,44 +241,44 @@ final class OutputNormalizerTest extends TestCase
 
         yield 'nominal without extra content' => [
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             1/5 [=====>----------------------]  20% 2 secs/10 secs 10.0 MiB
-             2/5 [===========>----------------]  40% 4 secs/10 secs 10.0 MiB
-             3/5 [================>-----------]  60% 6 secs/10 secs 10.0 MiB
-             4/5 [======================>-----]  80% 8 secs/10 secs 10.0 MiB
-             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
+                 1/5 [=====>----------------------]  20% 2 secs/10 secs 10.0 MiB
+                 2/5 [===========>----------------]  40% 4 secs/10 secs 10.0 MiB
+                 3/5 [================>-----------]  60% 6 secs/10 secs 10.0 MiB
+                 4/5 [======================>-----]  80% 8 secs/10 secs 10.0 MiB
+                 5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+                TXT,
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
+                 5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+                TXT,
         ];
 
         yield 'nominal with extra content' => [
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             1/5 [=====>----------------------]  20% 2 secs/10 secs 10.0 MiB [debug] smth1
-            [debug] smth2
-             2/5 [===========>----------------]  40% 4 secs/10 secs 10.0 MiB
-             3/5 [================>-----------]  60% 6 secs/10 secs 10.0 MiB[debug] smth3
-             4/5 [======================>-----]  80% 8 secs/10 secs 10.0 MiB
-             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
+                 1/5 [=====>----------------------]  20% 2 secs/10 secs 10.0 MiB [debug] smth1
+                [debug] smth2
+                 2/5 [===========>----------------]  40% 4 secs/10 secs 10.0 MiB
+                 3/5 [================>-----------]  60% 6 secs/10 secs 10.0 MiB[debug] smth3
+                 4/5 [======================>-----]  80% 8 secs/10 secs 10.0 MiB
+                 5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+                TXT,
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             [debug] smth1
-            [debug] smth2
-            [debug] smth3
-             5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
+                 [debug] smth1
+                [debug] smth2
+                [debug] smth3
+                 5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+                TXT,
         ];
     }
 
@@ -281,9 +287,13 @@ final class OutputNormalizerTest extends TestCase
      */
     public function test_it_can_normalize_non_fixed_sized_progress_bars(
         string $output,
+        int $numberOfItems,
         string $expected
     ): void {
-        $actual = OutputNormalizer::removeIntermediateNonFixedProgressBars($output);
+        $actual = OutputNormalizer::removeIntermediateNonFixedProgressBars(
+            $output,
+            $numberOfItems,
+        );
 
         self::assertSame($expected, $actual);
     }
@@ -291,55 +301,99 @@ final class OutputNormalizerTest extends TestCase
     public static function nonFixedSizedProgressBarsProvider(): iterable
     {
         yield 'single intermediate line' => [
-            ' 4/5 [---------------------->-----]  80%  1 sec/1 sec  10.0 MiB',
+            ' 3 [---------------------->-----] 4 secs  7.0 MiB',
+            0,
             '',
         ];
 
         yield 'single intermediate line with trailing content' => [
-            ' 4/5 [---------------------->-----]  80%  1 sec/1 sec  10.0 MiB [debug] smth',
+            ' 3 [---------------------->-----] 4 secs  7.0 MiB [debug] smth',
+            0,
             ' [debug] smth',
+        ];
+
+        yield 'single intermediate line with trailing content without spacing' => [
+            ' 3 [---------------------->-----] 4 secs  7.0 MiB[debug] smth',
+            0,
+            '[debug] smth',
         ];
 
         yield 'nominal without extra content' => [
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             1/5 [----->----------------------]  20% 2 secs/10 secs 10.0 MiB
-             2/5 [----------->----------------]  40% 4 secs/10 secs 10.0 MiB
-             3/5 [---------------->-----------]  60% 6 secs/10 secs 10.0 MiB
-             4/5 [---------------------->-----]  80% 8 secs/10 secs 10.0 MiB
-             5/5 [----------------------------] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0 [>---------------------------] < 1 sec 8.0 MiB
+                 1 [----->----------------------] 2 secs 10.0 MiB
+                 5 [----------->----------------] 4 secs 10.0 MiB
+                 6 [---------------->-----------] 6 secs 10.0 MiB
+                 9 [---------------------->-----] 8 secs 10.0 MiB
+                 12 [----------------------------] 142 secs 112.0 MiB
+
+                TXT,
+            12,
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             5/5 [----------------------------] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0 [>---------------------------] < 1 sec 8.0 MiB
+                 12 [----------------------------] 142 secs 112.0 MiB
+
+                TXT,
         ];
 
-        yield 'nominal with extra content' => [
+        yield 'nominal without extra content with the cursor back to the start' => [
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             1/5 [----->----------------------]  20% 2 secs/10 secs 10.0 MiB [debug] smth1
-            [debug] smth2
-             2/5 [----------->----------------]  40% 4 secs/10 secs 10.0 MiB
-             3/5 [---------------->-----------]  60% 6 secs/10 secs 10.0 MiB[debug] smth3
-             4/5 [---------------------->-----]  80% 8 secs/10 secs 10.0 MiB
-             5/5 [----------------------------] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0 [>---------------------------] < 1 sec 8.0 MiB
+                 1 [----->----------------------] 2 secs 10.0 MiB
+                 5 [----------->----------------] 4 secs 10.0 MiB
+                 6 [---------------->-----------] 6 secs 10.0 MiB
+                 9 [---------------------->-----] 8 secs 10.0 MiB
+                 12 [>---------------------------] 142 secs 112.0 MiB
+
+                TXT,
+            12,
             <<<'TXT'
-            
-             0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB
-             [debug] smth1
-            [debug] smth2
-            [debug] smth3
-             5/5 [----------------------------] 100% 10 secs/10 secs 10.0 MiB
 
-            TXT,
+                 0 [>---------------------------] < 1 sec 8.0 MiB
+                 12 [>---------------------------] 142 secs 112.0 MiB
+
+                TXT,
+        ];
+
+        yield 'nominal without extra content with the cursor in the middle' => [
+            <<<'TXT'
+
+                 0 [>---------------------------] < 1 sec 8.0 MiB
+                 1 [----->----------------------] 2 secs 10.0 MiB
+                 5 [----------->----------------] 4 secs 10.0 MiB
+                 6 [---------------->-----------] 6 secs 10.0 MiB
+                 9 [---------------------->-----] 8 secs 10.0 MiB
+                 12 [------------>---------------] 142 secs 112.0 MiB
+
+                TXT,
+            12,
+            <<<'TXT'
+
+                 0 [>---------------------------] < 1 sec 8.0 MiB
+                 12 [------------>---------------] 142 secs 112.0 MiB
+
+                TXT,
+        ];
+
+        yield 'buggy case #1' => [
+            <<<'TXT'
+
+                    0 [>---------------------------] 10 secs 10.0 MiB
+                    2 [->--------------------------]  10 secs 10.0 MiB
+                    4 [--->------------------------]  10 secs 10.0 MiB
+                    5 [----->----------------------]  10 secs 10.0 MiB
+
+                TXT,
+            5,
+            <<<'TXT'
+
+                    0 [>---------------------------] 10 secs 10.0 MiB
+                    5 [----->----------------------]  10 secs 10.0 MiB
+
+                TXT,
         ];
     }
 }

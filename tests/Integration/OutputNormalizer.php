@@ -1,17 +1,25 @@
 <?php
 
+/*
+ * This file is part of the Webmozarts Console Parallelization package.
+ *
+ * (c) Webmozarts GmbH <office@webmozarts.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
-use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Process\PhpExecutableFinder;
-use function array_keys;
+use function bin2hex;
 use function getcwd;
+use function preg_match;
 use function preg_replace;
-use function sprintf;
+use function random_bytes;
 use function str_replace;
-use const PHP_EOL;
 
 final class OutputNormalizer
 {
@@ -32,155 +40,107 @@ final class OutputNormalizer
             $output,
         );
 
-        $output = preg_replace(
+        return preg_replace(
             '/\d+ secs?/',
             '10 secs',
-            $output,
-        );
-
-        $replaceMap = [
-            '%  10 secs' => '% 10 secs',
-            'secs  10.0 MiB' => 'secs 10.0 MiB',
-            ']  10 secs' => '] 10 secs',
-            PHP_EOL => "\n",
-            (new PhpExecutableFinder())->find() => '/path/to/php',
-            getcwd() => '/path/to/work-dir',
-        ];
-
-        return str_replace(
-            array_keys($replaceMap),
-            $replaceMap,
             $output,
         );
     }
 
     public static function normalizePhpExecutablePath(string $output): string
     {
-        $replaceMap = [
-            (new PhpExecutableFinder())->find() => '/path/to/php',
-            getcwd() => '/path/to/work-dir',
-        ];
-
-        $output = self::normalizeConsolePath($output);
-
         return str_replace(
-            array_keys($replaceMap),
-            $replaceMap,
+            (new PhpExecutableFinder())->find(),
+            '/path/to/php',
             $output,
         );
     }
 
     public static function normalizeProjectPath(string $output): string
     {
-        $replaceMap = [
-            (new PhpExecutableFinder())->find() => '/path/to/php',
-            getcwd() => '/path/to/work-dir',
-        ];
-
-        $output = self::normalizeConsolePath($output);
-
         return str_replace(
-            array_keys($replaceMap),
-            $replaceMap,
+            getcwd(),
+            '/path/to/work-dir',
             $output,
         );
     }
 
     public static function normalizeLineReturns(string $output): string
     {
-        $replaceMap = [
-            (new PhpExecutableFinder())->find() => '/path/to/php',
-            getcwd() => '/path/to/work-dir',
-        ];
-
-        $output = self::normalizeConsolePath($output);
-
         return str_replace(
-            array_keys($replaceMap),
-            $replaceMap,
+            "\r\n",
+            "\n",
             $output,
         );
     }
 
-    private function getOutput(CommandTester $commandTester): string
+    public static function removeIntermediateFixedProgressBars(string $output): string
     {
-        $output = $commandTester->getDisplay(true);
-
-//        $output = preg_replace(
-//            '/\d+(\.\d+)? ([A-Z]i)?B/',
-//            '10.0 MiB',
-//            $output,
-//        );
-
-        $output = str_replace(
-            '< 1 sec',
-            '10 secs',
-            $output,
-        );
-
         $output = preg_replace(
-            '/\d+ secs?/',
-            '10 secs',
+            '# \d+\/\d+ \[=[=>-]+\-] .+?MiB\\n#',
+            '',
             $output,
         );
 
-        $replaceMap = [
-            '%  10 secs' => '% 10 secs',
-            'secs  10.0 MiB' => 'secs 10.0 MiB',
-            ']  10 secs' => '] 10 secs',
-            PHP_EOL => "\n",
-            (new PhpExecutableFinder())->find() => '/path/to/php',
-            getcwd() => '/path/to/work-dir',
-        ];
-
-        $output = self::normalizeConsolePath($output);
-
-        return str_replace(
-            array_keys($replaceMap),
-            $replaceMap,
-            $output,
-        );
-    }
-
-    private static function normalizeConsolePath(string $output): string
-    {
         return preg_replace(
-            '~'.getcwd().'.+?console~',
-            '/path/to/work-dir/bin/console',
+            '# \d+\/\d+ \[=[=>-]+\-] .+?MiB#',
+            '',
             $output,
         );
     }
 
-    public static function removeIntermediateFixedProgressBars(
+    public static function removeIntermediateNonFixedProgressBars(
         string $output,
-        int $expectedNumberOfItems = 5
+        int $itemsCount
     ): string {
-        $intermediateItemRange = sprintf(
-            '[1-%d]/%d',
-            $expectedNumberOfItems - 1,
-            $expectedNumberOfItems,
+        $restoreFirstLine = self::excludeNonFixedSizedProgressBarLine(
+            $output,
+            0,
+        );
+        $restoreLastLine = self::excludeNonFixedSizedProgressBarLine(
+            $output,
+            $itemsCount,
         );
 
-        return preg_replace(
-            '# *?'.$intermediateItemRange.' \[[=>-]+\]  \d+% 10 secs/10 secs 10.0 MiB\n#',
+        $output = preg_replace(
+            '#\s+\d+ \[[->]+?\] .+?MiB\\n#',
             '',
             $output,
         );
+
+        $output = preg_replace(
+            '#\s+\d+ \[[->]+?\] .+?MiB#',
+            '',
+            $output,
+        );
+
+        return $restoreFirstLine($restoreLastLine($output));
     }
 
-    public static function removeIntermediateNonFixedProgressBars(string $output): string
+    /**
+     * @return callable(string):string
+     */
+    private static function excludeNonFixedSizedProgressBarLine(
+        string &$output,
+        int $itemNumber
+    ): callable
     {
-        $output = preg_replace(
-            '# *?[1-4] \[[>-]+\]  ?10 secs 10.0 MiB\n#',
-            '',
+        $lineFound = 1 === preg_match(
+            '#(?<line> '.$itemNumber.' \[[->]+] .+?MiB.*?\\n?)#',
             $output,
+            $matches,
         );
 
-        return str_replace(
-            '\[[->]+?\]',
-            '[----->----------------------]',
-            $output,
-        );
+        if (!$lineFound) {
+            return static fn (string $updatedOutput) => $updatedOutput;
+        }
+
+        $line = $matches['line'];
+        $linePlaceholder = '__LAST_LINE_'.bin2hex(random_bytes(20)).'__';
+
+        $output = str_replace($line, $linePlaceholder, $output);
+
+        return static fn (string $updatedOutput) => str_replace($linePlaceholder, $line, $updatedOutput);
     }
 
     private function __construct()
