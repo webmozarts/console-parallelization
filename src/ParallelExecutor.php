@@ -231,7 +231,7 @@ final class ParallelExecutor
             $shouldSpawnChildProcesses,
         );
 
-        $logger->startProgress($numberOfItems);
+        $logger->logStart($numberOfItems);
 
         if ($shouldSpawnChildProcesses) {
             $exitCode = $this
@@ -248,11 +248,11 @@ final class ParallelExecutor
                 $input,
                 $output,
                 $logger,
-                static fn () => $logger->advance(),
+                static fn () => $logger->logAdvance(),
             );
         }
 
-        $logger->finish($itemName);
+        $logger->logFinish($itemName);
 
         ($this->runAfterLastCommand)($input, $output);
 
@@ -353,31 +353,45 @@ final class ParallelExecutor
             $numberOfProcesses,
             $segmentSize,
             $logger,
-            fn (string $type, string $buffer, int $index, ?int $pid) => $this->processChildOutput($buffer, $logger, $index, $pid ?? -10),
+            fn (int $index, ?int $pid, string $type, string $buffer) => $this->processChildOutput(
+                $index,
+                $pid,
+                $buffer,
+                $logger,
+            ),
             $this->processTick,
         );
     }
 
     /**
+     * TODO: pass the type
      * Called whenever data is received in the main process from a child process.
      *
-     * @param string $buffer The received data
+     * @param positive-int|0 $index  Index of the process amoung the list of running processes.
+     * @param int|null       $pid    The child process PID. It can be null if the process is no
+     *                               longer running.
+     * @param string         $buffer The received data
      */
     private function processChildOutput(
-        string $buffer,
-        Logger $logger,
         int $index,
-        int $pid
+        ?int $pid,
+        string $buffer,
+        Logger $logger
     ): void {
         $progressSymbol = $this->progressSymbol;
         $charactersCount = mb_substr_count($buffer, $progressSymbol);
 
         // Display unexpected output
         if ($charactersCount !== mb_strlen($buffer)) {
-            $logger->logUnexpectedOutput($buffer, $progressSymbol, $index, $pid);
+            $logger->logUnexpectedChildProcessOutput(
+                $index,
+                $pid,
+                $buffer,
+                $progressSymbol,
+            );
         }
 
-        $logger->advance($charactersCount);
+        $logger->logAdvance($charactersCount);
     }
 
     private static function validateBatchSize(int $batchSize): void

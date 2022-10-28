@@ -20,7 +20,6 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
@@ -95,11 +94,9 @@ trait Parallelization
      *
      * This method is called exactly once in the main process.
      *
-     * @param InputInterface $input The console input
-     *
      * @return iterable<string> The items to process
      */
-    abstract protected function fetchItems(InputInterface $input): iterable;
+    abstract protected function fetchItems(InputInterface $input, OutputInterface $output): iterable;
 
     /**
      * Processes an item in the child process.
@@ -131,7 +128,7 @@ trait Parallelization
 
         return $this
             ->getParallelExecutableFactory(
-                fn (InputInterface $input) => $this->fetchItems($input),
+                fn (InputInterface $input) => $this->fetchItems($input, $output),
                 fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
                 fn (int $count) => $this->getItemName($count),
                 $this->getName(),
@@ -266,10 +263,7 @@ trait Parallelization
             ->withRunAfterBatch(Closure::fromCallable([$this, 'runAfterBatch']));
     }
 
-    protected function createErrorHandler(
-        InputInterface $input,
-        OutputInterface $output
-    ): ErrorHandler
+    protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler
     {
         $errorHandler = new ThrowableCodeErrorHandler(
             ResetServiceErrorHandler::forContainer($this->getContainer()),
@@ -288,10 +282,7 @@ trait Parallelization
         return new LoggingErrorHandler($errorHandler);
     }
 
-    protected function createLogger(
-        InputInterface $input,
-        OutputInterface $output
-    ): Logger
+    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
     {
         return new StandardLogger(
             $input, $output,

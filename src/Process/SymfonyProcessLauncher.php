@@ -18,6 +18,8 @@ use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use function count;
+use function sprintf;
+use const PHP_EOL;
 
 /**
  * Launches a number of processes and distributes data among these processes.
@@ -26,6 +28,8 @@ use function count;
  * processes as configured in the constructor. Each process receives a share
  * of the data set via its standard input, separated by newlines. The size
  * of this share can be configured in the constructor (the segment size).
+ *
+ * @phpstan-import-type ProcessOutput from ProcessLauncherFactory
  */
 final class SymfonyProcessLauncher implements ProcessLauncher
 {
@@ -54,12 +58,12 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     private Logger $logger;
 
     /**
-     * @var callable(string, string): void
+     * @var ProcessOutput
      */
-    private $callback;
+    private $processOutput;
 
     /**
-     * @var Process[]
+     * @var array<positive-int|0, Process>
      */
     private array $runningProcesses = [];
 
@@ -71,12 +75,14 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     private SymfonyProcessFactory $processFactory;
 
     /**
-     * @param list<string>                   $command
-     * @param array<string, string>|null     $extraEnvironmentVariables
-     * @param positive-int                   $numberOfProcesses
-     * @param positive-int                   $segmentSize
-     * @param callable(string, string): void $callback
-     * @param callable(): void               $tick
+     * @param list<string>               $command
+     * @param array<string, string>|null $extraEnvironmentVariables
+     * @param positive-int               $numberOfProcesses
+     * @param positive-int               $segmentSize
+     * @param ProcessOutput              $processOutput             A PHP callback which is run whenever
+     *                                                              there is some output available on
+     *                                                              STDOUT or STDERR.
+     * @param callable(): void           $tick
      */
     public function __construct(
         array $command,
@@ -85,7 +91,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         int $numberOfProcesses,
         int $segmentSize,
         Logger $logger,
-        callable $callback,
+        callable $processOutput,
         callable $tick,
         SymfonyProcessFactory $processFactory
     ) {
@@ -95,7 +101,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         $this->numberOfProcesses = $numberOfProcesses;
         $this->segmentSize = $segmentSize;
         $this->logger = $logger;
-        $this->callback = $callback;
+        $this->processOutput = $processOutput;
         $this->tick = $tick;
         $this->processFactory = $processFactory;
     }
@@ -159,21 +165,30 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         $index = count($this->runningProcesses);
 
         $process = $this->processFactory->startProcess(
+            $index,
             $inputStream,
             $this->command,
             $this->workingDirectory,
             $this->environmentVariables,
-            $this->callback,
+            $this->processOutput,
+        );
+
+        $pid = $process->getPid();
+        Assert::notNull(
+            $pid,
+            sprintf(
+                'Expected the process #%d to have a PID. None found.',
+                $index,
+            ),
+        );
+
+        $this->logger->logChildProcessStarted(
             $index,
+            $pid,
+            $process->getCommandLine(),
         );
 
         $this->runningProcesses[] = $process;
-
-        $this->logger->logCommandStarted(
-            $index,
-            $process->getCommandLine(),
-            $process->getPid(),
-        );
     }
 
     /**
@@ -196,16 +211,43 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     }
 
     /**
-     * @return 0|positive-int
+     * @param positive-int|0 $index
+     *
+     * @return positive-int|0
      */
     private function freeProcess(int $index, Process $process): int
     {
-        $this->logger->logCommandFinished($index, 10);
+        $this->logger->logChildProcessFinished($index);
 
         unset($this->runningProcesses[$index]);
 
+        return self::getExitCode($process);
+    }
+
+    /**
+     * @return 0|positive-int
+     */
+    private static function getExitCode(Process $process): int
+    {
         $exitCode = $process->getExitCode();
-        Assert::natural($exitCode, 'Expected the process to be finished and return a valid exit code.');
+
+        // @codeCoverageIgnoreStart
+        if (null !== $exitCode && $exitCode < 0) {
+            // A negative exit code indicates the process has been terminated by
+            // a signal.
+            // Technically it is incorrect to change the exit code sign here.
+            // However, since we sum up the exit codes here we have no choice but
+            // to do so as otherwise we could cancel out an exit code. For example
+            // a child process that has -1 and the other one 1 the result would
+            // be 0 for the main process exit code which would be incorrect.
+            return -$exitCode;
+        }
+        // @codeCoverageIgnoreEnd
+
+        Assert::notNull(
+            $exitCode,
+            'Expected the process to have an exit code. Got "null" instead.',
+        );
 
         return $exitCode;
     }
