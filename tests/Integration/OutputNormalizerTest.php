@@ -444,14 +444,19 @@ final class OutputNormalizerTest extends TestCase
             ' 0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB[debug] Command started:',
         ];
 
-        yield 'standard fixed sized progress bar line with extra content with spacing' => [
+        yield 'fixed sized progress bar line with extra content with spacing' => [
             ' 0/5 [>---------------------------]   0% < 1 sec/< 1 sec 8.0 MiB [debug] Command started:',
             ' 0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB [debug] Command started:',
         ];
 
-        yield 'standard line with extra spacing' => [
+        yield 'fixed sized line with extra spacing' => [
             ' 5/5 [============================] 100%  1 sec/1 sec  14.0 MiB[debug] Command finished',
             ' 5/5 [============================] 100% 10 secs/10 secs 10.0 MiB[debug] Command finished',
+        ];
+
+        yield 'non fixed sized line with extra spacing' => [
+            ' 5 [----->----------------------]  10 secs 10.0 MiB',
+            ' 5 [----->----------------------] 10 secs 10.0 MiB',
         ];
     }
 }

@@ -176,7 +176,7 @@ class ParallelizationIntegrationTest extends TestCase
 
         $commandTester->execute(
             [
-                'command' => 's',
+                'command' => 'import:movies-unknown-count',
                 '--processes' => '2',
             ],
             ['interactive' => true],
@@ -239,7 +239,7 @@ class ParallelizationIntegrationTest extends TestCase
             ),
         );
 
-        self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $commandTester->getDisplay());
+        self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $outputWithoutExtraDebugInfo);
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandStartedLine));
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandFinishedLine));
     }
