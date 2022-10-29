@@ -69,6 +69,6 @@ final class InflectorTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Expected the singular word to be a known word from the inflector dictionary. Got "unknown".');
 
-        Inflector::pluralize('unknown', null);
+        Inflector::pluralize('unknown', 2);
     }
 }

@@ -30,11 +30,13 @@ final class OutputNormalizer
 {
     public static function normalize(string $output): string
     {
-        $output = self::normalizeProgressBarTimeTaken(
-            self::normalizeMemoryUsage(
-                self::normalizeProjectPath(
-                    self::normalizePhpExecutablePath(
-                        self::normalizeLineReturns($output),
+        $output = self::removeTrailingSpaces(
+            self::normalizeProgressBarTimeTaken(
+                self::normalizeMemoryUsage(
+                    self::normalizeProjectPath(
+                        self::normalizePhpExecutablePath(
+                            self::normalizeLineReturns($output),
+                        ),
                     ),
                 ),
             ),

@@ -23,8 +23,8 @@ use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use function array_column;
 use function array_map;
+use function preg_replace;
 use function spl_object_id;
-use function str_replace;
 
 /**
  * @coversNothing
@@ -79,10 +79,12 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 5 items, batches of 2, 3 batches
+            Processing 5 items, batches of 2, 3 batches, in the current process.
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 items.
 
@@ -108,10 +110,12 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 1 item, batches of 2, 1 batch
+            Processing 1 item, batches of 2, 1 batch, in the current process.
 
              0/1 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              1/1 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 1 item.
 
@@ -154,10 +158,12 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
+            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches, with 2 parallel child processes.
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 movies.
 
@@ -183,10 +189,12 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing ??? movies in segments of 2, batches of 2, ??? rounds, ??? batches in 2 processes
+            Processing ??? movies in segments of 2, batches of 2, with 2 parallel child processes.
 
                 0 [>---------------------------] 10 secs 10.0 MiB
                 5 [----->----------------------] 10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 movies.
 
@@ -216,10 +224,19 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expectedWithNoDebugMode = <<<'EOF'
-            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
+            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches, with 2 parallel child processes.
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
+
+
+
+
+
+
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 movies.
 
@@ -227,17 +244,23 @@ class ParallelizationIntegrationTest extends TestCase
 
         $actual = $this->getOutput($commandTester);
 
-        $expectedChildProcessesCount = 3;
-        $expectedCommandStartedLine = "[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n";
-        $expectedCommandFinishedLine = "[debug] Command finished\n";
+        // [notice] Started process #1 (PID 9076): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'
 
         $outputWithoutExtraDebugInfo = OutputNormalizer::removeIntermediateFixedProgressBars(
-            str_replace(
-                [$expectedCommandStartedLine, $expectedCommandFinishedLine],
-                ['', ''],
-                $actual,
+            preg_replace(
+                "~\\[notice\\] Started process #\\d \\(PID \\d+\\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'~",
+                '',
+                preg_replace(
+                    '~\\[notice\\] Stopped process #\\d~',
+                    '',
+                    $actual,
+                ),
             ),
         );
+
+        $expectedChildProcessesCount = 3;
+        $expectedCommandStartedLine = '[notice] Started process';
+        $expectedCommandFinishedLine = '[notice] Stopped process';
 
         self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $outputWithoutExtraDebugInfo);
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandStartedLine));
@@ -257,10 +280,12 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 20 legacy items, batches of 50, 1 batch
+            Processing 20 legacy items, batches of 50, 1 batch, in the current process.
 
               0/20 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              20/20 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 20 legacy items.
             You may need to run this command again.

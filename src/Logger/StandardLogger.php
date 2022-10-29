@@ -24,47 +24,23 @@ use Throwable;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Configuration;
 use function array_filter;
-use function count;
 use function implode;
 use function memory_get_peak_usage;
 use function memory_get_usage;
 use function microtime;
 use function sprintf;
-use function str_contains;
 use function str_pad;
 use function str_replace;
 use const STR_PAD_BOTH;
 
 final class StandardLogger implements Logger
 {
-    private const COLORS = [
-        'green',
-        'yellow',
-        'blue',
-        'magenta',
-        'cyan',
-        'white',
-        'gray',
-        'black',
-        'red',
-        'bright-red',
-        'bright-green',
-        'bright-yellow',
-        'bright-blue',
-        'bright-magenta',
-        'bright-cyan',
-        'bright-white',
-    ];
-
-    private array $started = [];
-    private int $count = -1;
-
     private SymfonyStyle $io;
     private int $terminalWidth;
     private ProgressBar $progressBar;
     private ProgressBarFactory $progressBarFactory;
     private float $startTime;
-    private bool $advanced;
+    private ?string $lastCall;
     private LoggerInterface $logger;
 
     public function __construct(
@@ -150,7 +126,7 @@ final class StandardLogger implements Logger
             $this->io,
             $numberOfItems ?? 0,
         );
-        $this->advanced = true;
+        $this->lastCall = 'logStart';
     }
 
     public function logAdvance(int $steps = 1): void
@@ -161,7 +137,7 @@ final class StandardLogger implements Logger
         );
 
         $this->progressBar->advance($steps);
-        $this->advanced = true;
+        $this->lastCall = 'logAdvance';
     }
 
     public function logFinish(string $itemName): void
@@ -188,59 +164,80 @@ final class StandardLogger implements Logger
             $itemName,
         ));
 
-        unset($this->progressBar);
+        unset($this->progressBar, $this->lastCall);
     }
 
     public function logChildProcessStarted(int $index, int $pid, string $commandName): void
     {
-        if ($this->advanced) {
+        if (!$this->io->isVeryVerbose()) {
+            return;
+        }
+
+        if ('logAdvance' === $this->lastCall) {
             $this->io->newLine();
         }
 
-        if ($this->io->isVeryVerbose()) {
-            $this->logger->notice(
-                sprintf(
-                    'Started process #%d (PID %s): %s',
-                    $index,
-                    $pid,
-                    $commandName,
-                ),
-            );
-        }
+        $this->logger->notice(
+            sprintf(
+                'Started process #%d (PID %s): %s',
+                $index,
+                $pid,
+                $commandName,
+            ),
+        );
 
-        $this->advanced = false;
-        $this->started[$index] = ['border' => ++$this->count % count(self::COLORS)];
+        $this->lastCall = 'logChildProcessStarted';
     }
 
     public function logChildProcessFinished(int $index): void
     {
-        if ($this->advanced) {
+        if (!$this->io->isVeryVerbose()) {
+            return;
+        }
+
+        if ('logAdvance' === $this->lastCall) {
             $this->io->newLine();
         }
 
-        if ($this->io->isVeryVerbose()) {
-            $this->logger->notice(
-                sprintf(
-                    'Stopped process #%d',
-                    $index,
-                ),
-            );
-        }
+        $this->logger->notice(
+            sprintf(
+                'Stopped process #%d',
+                $index,
+            ),
+        );
 
-        $this->advanced = false;
+        $this->lastCall = 'logChildProcessFinished';
     }
 
     public function logUnexpectedChildProcessOutput(
         int $index,
         ?int $pid,
-       string $type, string $buffer,
+        string $type,
+        string $buffer,
         string $progressSymbol
     ): void {
-        $this->io->newLine();
-
-        $error = str_contains($buffer, 'Failed to process the item');
+        $error = 'err' === $type;
         $message = str_replace($progressSymbol, '', $buffer);
 
+        if ($this->lastCall !== 'logUnexpectedChildProcessOutput:'.$index) {
+            $this->io->newLine();
+            $this->logUnexpectedChildProcessOutputSection($index, $pid);
+        }
+
+        $this->io->writeln(
+            self::formatBuffer(
+                $message,
+                $error,
+            ),
+        );
+
+        $this->io->newLine();
+
+        $this->lastCall = 'logUnexpectedChildProcessOutput:'.$index;
+    }
+
+    private function logUnexpectedChildProcessOutputSection(int $index, ?int $pid): void
+    {
         $pidPart = null !== $pid
             ? sprintf(
                 ' (PID %s)',
@@ -254,55 +251,17 @@ final class StandardLogger implements Logger
             $pidPart,
         );
 
-        $this->io->writeln([
-            sprintf(
-                '<comment>%s</comment>',
-                str_pad(
-                    $sectionTitle,
-                    $this->terminalWidth,
-                    '=',
-                    STR_PAD_BOTH,
-                ),
+        $processSectionLine = sprintf(
+            '<comment>%s</comment>',
+            str_pad(
+                $sectionTitle,
+                $this->terminalWidth,
+                '=',
+                STR_PAD_BOTH,
             ),
-            $this->progress(
-                $index,
-                $message,
-                $error,
-            ),
-        ]);
+        );
 
-        $this->io->newLine();
-    }
-
-    private function progress(int $id, string $buffer, bool $error = false, string $prefix = 'OUT', string $errorPrefix = 'ERR'): string
-    {
-        $message = '';
-
-        if ($error) {
-            if (isset($this->started[$id]['out'])) {
-                $message .= "\n";
-                unset($this->started[$id]['out']);
-            }
-            if (!isset($this->started[$id]['err'])) {
-                $message .= sprintf('%s<bg=red;fg=white> %s </> ', $this->getBorder($id), $errorPrefix);
-                $this->started[$id]['err'] = true;
-            }
-
-            $message .= str_replace("\n", sprintf("\n%s<bg=red;fg=white> %s </> ", $this->getBorder($id), $errorPrefix), $buffer);
-        } else {
-            if (isset($this->started[$id]['err'])) {
-                $message .= "\n";
-                unset($this->started[$id]['err']);
-            }
-            if (!isset($this->started[$id]['out'])) {
-                $message .= sprintf('%s<bg=green;fg=white> %s </> ', $this->getBorder($id), $prefix);
-                $this->started[$id]['out'] = true;
-            }
-
-            $message .= str_replace("\n", sprintf("\n%s<bg=green;fg=white> %s </> ", $this->getBorder($id), $prefix), $buffer);
-        }
-
-        return $message;
+        $this->io->writeln($processSectionLine);
     }
 
     public function logItemProcessingFailed(string $item, Throwable $throwable): void
@@ -313,13 +272,6 @@ final class StandardLogger implements Logger
             $throwable->getMessage(),
             $throwable->getTraceAsString(),
         ));
-    }
-
-    private function getBorder(int $id): string
-    {
-        return '';
-
-        return sprintf('<bg=%s> </>', self::COLORS[$this->started[$id]['border']]);
     }
 
     /**
@@ -336,5 +288,30 @@ final class StandardLogger implements Logger
                 $count,
                 Inflector::pluralize($singular, $count),
             );
+    }
+
+    private static function formatBuffer(
+        string $buffer,
+        bool $error
+    ): string {
+        $message = '';
+
+        if ($error) {
+            $message .= '<bg=red;fg=white> ERR </> ';
+            $message .= str_replace(
+                "\n",
+                "\n<bg=red;fg=white> ERR </> ",
+                $buffer,
+            );
+        } else {
+            $message .= '<bg=green;fg=white> OUT </> ';
+            $message .= str_replace(
+                "\n",
+                "\n<bg=green;fg=white> OUT </> ",
+                $buffer,
+            );
+        }
+
+        return $message;
     }
 }

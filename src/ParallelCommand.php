@@ -18,7 +18,6 @@ use Symfony\Bundle\FrameworkBundle\Console\Application as FrameworkBundleApplica
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -138,10 +137,10 @@ abstract class ParallelCommand extends Command
     protected function createLogger(InputInterface $input, OutputInterface $output): Logger
     {
         return new StandardLogger(
+            $input,
             $output,
             (new Terminal())->getWidth(),
             new DebugProgressBarFactory(),
-            new ConsoleLogger($output),
         );
     }
 

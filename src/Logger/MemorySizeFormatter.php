@@ -13,10 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Logger;
 
-use Webmozart\Assert\Assert;
 use function floor;
-use function is_float;
-use function is_int;
 use function log;
 use function number_format;
 use function sprintf;

@@ -16,7 +16,6 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
@@ -104,14 +103,6 @@ final class ImportMoviesCommand extends Command
 
     protected function runSingleCommand(string $movieFileName, InputInterface $input, OutputInterface $output): void
     {
-        $output->writeln('Hello there!');
-
-        if ('movie-3.json' === $movieFileName) {
-            if ($output instanceof ConsoleOutputInterface) {
-                $output->getErrorOutput()->writeln('Failed to process the item stderr message');
-            }
-        }
-
         $this->logger->recordSingleCommand(
             $movieFileName,
             $this->batchMovies[$movieFileName],
