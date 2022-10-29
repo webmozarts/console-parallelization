@@ -16,10 +16,11 @@ namespace Webmozarts\Console\Parallelization\Logger;
 use Error;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Logger\ConsoleLogger;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\Configuration;
+use Webmozarts\Console\Parallelization\Integration\OutputNormalizer;
 use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
 
 /**
@@ -29,7 +30,7 @@ use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
  */
 final class StandardLoggerTest extends TestCase
 {
-    private const ADVANCEMENT_CHARACTER = '▌';
+    private const PROGRESS_CHARACTER = '▌';
     private const TERMINAL_WIDTH = 50;
 
     private BufferedOutput $output;
@@ -40,10 +41,10 @@ final class StandardLoggerTest extends TestCase
         $this->output = new BufferedOutput();
 
         $this->logger = new StandardLogger(
+            new StringInput(''),
             $this->output,
             self::TERMINAL_WIDTH,
             new TestProgressBarFactory(),
-            new ConsoleLogger($this->output),
         );
     }
 
@@ -96,7 +97,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             false,
             <<<'TXT'
-                Processing 4 tokens, batches of 3, 2 batches
+                Processing 4 tokens, batches of 3, 2 batches, in the current process.
 
 
                 TXT,
@@ -114,7 +115,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             false,
             <<<'TXT'
-                Processing 8 tokens, batches of 3, 1 batch
+                Processing 8 tokens, batches of 3, 1 batch, in the current process.
 
 
                 TXT,
@@ -132,7 +133,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             false,
             <<<'TXT'
-                Processing 8 tokens, batches of 3, 4 batches
+                Processing 8 tokens, batches of 3, 4 batches, in the current process.
 
 
                 TXT,
@@ -150,7 +151,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             false,
             <<<'TXT'
-                Processing 8 tokens, batches of 3, 4 batches
+                Processing 8 tokens, batches of 3, 4 batches, in the current process.
 
 
                 TXT,
@@ -168,7 +169,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             false,
             <<<'TXT'
-                Processing 8 tokens, batches of 3, ??? batches
+                Processing 8 tokens, batches of 3, in the current process.
 
 
                 TXT,
@@ -186,7 +187,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             false,
             <<<'TXT'
-                Processing ??? tokens, batches of 3, 4 batches
+                Processing ??? tokens, batches of 3, 4 batches, in the current process.
 
 
                 TXT,
@@ -204,7 +205,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             false,
             <<<'TXT'
-                Processing 8 tokens, batches of 3, 4 batches
+                Processing 8 tokens, batches of 3, 4 batches, in the current process.
 
 
                 TXT,
@@ -225,7 +226,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             true,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 2 processes
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches, with 2 parallel child processes.
 
 
                 TXT,
@@ -243,7 +244,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             true,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 1 round, 4 batches in 2 processes
+                Processing 8 tokens in segments of 5, batches of 3, 1 round, 4 batches, with 2 parallel child processes.
 
 
                 TXT,
@@ -261,7 +262,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             true,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 1 batch in 2 processes
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 1 batch, with 2 parallel child processes.
 
 
                 TXT,
@@ -279,7 +280,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             true,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 1 process
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, 4 batches, with 1 child process.
 
 
                 TXT,
@@ -297,7 +298,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             true,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, ??? batches in 1 process
+                Processing 8 tokens in segments of 5, batches of 3, 2 rounds, with 1 child process.
 
 
                 TXT,
@@ -312,10 +313,10 @@ final class StandardLoggerTest extends TestCase
             ),
             3,
             null,
-            'tokens',
+            'token(s)',
             true,
             <<<'TXT'
-                Processing ??? tokens in segments of 5, batches of 3, 2 rounds, 4 batches in 1 process
+                Processing ??? token(s) in segments of 5, batches of 3, 2 rounds, 4 batches, with 1 child process.
 
 
                 TXT,
@@ -333,7 +334,7 @@ final class StandardLoggerTest extends TestCase
             'tokens',
             true,
             <<<'TXT'
-                Processing 8 tokens in segments of 5, batches of 3, ??? rounds, 4 batches in 1 process
+                Processing 8 tokens in segments of 5, batches of 3, 4 batches, with 1 child process.
 
 
                 TXT,
@@ -410,11 +411,21 @@ final class StandardLoggerTest extends TestCase
 
              10/10 [============================] 100%
 
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
+
             Processed 10 tokens.
 
             TXT;
 
-        self::assertSame($expected, $this->output->fetch());
+        $actual = OutputNormalizer::removeTrailingSpaces(
+            OutputNormalizer::normalizeMemoryUsage(
+                OutputNormalizer::normalizeProgressBarTimeTaken(
+                    $this->output->fetch(),
+                ),
+            ),
+        );
+
+        self::assertSame($expected, $actual);
     }
 
     public function test_it_cannot_end_the_processing_of_a_non_started_process(): void
@@ -425,119 +436,473 @@ final class StandardLoggerTest extends TestCase
         $this->logger->logFinish('tokens');
     }
 
-    public function test_it_can_log_the_unexpected_output_of_a_child_process(): void
-    {
+    /**
+     * @dataProvider unexpectedChildOutputProvider
+     */
+    public function test_it_can_log_the_unexpected_output_of_a_child_process(
+        int $index,
+        ?int $pid,
+        string $type,
+        string $buffer,
+        bool $alreadyLoggingChildOutput,
+        bool $previousChildOutputIsSameProcess,
+        string $expected
+    ): void {
+        // Setup
         $this->logger->logStart(10);
         $this->logger->logAdvance(4);
+
+        if ($alreadyLoggingChildOutput) {
+            $previousChildOutputIsSameProcess
+                ? $this->logger->logUnexpectedChildProcessOutput(
+                    $index,
+                    $pid,
+                    $type,
+                    $buffer,
+                    self::PROGRESS_CHARACTER,
+                )
+                : $this->logger->logUnexpectedChildProcessOutput(
+                    932,
+                    null,
+                    $type,
+                    $buffer,
+                    self::PROGRESS_CHARACTER,
+                );
+        }
+
         $this->output->fetch();
+        // End of setup
 
         $this->logger->logUnexpectedChildProcessOutput(
+            $index,
+            $pid,
+            $type,
+            $buffer,
+            self::PROGRESS_CHARACTER,
+        );
+
+        $actual = $this->output->fetch();
+
+        self::assertSame($expected, $actual);
+    }
+
+    public static function unexpectedChildOutputProvider(): iterable
+    {
+        yield 'stdout output; running process; did not start to print unexpected output of this process yet' => [
             2,
             23123,
             'out',
             'An error occurred.',
-            self::ADVANCEMENT_CHARACTER,
-        );
+            false,
+            true,
+            <<<'TXT'
 
-        $expected = <<<'TXT'
-
-            ================= Process Output =================
-            An error occurred.
+                ========= Process #2 (PID 23123) Output ==========
+                 OUT  An error occurred.
 
 
-            TXT;
+                TXT,
+        ];
 
-        self::assertSame($expected, $this->output->fetch());
-    }
+        yield 'stdout output; running process; already printing unexpected output of this process' => [
+            2,
+            23123,
+            'out',
+            'An error occurred.',
+            true,
+            true,
+            <<<'TXT'
+                 OUT  An error occurred.
 
-    public function test_it_can_log_the_unexpected_output_of_a_stopped_child_process(): void
-    {
-        $this->logger->logStart(10);
-        $this->logger->logAdvance(4);
-        $this->output->fetch();
 
-        $this->logger->logUnexpectedChildProcessOutput(
+                TXT,
+        ];
+
+        yield 'stdout output; running process; already printing unexpected output of another process' => [
+            2,
+            23123,
+            'out',
+            'An error occurred.',
+            true,
+            false,
+            <<<'TXT'
+
+                ========= Process #2 (PID 23123) Output ==========
+                 OUT  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stdout output; stopped process; did not start to print unexpected output of this process yet' => [
             2,
             null,
             'out',
             'An error occurred.',
-            self::ADVANCEMENT_CHARACTER,
-        );
+            false,
+            true,
+            <<<'TXT'
 
-        $expected = <<<'TXT'
-
-            ================= Process Output =================
-            An error occurred.
+                =============== Process #2 Output ================
+                 OUT  An error occurred.
 
 
-            TXT;
+                TXT,
+        ];
 
-        self::assertSame($expected, $this->output->fetch());
+        yield 'stdout output; stopped process; already printing unexpected output of this process' => [
+            2,
+            null,
+            'out',
+            'An error occurred.',
+            true,
+            true,
+            <<<'TXT'
+                 OUT  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stdout output; stopped process; already printing unexpected output of another process' => [
+            2,
+            null,
+            'out',
+            'An error occurred.',
+            true,
+            false,
+            <<<'TXT'
+
+                =============== Process #2 Output ================
+                 OUT  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stderr output; running process; did not start to print unexpected output of this process yet' => [
+            2,
+            23123,
+            'err',
+            'An error occurred.',
+            false,
+            true,
+            <<<'TXT'
+
+                ========= Process #2 (PID 23123) Output ==========
+                 ERR  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stderr output; running process; already printing unexpected output of this process' => [
+            2,
+            23123,
+            'err',
+            'An error occurred.',
+            true,
+            true,
+            <<<'TXT'
+                 ERR  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stderr output; running process; already printing unexpected output of another process' => [
+            2,
+            23123,
+            'err',
+            'An error occurred.',
+            true,
+            false,
+            <<<'TXT'
+
+                ========= Process #2 (PID 23123) Output ==========
+                 ERR  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stderr output; stopped process; did not start to print unexpected output of this process yet' => [
+            2,
+            null,
+            'err',
+            'An error occurred.',
+            false,
+            true,
+            <<<'TXT'
+
+                =============== Process #2 Output ================
+                 ERR  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stderr output; stopped process; already printing unexpected output of this process' => [
+            2,
+            null,
+            'err',
+            'An error occurred.',
+            true,
+            true,
+            <<<'TXT'
+                 ERR  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stderr output; stopped process; already printing unexpected output of another process' => [
+            2,
+            null,
+            'err',
+            'An error occurred.',
+            true,
+            false,
+            <<<'TXT'
+
+                =============== Process #2 Output ================
+                 ERR  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'output containing the progress symbol' => [
+            2,
+            23123,
+            'out',
+            'An error'.self::PROGRESS_CHARACTER.' occurred.',
+            true,
+            true,
+            <<<'TXT'
+                 OUT  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stdout; output containing line returns' => [
+            2,
+            23123,
+            'out',
+            "An error\n occurred\n.",
+            true,
+            true,
+            <<<'TXT'
+                 OUT  An error
+                 OUT   occurred
+                 OUT  .
+
+
+                TXT,
+        ];
+
+        yield 'stderr; output containing line returns' => [
+            2,
+            23123,
+            'err',
+            "An error\n occurred\n.",
+            true,
+            true,
+            <<<'TXT'
+                 ERR  An error
+                 ERR   occurred
+                 ERR  .
+
+
+                TXT,
+        ];
     }
 
-    public function test_it_removes_the_progress_character_of_the_unexpected_output_of_a_child_process(): void
-    {
-        $this->logger->logStart(10);
-        $this->logger->logAdvance(4);
+    /**
+     * @dataProvider startOfChildProcessProvider
+     */
+    public function test_it_can_log_the_start_of_child_process(
+        int $index,
+        int $pid,
+        int $verbosity,
+        bool $previousCallIsLogAdvance,
+        string $expected
+    ): void {
+        // Setup start
+        $this->logger->logStart(null);
+        if ($previousCallIsLogAdvance) {
+            $this->logger->logAdvance();
+        }
         $this->output->fetch();
 
-        $this->logger->logUnexpectedChildProcessOutput(
-            23,
-            23132,
-            'out',
-            'An error'.self::ADVANCEMENT_CHARACTER.' occurred.',
-            self::ADVANCEMENT_CHARACTER,
-        );
-
-        $expected = <<<'TXT'
-
-            ================= Process Output =================
-            An error occurred.
-
-
-            TXT;
-
-        self::assertSame($expected, $this->output->fetch());
-    }
-
-    public function test_it_can_log_the_start_of_a_command(): void
-    {
-        $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
+        $this->output->setVerbosity($verbosity);
+        // // Setup end
 
         $this->logger->logChildProcessStarted(
-            2,
-            2132,
+            $index,
+            $pid,
             '/path/to/bin/console foo:bar --child',
         );
 
-        $expected = <<<'TXT'
-            [debug] Command started: /path/to/bin/console foo:bar --child
+        $actual = $this->output->fetch();
 
-            TXT;
-
-        self::assertSame($expected, $this->output->fetch());
+        self::assertSame($expected, $actual);
     }
 
-    public function test_it_can_log_the_end_of_a_command(): void
+    public static function startOfChildProcessProvider(): iterable
     {
-        $this->output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
+        $verboseEnough = [
+            'very verbose' => OutputInterface::VERBOSITY_VERY_VERBOSE,
+            'debug' => OutputInterface::VERBOSITY_DEBUG,
+        ];
 
-        $this->logger->logChildProcessFinished(3);
+        $notVerboseEnough = [
+            'quiet' => OutputInterface::VERBOSITY_QUIET,
+            'normal' => OutputInterface::VERBOSITY_NORMAL,
+            'verbose' => OutputInterface::VERBOSITY_VERBOSE,
+        ];
 
-        $expected = <<<'TXT'
-            [debug] Command finished
+        foreach ($verboseEnough as $verbosityLabel => $verbosity) {
+            yield $verbosityLabel.'; previous call is not log advance' => [
+                2,
+                2132,
+                $verbosity,
+                false,
+                <<<'TXT'
+                    [notice] Started process #2 (PID 2132): /path/to/bin/console foo:bar --child
 
-            TXT;
+                    TXT,
+            ];
 
-        self::assertSame($expected, $this->output->fetch());
+            yield $verbosityLabel.'; previous call is log advance' => [
+                2,
+                2132,
+                $verbosity,
+                true,
+                <<<'TXT'
+
+                    [notice] Started process #2 (PID 2132): /path/to/bin/console foo:bar --child
+
+                    TXT,
+            ];
+        }
+
+        foreach ($notVerboseEnough as $verbosityLabel => $verbosity) {
+            yield $verbosityLabel.'; previous call is not log advance' => [
+                2,
+                2132,
+                $verbosity,
+                false,
+                <<<'TXT'
+
+                    TXT,
+            ];
+
+            yield $verbosityLabel.'; previous call is log advance' => [
+                2,
+                2132,
+                $verbosity,
+                true,
+                <<<'TXT'
+
+                    TXT,
+            ];
+        }
+    }
+
+    /**
+     * @dataProvider endOfChildProcessProvider
+     */
+    public function test_it_can_log_the_end_of_child_process(
+        int $index,
+        int $verbosity,
+        bool $previousCallIsLogAdvance,
+        string $expected
+    ): void {
+        // Setup start
+        $this->logger->logStart(null);
+        if ($previousCallIsLogAdvance) {
+            $this->logger->logAdvance();
+        }
+        $this->output->fetch();
+
+        $this->output->setVerbosity($verbosity);
+        // // Setup end
+
+        $this->logger->logChildProcessFinished($index);
+
+        $actual = $this->output->fetch();
+
+        self::assertSame($expected, $actual);
+    }
+
+    public static function endOfChildProcessProvider(): iterable
+    {
+        $verboseEnough = [
+            'very verbose' => OutputInterface::VERBOSITY_VERY_VERBOSE,
+            'debug' => OutputInterface::VERBOSITY_DEBUG,
+        ];
+
+        $notVerboseEnough = [
+            'quiet' => OutputInterface::VERBOSITY_QUIET,
+            'normal' => OutputInterface::VERBOSITY_NORMAL,
+            'verbose' => OutputInterface::VERBOSITY_VERBOSE,
+        ];
+
+        foreach ($verboseEnough as $verbosityLabel => $verbosity) {
+            yield $verbosityLabel.'; previous call is not log advance' => [
+                2,
+                $verbosity,
+                false,
+                <<<'TXT'
+                    [notice] Stopped process #2
+
+                    TXT,
+            ];
+
+            yield $verbosityLabel.'; previous call is log advance' => [
+                2,
+                $verbosity,
+                true,
+                <<<'TXT'
+
+                    [notice] Stopped process #2
+
+                    TXT,
+            ];
+        }
+
+        foreach ($notVerboseEnough as $verbosityLabel => $verbosity) {
+            yield $verbosityLabel.'; previous call is not log advance' => [
+                2,
+                $verbosity,
+                false,
+                <<<'TXT'
+
+                    TXT,
+            ];
+
+            yield $verbosityLabel.'; previous call is log advance' => [
+                2,
+                $verbosity,
+                true,
+                <<<'TXT'
+
+                    TXT,
+            ];
+        }
     }
 
     public function test_it_can_log_an_item_processing_failure(): void
     {
-        $this->logger->logItemProcessingFailed('item1', new Error('An error occurred.'));
+        $this->logger->logItemProcessingFailed(
+            'item1',
+            new Error('An error occurred.'),
+        );
 
         self::assertStringStartsWith(
-            'Failed to process "item1": An error occurred.',
+            'Failed to process the item "item1": An error occurred.',
             $this->output->fetch(),
         );
     }

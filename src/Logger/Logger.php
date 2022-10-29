@@ -72,7 +72,7 @@ interface Logger
      * @param positive-int|0 $index  Index of the process amoung the list of running processes.
      * @param int|null       $pid    The child process PID. It can be null if the process is no
      *                               longer running.
-     * @param string         $type The type of output: "out" or "err".
+     * @param string         $type   The type of output: "out" or "err".
      * @param string         $buffer Child process output.
      */
     public function logUnexpectedChildProcessOutput(

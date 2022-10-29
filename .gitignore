@@ -6,6 +6,7 @@
 /.phpunit.result.cache
 /composer.lock
 /dist/
+/phpunit.xml
 /tests/Integration/output
 /tests/Integration/var/
 /vendor-bin/*/vendor/

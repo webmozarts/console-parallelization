@@ -42,7 +42,6 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
         if (method_exists($process, 'inheritEnvironmentVariables')) {
             $process->inheritEnvironmentVariables(true);
         }
-        // @codeCoverageIgnoreEnd
         $process->start(
             fn (string $type, string $buffer) => $processOutput(
                 $index,
@@ -51,6 +50,7 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
                 $buffer,
             ),
         );
+        // @codeCoverageIgnoreEnd
 
         return $process;
     }

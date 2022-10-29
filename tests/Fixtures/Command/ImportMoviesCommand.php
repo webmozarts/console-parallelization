@@ -16,7 +16,6 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
@@ -115,13 +114,15 @@ final class ImportMoviesCommand extends Command
         return 1 === $count ? 'movie' : 'movies';
     }
 
-    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
-    {
+    protected function createLogger(
+        InputInterface $input,
+        OutputInterface $output
+    ): Logger {
         return new StandardLogger(
+            $input,
             $output,
             (new Terminal())->getWidth(),
             new TestDebugProgressBarFactory(),
-            new ConsoleLogger($output),
         );
     }
 

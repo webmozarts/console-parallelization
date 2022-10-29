@@ -14,11 +14,20 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Configuration;
+use function array_filter;
+use function implode;
+use function memory_get_peak_usage;
+use function memory_get_usage;
+use function microtime;
 use function sprintf;
 use function str_pad;
 use function str_replace;
@@ -26,22 +35,24 @@ use const STR_PAD_BOTH;
 
 final class StandardLogger implements Logger
 {
-    private OutputInterface $output;
+    private SymfonyStyle $io;
     private int $terminalWidth;
     private ProgressBar $progressBar;
     private ProgressBarFactory $progressBarFactory;
+    private float $startTime;
+    private ?string $lastCall;
     private LoggerInterface $logger;
 
     public function __construct(
+        InputInterface $input,
         OutputInterface $output,
         int $terminalWidth,
-        ProgressBarFactory $progressBarFactory,
-        LoggerInterface $logger
+        ProgressBarFactory $progressBarFactory
     ) {
-        $this->output = $output;
+        $this->io = new SymfonyStyle($input, $output);
         $this->terminalWidth = $terminalWidth;
         $this->progressBarFactory = $progressBarFactory;
-        $this->logger = $logger;
+        $this->logger = new ConsoleLogger($output);
     }
 
     public function logConfiguration(
@@ -53,36 +64,54 @@ final class StandardLogger implements Logger
     ): void {
         $numberOfItems ??= '???';
         $segmentSize = $configuration->getSegmentSize();
-        $numberOfSegments = $configuration->getNumberOfSegments() ?? '???';
-        $totalNumberOfBatches = $configuration->getTotalNumberOfBatches() ?? '???';
+        $numberOfSegments = $configuration->getNumberOfSegments();
+        $totalNumberOfBatches = $configuration->getTotalNumberOfBatches();
         $numberOfProcesses = $configuration->getNumberOfProcesses();
 
         if ($shouldSpawnChildProcesses) {
-            $this->output->writeln(sprintf(
-                'Processing %s %s in segments of %d, batches of %d, %s %s, %s %s in %d %s',
-                $numberOfItems,
-                $itemName,
-                $segmentSize,
-                $batchSize,
-                $numberOfSegments,
-                1 === $numberOfSegments ? 'round' : 'rounds',
-                $totalNumberOfBatches,
-                1 === $totalNumberOfBatches ? 'batch' : 'batches',
+            $parts = [
+                sprintf(
+                    'Processing %s %s in segments of %d',
+                    $numberOfItems,
+                    $itemName,
+                    $segmentSize,
+                ),
+                sprintf(
+                    'batches of %d',
+                    $batchSize,
+                ),
+                self::enunciate('round', $numberOfSegments),
+                self::enunciate('batch', $totalNumberOfBatches),
+            ];
+
+            $message = sprintf(
+                '%s, with %d %s.',
+                implode(', ', array_filter($parts)),
                 $numberOfProcesses,
-                1 === $numberOfProcesses ? 'process' : 'processes',
-            ));
+                Inflector::pluralize('child process', $numberOfProcesses),
+            );
         } else {
-            $this->output->writeln(sprintf(
-                'Processing %s %s, batches of %d, %s %s',
-                $numberOfItems,
-                $itemName,
-                $batchSize,
-                $totalNumberOfBatches,
-                1 === $totalNumberOfBatches ? 'batch' : 'batches',
-            ));
+            $parts = [
+                sprintf(
+                    'Processing %s %s',
+                    $numberOfItems,
+                    $itemName,
+                ),
+                sprintf(
+                    'batches of %d',
+                    $batchSize,
+                ),
+                self::enunciate('batch', $totalNumberOfBatches),
+            ];
+
+            $message = sprintf(
+                '%s, in the current process.',
+                implode(', ', array_filter($parts)),
+            );
         }
 
-        $this->output->writeln('');
+        $this->io->writeln($message);
+        $this->io->newLine();
     }
 
     public function logStart(?int $numberOfItems): void
@@ -92,10 +121,12 @@ final class StandardLogger implements Logger
             'Cannot start the progress: already started.',
         );
 
+        $this->startTime = microtime(true);
         $this->progressBar = $this->progressBarFactory->create(
-            $this->output,
+            $this->io,
             $numberOfItems ?? 0,
         );
+        $this->lastCall = 'logStart';
     }
 
     public function logAdvance(int $steps = 1): void
@@ -106,6 +137,7 @@ final class StandardLogger implements Logger
         );
 
         $this->progressBar->advance($steps);
+        $this->lastCall = 'logAdvance';
     }
 
     public function logFinish(string $itemName): void
@@ -117,35 +149,64 @@ final class StandardLogger implements Logger
 
         $this->progressBar->finish();
 
-        $this->output->writeln('');
-        $this->output->writeln('');
-        $this->output->writeln(sprintf(
+        $this->io->comment(
+            sprintf(
+                '<info>Memory usage: %s (peak: %s), time: %s</info>',
+                MemorySizeFormatter::format(memory_get_usage()),
+                MemorySizeFormatter::format(memory_get_peak_usage()),
+                Helper::formatTime(microtime(true) - $this->startTime),
+            ),
+        );
+
+        $this->io->writeln(sprintf(
             'Processed %d %s.',
             $this->progressBar->getMaxSteps(),
             $itemName,
         ));
 
-        unset($this->progressBar);
-    }
-
-    public function logItemProcessingFailed(string $item, Throwable $throwable): void
-    {
-        $this->output->writeln(sprintf(
-            "Failed to process \"%s\": %s\n%s",
-            $item,
-            $throwable->getMessage(),
-            $throwable->getTraceAsString(),
-        ));
+        unset($this->progressBar, $this->lastCall);
     }
 
     public function logChildProcessStarted(int $index, int $pid, string $commandName): void
     {
-        $this->logger->debug('Command started: '.$commandName);
+        if (!$this->io->isVeryVerbose()) {
+            return;
+        }
+
+        if ('logAdvance' === $this->lastCall) {
+            $this->io->newLine();
+        }
+
+        $this->logger->notice(
+            sprintf(
+                'Started process #%d (PID %s): %s',
+                $index,
+                $pid,
+                $commandName,
+            ),
+        );
+
+        $this->lastCall = 'logChildProcessStarted';
     }
 
     public function logChildProcessFinished(int $index): void
     {
-        $this->logger->debug('Command finished');
+        if (!$this->io->isVeryVerbose()) {
+            return;
+        }
+
+        if ('logAdvance' === $this->lastCall) {
+            $this->io->newLine();
+        }
+
+        $this->logger->notice(
+            sprintf(
+                'Stopped process #%d',
+                $index,
+            ),
+        );
+
+        $this->lastCall = 'logChildProcessFinished';
     }
 
     public function logUnexpectedChildProcessOutput(
@@ -155,17 +216,100 @@ final class StandardLogger implements Logger
         string $buffer,
         string $progressSymbol
     ): void {
-        $this->output->writeln('');
-        $this->output->writeln(sprintf(
+        $error = 'err' === $type;
+        $message = str_replace($progressSymbol, '', $buffer);
+
+        if ($this->lastCall !== 'logUnexpectedChildProcessOutput:'.$index) {
+            $this->io->newLine();
+            $this->logUnexpectedChildProcessOutputSection($index, $pid);
+        }
+
+        $this->io->writeln(
+            self::formatBuffer(
+                $message,
+                $error,
+            ),
+        );
+
+        $this->io->newLine();
+
+        $this->lastCall = 'logUnexpectedChildProcessOutput:'.$index;
+    }
+
+    private function logUnexpectedChildProcessOutputSection(int $index, ?int $pid): void
+    {
+        $pidPart = null !== $pid
+            ? sprintf(
+                ' (PID %s)',
+                $pid,
+            )
+            : '';
+
+        $sectionTitle = sprintf(
+            ' Process #%d%s Output ',
+            $index,
+            $pidPart,
+        );
+
+        $processSectionLine = sprintf(
             '<comment>%s</comment>',
             str_pad(
-                ' Process Output ',
+                $sectionTitle,
                 $this->terminalWidth,
                 '=',
                 STR_PAD_BOTH,
             ),
+        );
+
+        $this->io->writeln($processSectionLine);
+    }
+
+    public function logItemProcessingFailed(string $item, Throwable $throwable): void
+    {
+        $this->io->writeln(sprintf(
+            "Failed to process the item \"%s\": %s\n%s",
+            $item,
+            $throwable->getMessage(),
+            $throwable->getTraceAsString(),
         ));
-        $this->output->writeln(str_replace($progressSymbol, '', $buffer));
-        $this->output->writeln('');
+    }
+
+    /**
+     * @param positive-int|0 $count
+     */
+    private static function enunciate(
+        string $singular,
+        ?int $count
+    ): ?string {
+        return null === $count
+            ? null
+            : sprintf(
+                '%d %s',
+                $count,
+                Inflector::pluralize($singular, $count),
+            );
+    }
+
+    private static function formatBuffer(
+        string $buffer,
+        bool $error
+    ): string {
+        if ($error) {
+            $message = '<bg=red;fg=white> ERR </> ';
+            $message .= str_replace(
+                "\n",
+                "\n<bg=red;fg=white> ERR </> ",
+                $buffer,
+            );
+        } else {
+            $message = '<bg=green;fg=white> OUT </> ';
+            $message .= str_replace(
+                "\n",
+                "\n<bg=green;fg=white> OUT </> ",
+                $buffer,
+            );
+        }
+
+        return $message;
     }
 }

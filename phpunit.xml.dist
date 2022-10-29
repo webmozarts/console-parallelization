@@ -30,6 +30,7 @@
             <file>src/CpuCoreCounter.php</file>
             <file>src/Deprecation.php</file>
             <file>src/ErrorHandler/NullErrorHandler.php</file>
+            <file>src/Logger/MemorySizeFormatter.php</file>
             <file>src/Logger/NullLogger.php</file>
             <file>src/Logger/DebugProgressBarFactory.php</file>
             <file>src/ParallelCommand.php</file>
