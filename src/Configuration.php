@@ -41,6 +41,8 @@ final class Configuration
     private ?int $totalNumberOfBatches;
 
     /**
+     * @internal Use the static factory methods instead.
+     *
      * @param positive-int        $numberOfProcesses
      * @param positive-int        $segmentSize
      * @param positive-int|null   $numberOfSegments
@@ -97,6 +99,8 @@ final class Configuration
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @return positive-int
      */
     public function getNumberOfProcesses(): int
@@ -105,6 +109,8 @@ final class Configuration
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @return positive-int
      */
     public function getSegmentSize(): int
@@ -113,6 +119,8 @@ final class Configuration
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @return positive-int|null
      */
     public function getNumberOfSegments(): ?int
@@ -121,6 +129,8 @@ final class Configuration
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @return positive-int|0|null
      */
     public function getTotalNumberOfBatches(): ?int
@@ -198,23 +208,19 @@ final class Configuration
     }
 
     /**
-     * @param 0|positive-int|null $numberOfItems
-     * @param positive-int        $segmentSize
-     * @param positive-int        $batchSize
-     * @param positive-int        $numberOfSegments
+     * @param 0|positive-int $numberOfItems
+     * @param positive-int   $segmentSize
+     * @param positive-int   $batchSize
+     * @param positive-int   $numberOfSegments
      *
-     * @return 0|positive-int|null
+     * @return 0|positive-int
      */
     private static function calculateTotalNumberOfBatches(
-        ?int $numberOfItems,
+        int $numberOfItems,
         int $segmentSize,
         int $batchSize,
         int $numberOfSegments
-    ): ?int {
-        if (null === $numberOfItems) {
-            return null;
-        }
-
+    ): int {
         if ($numberOfSegments >= 2) {
             // It "should" be `$numberOfSegments - 1`. However, it actually does
             // not matter as the expression L128 is just going to give a

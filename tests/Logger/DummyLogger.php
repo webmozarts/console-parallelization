@@ -34,7 +34,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function startProgress(?int $numberOfItems): void
+    public function logStart(?int $numberOfItems): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -42,7 +42,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function advance(int $steps = 1): void
+    public function logAdvance(int $steps = 1): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -50,31 +50,7 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function finish(string $itemName): void
-    {
-        $this->records[] = [
-            __FUNCTION__,
-            func_get_args(),
-        ];
-    }
-
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
-    {
-        $this->records[] = [
-            __FUNCTION__,
-            func_get_args(),
-        ];
-    }
-
-    public function logCommandStarted(string $commandName): void
-    {
-        $this->records[] = [
-            __FUNCTION__,
-            func_get_args(),
-        ];
-    }
-
-    public function logCommandFinished(): void
+    public function logFinish(string $itemName): void
     {
         $this->records[] = [
             __FUNCTION__,
@@ -84,6 +60,35 @@ final class DummyLogger implements Logger
 
     public function logItemProcessingFailed(string $item, Throwable $throwable): void
     {
+        $this->records[] = [
+            __FUNCTION__,
+            func_get_args(),
+        ];
+    }
+
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
+    {
+        $this->records[] = [
+            __FUNCTION__,
+            func_get_args(),
+        ];
+    }
+
+    public function logChildProcessFinished(int $index): void
+    {
+        $this->records[] = [
+            __FUNCTION__,
+            func_get_args(),
+        ];
+    }
+
+    public function logUnexpectedChildProcessOutput(
+        int $index,
+        ?int $pid,
+        string $type,
+        string $buffer,
+        string $progressSymbol
+    ): void {
         $this->records[] = [
             __FUNCTION__,
             func_get_args(),

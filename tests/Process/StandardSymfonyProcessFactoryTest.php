@@ -27,31 +27,34 @@ final class StandardSymfonyProcessFactoryTest extends TestCase
     {
         $factory = new StandardSymfonyProcessFactory();
 
+        $index = 11;
         $inputStream = new InputStream();
         $command = ['php', 'echo.php'];
         $workingDirectory = __DIR__;
         $environmentVariables = ['TEST_PARALLEL' => '0'];
 
-        $callbackCalled = false;
+        $processOutputCalled = false;
 
         // Do not use a Fake callback here as it would otherwise throw an
         // exception at a random time during cleanup.
-        $callback = static function () use (&$callbackCalled): void {
-            $callbackCalled = true;
+        $processOutput = static function () use (&$processOutputCalled): void {
+            $processOutputCalled = true;
         };
 
         $process = $factory->startProcess(
+            $index,
             $inputStream,
             $command,
             $workingDirectory,
             $environmentVariables,
-            $callback,
+            $processOutput,
         );
 
         self::assertSame("'php' 'echo.php'", $process->getCommandLine());
         self::assertSame($workingDirectory, $process->getWorkingDirectory());
         self::assertSame($environmentVariables, $process->getEnv());
         self::assertTrue($process->isRunning());
-        self::assertFalse($callbackCalled);
+        self::assertNotNull($process->getPid());
+        self::assertFalse($processOutputCalled);
     }
 }

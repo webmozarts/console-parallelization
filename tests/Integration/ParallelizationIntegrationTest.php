@@ -17,20 +17,15 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Process\PhpExecutableFinder;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use function array_column;
-use function array_keys;
 use function array_map;
-use function getcwd;
 use function preg_replace;
 use function spl_object_id;
-use function sprintf;
 use function str_replace;
-use const PHP_EOL;
 
 /**
  * @coversNothing
@@ -85,16 +80,18 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 5 items, batches of 2, 3 batches
+            Processing 5 items, batches of 2, 3 batches, in the current process.
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 items.
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -114,16 +111,18 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 1 item, batches of 2, 1 batch
+            Processing 1 item, batches of 2, 1 batch, in the current process.
 
              0/1 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              1/1 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 1 item.
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -160,16 +159,18 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
+            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches, with 2 parallel child processes.
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 movies.
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
         );
 
@@ -189,23 +190,26 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing ??? movies in segments of 2, batches of 2, ??? rounds, ??? batches in 2 processes
+            Processing ??? movies in segments of 2, batches of 2, with 2 parallel child processes.
 
                 0 [>---------------------------] 10 secs 10.0 MiB
                 5 [----->----------------------] 10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 movies.
 
             EOF;
 
-        $actual = self::normalizeIntermediateDynamicProgressBars(
+        $actual = OutputNormalizer::removeIntermediateNonFixedProgressBars(
             $this->getOutput($commandTester),
+            5,
         );
 
         self::assertSame($expected, $actual, $actual);
     }
 
-    public function test_it_can_run_the_command_with_multiple_processes_in_debug_mode(): void
+    public function test_it_can_run_the_command_with_multiple_processes_in_very_verbose_mode(): void
     {
         $commandTester = $this->importMoviesCommandTester;
 
@@ -216,15 +220,17 @@ class ParallelizationIntegrationTest extends TestCase
             ],
             [
                 'interactive' => true,
-                'verbosity' => OutputInterface::VERBOSITY_DEBUG,
+                'verbosity' => OutputInterface::VERBOSITY_VERY_VERBOSE,
             ],
         );
 
         $expectedWithNoDebugMode = <<<'EOF'
-            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches in 2 processes
+            Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches, with 2 parallel child processes.
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 5 movies.
 
@@ -232,17 +238,33 @@ class ParallelizationIntegrationTest extends TestCase
 
         $actual = $this->getOutput($commandTester);
 
-        $expectedChildProcessesCount = 3;
-        $expectedCommandStartedLine = "[debug] Command started: '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n";
-        $expectedCommandFinishedLine = "[debug] Command finished\n";
+        $removeProcessStartedOutput = static fn (string $output) => preg_replace(
+            "~\n?\\[notice\\] Started process #\\d \\(PID \\d+\\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n~",
+            '',
+            $output,
+        );
+        $removeProcessStoppedOutput = static fn (string $output) => preg_replace(
+            '~\[notice\] Stopped process #\d\n~',
+            '',
+            $output,
+        );
+        $removeUnstableOutput = static fn (string $output) => str_replace(
+            "MiB\n\n 5/5",
+            "MiB\n 5/5",
+            $output,
+        );
 
-        $outputWithoutExtraDebugInfo = self::normalizeIntermediateFixedProgressBars(
-            str_replace(
-                [$expectedCommandStartedLine, $expectedCommandFinishedLine],
-                ['', ''],
-                $actual,
+        $outputWithoutExtraDebugInfo = $removeUnstableOutput(
+            $removeProcessStartedOutput(
+                $removeProcessStoppedOutput(
+                    OutputNormalizer::removeIntermediateFixedProgressBars($actual),
+                ),
             ),
         );
+
+        $expectedChildProcessesCount = 3;
+        $expectedCommandStartedLine = '[notice] Started process';
+        $expectedCommandFinishedLine = '[notice] Stopped process';
 
         self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $outputWithoutExtraDebugInfo);
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandStartedLine));
@@ -262,10 +284,12 @@ class ParallelizationIntegrationTest extends TestCase
         );
 
         $expected = <<<'EOF'
-            Processing 20 legacy items, batches of 50, 1 batch
+            Processing 20 legacy items, batches of 50, 1 batch, in the current process.
 
               0/20 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
              20/20 [============================] 100% 10 secs/10 secs 10.0 MiB
+
+             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
             Processed 20 legacy items.
             You may need to run this command again.
@@ -313,9 +337,8 @@ class ParallelizationIntegrationTest extends TestCase
             ],
         ];
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
-            20,
         );
 
         self::assertSame($expected, $actual, $actual);
@@ -365,9 +388,8 @@ class ParallelizationIntegrationTest extends TestCase
 
             EOF;
 
-        $actual = self::normalizeIntermediateFixedProgressBars(
+        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
             $this->getOutput($commandTester),
-            20,
         );
 
         self::assertSame($expected, $actual, $actual);
@@ -377,80 +399,6 @@ class ParallelizationIntegrationTest extends TestCase
     {
         $output = $commandTester->getDisplay(true);
 
-        $output = preg_replace(
-            '/\d+(\.\d+)? ([A-Z]i)?B/',
-            '10.0 MiB',
-            $output,
-        );
-
-        $output = str_replace(
-            '< 1 sec',
-            '10 secs',
-            $output,
-        );
-
-        $output = preg_replace(
-            '/\d+ secs?/',
-            '10 secs',
-            $output,
-        );
-
-        $replaceMap = [
-            '%  10 secs' => '% 10 secs',
-            'secs  10.0 MiB' => 'secs 10.0 MiB',
-            ']  10 secs' => '] 10 secs',
-            PHP_EOL => "\n",
-            (new PhpExecutableFinder())->find() => '/path/to/php',
-            getcwd() => '/path/to/work-dir',
-        ];
-
-        $output = self::normalizeConsolePath($output);
-
-        return str_replace(
-            array_keys($replaceMap),
-            $replaceMap,
-            $output,
-        );
-    }
-
-    private static function normalizeConsolePath(string $output): string
-    {
-        return preg_replace(
-            '~'.getcwd().'.+?console~',
-            '/path/to/work-dir/bin/console',
-            $output,
-        );
-    }
-
-    private static function normalizeIntermediateFixedProgressBars(
-        string $output,
-        int $expectedNumberOfItems = 5
-    ): string {
-        $intermediateItemRange = sprintf(
-            '[1-%d]/%d',
-            $expectedNumberOfItems - 1,
-            $expectedNumberOfItems,
-        );
-
-        return preg_replace(
-            '# *?'.$intermediateItemRange.' \[[=>-]+\]  \d+% 10 secs/10 secs 10.0 MiB\n#',
-            '',
-            $output,
-        );
-    }
-
-    private static function normalizeIntermediateDynamicProgressBars(string $output): string
-    {
-        $output = preg_replace(
-            '# *?[1-4] \[[>-]+\]  ?10 secs 10.0 MiB\n#',
-            '',
-            $output,
-        );
-
-        return str_replace(
-            '\[[->]+?\]',
-            '[----->----------------------]',
-            $output,
-        );
+        return OutputNormalizer::normalize($output);
     }
 }

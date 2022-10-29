@@ -28,38 +28,43 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function startProgress(?int $numberOfItems): void
+    public function logStart(?int $numberOfItems): void
     {
         // Do nothing.
     }
 
-    public function advance(int $steps = 1): void
+    public function logAdvance(int $steps = 1): void
     {
         // Do nothing.
     }
 
-    public function finish(string $itemName): void
-    {
-        // Do nothing.
-    }
-
-    public function logUnexpectedOutput(string $buffer, string $progressSymbol): void
-    {
-        // Do nothing.
-    }
-
-    public function logCommandStarted(string $commandName): void
-    {
-        // Do nothing.
-    }
-
-    public function logCommandFinished(): void
+    public function logFinish(string $itemName): void
     {
         // Do nothing.
     }
 
     public function logItemProcessingFailed(string $item, Throwable $throwable): void
     {
+        // Do nothing.
+    }
+
+    public function logChildProcessStarted(int $index, int $pid, string $commandName): void
+    {
+        // Do nothing.
+    }
+
+    public function logChildProcessFinished(int $index): void
+    {
+        // Do nothing.
+    }
+
+    public function logUnexpectedChildProcessOutput(
+        int $index,
+        ?int $pid,
+        string $type,
+        string $buffer,
+        string $progressSymbol
+    ): void {
         // Do nothing.
     }
 }

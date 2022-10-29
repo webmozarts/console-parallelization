@@ -18,13 +18,9 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
-use function array_key_exists;
-use function array_keys;
-use function array_map;
 use function chr;
 use function getcwd;
 use function Safe\chdir;
-use function Safe\putenv;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutorFactory
@@ -201,7 +197,7 @@ final class ParallelExecutorFactoryTest extends TestCase
         string $expectedWorkingDirectory
     ): void {
         $cleanUpWorkingDirectory = self::moveToWorkingDirectory($workingDirectory);
-        $cleanUpEnvironmentVariables = self::setEnvironmentVariables($environmentVariables);
+        $cleanUpEnvironmentVariables = EnvironmentVariables::setVariables($environmentVariables);
 
         $expected = ParallelExecutorFactory::create(
             static fn () => ['item1', 'item2'],
@@ -275,61 +271,6 @@ final class ParallelExecutorFactoryTest extends TestCase
         chdir($workingDirectory);
 
         return static fn () => chdir($currentWorkingDirectory);
-    }
-
-    /**
-     * @param array<string, string> $environmentVariables
-     *
-     * @return callable():void
-     */
-    private static function setEnvironmentVariables(array $environmentVariables): callable
-    {
-        $restoreEnvironmentVariables = array_map(
-            static fn (string $name) => self::setEnvironmentVariable($name, $environmentVariables[$name]),
-            array_keys($environmentVariables),
-        );
-
-        return static function () use ($restoreEnvironmentVariables): void {
-            foreach ($restoreEnvironmentVariables as $restoreEnvironmentVariable) {
-                $restoreEnvironmentVariable();
-            }
-        };
-    }
-
-    /**
-     * @return callable():void
-     */
-    private static function setEnvironmentVariable(string $name, string $value): callable
-    {
-        if (array_key_exists($name, $_SERVER)) {
-            $previousValue = $_SERVER[$name];
-
-            $restoreServer = static fn () => $_SERVER[$name] = $previousValue;
-        } else {
-            $restoreServer = static function () use ($name): void {
-                unset($_SERVER[$name]);
-            };
-        }
-
-        if (array_key_exists($name, $_ENV)) {
-            $previousValue = $_ENV[$name];
-
-            $restoreEnv = static fn () => $_SERVER[$name] = $previousValue;
-        } else {
-            $restoreEnv = static function () use ($name): void {
-                unset($_ENV[$name]);
-            };
-        }
-
-        putenv($name.'='.$value);
-        $_SERVER[$name] = $value;
-        $_ENV[$name] = $value;
-
-        return static function () use ($restoreServer, $restoreEnv, $name): void {
-            putenv($name.'=');
-            $restoreServer();
-            $restoreEnv();
-        };
     }
 
     private static function createCallable(int $id): callable

@@ -245,6 +245,31 @@ final class ChildCommandFactoryTest extends TestCase
                 ],
             ];
         })();
+
+        yield 'enriched PHP executable' => (static function () use (
+            $scriptPath,
+            $commandName
+        ) {
+            [$input, $commandDefinition] = self::createInput(
+                [],
+                [],
+            );
+
+            return [
+                '/path/to/php -dmemory_limit=1',
+                $scriptPath,
+                $commandName,
+                $commandDefinition,
+                $input,
+                [
+                    '/path/to/php',
+                    '-dmemory_limit=1',
+                    $scriptPath,
+                    $commandName,
+                    '--child',
+                ],
+            ];
+        })();
     }
 
     public function test_it_cannot_create_a_factory_with_an_invalid_script_path(): void

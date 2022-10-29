@@ -54,6 +54,7 @@ final class ParallelizationInput
     private $findNumberOfProcesses;
 
     private ?string $item;
+
     private bool $childProcess;
 
     /**
@@ -167,7 +168,7 @@ final class ParallelizationInput
                 self::PROCESSES_OPTION,
                 'p',
                 InputOption::VALUE_OPTIONAL,
-                'The number of maximum parallel processes to run.',
+                'The number of maximum parallel child processes to run.',
             )
             ->addOption(
                 self::MAIN_PROCESS_OPTION,
