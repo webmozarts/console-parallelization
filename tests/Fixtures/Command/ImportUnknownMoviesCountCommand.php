@@ -16,9 +16,7 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 use Error;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
@@ -118,10 +116,10 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
     protected function createLogger(
         InputInterface $input,
         OutputInterface $output
-    ): Logger
-    {
+    ): Logger {
         return new StandardLogger(
-            $input, $output,
+            $input,
+            $output,
             (new Terminal())->getWidth(),
             new TestDebugProgressBarFactory(),
         );

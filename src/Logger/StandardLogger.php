@@ -24,6 +24,7 @@ use Throwable;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Configuration;
 use function array_filter;
+use function count;
 use function implode;
 use function memory_get_peak_usage;
 use function memory_get_usage;
@@ -37,22 +38,22 @@ use const STR_PAD_BOTH;
 final class StandardLogger implements Logger
 {
     private const COLORS = [
-'green',
-'yellow',
-'blue',
-'magenta',
-'cyan',
-'white',
-'gray',
+        'green',
+        'yellow',
+        'blue',
+        'magenta',
+        'cyan',
+        'white',
+        'gray',
         'black',
         'red',
-'bright-red',
-'bright-green',
-'bright-yellow',
-'bright-blue',
-'bright-magenta',
-'bright-cyan',
-'bright-white',
+        'bright-red',
+        'bright-green',
+        'bright-yellow',
+        'bright-blue',
+        'bright-magenta',
+        'bright-cyan',
+        'bright-white',
     ];
 
     private array $started = [];
@@ -103,26 +104,15 @@ final class StandardLogger implements Logger
                     'batches of %d',
                     $batchSize,
                 ),
-                null === $numberOfSegments
-                    ? null
-                    : sprintf(
-                        '%d %s',
-                    $numberOfSegments,
-                        1 === $numberOfSegments ? 'round' : 'rounds',
-                    ),
-                null === $totalNumberOfBatches
-                    ? null
-                    : sprintf(
-                        '%d batches',
-                        $totalNumberOfBatches,
-                    ),
+                self::enunciate('round', $numberOfSegments),
+                self::enunciate('batch', $totalNumberOfBatches),
             ];
 
             $message = sprintf(
                 '%s, with %d %s.',
                 implode(', ', array_filter($parts)),
                 $numberOfProcesses,
-                1 === $numberOfProcesses ? 'sub-process' : 'parallel sub-processes',
+                Inflector::pluralize('child process', $numberOfProcesses),
             );
         } else {
             $parts = [
@@ -135,12 +125,7 @@ final class StandardLogger implements Logger
                     'batches of %d',
                     $batchSize,
                 ),
-                null === $totalNumberOfBatches
-                    ? null
-                    : sprintf(
-                    '%d batches',
-                    $totalNumberOfBatches,
-                ),
+                self::enunciate('batch', $totalNumberOfBatches),
             ];
 
             $message = sprintf(
@@ -224,7 +209,7 @@ final class StandardLogger implements Logger
         }
 
         $this->advanced = false;
-        $this->started[$index] = ['border' => ++$this->count % \count(self::COLORS)];
+        $this->started[$index] = ['border' => ++$this->count % count(self::COLORS)];
     }
 
     public function logChildProcessFinished(int $index): void
@@ -250,27 +235,41 @@ final class StandardLogger implements Logger
         ?int $pid,
         string $buffer,
         string $progressSymbol
-    ): void
-    {
+    ): void {
         $this->io->newLine();
 
         $error = str_contains($buffer, 'Failed to process the item');
+        $message = str_replace($progressSymbol, '', $buffer);
 
-        $this->io->writeln(
-            sprintf(
-                '<comment>====== Process #%d (PID %s) Output ======</comment>',
-                $index,
+        $pidPart = null !== $pid
+            ? sprintf(
+                ' (PID %s)',
                 $pid,
-            ),
+            )
+            : '';
+
+        $sectionTitle = sprintf(
+            ' Process #%d%s Output ',
+            $index,
+            $pidPart,
         );
-        $this->io->writeln(
+
+        $this->io->writeln([
+            sprintf(
+                '<comment>%s</comment>',
+                str_pad(
+                    $sectionTitle,
+                    $this->terminalWidth,
+                    '=',
+                    STR_PAD_BOTH,
+                ),
+            ),
             $this->progress(
                 $index,
-                str_replace($progressSymbol, '', $buffer),
+                $message,
                 $error,
             ),
-        );
-        //$this->io->writeln();
+        ]);
 
         $this->io->newLine();
     }
@@ -319,6 +318,23 @@ final class StandardLogger implements Logger
     private function getBorder(int $id): string
     {
         return '';
+
         return sprintf('<bg=%s> </>', self::COLORS[$this->started[$id]['border']]);
+    }
+
+    /**
+     * @param positive-int|0 $count
+     */
+    private static function enunciate(
+        string $singular,
+        ?int $count
+    ): ?string {
+        return null === $count
+            ? null
+            : sprintf(
+                '%d %s',
+                $count,
+                Inflector::pluralize($singular, $count),
+            );
     }
 }

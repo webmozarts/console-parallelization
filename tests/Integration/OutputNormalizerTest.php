@@ -60,6 +60,16 @@ final class OutputNormalizerTest extends TestCase
             ' 5 [----->----------------------] < 1 sec 8.0 MiB ',
             ' 5 [----->----------------------] < 1 sec 10.0 MiB ',
         ];
+
+        yield 'MB' => [
+            '8.0 MB',
+            '10.0 MB',
+        ];
+
+        yield 'with NBSP' => [
+            "8.0\u{a0}MB",
+            '10.0 MB',
+        ];
     }
 
     /**

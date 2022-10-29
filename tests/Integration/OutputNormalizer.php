@@ -15,9 +15,12 @@ namespace Webmozarts\Console\Parallelization\Integration;
 
 use Symfony\Component\Process\PhpExecutableFinder;
 use function array_keys;
+use function array_map;
 use function array_values;
 use function bin2hex;
+use function explode;
 use function getcwd;
+use function implode;
 use function preg_match;
 use function preg_replace;
 use function random_bytes;
@@ -55,8 +58,8 @@ final class OutputNormalizer
     public static function normalizeMemoryUsage(string $output): string
     {
         return preg_replace(
-            '/\d+(\.\d+)? ([A-Z]i)?B/',
-            '10.0 MiB',
+            '/\d+(?:\.\d+)?(?:\x{00A0}|\s)(?:[A-Z])?(i?)B/u',
+            '10.0 M$1B',
             $output,
         );
     }
@@ -100,6 +103,16 @@ final class OutputNormalizer
             "\r\n",
             "\n",
             $output,
+        );
+    }
+
+    public static function removeTrailingSpaces(string $output): string
+    {
+        $lines = explode("\n", $output);
+
+        return implode(
+            "\n",
+            array_map('rtrim', $lines),
         );
     }
 

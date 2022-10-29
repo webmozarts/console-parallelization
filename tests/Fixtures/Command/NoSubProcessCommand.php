@@ -17,7 +17,6 @@ use DomainException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
@@ -97,8 +96,7 @@ final class NoSubProcessCommand extends Command
     protected function createLogger(
         InputInterface $input,
         OutputInterface $output
-    ): Logger
-    {
+    ): Logger {
         return new StandardLogger(
             $input,
             $output,
