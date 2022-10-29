@@ -33,8 +33,6 @@ final class MemorySizeFormatter
      */
     public static function format($size, int $decimals = 2): string
     {
-        Assert::true(is_int($size) || is_float($size));
-
         if (-1 === $size) {
             return '-1';
         }
