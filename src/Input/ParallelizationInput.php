@@ -133,25 +133,25 @@ final class ParallelizationInput
             ->addArgument(
                 self::ITEM_ARGUMENT,
                 InputArgument::OPTIONAL,
-                'The item to process',
+                'The item to process.',
             )
             ->addOption(
                 self::PROCESSES_OPTION,
                 'p',
                 InputOption::VALUE_OPTIONAL,
-                'The number of parallel processes to run',
+                'The number of maximum parallel child processes to run.',
             )
             ->addOption(
                 self::MAIN_PROCESS_OPTION,
                 'm',
                 InputOption::VALUE_NONE,
-                'To execute the processing in the main process (no child processes will be spawned)',
+                'To execute the processing in the main process (no child processes will be spawned).',
             )
             ->addOption(
                 self::CHILD_OPTION,
                 null,
                 InputOption::VALUE_NONE,
-                'Set on child processes',
+                'Set on child processes.',
             );
     }
 
