@@ -71,8 +71,8 @@ final class ParallelizationInput
      * @internal Use the static factory methods instead.
      *
      * @param positive-int|callable():positive-int $numberOfOrFindNumberOfProcesses
-     * @param positive-int|null $batchSize
-     * @param positive-int|null $segmentSize
+     * @param positive-int|null                    $batchSize
+     * @param positive-int|null                    $segmentSize
      */
     public function __construct(
         bool $mainProcess,
@@ -107,9 +107,9 @@ final class ParallelizationInput
         $mainProcess = $input->getOption(self::MAIN_PROCESS_OPTION);
         /** @var bool $isChild */
         $isChild = $input->getOption(self::CHILD_OPTION);
-        /** @var string|int|null $isChild */
+        /** @var string|int|null $batchSize */
         $batchSize = $input->getOption(self::BATCH_SIZE);
-        /** @var string|int|null $isChild */
+        /** @var string|int|null $segmentSize */
         $segmentSize = $input->getOption(self::SEGMENT_SIZE);
 
         if ($hasItem) {
@@ -138,8 +138,16 @@ final class ParallelizationInput
             );
         }
 
-        self::validateBatchSize($batchSize);
-        self::validateSegmentSize($segmentSize);
+        $batchSize = self::coerceAndValidatePositiveInt(
+            $batchSize,
+            'batch size',
+            true,
+        );
+        $segmentSize = self::coerceAndValidatePositiveInt(
+            $segmentSize,
+            'segment size',
+            true,
+        );
 
         return new self(
             $mainProcess,
@@ -267,60 +275,39 @@ final class ParallelizationInput
      */
     private static function coerceNumberOfProcesses(string $numberOfProcesses): int
     {
-        Assert::numeric(
+        return self::coerceAndValidatePositiveInt(
             $numberOfProcesses,
-            sprintf(
-                'Expected the number of process defined to be a valid numeric value. Got "%s".',
-                $numberOfProcesses,
-            ),
-        );
-
-        $castedNumberOfProcesses = (int) $numberOfProcesses;
-
-        Assert::same(
-            // We cast it again in string to make sure since it is more convenient to pass an
-            // int in the tests or when calling the command directly without passing by the CLI
-            (string) $numberOfProcesses,
-            (string) $castedNumberOfProcesses,
-            sprintf(
-                'Expected the number of process defined to be an integer. Got "%s".',
-                $numberOfProcesses,
-            ),
-        );
-
-        Assert::greaterThan(
-            $castedNumberOfProcesses,
-            0,
-            sprintf(
-                'Expected the number of processes to be 1 or greater. Got "%s".',
-                $castedNumberOfProcesses,
-            ),
-        );
-
-        return $castedNumberOfProcesses;
-    }
-
-    private static function validateBatchSize(?int $batchSize): void
-    {
-        Assert::nullOrGreaterThan(
-            $batchSize,
-            0,
-            sprintf(
-                'Expected the batch size to be 1 or greater. Got "%s".',
-                $batchSize,
-            ),
+            'maximum number of parallel processes',
+            false,
         );
     }
 
-    private static function validateSegmentSize(?int $segmentSize): void
-    {
-        Assert::nullOrGreaterThan(
-            $segmentSize,
-            0,
-            sprintf(
-                'Expected the segment size to be 1 or greater. Got "%s".',
-                $segmentSize,
-            ),
+    /**
+     * @param string|int|null $value
+     *
+     * @return ($nullable is true ? positive-int|null : positive-int)
+     */
+    private static function coerceAndValidatePositiveInt(
+        $value,
+        string $name,
+        bool $nullable
+    ): ?int {
+        if ($nullable && null === $value) {
+            return null;
+        }
+
+        $message = sprintf(
+            'Expected the %s to be an integer greater than or equal to 1. Got "%s".',
+            $name,
+            $value,
         );
+
+        Assert::integerish($value, $message);
+
+        $value = (int) $value;
+
+        Assert::positiveInteger($value, $message);
+
+        return $value;
     }
 }

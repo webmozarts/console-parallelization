@@ -129,6 +129,8 @@ final class ParallelExecutorTest extends TestCase
                     5,
                     null,
                     true,
+                    null,
+                    null,
                 ),
                 $input,
                 $output,
@@ -184,6 +186,8 @@ final class ParallelExecutorTest extends TestCase
                     5,
                     null,
                     true,
+                    null,
+                    null,
                 ),
                 $input,
                 $output,
@@ -223,6 +227,8 @@ final class ParallelExecutorTest extends TestCase
                     5,
                     'item1',
                     true,
+                    null,
+                    null,
                 ),
                 $input,
                 $output,
@@ -235,6 +241,77 @@ final class ParallelExecutorTest extends TestCase
                 [],
             ];
         })();
+
+        yield 'overridden batch and segment size' => (static function () use (
+            $progressSymbol,
+            $createExpectedOutput
+        ) {
+            $input = new StringInput('');
+            $output = new BufferedOutput();
+
+            $items = [
+                'item1',
+                'item2',
+                'item3',
+            ];
+
+            return [
+                new ParallelizationInput(
+                    true,
+                    5,
+                    null,
+                    true,
+                    1,
+                    null,
+                ),
+                $input,
+                $output,
+                implode(PHP_EOL, $items),
+                2,
+                $progressSymbol,
+                $createExpectedOutput(3),
+                0,
+                [
+                    [
+                        'runBeforeBatch',
+                        [$input, $output, [$items[0]]],
+                    ],
+                    [
+                        'runSingleCommand',
+                        [$items[0], $input, $output],
+                    ],
+                    [
+                        'runAfterBatch',
+                        [$input, $output, [$items[0]]],
+                    ],
+                    [
+                        'runBeforeBatch',
+                        [$input, $output, [$items[1]]],
+                    ],
+                    [
+                        'runSingleCommand',
+                        [$items[1], $input, $output],
+                    ],
+                    [
+                        'runAfterBatch',
+                        [$input, $output, [$items[1]]],
+                    ],
+                    [
+                        'runBeforeBatch',
+                        [$input, $output, [$items[2]]],
+                    ],
+                    [
+                        'runSingleCommand',
+                        [$items[2], $input, $output],
+                    ],
+                    [
+                        'runAfterBatch',
+                        [$input, $output, [$items[2]]],
+                    ],
+                ],
+                [],
+            ];
+        })();
     }
 
     public function test_it_handles_processing_failures_in_child_processes(): void
@@ -244,6 +321,8 @@ final class ParallelExecutorTest extends TestCase
             5,
             null,
             true,
+            null,
+            null,
         );
         $input = new StringInput('');
         $output = new BufferedOutput();
@@ -363,14 +442,16 @@ final class ParallelExecutorTest extends TestCase
 
     public function test_it_can_launch_configured_child_processes(): void
     {
-        $numberOfProcesses = 2;
-        $segmentSize = 2;
+        $inputBatchSize = 3;
+        $inputSegmentSize = 5;
 
         $parallelizationInput = new ParallelizationInput(
             false,
-            $numberOfProcesses,
+            2,
             null,
             false,
+            $inputBatchSize,
+            $inputSegmentSize,
         );
 
         $input = new ArrayInput([
@@ -379,6 +460,8 @@ final class ParallelExecutorTest extends TestCase
             '--child' => null,
             '--processes' => '2',
             '--opt' => 'val',
+            '--batch-size' => (string) $inputBatchSize,
+            '--segment-size' => (string) $inputSegmentSize,
         ]);
 
         $commandDefinition = new InputDefinition([
@@ -408,6 +491,16 @@ final class ParallelExecutorTest extends TestCase
             ),
             new InputOption(
                 'processes',
+                null,
+                InputOption::VALUE_REQUIRED,
+            ),
+            new InputOption(
+                'batch-size',
+                null,
+                InputOption::VALUE_REQUIRED,
+            ),
+            new InputOption(
+                'segment-size',
                 null,
                 InputOption::VALUE_REQUIRED,
             ),
@@ -442,11 +535,13 @@ final class ParallelExecutorTest extends TestCase
                     'group2',
                     '--child',
                     '--opt=val',
+                    '--batch-size='.$inputBatchSize,
+                    '--segment-size='.$inputSegmentSize,
                 ],
                 $workingDirectory,
                 $extraEnvironmentVariables,
-                $numberOfProcesses,
-                $segmentSize,
+                Argument::any(),
+                $inputSegmentSize,
                 $logger,
                 Argument::type('callable'),
                 Argument::type('callable'),
@@ -460,7 +555,7 @@ final class ParallelExecutorTest extends TestCase
             $errorHandler,
             StringStream::fromString(''),
             1,
-            $segmentSize,
+            2,
             $noop,
             $noop,
             $noop,
@@ -544,6 +639,8 @@ final class ParallelExecutorTest extends TestCase
                 $numberOfProcesses,
                 null,
                 false,
+                null,
+                null,
             ),
             $segmentSize,
             array_fill(0, $itemCount, 'itemX'),
@@ -637,6 +734,8 @@ final class ParallelExecutorTest extends TestCase
             2,
             null,
             false,
+            null,
+            null,
         );
         $batchSize = 2;
         $segmentSize = 2;
@@ -843,12 +942,14 @@ final class ParallelExecutorTest extends TestCase
             'item3',
         ];
 
-        yield [
+        yield 'nominal' => [
             new ParallelizationInput(
                 $mainProcess,
                 $numberOfProcesses,
                 null,
                 false,
+                null,
+                null,
             ),
             $input,
             $output,
@@ -895,6 +996,61 @@ final class ParallelExecutorTest extends TestCase
             ],
             true,
         ];
+
+        yield 'with overridden batch & segment size' => [
+            new ParallelizationInput(
+                $mainProcess,
+                $numberOfProcesses,
+                null,
+                false,
+                10,
+                20,
+            ),
+            $input,
+            $output,
+            $items,
+            $batchSize,
+            $segmentSize,
+            '👉',
+            '',
+            0,
+            [
+                [
+                    'runBeforeFirstCommand',
+                    [$input, $output],
+                ],
+                [
+                    'runAfterLastCommand',
+                    [$input, $output],
+                ],
+            ],
+            [
+                [
+                    'logConfiguration',
+                    [
+                        new Configuration(
+                            1,
+                            20,
+                            1,
+                            1,
+                        ),
+                        10,
+                        3,
+                        'items',
+                        true,
+                    ],
+                ],
+                [
+                    'logStart',
+                    [3],
+                ],
+                [
+                    'logFinish',
+                    ['items'],
+                ],
+            ],
+            true,
+        ];
     }
 
     /** @noinspection NestedTernaryOperatorInspection */
@@ -915,6 +1071,8 @@ final class ParallelExecutorTest extends TestCase
                 $numberOfProcesses,
                 null,
                 false,
+                null,
+                null,
             ),
             $input,
             $output,

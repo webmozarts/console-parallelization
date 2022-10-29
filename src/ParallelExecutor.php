@@ -173,7 +173,7 @@ final class ParallelExecutor
                 $parallelizationInput,
                 $input,
                 $output,
-                $logger
+                $logger,
             );
         }
 

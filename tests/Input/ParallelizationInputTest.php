@@ -58,12 +58,16 @@ final class ParallelizationInputTest extends TestCase
             5,
             'item',
             true,
+            10,
+            11,
         );
 
         self::assertTrue($input->shouldBeProcessedInMainProcess());
         self::assertSame(5, $input->getNumberOfProcesses());
         self::assertSame('item', $input->getItem());
         self::assertTrue($input->isChildProcess());
+        self::assertSame(10, $input->getBatchSize());
+        self::assertSame(11, $input->getSegmentSize());
     }
 
     public function test_it_can_be_instantiated_with_a_lazily_evaluated_closure_for_the_number_of_processes(): void
@@ -79,11 +83,15 @@ final class ParallelizationInputTest extends TestCase
             },
             'item',
             true,
+            10,
+            11,
         );
 
         self::assertTrue($input->shouldBeProcessedInMainProcess());
         self::assertSame('item', $input->getItem());
         self::assertTrue($input->isChildProcess());
+        self::assertSame(10, $input->getBatchSize());
+        self::assertSame(11, $input->getSegmentSize());
 
         self::assertFalse($closureEvaluated);
         self::assertSame(5, $input->getNumberOfProcesses());
@@ -131,23 +139,10 @@ final class ParallelizationInputTest extends TestCase
         ParallelizationInput::fromInput($input);
     }
 
-    public function test_it_cannot_be_instantiated_from_an_input_with_an_invalid_number_of_processes(): void
-    {
-        $input = new ArrayInput([
-            '--processes' => '0',
-        ]);
-        self::bindInput($input);
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected the number of processes to be 1 or greater. Got "0".');
-
-        ParallelizationInput::fromInput($input);
-    }
-
     /**
-     * @dataProvider invalidNumberOfProcessesProvider
+     * @dataProvider invalidInputProvider
      */
-    public function test_it_cannot_pass_an_invalid_number_of_processes(
+    public function test_it_cannot_pass_an_invalid_input(
         InputInterface $input,
         string $expectedErrorMessage
     ): void {
@@ -170,6 +165,8 @@ final class ParallelizationInputTest extends TestCase
                 $findNumberOfProcesses,
                 null,
                 false,
+                null,
+                null,
             ),
         ];
 
@@ -180,6 +177,8 @@ final class ParallelizationInputTest extends TestCase
                 1,
                 null,
                 false,
+                null,
+                null,
             ),
         ];
 
@@ -190,6 +189,8 @@ final class ParallelizationInputTest extends TestCase
                 4,
                 null,
                 false,
+                null,
+                null,
             ),
         ];
 
@@ -200,6 +201,8 @@ final class ParallelizationInputTest extends TestCase
                 1,
                 'item15',
                 false,
+                null,
+                null,
             ),
         ];
 
@@ -210,6 +213,8 @@ final class ParallelizationInputTest extends TestCase
                 1,
                 '10',
                 false,
+                null,
+                null,
             ),
         ];
 
@@ -220,6 +225,8 @@ final class ParallelizationInputTest extends TestCase
                 1,
                 '-0.5',
                 false,
+                null,
+                null,
             ),
         ];
 
@@ -230,16 +237,20 @@ final class ParallelizationInputTest extends TestCase
                 $findNumberOfProcesses,
                 null,
                 true,
+                null,
+                null,
             ),
         ];
 
         yield 'do processing in the main process' => [
-            new StringInput('--main-process --processes 15'),
+            new StringInput('--main-process --processes=15'),
             new ParallelizationInput(
                 true,
                 1,
                 null,
                 false,
+                null,
+                null,
             ),
         ];
 
@@ -250,30 +261,93 @@ final class ParallelizationInputTest extends TestCase
                 1,
                 null,
                 false,
+                null,
+                null,
+            ),
+        ];
+
+        yield 'custom batch size' => [
+            new StringInput('--batch-size=10'),
+            new ParallelizationInput(
+                false,
+                $findNumberOfProcesses,
+                null,
+                false,
+                10,
+                null,
+            ),
+        ];
+
+        yield 'custom segment size' => [
+            new StringInput('--segment-size=10'),
+            new ParallelizationInput(
+                false,
+                $findNumberOfProcesses,
+                null,
+                false,
+                null,
+                10,
             ),
         ];
 
         yield 'nominal' => [
-            new StringInput('--child --processes 15'),
+            new StringInput('--child --processes=15 --segment-size=11 --batch-size=10'),
             new ParallelizationInput(
                 false,
                 15,
                 null,
                 true,
+                10,
+                11,
             ),
         ];
     }
 
-    public static function invalidNumberOfProcessesProvider(): iterable
+    public static function invalidInputProvider(): iterable
     {
-        yield 'non numeric value' => [
-            new StringInput('--processes foo'),
-            'Expected the number of process defined to be a valid numeric value. Got "foo".',
+        yield '[number of processes] non numeric value' => [
+            new StringInput('--processes=foo'),
+            'Expected the maximum number of parallel processes to be an integer greater than or equal to 1. Got "foo".',
         ];
 
-        yield 'non integer value' => [
-            new StringInput('--processes 1.5'),
-            'Expected the number of process defined to be an integer. Got "1.5".',
+        yield '[number of processes] non integer value' => [
+            new StringInput('--processes=1.5'),
+            'Expected the maximum number of parallel processes to be an integer greater than or equal to 1. Got "1.5".',
+        ];
+
+        yield '[number of processes] invalid integer value' => [
+            new StringInput('--processes=0'),
+            'Expected the maximum number of parallel processes to be an integer greater than or equal to 1. Got "0".',
+        ];
+
+        yield '[batch size] non numeric value' => [
+            new StringInput('--batch-size=foo'),
+            'Expected the batch size to be an integer greater than or equal to 1. Got "foo".',
+        ];
+
+        yield '[batch size] non integer value' => [
+            new StringInput('--batch-size=1.5'),
+            'Expected the batch size to be an integer greater than or equal to 1. Got "1.5".',
+        ];
+
+        yield '[batch size] invalid integer value' => [
+            new StringInput('--batch-size=0'),
+            'Expected the batch size to be an integer greater than or equal to 1. Got "0".',
+        ];
+
+        yield '[segment size] non numeric value' => [
+            new StringInput('--segment-size=foo'),
+            'Expected the segment size to be an integer greater than or equal to 1. Got "foo".',
+        ];
+
+        yield '[segment size] non integer value' => [
+            new StringInput('--segment-size=1.5'),
+            'Expected the segment size to be an integer greater than or equal to 1. Got "1.5".',
+        ];
+
+        yield '[segment size] invalid integer value' => [
+            new StringInput('--segment-size=0'),
+            'Expected the segment size to be an integer greater than or equal to 1. Got "0".',
         ];
     }
 
