@@ -25,6 +25,7 @@ use function array_column;
 use function array_map;
 use function preg_replace;
 use function spl_object_id;
+use function str_replace;
 
 /**
  * @coversNothing
@@ -238,19 +239,26 @@ class ParallelizationIntegrationTest extends TestCase
         $actual = $this->getOutput($commandTester);
 
         $removeProcessStartedOutput = static fn (string $output) => preg_replace(
-            "~\n?\\[notice\\] Started process #\\d \\(PID \\d+\\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n~",
+            "~\n?\[notice\] Started process #\d \(PID \d+\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n~",
             '',
             $output,
         );
         $removeProcessStoppedOutput = static fn (string $output) => preg_replace(
-            '~\\[notice\\] Stopped process #\\d\n~',
+            '~\[notice\] Stopped process #\d\n~',
             '',
             $output,
         );
+        $removeUnstableOutput = static fn (string $output) => str_replace(
+            "MiB\n\n 5/5",
+            "MiB\n 5/5",
+            $output,
+        );
 
-        $outputWithoutExtraDebugInfo = $removeProcessStartedOutput(
-            $removeProcessStoppedOutput(
-                OutputNormalizer::removeIntermediateFixedProgressBars($actual),
+        $outputWithoutExtraDebugInfo = $removeUnstableOutput(
+            $removeProcessStartedOutput(
+                $removeProcessStoppedOutput(
+                    OutputNormalizer::removeIntermediateFixedProgressBars($actual),
+                ),
             ),
         );
 
