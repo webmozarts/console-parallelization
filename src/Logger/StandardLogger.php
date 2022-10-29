@@ -294,17 +294,15 @@ final class StandardLogger implements Logger
         string $buffer,
         bool $error
     ): string {
-        $message = '';
-
         if ($error) {
-            $message .= '<bg=red;fg=white> ERR </> ';
+            $message = '<bg=red;fg=white> ERR </> ';
             $message .= str_replace(
                 "\n",
                 "\n<bg=red;fg=white> ERR </> ",
                 $buffer,
             );
         } else {
-            $message .= '<bg=green;fg=white> OUT </> ';
+            $message = '<bg=green;fg=white> OUT </> ';
             $message .= str_replace(
                 "\n",
                 "\n<bg=green;fg=white> OUT </> ",

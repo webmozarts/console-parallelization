@@ -30,7 +30,7 @@ use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
  */
 final class StandardLoggerTest extends TestCase
 {
-    private const ADVANCEMENT_CHARACTER = '▌';
+    private const PROGRESS_CHARACTER = '▌';
     private const TERMINAL_WIDTH = 50;
 
     private BufferedOutput $output;
@@ -459,14 +459,14 @@ final class StandardLoggerTest extends TestCase
                     $pid,
                     $type,
                     $buffer,
-                    self::ADVANCEMENT_CHARACTER,
+                    self::PROGRESS_CHARACTER,
                 )
                 : $this->logger->logUnexpectedChildProcessOutput(
                     932,
                     null,
                     $type,
                     $buffer,
-                    self::ADVANCEMENT_CHARACTER,
+                    self::PROGRESS_CHARACTER,
                 );
         }
 
@@ -478,7 +478,7 @@ final class StandardLoggerTest extends TestCase
             $pid,
             $type,
             $buffer,
-            self::ADVANCEMENT_CHARACTER,
+            self::PROGRESS_CHARACTER,
         );
 
         $actual = $this->output->fetch();
@@ -667,6 +667,52 @@ final class StandardLoggerTest extends TestCase
 
                 =============== Process #2 Output ================
                  ERR  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'output containing the progress symbol' => [
+            2,
+            23123,
+            'out',
+            'An error'.self::PROGRESS_CHARACTER.' occurred.',
+            true,
+            true,
+            <<<'TXT'
+                 OUT  An error occurred.
+
+
+                TXT,
+        ];
+
+        yield 'stdout; output containing line returns' => [
+            2,
+            23123,
+            'out',
+            "An error\n occurred\n.",
+            true,
+            true,
+            <<<'TXT'
+                 OUT  An error
+                 OUT   occurred
+                 OUT  .
+
+
+                TXT,
+        ];
+
+        yield 'stderr; output containing line returns' => [
+            2,
+            23123,
+            'err',
+            "An error\n occurred\n.",
+            true,
+            true,
+            <<<'TXT'
+                 ERR  An error
+                 ERR   occurred
+                 ERR  .
 
 
                 TXT,
