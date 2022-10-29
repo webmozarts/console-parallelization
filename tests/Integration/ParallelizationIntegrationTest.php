@@ -208,7 +208,7 @@ class ParallelizationIntegrationTest extends TestCase
         self::assertSame($expected, $actual, $actual);
     }
 
-    public function test_it_can_run_the_command_with_multiple_processes_in_debug_mode(): void
+    public function test_it_can_run_the_command_with_multiple_processes_in_very_verbose_mode(): void
     {
         $commandTester = $this->importMoviesCommandTester;
 
@@ -219,7 +219,7 @@ class ParallelizationIntegrationTest extends TestCase
             ],
             [
                 'interactive' => true,
-                'verbosity' => OutputInterface::VERBOSITY_DEBUG,
+                'verbosity' => OutputInterface::VERBOSITY_VERY_VERBOSE,
             ],
         );
 
@@ -227,14 +227,7 @@ class ParallelizationIntegrationTest extends TestCase
             Processing 5 movies in segments of 2, batches of 2, 3 rounds, 3 batches, with 2 parallel child processes.
 
              0/5 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-
-
-
-
-
-
              5/5 [============================] 100% 10 secs/10 secs 10.0 MiB
-
 
              // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
 
@@ -244,17 +237,20 @@ class ParallelizationIntegrationTest extends TestCase
 
         $actual = $this->getOutput($commandTester);
 
-        // [notice] Started process #1 (PID 9076): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'
+        $removeProcessStartedOutput = static fn (string $output) => preg_replace(
+            "~\n?\\[notice\\] Started process #\\d \\(PID \\d+\\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n~",
+            '',
+            $output,
+        );
+        $removeProcessStoppedOutput = static fn (string $output) => preg_replace(
+            '~\\[notice\\] Stopped process #\\d\n~',
+            '',
+            $output,
+        );
 
-        $outputWithoutExtraDebugInfo = OutputNormalizer::removeIntermediateFixedProgressBars(
-            preg_replace(
-                "~\\[notice\\] Started process #\\d \\(PID \\d+\\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'~",
-                '',
-                preg_replace(
-                    '~\\[notice\\] Stopped process #\\d~',
-                    '',
-                    $actual,
-                ),
+        $outputWithoutExtraDebugInfo = $removeProcessStartedOutput(
+            $removeProcessStoppedOutput(
+                OutputNormalizer::removeIntermediateFixedProgressBars($actual),
             ),
         );
 
