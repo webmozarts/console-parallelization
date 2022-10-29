@@ -148,8 +148,13 @@ final class StandardLogger implements Logger
         $this->logger->debug('Command finished');
     }
 
-    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
-    {
+    public function logUnexpectedChildProcessOutput(
+        int $index,
+        ?int $pid,
+        string $type,
+        string $buffer,
+        string $progressSymbol
+    ): void {
         $this->output->writeln('');
         $this->output->writeln(sprintf(
             '<comment>%s</comment>',

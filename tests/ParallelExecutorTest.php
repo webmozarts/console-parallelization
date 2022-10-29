@@ -735,7 +735,7 @@ final class ParallelExecutorTest extends TestCase
             ],
             [
                 'logUnexpectedChildProcessOutput',
-                [10, null, 'FOO', $progressSymbol],
+                [10, null, 'test', 'FOO', $progressSymbol],
             ],
             [
                 'logAdvance',

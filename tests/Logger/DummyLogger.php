@@ -82,8 +82,13 @@ final class DummyLogger implements Logger
         ];
     }
 
-    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
-    {
+    public function logUnexpectedChildProcessOutput(
+        int $index,
+        ?int $pid,
+        string $type,
+        string $buffer,
+        string $progressSymbol
+    ): void {
         $this->records[] = [
             __FUNCTION__,
             func_get_args(),
