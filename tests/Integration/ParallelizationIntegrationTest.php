@@ -239,7 +239,7 @@ class ParallelizationIntegrationTest extends TestCase
         $actual = $this->getOutput($commandTester);
 
         $removeProcessStartedOutput = static fn (string $output) => preg_replace(
-            "~\n?\[notice\] Started process #\d \(PID \d+\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n~",
+            "~\n?\\[notice\\] Started process #\\d \\(PID \\d+\\): '/path/to/php' '/path/to/work-dir/bin/console' 'import:movies' '--child'\n~",
             '',
             $output,
         );
