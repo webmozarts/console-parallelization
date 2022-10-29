@@ -169,7 +169,12 @@ final class ParallelExecutor
         Logger $logger
     ): int {
         if ($parallelizationInput->isChildProcess()) {
-            return $this->executeChildProcess($input, $output, $logger);
+            return $this->executeChildProcess(
+                $parallelizationInput,
+                $input,
+                $output,
+                $logger,
+            );
         }
 
         return $this->executeMainProcess(
@@ -198,8 +203,8 @@ final class ParallelExecutor
     ): int {
         ($this->runBeforeFirstCommand)($input, $output);
 
-        $batchSize = $this->batchSize;
-        $desiredSegmentSize = $this->segmentSize;
+        $batchSize = $parallelizationInput->getBatchSize() ?? $this->batchSize;
+        $desiredSegmentSize = $parallelizationInput->getSegmentSize() ?? $this->segmentSize;
 
         $itemIterator = ChunkedItemsIterator::fromItemOrCallable(
             $parallelizationInput->getItem(),
@@ -269,13 +274,14 @@ final class ParallelExecutor
      * @return 0|positive-int
      */
     private function executeChildProcess(
+        ParallelizationInput $parallelizationInput,
         InputInterface $input,
         OutputInterface $output,
         Logger $logger
     ): int {
         $itemIterator = ChunkedItemsIterator::fromStream(
             $this->childSourceStream,
-            $this->batchSize,
+            $parallelizationInput->getBatchSize() ?? $this->batchSize,
         );
 
         $progressSymbol = $this->progressSymbol;

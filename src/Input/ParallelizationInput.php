@@ -32,6 +32,8 @@ final class ParallelizationInput
     public const PROCESSES_OPTION = 'processes';
     public const MAIN_PROCESS_OPTION = 'main-process';
     public const CHILD_OPTION = 'child';
+    public const BATCH_SIZE = 'batch-size';
+    public const SEGMENT_SIZE = 'segment-size';
 
     public const OPTIONS = [
         self::PROCESSES_OPTION,
@@ -52,18 +54,33 @@ final class ParallelizationInput
     private $findNumberOfProcesses;
 
     private ?string $item;
+
     private bool $childProcess;
+
+    /**
+     * @var positive-int|null
+     */
+    private ?int $batchSize;
+
+    /**
+     * @var positive-int|null
+     */
+    private ?int $segmentSize;
 
     /**
      * @internal Use the static factory methods instead.
      *
      * @param positive-int|callable():positive-int $numberOfOrFindNumberOfProcesses
+     * @param positive-int|null                    $batchSize
+     * @param positive-int|null                    $segmentSize
      */
     public function __construct(
         bool $mainProcess,
         $numberOfOrFindNumberOfProcesses,
         ?string $item,
-        bool $childProcess
+        bool $childProcess,
+        ?int $batchSize,
+        ?int $segmentSize
     ) {
         $this->mainProcess = $mainProcess;
         $this->item = $item;
@@ -74,6 +91,9 @@ final class ParallelizationInput
         } else {
             $this->findNumberOfProcesses = $numberOfOrFindNumberOfProcesses;
         }
+
+        $this->batchSize = $batchSize;
+        $this->segmentSize = $segmentSize;
     }
 
     public static function fromInput(InputInterface $input): self
@@ -87,6 +107,10 @@ final class ParallelizationInput
         $mainProcess = $input->getOption(self::MAIN_PROCESS_OPTION);
         /** @var bool $isChild */
         $isChild = $input->getOption(self::CHILD_OPTION);
+        /** @var string|int|null $batchSize */
+        $batchSize = $input->getOption(self::BATCH_SIZE);
+        /** @var string|int|null $segmentSize */
+        $segmentSize = $input->getOption(self::SEGMENT_SIZE);
 
         if ($hasItem) {
             $item = self::validateItem($item);
@@ -114,11 +138,24 @@ final class ParallelizationInput
             );
         }
 
+        $batchSize = self::coerceAndValidatePositiveInt(
+            $batchSize,
+            'batch size',
+            true,
+        );
+        $segmentSize = self::coerceAndValidatePositiveInt(
+            $segmentSize,
+            'segment size',
+            true,
+        );
+
         return new self(
             $mainProcess,
             $validatedNumberOfProcesses,
             $hasItem ? $item : null,
             $isChild,
+            $batchSize,
+            $segmentSize,
         );
     }
 
@@ -152,6 +189,18 @@ final class ParallelizationInput
                 null,
                 InputOption::VALUE_NONE,
                 'Set on child processes.',
+            )
+            ->addOption(
+                self::BATCH_SIZE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set the batch size.',
+            )
+            ->addOption(
+                self::SEGMENT_SIZE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Set the segment size.',
             );
     }
 
@@ -183,6 +232,22 @@ final class ParallelizationInput
     }
 
     /**
+     * @return positive-int|null
+     */
+    public function getBatchSize(): ?int
+    {
+        return $this->batchSize;
+    }
+
+    /**
+     * @return positive-int|null
+     */
+    public function getSegmentSize(): ?int
+    {
+        return $this->segmentSize;
+    }
+
+    /**
      * @param mixed $item
      */
     private static function validateItem($item): string
@@ -210,36 +275,39 @@ final class ParallelizationInput
      */
     private static function coerceNumberOfProcesses(string $numberOfProcesses): int
     {
-        Assert::numeric(
+        return self::coerceAndValidatePositiveInt(
             $numberOfProcesses,
-            sprintf(
-                'Expected the number of process defined to be a valid numeric value. Got "%s".',
-                $numberOfProcesses,
-            ),
+            'maximum number of parallel processes',
+            false,
+        );
+    }
+
+    /**
+     * @param string|int|null $value
+     *
+     * @return ($nullable is true ? positive-int|null : positive-int)
+     */
+    private static function coerceAndValidatePositiveInt(
+        $value,
+        string $name,
+        bool $nullable
+    ): ?int {
+        if ($nullable && null === $value) {
+            return null;
+        }
+
+        $message = sprintf(
+            'Expected the %s to be an integer greater than or equal to 1. Got "%s".',
+            $name,
+            $value,
         );
 
-        $castedNumberOfProcesses = (int) $numberOfProcesses;
+        Assert::integerish($value, $message);
 
-        Assert::same(
-            // We cast it again in string to make sure since it is more convenient to pass an
-            // int in the tests or when calling the command directly without passing by the CLI
-            (string) $numberOfProcesses,
-            (string) $castedNumberOfProcesses,
-            sprintf(
-                'Expected the number of process defined to be an integer. Got "%s".',
-                $numberOfProcesses,
-            ),
-        );
+        $value = (int) $value;
 
-        Assert::greaterThan(
-            $castedNumberOfProcesses,
-            0,
-            sprintf(
-                'Expected the number of processes to be 1 or greater. Got "%s".',
-                $castedNumberOfProcesses,
-            ),
-        );
+        Assert::positiveInteger($value, $message);
 
-        return $castedNumberOfProcesses;
+        return $value;
     }
 }
