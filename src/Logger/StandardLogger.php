@@ -233,7 +233,7 @@ final class StandardLogger implements Logger
     public function logUnexpectedChildProcessOutput(
         int $index,
         ?int $pid,
-        string $buffer,
+       string $type, string $buffer,
         string $progressSymbol
     ): void {
         $this->io->newLine();

@@ -445,6 +445,7 @@ final class StandardLoggerTest extends TestCase
         $this->logger->logUnexpectedChildProcessOutput(
             2,
             23123,
+            'out',
             'An error occurred.',
             self::ADVANCEMENT_CHARACTER,
         );
@@ -469,6 +470,7 @@ final class StandardLoggerTest extends TestCase
         $this->logger->logUnexpectedChildProcessOutput(
             2,
             null,
+            'out',
             'An error occurred.',
             self::ADVANCEMENT_CHARACTER,
         );
@@ -493,6 +495,7 @@ final class StandardLoggerTest extends TestCase
         $this->logger->logUnexpectedChildProcessOutput(
             23,
             23132,
+            'out',
             'An error'.self::ADVANCEMENT_CHARACTER.' occurred.',
             self::ADVANCEMENT_CHARACTER,
         );
