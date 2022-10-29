@@ -58,8 +58,13 @@ final class NullLogger implements Logger
         // Do nothing.
     }
 
-    public function logUnexpectedChildProcessOutput(int $index, ?int $pid, string $buffer, string $progressSymbol): void
-    {
+    public function logUnexpectedChildProcessOutput(
+        int $index,
+        ?int $pid,
+        string $type,
+        string $buffer,
+        string $progressSymbol
+    ): void {
         // Do nothing.
     }
 }

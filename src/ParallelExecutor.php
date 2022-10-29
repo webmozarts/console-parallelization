@@ -356,6 +356,7 @@ final class ParallelExecutor
             fn (int $index, ?int $pid, string $type, string $buffer) => $this->processChildOutput(
                 $index,
                 $pid,
+                $type,
                 $buffer,
                 $logger,
             ),
@@ -364,17 +365,18 @@ final class ParallelExecutor
     }
 
     /**
-     * TODO: pass the type
      * Called whenever data is received in the main process from a child process.
      *
      * @param positive-int|0 $index  Index of the process amoung the list of running processes.
      * @param int|null       $pid    The child process PID. It can be null if the process is no
      *                               longer running.
-     * @param string         $buffer The received data
+     * @param string         $type   The type of output: "out" or "err".
+     * @param string         $buffer The received data.
      */
     private function processChildOutput(
         int $index,
         ?int $pid,
+        string $type,
         string $buffer,
         Logger $logger
     ): void {
@@ -386,6 +388,7 @@ final class ParallelExecutor
             $logger->logUnexpectedChildProcessOutput(
                 $index,
                 $pid,
+                $type,
                 $buffer,
                 $progressSymbol,
             );
