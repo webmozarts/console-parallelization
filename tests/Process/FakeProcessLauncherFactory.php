@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use DomainException;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 
 final class FakeProcessLauncherFactory implements ProcessLauncherFactory
 {
@@ -28,6 +28,6 @@ final class FakeProcessLauncherFactory implements ProcessLauncherFactory
         callable $processOutput,
         callable $tick
     ): ProcessLauncher {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 }

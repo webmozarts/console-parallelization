@@ -13,16 +13,18 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-final class FakeCallable
-{
-    private function __construct()
-    {
-    }
+use DomainException;
+use function sprintf;
 
-    public static function create(): callable
+final class UnexpectedCall extends DomainException
+{
+    public static function forMethod($method): self
     {
-        return static function (): void {
-            throw UnexpectedCall::forMethod(__METHOD__);
-        };
+        return new self(
+            sprintf(
+                'Did not expect "%s" to be called.',
+                $method,
+            ),
+        );
     }
 }
