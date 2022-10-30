@@ -13,14 +13,14 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
-use DomainException;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 
 final class FakeErrorHandler implements ErrorHandler
 {
     public function handleError(string $item, Throwable $throwable, Logger $logger): int
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 }

@@ -13,89 +13,89 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
-use DomainException;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 
 final class FakeInput81 implements InputInterface
 {
     public function __call($name, $arguments): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getFirstArgument(): ?string
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function hasParameterOption($values, bool $onlyParams = false): bool
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getParameterOption(string|array $values, string|bool|int|float|array|null $default = false, bool $onlyParams = false): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function bind(InputDefinition $definition): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function validate(): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getArguments(): array
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getArgument(string $name): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setArgument(string $name, $value): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function hasArgument(string $name): bool
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getOptions(): array
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getOption(string $name): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setOption(string $name, $value): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function hasOption(string $name): bool
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function isInteractive(): bool
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setInteractive(bool $interactive): void
     {
-        throw new DomainException('Not implemented.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 }
