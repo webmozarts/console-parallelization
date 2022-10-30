@@ -293,6 +293,16 @@ final class ConfigurationTest extends TestCase
             2,
             2,
         );
+
+        yield 'no item' => $createSet(
+            0,
+            1,
+            5,
+            5,
+            1,
+            1,
+            0,
+        );
     }
 
     /**
