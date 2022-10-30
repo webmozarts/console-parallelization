@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization;
 
 use Webmozart\Assert\Assert;
 use function ceil;
+use function max;
 use function min;
 use function sprintf;
 
@@ -185,10 +186,10 @@ final class Configuration
             );
         }
 
-        $numberOfSegments = (int) ceil($numberOfItems / $segmentSize);
+        $numberOfSegments = max(1, (int) ceil($numberOfItems / $segmentSize));
         Assert::positiveInteger($numberOfSegments);
 
-        $numberOfSegmentsRequired = (int) ceil($numberOfItems / $segmentSize);
+        $numberOfSegmentsRequired = max(1, (int) ceil($numberOfItems / $segmentSize));
         Assert::positiveInteger($numberOfSegmentsRequired);
 
         $requiredNumberOfProcesses = min($numberOfProcesses, $numberOfSegmentsRequired);
