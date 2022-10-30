@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use DomainException;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 
 final class FakeProcessFactory implements SymfonyProcessFactory
 {
@@ -27,6 +27,6 @@ final class FakeProcessFactory implements SymfonyProcessFactory
         ?array $environmentVariables,
         callable $processOutput
     ): Process {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 }

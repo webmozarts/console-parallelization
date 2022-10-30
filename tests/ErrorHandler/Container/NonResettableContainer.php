@@ -13,18 +13,18 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\ErrorHandler\Container;
 
-use DomainException;
 use Psr\Container\ContainerInterface;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 
 final class NonResettableContainer implements ContainerInterface
 {
     public function get(string $id): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function has(string $id): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 }

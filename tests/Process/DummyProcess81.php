@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
-use DomainException;
 use Generator;
 use Symfony\Component\Process\InputStream;
 use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 use function func_get_args;
 use function implode;
 
@@ -162,27 +162,27 @@ final class DummyProcess81 extends Process
 
     public function run(?callable $callback = null, array $env = []): int
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function mustRun(?callable $callback = null, array $env = []): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function restart(?callable $callback = null, array $env = []): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function wait(?callable $callback = null): int
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function waitUntil(callable $callback): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getPid(): ?int
@@ -192,57 +192,57 @@ final class DummyProcess81 extends Process
 
     public function signal(int $signal): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function disableOutput(): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function enableOutput(): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function isOutputDisabled(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getOutput(): string
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getIncrementalOutput(): string
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getIterator(int $flags = 0): Generator
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function clearOutput(): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getErrorOutput(): string
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getIncrementalErrorOutput(): string
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function clearErrorOutput(): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getExitCode(): ?int
@@ -257,57 +257,57 @@ final class DummyProcess81 extends Process
 
     public function isSuccessful(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function hasBeenSignaled(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getTermSignal(): int
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function hasBeenStopped(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getStopSignal(): int
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function isStarted(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function isTerminated(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getStatus(): string
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function addOutput(string $line): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function addErrorOutput(string $line): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getLastOutputTime(): ?float
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getCommandLine(): string
@@ -317,71 +317,71 @@ final class DummyProcess81 extends Process
 
     public function getTimeout(): ?float
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getIdleTimeout(): ?float
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setIdleTimeout(?float $timeout): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setTty(bool $tty): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function isTty(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setPty(bool $bool): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function isPty(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setWorkingDirectory(string $cwd): static
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getInput(): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function checkTimeout(): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function getStartTime(): float
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function setOptions(array $options): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public static function isTtySupported(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public static function isPtySupported(): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 }

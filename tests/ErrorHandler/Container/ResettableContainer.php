@@ -13,24 +13,24 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\ErrorHandler\Container;
 
-use DomainException;
 use Psr\Container\ContainerInterface;
 use Symfony\Contracts\Service\ResetInterface;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 
 final class ResettableContainer implements ContainerInterface, ResetInterface
 {
     public function get(string $id): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function has(string $id): bool
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 
     public function reset(): void
     {
-        throw new DomainException('Unexpected call.');
+        throw UnexpectedCall::forMethod(__METHOD__);
     }
 }
