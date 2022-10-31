@@ -57,10 +57,12 @@
             "phpstan/extension-installer": true,
             "infection/extension-installer": true
         },
+        "sort-packages": true
+    },
+    "extra": {
         "bamarni-bin": {
             "bin-links": false,
             "forward-command": false
-        },
-        "sort-packages": true
+        }
     }
 }
