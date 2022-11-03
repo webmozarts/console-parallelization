@@ -59,7 +59,7 @@ final class ChildCommandFactory
     }
 
     /**
-     * @return list<string>
+     * @return array<int, string>
      */
     private function createBaseCommand(
         InputInterface $input
