@@ -270,6 +270,27 @@ final class ChildCommandFactoryTest extends TestCase
                 ],
             ];
         })();
+
+        yield 'no PHP executable or command' => (static function () use (
+            $scriptPath
+        ) {
+            [$input, $commandDefinition] = self::createInput(
+                [],
+                [],
+            );
+
+            return [
+                '',
+                $scriptPath,
+                '',
+                $commandDefinition,
+                $input,
+                [
+                    $scriptPath,
+                    '--child',
+                ],
+            ];
+        })();
     }
 
     public function test_it_cannot_create_a_factory_with_an_invalid_script_path(): void
