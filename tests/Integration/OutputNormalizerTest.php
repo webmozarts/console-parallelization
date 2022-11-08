@@ -343,7 +343,7 @@ final class OutputNormalizerTest extends TestCase
             <<<'TXT'
 
                  0 [>---------------------------] < 1 sec 8.0 MiB
-                 12 [----------------------------] 142 secs 112.0 MiB
+                 12 [----->----------------------] 142 secs 112.0 MiB
 
                 TXT,
         ];
@@ -363,7 +363,7 @@ final class OutputNormalizerTest extends TestCase
             <<<'TXT'
 
                  0 [>---------------------------] < 1 sec 8.0 MiB
-                 12 [>---------------------------] 142 secs 112.0 MiB
+                 12 [----->----------------------] 142 secs 112.0 MiB
 
                 TXT,
         ];
@@ -383,7 +383,7 @@ final class OutputNormalizerTest extends TestCase
             <<<'TXT'
 
                  0 [>---------------------------] < 1 sec 8.0 MiB
-                 12 [------------>---------------] 142 secs 112.0 MiB
+                 12 [----->----------------------] 142 secs 112.0 MiB
 
                 TXT,
         ];
@@ -402,6 +402,23 @@ final class OutputNormalizerTest extends TestCase
 
                     0 [>---------------------------] 10 secs 10.0 MiB
                     5 [----->----------------------]  10 secs 10.0 MiB
+
+                TXT,
+        ];
+
+        // https://github.com/webmozarts/console-parallelization/actions/runs/3418534317/jobs/5690951308
+        yield 'final step at a random stage' => [
+            <<<'TXT'
+
+                    0 [>---------------------------] 10 secs 10.0 MiB
+                    5 [------->--------------------] 10 secs 10.0 MiB
+
+                TXT,
+            5,
+            <<<'TXT'
+
+                    0 [>---------------------------] 10 secs 10.0 MiB
+                    5 [----->----------------------] 10 secs 10.0 MiB
 
                 TXT,
         ];

@@ -146,19 +146,26 @@ final class OutputNormalizer
             $itemsCount,
         );
 
+        // Remove intermediate lines
         $output = preg_replace(
             '#\s+\d+ \[[->]+?\] .+?MiB\\n#',
             '',
             $output,
         );
-
         $output = preg_replace(
             '#\s+\d+ \[[->]+?\] .+?MiB#',
             '',
             $output,
         );
 
-        return $restoreFirstLine($restoreLastLine($output));
+        $output = $restoreFirstLine($restoreLastLine($output));
+
+        // Normalize last line
+        return preg_replace(
+            '#(\s+'.$itemsCount.' )\[[->]+?\]( .+?MiB)#',
+            '$1[----->----------------------]$2',
+            $output,
+        );
     }
 
     /**
