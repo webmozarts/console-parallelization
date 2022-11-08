@@ -66,7 +66,7 @@ class ImportMoviesCommand extends ParallelCommand
         // ...
     }
 
-    protected function fetchItems(InputInterface $input): iterable
+    protected function fetchItems(InputInterface $input, OutputInterface $output): iterable
     {
         // open up the file and read movie data...
 
@@ -85,8 +85,12 @@ class ImportMoviesCommand extends ParallelCommand
         // insert into the database
     }
 
-    protected function getItemName(int $count): string
+    protected function getItemName(?int $count): string
     {
+        if (null === $count) {
+            return 'movie(s)';
+        }
+
         return 1 === $count ? 'movie' : 'movies';
     }
 }
