@@ -1,0 +1,102 @@
+name: "Tests"
+
+on:
+    push:
+        branches:
+            - "main"
+    pull_request: null
+
+jobs:
+    tests:
+        runs-on: "ubuntu-latest"
+        name: "Test ${{ matrix.php }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                php:
+                    - "7.4"
+                    - "8.0"
+                    - "8.1"
+
+        steps:
+            -   name: "Check out repository code"
+                uses: "actions/checkout@v2"
+
+            -   name: "Setup PHP"
+                uses: "shivammathur/setup-php@v2"
+                with:
+                    php-version: "${{ matrix.php }}"
+                    tools: "composer"
+
+            -   name: "Install Composer dependencies"
+                uses: "ramsey/composer-install@v2"
+
+            -   name: "Run tests"
+                run: "make phpunit"
+
+    symfony-version:
+        runs-on: "ubuntu-latest"
+        name: "Test ${{ matrix.config.php }} with Symfony ${{ matrix.config.symfony_version }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                config:
+                    - php: "7.4"
+                      symfony_version: "4.4"
+                      symfony_conflict: ">=5.0"
+                    - php: "7.4"
+                      symfony_version: "5.4"
+                      symfony_conflict: ">=6.0,<5.0"
+                    # The case of Symfony 4.4 with PHP 8 is just too impractical to
+                    # bother with.
+                    - php: "8.0"
+                      symfony_version: "5.4"
+                      symfony_conflict: "<=5.0,>=6.0"
+                    - php: "8.1"
+                      symfony_version: "5.4"
+                      symfony_conflict: "<=5.0,>=6.0"
+
+        steps:
+            -   name: "Check out repository code"
+                uses: "actions/checkout@v2"
+
+            -   name: "Setup PHP"
+                uses: "shivammathur/setup-php@v2"
+                with:
+                    php-version: "${{ matrix.config.php }}"
+                    tools: "composer"
+
+            -   name: "Fix the Symfony versions"
+                run: "bin/fix-symfony-versions \"${{ matrix.config.symfony_conflict }}\""
+
+            -   name: "Install Composer dependencies"
+                uses: "ramsey/composer-install@v2"
+
+            -   name: "Run tests"
+                run: "make phpunit"
+
+    infection:
+        runs-on: "ubuntu-latest"
+        name: "Infection ${{ matrix.php }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                php:
+                    - "8.1"
+
+        steps:
+            -   name: "Check out repository code"
+                uses: "actions/checkout@v2"
+
+            -   name: "Setup PHP"
+                uses: "shivammathur/setup-php@v2"
+                with:
+                    php-version: "${{ matrix.php }}"
+                    tools: "composer"
+                    coverage: "pcov"
+
+            -   name: "Install Composer dependencies"
+                uses: "ramsey/composer-install@v2"
+
+            -   name: "Run tests with coverage and Infection"
+                run: "make infection"

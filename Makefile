@@ -44,18 +44,20 @@ help:
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//' | awk 'BEGIN {FS = ":"}; {printf "\033[33m%s:\033[0m%s\n", $$1, $$2}'
 
 .PHONY: cs
-cs: 	 	  ## Fixes CS
-cs: php_cs_fixer gitignore_sort
-
-.PHONY: php_cs_fixer
-php_cs_fixer: 	  ## Runs PHP-CS-Fixer
-php_cs_fixer: $(PHP_CS_FIXER_BIN)
-	$(PHP_CS_FIXER) fix
+cs: 	## Fixes CS
+cs: gitignore_sort composer_normalize php_cs_fixer
 
 .PHONY: gitignore_sort
-gitignore_sort:	  ## Sorts the .gitignore entries
 gitignore_sort:
 	LC_ALL=C sort -u .gitignore -o .gitignore
+
+.PHONY: composer_normalize
+composer_normalize: vendor
+	$(COMPOSER) normalize
+
+.PHONY: php_cs_fixer
+php_cs_fixer: $(PHP_CS_FIXER_BIN)
+	$(PHP_CS_FIXER) fix
 
 .PHONY: test
 test: 	 	  ## Runs all the tests
@@ -87,6 +89,7 @@ phpunit_coverage_infection: $(PHPUNIT_BIN) vendor
 phpunit_coverage_html:	    ## Runs PHPUnit with code coverage with HTML report
 phpunit_coverage_html: $(PHPUNIT_BIN) vendor
 	$(PHPUNIT_COVERAGE_HTML)
+	@echo "You can check the report by opening the file \"$(COVERAGE_HTML)/index.html\"."
 
 .PHONY: infection
 infection:	  ## Runs Infection
