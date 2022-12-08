@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Webmozart\Assert\Assert;
-use function getenv;
 
 /**
  * @internal
@@ -37,7 +36,7 @@ final class CpuCoreCounter
             return self::$count = 1;
         }
 
-        $count = getenv('WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT');
+        $count = $_ENV['WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT'];
 
         if (false !== $count) {
             Assert::numeric($count);
