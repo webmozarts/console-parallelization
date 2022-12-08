@@ -45,7 +45,7 @@ help:
 
 .PHONY: cs
 cs: 	 	  ## Fixes CS
-cs: php_cs_fixer gitignore_sort
+cs: php_cs_fixer gitignore_sort composer_normalize
 
 .PHONY: php_cs_fixer
 php_cs_fixer: 	  ## Runs PHP-CS-Fixer
@@ -56,6 +56,11 @@ php_cs_fixer: $(PHP_CS_FIXER_BIN)
 gitignore_sort:	  ## Sorts the .gitignore entries
 gitignore_sort:
 	LC_ALL=C sort -u .gitignore -o .gitignore
+
+.PHONY: composer_normalize
+composer_normalize:  ## Normalizes the composer.json
+composer_normalize:	vendor
+	composer normalize
 
 .PHONY: test
 test: 	 	  ## Runs all the tests
