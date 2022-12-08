@@ -22,6 +22,9 @@ use Webmozart\Assert\Assert;
  */
 final class CpuCoreCounter
 {
+    /**
+     * @var positive-int|null
+     */
     private static ?int $count = null;
 
     /**
