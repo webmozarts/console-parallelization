@@ -6,6 +6,7 @@
             "src"
         ]
     },
+    "testFrameworkOptions": "--exclude-group=autoreview",
     "logs": {
         "text": "dist/infection.log"
     },
