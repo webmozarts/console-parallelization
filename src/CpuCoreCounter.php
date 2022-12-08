@@ -20,7 +20,6 @@ use function getenv;
 
 /**
  * @internal
- * From https://github.com/phpstan/phpstan-src/blob/1.8.x/src/Process/CpuCoreCounter.php
  */
 final class CpuCoreCounter
 {
