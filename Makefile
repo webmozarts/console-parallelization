@@ -16,19 +16,24 @@ CCEND=\033[0m
 SRC_TESTS_FILES=$(shell find src/ tests/ -type f)
 COVERAGE_DIR = dist/coverage
 COVERAGE_XML = $(COVERAGE_DIR)/xml
+COVERAGE_JUNIT = $(COVERAGE_DIR)/phpunit.junit.xml
 COVERAGE_HTML = $(COVERAGE_DIR)/html
 TARGET_MSI = 100
 
 PHP_CS_FIXER_BIN = vendor-bin/php-cs-fixer/vendor/friendsofphp/php-cs-fixer/php-cs-fixer
 PHP_CS_FIXER = $(PHPNOGC) $(PHP_CS_FIXER_BIN)
+
 PHPSTAN_BIN = vendor/phpstan/phpstan/phpstan
 PHPSTAN = $(PHPSTAN_BIN)
+
 PHPUNIT_BIN = vendor/bin/phpunit
 PHPUNIT = $(PHPUNIT_BIN)
-PHPUNIT_COVERAGE_INFECTION = XDEBUG_MODE=coverage $(PHPUNIT) --coverage-xml=$(COVERAGE_XML) --log-junit=$(COVERAGE_DIR)/phpunit.junit.xml
+PHPUNIT_COVERAGE_INFECTION = XDEBUG_MODE=coverage $(PHPUNIT) --coverage-xml=$(COVERAGE_XML) --log-junit=$(COVERAGE_JUNIT)
 PHPUNIT_COVERAGE_HTML = XDEBUG_MODE=coverage $(PHPUNIT) --coverage-html=$(COVERAGE_HTML)
+
 INFECTION_BIN = vendor/bin/infection
 INFECTION = $(INFECTION_BIN) --skip-initial-tests --coverage=$(COVERAGE_DIR) --only-covered --show-mutations --min-msi=$(TARGET_MSI) --min-covered-msi=$(TARGET_MSI) --ansi --threads=max
+INFECTION_WITH_INITIAL_TESTS = $(INFECTION_BIN) --only-covered --show-mutations --min-msi=$(TARGET_MSI) --min-covered-msi=$(TARGET_MSI) --ansi --threads=max
 
 
 #
@@ -92,11 +97,16 @@ phpunit_coverage_infection: $(PHPUNIT_BIN) vendor
 phpunit_coverage_html:	    ## Runs PHPUnit with code coverage with HTML report
 phpunit_coverage_html: $(PHPUNIT_BIN) vendor
 	$(PHPUNIT_COVERAGE_HTML)
+	@echo "You can check the report by opening the file \"$(COVERAGE_HTML)/index.html\"."
 
 .PHONY: infection
 infection:	  ## Runs Infection
-infection: $(INFECTION_BIN) $(COVERAGE_DIR) vendor
-	if [ -d $(COVERAGE_XML) ]; then $(INFECTION); fi
+infection: $(INFECTION_BIN) vendor
+	$(INFECTION_WITH_INITIAL_TESTS)
+
+.PHONY: _infection
+_infection: $(INFECTION_BIN) $(COVERAGE_XML) $(COVERAGE_JUNIT) vendor
+	$(INFECTION)
 
 .PHONY: validate-package
 validate-package: ## Validates the Composer package
@@ -140,9 +150,15 @@ $(PHPSTAN_BIN): vendor
 $(PHPUNIT_BIN): vendor
 	touch -c $@
 
-$(COVERAGE_DIR): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
+$(COVERAGE_XML): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
 	$(MAKE) phpunit_coverage_infection
-	touch -c "$@"
+	touch -c $@
+	touch -c $(COVERAGE_JUNIT)
+
+$(COVERAGE_JUNIT): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
+	$(MAKE) phpunit_coverage_infection
+	touch -c $@
+	touch -c $(COVERAGE_XML)
 
 $(INFECTION_BIN): vendor
 	touch -c $@
