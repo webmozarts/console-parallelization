@@ -28,7 +28,7 @@ PHPSTAN = $(PHPSTAN_BIN)
 
 PHPUNIT_BIN = vendor/bin/phpunit
 PHPUNIT = $(PHPUNIT_BIN)
-PHPUNIT_COVERAGE_INFECTION = XDEBUG_MODE=coverage $(PHPUNIT) --coverage-xml=$(COVERAGE_XML) --log-junit=$(COVERAGE_JUNIT)
+PHPUNIT_COVERAGE_INFECTION = XDEBUG_MODE=coverage $(PHPUNIT) --exclude-group autoreview --coverage-xml=$(COVERAGE_XML) --log-junit=$(COVERAGE_JUNIT)
 PHPUNIT_COVERAGE_HTML = XDEBUG_MODE=coverage $(PHPUNIT) --coverage-html=$(COVERAGE_HTML)
 
 INFECTION_BIN = vendor/bin/infection
