@@ -13,10 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Fidry\CpuCounter\CpuCoreCounter as FidryCpuCoreCounter;
-use Fidry\CpuCounter\NumberOfCpuCoreNotFound;
+use Fidry\CpuCoreCounter\CpuCoreCounter as FidryCpuCoreCounter;
+use Fidry\CpuCoreCounter\NumberOfCpuCoreNotFound;
 use Webmozart\Assert\Assert;
-use function getenv;
 
 /**
  * @internal
@@ -34,7 +33,7 @@ final class CpuCoreCounter
             return self::$count;
         }
 
-        $count = getenv('WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT');
+        $count = $_ENV['WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT'] ?? false;
 
         if (false !== $count) {
             Assert::numeric($count);

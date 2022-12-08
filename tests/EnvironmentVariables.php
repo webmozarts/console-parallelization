@@ -57,7 +57,7 @@ final class EnvironmentVariables
         if (array_key_exists($name, $_ENV)) {
             $previousValue = $_ENV[$name];
 
-            $restoreEnv = static fn () => $_SERVER[$name] = $previousValue;
+            $restoreEnv = static fn () => $_ENV[$name] = $previousValue;
         } else {
             $restoreEnv = static function () use ($name): void {
                 unset($_ENV[$name]);

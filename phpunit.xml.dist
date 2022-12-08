@@ -13,6 +13,7 @@
     </php>
 
     <extensions>
+        <extension class="Webmozarts\Console\Parallelization\PHPUnit\ResetCpuCounterListener"/>
         <extension class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
     </extensions>
 
