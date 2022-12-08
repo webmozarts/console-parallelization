@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Process;
 
 use Fidry\CpuCoreCounter\CpuCoreCounter as FidryCpuCoreCounter;
 use Fidry\CpuCoreCounter\NumberOfCpuCoreNotFound;

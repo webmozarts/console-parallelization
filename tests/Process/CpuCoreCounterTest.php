@@ -11,12 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization;
+namespace Webmozarts\Console\Parallelization\Process;
 
 use PHPUnit\Framework\TestCase;
+use Webmozarts\Console\Parallelization\EnvironmentVariables;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\CpuCoreCounter
+ * @covers \Webmozarts\Console\Parallelization\Process\CpuCoreCounter
  *
  * @internal
  */

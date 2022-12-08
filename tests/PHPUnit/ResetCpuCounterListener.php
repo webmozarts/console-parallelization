@@ -16,7 +16,7 @@ namespace Webmozarts\Console\Parallelization\PHPUnit;
 use PHPUnit\Runner\AfterTestHook;
 use ReflectionClass;
 use ReflectionProperty;
-use Webmozarts\Console\Parallelization\CpuCoreCounter;
+use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
 
 final class ResetCpuCounterListener implements AfterTestHook
 {
