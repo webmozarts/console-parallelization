@@ -60,7 +60,7 @@ interface Logger
     public function logChildProcessStarted(int $index, int $pid, string $commandName): void;
 
     /**
-     * @param positive-int|0 $index Index of the process amoung the list of running processes.
+     * @param int $index Index of the process amoung the list of running processes.
      */
     public function logChildProcessFinished(int $index): void;
 

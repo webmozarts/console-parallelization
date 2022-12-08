@@ -63,7 +63,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     private $processOutput;
 
     /**
-     * @var array<positive-int|0, Process>
+     * @var array<int, Process>
      */
     private array $runningProcesses = [];
 
@@ -211,8 +211,6 @@ final class SymfonyProcessLauncher implements ProcessLauncher
     }
 
     /**
-     * @param positive-int|0 $index
-     *
      * @return positive-int|0
      */
     private function freeProcess(int $index, Process $process): int

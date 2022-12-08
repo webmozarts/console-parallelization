@@ -1,15 +1,8 @@
 parameters:
-    level: 9
+    level: max
     paths:
         - bin/set-composer-conflicts.php
         - src
     ignoreErrors:
         - path: src/ErrorHandler/ResetServiceErrorHandler.php
           message: '#ResettableContainerInterface#'
-
-        - path: src/CpuCoreCounter.php
-          message: '#getNumberOfCpuCores\(\) should return#'
-
-        # https://github.com/phpstan/phpstan/issues/8222
-        - path: src/Process/SymfonyProcessLauncher.php
-          message: '#\$runningProcesses \(array<int<0, max>, .*>\) does not accept non-empty-array<int, .*>\.#'
