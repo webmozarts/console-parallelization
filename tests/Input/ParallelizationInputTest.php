@@ -20,7 +20,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
-use Webmozarts\Console\Parallelization\CpuCoreCounter;
+use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\Input\ParallelizationInput

@@ -18,7 +18,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
-use Webmozarts\Console\Parallelization\CpuCoreCounter;
+use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
 use function get_class;
 use function gettype;
 use function is_int;
