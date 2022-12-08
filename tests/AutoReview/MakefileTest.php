@@ -17,6 +17,7 @@ use Fidry\Makefile\Test\BaseMakefileTestCase;
 
 /**
  * @coversNothing
+ * @group autoreview
  *
  * @internal
  */
