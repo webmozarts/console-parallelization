@@ -125,15 +125,24 @@ trait Parallelization
     {
         $parallelizationInput = ParallelizationInput::fromInput($input);
 
-        return $this
-            ->getParallelExecutableFactory(
-                fn (InputInterface $input) => $this->fetchItems($input, $output),
-                fn (string $item, InputInterface $input, OutputInterface $output) => $this->runSingleCommand($item, $input, $output),
-                fn (int $count) => $this->getItemName($count),
-                $this->getName(),
-                $this->getDefinition(),
-                $this->createErrorHandler($input, $output),
-            )
+        $parallelExecutorFactory = $this->getParallelExecutableFactory(
+            fn (InputInterface $input) => $this->fetchItems($input, $output),
+            fn (
+                string $item,
+                InputInterface $input,
+                OutputInterface $output
+            ) => $this->runSingleCommand($item, $input, $output),
+            fn (int $count) => $this->getItemName($count),
+            $this->getName(),
+            $this->getDefinition(),
+            $this->createErrorHandler($input, $output),
+        );
+
+        return $this->configureParallelExecutableFactory(
+            $parallelExecutorFactory,
+            $input,
+            $output,
+        )
             ->build()
             ->execute(
                 $parallelizationInput,
@@ -260,6 +269,22 @@ trait Parallelization
             ->withRunAfterLastCommand(Closure::fromCallable([$this, 'runAfterLastCommand']))
             ->withRunBeforeBatch(Closure::fromCallable([$this, 'runBeforeBatch']))
             ->withRunAfterBatch(Closure::fromCallable([$this, 'runAfterBatch']));
+    }
+
+    /**
+     * This is an alternative to overriding ::getParallelExecutableFactory() which
+     * is a bit less convenient due to the number of parameters.
+     */
+    protected function configureParallelExecutableFactory(
+        ParallelExecutorFactory $parallelExecutorFactory,
+        InputInterface $input,
+        OutputInterface $output
+    ): ParallelExecutorFactory {
+        // This method will safely never contain anything. It is only a
+        // placeholder for the user to override so omitting
+        // parent::configureParallelExecutableFactory() is perfectly safe.
+
+        return $parallelExecutorFactory;
     }
 
     protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler
