@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": "^7.4 || ^8.0",
-        "fidry/cpu-core-counter": "^0.3.0",
+        "fidry/cpu-core-counter": "^0.4.0",
         "nikic/iter": "^2.2",
         "psr/log": "^1.1 || ^2.0 || ^3.0",
         "symfony/console": "^4.4 || ^5.4 || ^6.0",
