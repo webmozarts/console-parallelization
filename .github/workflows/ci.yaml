@@ -9,7 +9,7 @@ on:
 jobs:
     tests:
         runs-on: "ubuntu-latest"
-        name: "Test ${{ matrix.php }}"
+        name: "Test (PHP ${{ matrix.php }})"
         strategy:
             fail-fast: false
             matrix:
@@ -17,6 +17,7 @@ jobs:
                     - "7.4"
                     - "8.0"
                     - "8.1"
+                    - "8.2"
 
         steps:
             -   name: "Check out repository code"
@@ -36,7 +37,7 @@ jobs:
 
     symfony-version:
         runs-on: "ubuntu-latest"
-        name: "Test ${{ matrix.config.php }} with Symfony ${{ matrix.config.symfony_version }}"
+        name: "Tests (PHP ${{ matrix.config.php }}) with Symfony ${{ matrix.config.symfony_version }}"
         strategy:
             fail-fast: false
             matrix:
@@ -77,12 +78,12 @@ jobs:
 
     infection:
         runs-on: "ubuntu-latest"
-        name: "Infection ${{ matrix.php }}"
+        name: "Infection (PHP ${{ matrix.php }})"
         strategy:
             fail-fast: false
             matrix:
                 php:
-                    - "8.1"
+                    - "8.2"
 
         steps:
             -   name: "Check out repository code"
