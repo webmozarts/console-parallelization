@@ -14,8 +14,11 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Process;
 
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use Webmozarts\Console\Parallelization\FakeCallable;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
@@ -31,6 +34,8 @@ use function sprintf;
  */
 final class SymfonyProcessLauncherTest extends TestCase
 {
+    use ProphecyTrait;
+
     public function test_it_does_nothing_if_there_is_no_items(): void
     {
         $launcher = new SymfonyProcessLauncher(
@@ -266,6 +271,43 @@ final class SymfonyProcessLauncherTest extends TestCase
             6,
             7,
         ];
+    }
+
+    public function test_it_caps_the_exit_code_to_255(): void
+    {
+        $output = new BufferedOutput();
+
+        $processProphecy = $this->prophesize(Process::class);
+        $processProphecy->getPid()->willReturn(10);
+        $processProphecy->getCommandLine()->willReturn('');
+        $processProphecy->isRunning()->willReturn(false);
+        $processProphecy->getExitCode()->willReturn(500);
+
+        $processFactoryProphecy = $this->prophesize(SymfonyProcessFactory::class);
+        $processFactoryProphecy
+            ->startProcess(Argument::cetera())
+            ->willReturn($processProphecy->reveal());
+
+        $processOutput = self::createProcessOutput($output);
+        $numberOfTicksRecorded = 0;
+
+        $launcher = new SymfonyProcessLauncher(
+            [],
+            '',
+            null,
+            1,
+            1,
+            new DummyLogger(),
+            $processOutput,
+            static function () use (&$numberOfTicksRecorded): void {
+                ++$numberOfTicksRecorded;
+            },
+            $processFactoryProphecy->reveal(),
+        );
+
+        $exitCode = $launcher->run(['item0']);
+
+        self::assertSame(255, $exitCode);
     }
 
     /**
