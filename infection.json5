@@ -38,12 +38,14 @@
         "DecrementInteger": {
             "ignoreSourceCodeByRegex": [
                 ".*\\$numberOfStreamedItems = .*",
-                ".*\\$numberOfItems \\?\\? 0.*"
+                ".*\\$numberOfItems \\?\\? 0.*",
+                ".*return min\\(\\$exitCode, 255\\);.*"
             ]
         },
         "IncrementInteger": {
             "ignoreSourceCodeByRegex": [
-                ".*\\$numberOfItems \\?\\? 0.*"
+                ".*\\$numberOfItems \\?\\? 0.*",
+                ".*return min\\(\\$exitCode, 255\\);.*"
             ]
         },
         "MBString": false,

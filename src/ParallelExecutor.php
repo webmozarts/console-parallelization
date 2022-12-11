@@ -25,6 +25,7 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncher;
 use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use function mb_strlen;
+use function min;
 use function sprintf;
 
 final class ParallelExecutor
@@ -193,7 +194,7 @@ final class ParallelExecutor
      * items of the processed data set and terminates. As long as there is data
      * left to process, new child processes are spawned automatically.
      *
-     * @return 0|positive-int
+     * @return int<0,255>
      */
     private function executeMainProcess(
         ParallelizationInput $parallelizationInput,
@@ -298,7 +299,7 @@ final class ParallelExecutor
     /**
      * @param callable():void $advance
      *
-     * @return 0|positive-int
+     * @return int<0,255>
      */
     private function processItems(
         ChunkedItemsIterator $itemIterator,
@@ -321,7 +322,7 @@ final class ParallelExecutor
             ($this->runAfterBatch)($input, $output, $items);
         }
 
-        return $exitCode;
+        return min($exitCode, 255);
     }
 
     /**

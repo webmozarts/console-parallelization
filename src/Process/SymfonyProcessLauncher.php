@@ -18,6 +18,7 @@ use Symfony\Component\Process\Process;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use function count;
+use function min;
 use function sprintf;
 use const PHP_EOL;
 
@@ -157,7 +158,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
             ($this->tick)();
         }
 
-        return $exitCode;
+        return min($exitCode, 255);
     }
 
     private function startProcess(InputStream $inputStream): void
