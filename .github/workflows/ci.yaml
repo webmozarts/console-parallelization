@@ -9,7 +9,7 @@ on:
 jobs:
     tests:
         runs-on: "ubuntu-latest"
-        name: "Test (PHP ${{ matrix.php }})"
+        name: "Tests (PHP ${{ matrix.php }})"
         strategy:
             fail-fast: false
             matrix:
