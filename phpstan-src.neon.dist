@@ -6,3 +6,7 @@ parameters:
     ignoreErrors:
         - path: src/ErrorHandler/ResetServiceErrorHandler.php
           message: '#ResettableContainerInterface#'
+
+        # This is due to usages of func_get_args()
+        - path: src/Logger/DecoratorLogger.php
+          message: '#Parameter \#1#'
