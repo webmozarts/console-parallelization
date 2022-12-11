@@ -198,6 +198,8 @@ The library offers a wide variety of configuration settings:
 - `::getParallelExecutableFactory()` allows you to completely configure the
   `ParallelExecutorFactory` factory which goes from fragment, batch sizes, which
   PHP executable is used or any of the [process handling hooks](#hooks)
+- `::configureParallelExecutableFactory()` is a different, lighter extension
+  point to configure the `ParallelExecutorFactory` factory.
 - `::getContainer()` allows you to configure which container is used. By default,
   it passes the application's kernel's container if there is one. This is used
   by the default error handler which resets the container in-between each item

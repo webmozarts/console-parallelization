@@ -25,6 +25,7 @@ use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use function file_get_contents;
+use function func_get_args;
 use function json_decode;
 use function realpath;
 use const JSON_THROW_ON_ERROR;
@@ -64,16 +65,17 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
         InputDefinition $commandDefinition,
         ErrorHandler $errorHandler
     ): ParallelExecutorFactory {
-        return ParallelExecutorFactory::create(
-            $fetchItems,
-            $runSingleCommand,
-            $getItemName,
-            $commandName,
-            $commandDefinition,
-            $errorHandler,
-        )
+        return parent::getParallelExecutableFactory(...func_get_args())
             ->withBatchSize(2)
-            ->withSegmentSize(2)
+            ->withSegmentSize(2);
+    }
+
+    protected function configureParallelExecutableFactory(
+        ParallelExecutorFactory $parallelExecutorFactory,
+        InputInterface $input,
+        OutputInterface $output
+    ): ParallelExecutorFactory {
+        return $parallelExecutorFactory
             ->withRunBeforeFirstCommand(
                 fn () => $this->logger->recordFirstCommand(),
             )
