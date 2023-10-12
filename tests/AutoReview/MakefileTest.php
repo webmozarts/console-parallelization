@@ -39,9 +39,12 @@ final class MakefileTest extends BaseMakefileTestCase
             #---------------------------------------------------------------------------[0m
 
             [33mcs:[0m 	 	   Fixes CS
+            [33mcs_lint:[0m	   Lints CS
             [33mphp_cs_fixer:[0m 	   Runs PHP-CS-Fixer
-            [33mgitignore_sort:[0m	   Sorts the .gitignore entries
+            [33mphp_cs_fixer_lint:[0m Runs PHP-CS-Fixer lint
+            [33mgitignore_sort:[0m	      Sorts the .gitignore entries
             [33mcomposer_normalize:[0m   Normalizes the composer.json
+            [33mcomposer_normalize_lint:[0m   Lints the composer.json
             [33mtest:[0m 	 	   Runs all the tests
             [33mphpstan:[0m 	   Runs PHPStan
             [33mphpunit:[0m	   Runs PHPUnit
