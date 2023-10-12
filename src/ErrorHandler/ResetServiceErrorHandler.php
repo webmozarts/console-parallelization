@@ -14,25 +14,17 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Psr\Container\ContainerInterface;
-use Symfony\Component\DependencyInjection\ResettableContainerInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
-use function interface_exists;
 
 final class ResetServiceErrorHandler implements ErrorHandler
 {
-    /**
-     * @var ResetInterface|ResettableContainerInterface
-     */
-    private $resettable;
+    private ResetInterface $resettable;
     private ErrorHandler $decoratedErrorHandler;
 
-    /**
-     * @param ResetInterface|ResettableContainerInterface $resettable
-     */
     public function __construct(
-        $resettable,
+        ResetInterface $resettable,
         ?ErrorHandler $decoratedErrorHandler = null
     ) {
         $this->resettable = $resettable;
@@ -41,7 +33,7 @@ final class ResetServiceErrorHandler implements ErrorHandler
 
     public static function forContainer(?ContainerInterface $container): ErrorHandler
     {
-        return null !== $container && self::isResettable($container)
+        return $container instanceof ResetInterface
             ? new self($container)
             : new NullErrorHandler();
     }
@@ -51,18 +43,5 @@ final class ResetServiceErrorHandler implements ErrorHandler
         $this->resettable->reset();
 
         return $this->decoratedErrorHandler->handleError($item, $throwable, $logger);
-    }
-
-    private static function isResettable(ContainerInterface $container): bool
-    {
-        return (
-            interface_exists(ResetInterface::class)
-            && $container instanceof ResetInterface
-        )
-            // TODO: to remove once we drop Symfony 4.4 support.
-            || (
-                interface_exists(ResettableContainerInterface::class)
-            && $container instanceof ResettableContainerInterface
-            );
     }
 }
