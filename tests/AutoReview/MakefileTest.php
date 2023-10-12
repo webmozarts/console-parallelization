@@ -33,11 +33,11 @@ final class MakefileTest extends BaseMakefileTestCase
         return <<<'EOF'
             [33mUsage:[0m
               make TARGET
-            
+
             [32m#
             # Commands
             #---------------------------------------------------------------------------[0m
-            
+
             [33mcs:[0m 	 	   Fixes CS
             [33mcs_lint:[0m	   Lints CS
             [33mphp_cs_fixer:[0m 	   Runs PHP-CS-Fixer
