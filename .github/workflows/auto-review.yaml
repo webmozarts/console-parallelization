@@ -20,6 +20,9 @@ jobs:
                     -   name: "PHPStan"
                         command: "make phpstan"
 
+                    -   name: "CS"
+                        command: "make cs_lint"
+
         steps:
             -   name: "Checkout"
                 uses: "actions/checkout@v2"
