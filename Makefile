@@ -53,7 +53,7 @@ cs: 	 	  ## Fixes CS
 cs: php_cs_fixer gitignore_sort composer_normalize
 
 .PHONY: cs_lint
-cs_lint: 	 	  ## Lints CS
+cs_lint:	  ## Lints CS
 cs_lint: php_cs_fixer_lint composer_normalize_lint
 
 .PHONY: php_cs_fixer
@@ -62,12 +62,12 @@ php_cs_fixer: $(PHP_CS_FIXER_BIN)
 	$(PHP_CS_FIXER) fix
 
 .PHONY: php_cs_fixer_lint
-php_cs_fixer_lint: 	  ## Runs PHP-CS-Fixer lint
+php_cs_fixer_lint:## Runs PHP-CS-Fixer lint
 php_cs_fixer_lint: $(PHP_CS_FIXER_BIN)
 	$(PHP_CS_FIXER) fix --dry-run
 
 .PHONY: gitignore_sort
-gitignore_sort:	  ## Sorts the .gitignore entries
+gitignore_sort:	     ## Sorts the .gitignore entries
 gitignore_sort:
 	LC_ALL=C sort -u .gitignore -o .gitignore
 
