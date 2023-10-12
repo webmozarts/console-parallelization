@@ -43,7 +43,7 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
             $process->inheritEnvironmentVariables(true);
         }
         $process->start(
-            fn (string $type, string $buffer) => $processOutput(
+            static fn (string $type, string $buffer) => $processOutput(
                 $index,
                 $process->getPid(),
                 $type,

@@ -20,7 +20,6 @@ use function array_keys;
 use function array_map;
 use function count;
 use function explode;
-use function get_class;
 use function gettype;
 use function is_array;
 use function is_numeric;
@@ -150,7 +149,7 @@ final class ChunkedItemsIterator
             sprintf(
                 'Expected the fetched items to be a list or an iterable of strings. Got "%s".',
                 // TODO: use get_debug_type when dropping PHP 7.4 support
-                is_object($items) ? get_class($items) : gettype($items),
+                is_object($items) ? $items::class : gettype($items),
             ),
         );
 
@@ -177,7 +176,7 @@ final class ChunkedItemsIterator
             sprintf(
                 'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
                 // TODO: use get_debug_type when dropping PHP 7.4 support
-                is_object($item) ? get_class($item) : gettype($item),
+                is_object($item) ? $item::class : gettype($item),
                 $index,
             ),
         );
