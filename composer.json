@@ -30,7 +30,7 @@
         "bamarni/composer-bin-plugin": "^1.8",
         "ergebnis/composer-normalize": "^2.28",
         "fidry/makefile": "^1.0",
-        "infection/infection": "^0.27.0c",
+        "infection/infection": "^0.27.0",
         "jangregor/phpstan-prophecy": "^1.0",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpstan/extension-installer": "^1.1",
