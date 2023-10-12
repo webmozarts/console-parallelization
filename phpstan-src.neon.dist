@@ -10,3 +10,9 @@ parameters:
         # This is due to usages of func_get_args()
         - path: src/Logger/DecoratorLogger.php
           message: '#Parameter \#1#'
+
+        - path: src/ChunkedItemsIterator.php
+          message: '#ChunkedItemsIterator::\$itemsChunks#'
+
+        - path: src/Input/ChildCommandFactory.php
+          message: '#Parameter \#1 \$callback of function array_map expects#'

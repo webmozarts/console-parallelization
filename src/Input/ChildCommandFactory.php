@@ -22,6 +22,7 @@ use function array_merge;
 use function explode;
 use function Safe\getcwd;
 use function sprintf;
+use function strval;
 
 /**
  * @internal
@@ -68,7 +69,7 @@ final class ChildCommandFactory
             ...$this->getEscapedPhpExecutable(),
             $this->scriptPath,
             $this->commandName,
-            ...array_map('strval', self::getArguments($input)),
+            ...array_map(strval(...), self::getArguments($input)),
             '--child',
         ]);
     }
