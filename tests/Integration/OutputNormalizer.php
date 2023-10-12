@@ -174,8 +174,7 @@ final class OutputNormalizer
     private static function excludeNonFixedSizedProgressBarLine(
         string &$output,
         int $itemNumber
-    ): callable
-    {
+    ): callable {
         $lineFound = 1 === preg_match(
             '#(?<line> '.$itemNumber.' \[[->]+] .+?MiB.*?\\n?)#',
             $output,
