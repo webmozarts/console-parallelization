@@ -76,9 +76,9 @@ composer_normalize:  ## Normalizes the composer.json
 composer_normalize:	vendor
 	composer normalize
 
-.PHONY: composer_normalize
-composer_normalize:  ## Lints the composer.json
-composer_normalize:	vendor
+.PHONY: composer_normalize_lint
+composer_normalize_lint:  ## Lints the composer.json
+composer_normalize_lint:	vendor
 	composer normalize --dry-run
 
 .PHONY: test
