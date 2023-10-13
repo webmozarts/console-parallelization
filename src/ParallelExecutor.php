@@ -45,22 +45,15 @@ final class ParallelExecutor
      */
     private $getItemName;
 
-    private ErrorHandler $errorHandler;
-
     /**
-     * @var resource
+     * @var positive-int
      */
-    private $childSourceStream;
+    private readonly int $batchSize;
 
     /**
      * @var positive-int
      */
-    private int $batchSize;
-
-    /**
-     * @var positive-int
-     */
-    private int $segmentSize;
+    private readonly int $segmentSize;
 
     /**
      * @var callable(InputInterface, OutputInterface):void
@@ -83,17 +76,6 @@ final class ParallelExecutor
     private $runAfterBatch;
 
     private string $progressSymbol;
-
-    private ChildCommandFactory $childCommandFactory;
-
-    private string $workingDirectory;
-
-    /**
-     * @var array<string, string>|null
-     */
-    private ?array $extraEnvironmentVariables;
-
-    private ProcessLauncherFactory $processLauncherFactory;
 
     /**
      * @var callable(): void
@@ -122,8 +104,8 @@ final class ParallelExecutor
         callable $fetchItems,
         callable $runSingleCommand,
         callable $getItemName,
-        ErrorHandler $errorHandler,
-        $childSourceStream,
+        private readonly ErrorHandler $errorHandler,
+        private $childSourceStream,
         int $batchSize,
         int $segmentSize,
         callable $runBeforeFirstCommand,
@@ -131,10 +113,10 @@ final class ParallelExecutor
         callable $runBeforeBatch,
         callable $runAfterBatch,
         string $progressSymbol,
-        ChildCommandFactory $childCommandFactory,
-        string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        ProcessLauncherFactory $processLauncherFactory,
+        private readonly ChildCommandFactory $childCommandFactory,
+        private readonly string $workingDirectory,
+        private readonly ?array $extraEnvironmentVariables,
+        private readonly ProcessLauncherFactory $processLauncherFactory,
         callable $processTick
     ) {
         self::validateSegmentSize($segmentSize);
@@ -144,8 +126,6 @@ final class ParallelExecutor
         $this->fetchItems = $fetchItems;
         $this->runSingleCommand = $runSingleCommand;
         $this->getItemName = $getItemName;
-        $this->errorHandler = $errorHandler;
-        $this->childSourceStream = $childSourceStream;
         $this->batchSize = $batchSize;
         $this->segmentSize = $segmentSize;
         $this->runBeforeFirstCommand = $runBeforeFirstCommand;
@@ -153,10 +133,6 @@ final class ParallelExecutor
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
         $this->progressSymbol = $progressSymbol;
-        $this->childCommandFactory = $childCommandFactory;
-        $this->workingDirectory = $workingDirectory;
-        $this->extraEnvironmentVariables = $extraEnvironmentVariables;
-        $this->processLauncherFactory = $processLauncherFactory;
         $this->processTick = $processTick;
     }
 

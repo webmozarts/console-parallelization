@@ -150,7 +150,7 @@ final class OutputNormalizer
         $output = preg_replace(
             '#\s+\d+ \[[->]+?\] .+?MiB\\n#',
             '',
-            $output,
+            (string) $output,
         );
         $output = preg_replace(
             '#\s+\d+ \[[->]+?\] .+?MiB#',

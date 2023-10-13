@@ -20,34 +20,28 @@ use function array_keys;
 use function array_map;
 use function count;
 use function explode;
-use function gettype;
 use function is_array;
 use function is_numeric;
-use function is_object;
 use function iter\chunk;
 use function iter\mapWithKeys;
 use function iter\values;
 use function Safe\stream_get_contents;
 use function sprintf;
+use function str_contains;
 use function str_replace;
 use const PHP_EOL;
 
 final class ChunkedItemsIterator
 {
     /**
-     * @var list<string>|Iterator<string>
-     */
-    private iterable $items;
-
-    /**
      * @var Iterator<list<string>>
      */
-    private Iterator $itemsChunks;
+    private readonly Iterator $itemsChunks;
 
     /**
      * @var 0|positive-int|null
      */
-    private ?int $numberOfItems;
+    private readonly ?int $numberOfItems;
 
     /**
      * @internal Use the static factory methods instead.
@@ -55,9 +49,10 @@ final class ChunkedItemsIterator
      * @param list<string>|Iterator<string> $items
      * @param positive-int                  $batchSize
      */
-    public function __construct(iterable $items, int $batchSize)
-    {
-        $this->items = $items;
+    public function __construct(
+        private readonly iterable $items,
+        int $batchSize,
+    ) {
         $this->itemsChunks = chunk($items, $batchSize);
         $this->numberOfItems = is_array($items) ? count($items) : null;
     }
@@ -138,18 +133,16 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @param mixed $items
-     *
      * @return Iterator<string>
      */
-    private static function normalizeItemStream($items): Iterator
+    private static function normalizeItemStream(mixed $items): Iterator
     {
         Assert::isIterable(
             $items,
             sprintf(
                 'Expected the fetched items to be a list or an iterable of strings. Got "%s".',
                 // TODO: use get_debug_type when dropping PHP 7.4 support
-                is_object($items) ? $items::class : gettype($items),
+                get_debug_type($items),
             ),
         );
 
@@ -161,11 +154,7 @@ final class ChunkedItemsIterator
         );
     }
 
-    /**
-     * @param mixed     $item
-     * @param array-key $index
-     */
-    private static function normalizeItem($item, $index): string
+    private static function normalizeItem(mixed $item, int|string $index): string
     {
         if (is_numeric($item)) {
             return (string) $item;
@@ -176,12 +165,12 @@ final class ChunkedItemsIterator
             sprintf(
                 'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
                 // TODO: use get_debug_type when dropping PHP 7.4 support
-                is_object($item) ? $item::class : gettype($item),
+                get_debug_type($item),
                 $index,
             ),
         );
         Assert::false(
-            '' !== PHP_EOL && false !== mb_strpos($item, PHP_EOL),
+            '' !== PHP_EOL && str_contains($item, PHP_EOL),
             sprintf(
                 'An item cannot contain a line return. Got one for "%s" for the item "%s".',
                 str_replace(PHP_EOL, '<lineReturn>', $item),

@@ -24,6 +24,7 @@ use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
 use function Safe\getcwd;
+use function str_starts_with;
 use const DIRECTORY_SEPARATOR;
 use const STDIN;
 
@@ -46,28 +47,7 @@ final class ParallelExecutorFactory
      */
     private $getItemName;
 
-    private string $commandName;
-
-    private InputDefinition $commandDefinition;
-
-    private ErrorHandler $errorHandler;
-
-    /**
-     * @var resource
-     */
-    private $childSourceStream;
-
-    /**
-     * @var positive-int
-     */
-    private int $batchSize;
-
     private bool $useDefaultBatchSize = true;
-
-    /**
-     * @var positive-int
-     */
-    private int $segmentSize;
 
     /**
      * @var callable(InputInterface, OutputInterface):void
@@ -88,21 +68,6 @@ final class ParallelExecutorFactory
      * @var callable(InputInterface, OutputInterface, list<string>):void
      */
     private $runAfterBatch;
-
-    private string $phpExecutable;
-
-    private string $progressSymbol;
-
-    private string $scriptPath;
-
-    private string $workingDirectory;
-
-    /**
-     * @var array<string, string>|null
-     */
-    private ?array $extraEnvironmentVariables;
-
-    private ProcessLauncherFactory $processLauncherFactory;
 
     /**
      * @var callable(): void
@@ -127,43 +92,31 @@ final class ParallelExecutorFactory
         callable $fetchItems,
         callable $runSingleCommand,
         callable $getItemName,
-        string $commandName,
-        InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler,
-        $childSourceStream,
-        int $batchSize,
-        int $segmentSize,
+        private string $commandName,
+        private InputDefinition $commandDefinition,
+        private ErrorHandler $errorHandler,
+        private $childSourceStream,
+        private int $batchSize,
+        private int $segmentSize,
         callable $runBeforeFirstCommand,
         callable $runAfterLastCommand,
         callable $runBeforeBatch,
         callable $runAfterBatch,
-        string $progressSymbol,
-        string $phpExecutable,
-        string $scriptPath,
-        string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        ProcessLauncherFactory $processLauncherFactory,
+        private string $progressSymbol,
+        private string $phpExecutable,
+        private string $scriptPath,
+        private string $workingDirectory,
+        private ?array $extraEnvironmentVariables,
+        private ProcessLauncherFactory $processLauncherFactory,
         callable $processTick
     ) {
         $this->fetchItems = $fetchItems;
         $this->runSingleCommand = $runSingleCommand;
         $this->getItemName = $getItemName;
-        $this->commandName = $commandName;
-        $this->commandDefinition = $commandDefinition;
-        $this->errorHandler = $errorHandler;
-        $this->childSourceStream = $childSourceStream;
-        $this->batchSize = $batchSize;
-        $this->segmentSize = $segmentSize;
         $this->runBeforeFirstCommand = $runBeforeFirstCommand;
         $this->runAfterLastCommand = $runAfterLastCommand;
         $this->runBeforeBatch = $runBeforeBatch;
         $this->runAfterBatch = $runAfterBatch;
-        $this->progressSymbol = $progressSymbol;
-        $this->phpExecutable = $phpExecutable;
-        $this->scriptPath = $scriptPath;
-        $this->workingDirectory = $workingDirectory;
-        $this->extraEnvironmentVariables = $extraEnvironmentVariables;
-        $this->processLauncherFactory = $processLauncherFactory;
         $this->processTick = $processTick;
     }
 
@@ -434,7 +387,7 @@ final class ParallelExecutorFactory
         $pwd = $_SERVER['PWD'];
         $scriptName = $_SERVER['SCRIPT_NAME'];
 
-        return 0 === mb_strpos($scriptName, $pwd)
+        return str_starts_with($scriptName, $pwd)
             ? $scriptName
             : $pwd.DIRECTORY_SEPARATOR.$scriptName;
     }

@@ -337,7 +337,7 @@ final class ChunkedItemsIteratorTest extends TestCase
             null,
             [true],
             1,
-            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "boolean" for the item "0".',
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "bool" for the item "0".',
         ];
 
         yield 'single item with line return' => [

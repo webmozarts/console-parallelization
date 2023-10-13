@@ -35,30 +35,6 @@ use const PHP_EOL;
 final class SymfonyProcessLauncher implements ProcessLauncher
 {
     /**
-     * @var list<string>
-     */
-    private array $command;
-
-    private string $workingDirectory;
-
-    /**
-     * @var array<string, string>|null
-     */
-    private ?array $environmentVariables;
-
-    /**
-     * @var positive-int
-     */
-    private int $numberOfProcesses;
-
-    /**
-     * @var positive-int
-     */
-    private int $segmentSize;
-
-    private Logger $logger;
-
-    /**
      * @var ProcessOutput
      */
     private $processOutput;
@@ -73,38 +49,29 @@ final class SymfonyProcessLauncher implements ProcessLauncher
      */
     private $tick;
 
-    private SymfonyProcessFactory $processFactory;
-
     /**
      * @param list<string>               $command
-     * @param array<string, string>|null $extraEnvironmentVariables
+     * @param array<string, string>|null $environmentVariables
      * @param positive-int               $numberOfProcesses
      * @param positive-int               $segmentSize
-     * @param ProcessOutput              $processOutput             A PHP callback which is run whenever
-     *                                                              there is some output available on
-     *                                                              STDOUT or STDERR.
+     * @param ProcessOutput              $processOutput        A PHP callback which is run whenever
+     *                                                         there is some output available on
+     *                                                         STDOUT or STDERR.
      * @param callable(): void           $tick
      */
     public function __construct(
-        array $command,
-        string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        int $numberOfProcesses,
-        int $segmentSize,
-        Logger $logger,
+        private readonly array $command,
+        private readonly string $workingDirectory,
+        private readonly ?array $environmentVariables,
+        private readonly int $numberOfProcesses,
+        private readonly int $segmentSize,
+        private readonly Logger $logger,
         callable $processOutput,
         callable $tick,
-        SymfonyProcessFactory $processFactory
+        private readonly SymfonyProcessFactory $processFactory
     ) {
-        $this->command = $command;
-        $this->workingDirectory = $workingDirectory;
-        $this->environmentVariables = $extraEnvironmentVariables;
-        $this->numberOfProcesses = $numberOfProcesses;
-        $this->segmentSize = $segmentSize;
-        $this->logger = $logger;
         $this->processOutput = $processOutput;
         $this->tick = $tick;
-        $this->processFactory = $processFactory;
     }
 
     public function run(iterable $items): int

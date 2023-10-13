@@ -22,26 +22,6 @@ use function sprintf;
 final class Configuration
 {
     /**
-     * @var positive-int
-     */
-    private int $numberOfProcesses;
-
-    /**
-     * @var positive-int
-     */
-    private int $segmentSize;
-
-    /**
-     * @var positive-int|null
-     */
-    private ?int $numberOfSegments;
-
-    /**
-     * @var positive-int|0|null
-     */
-    private ?int $totalNumberOfBatches;
-
-    /**
      * @internal Use the static factory methods instead.
      *
      * @param positive-int        $numberOfProcesses
@@ -50,15 +30,11 @@ final class Configuration
      * @param positive-int|0|null $totalNumberOfBatches
      */
     public function __construct(
-        int $numberOfProcesses,
-        int $segmentSize,
-        ?int $numberOfSegments,
-        ?int $totalNumberOfBatches
+        private readonly int $numberOfProcesses,
+        private readonly int $segmentSize,
+        private readonly ?int $numberOfSegments,
+        private readonly ?int $totalNumberOfBatches,
     ) {
-        $this->numberOfProcesses = $numberOfProcesses;
-        $this->segmentSize = $segmentSize;
-        $this->numberOfSegments = $numberOfSegments;
-        $this->totalNumberOfBatches = $totalNumberOfBatches;
     }
 
     /**
@@ -72,7 +48,7 @@ final class Configuration
         ?int $numberOfItems,
         int $numberOfProcesses,
         int $segmentSize,
-        int $batchSize
+        int $batchSize,
     ): self {
         // We always check those (and not the calculated ones) since they come from the command
         // configuration so an issue there hints on a misconfiguration which should be fixed.

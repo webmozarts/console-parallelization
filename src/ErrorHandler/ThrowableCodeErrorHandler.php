@@ -16,14 +16,13 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler;
 use Throwable;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use function max;
 
 final class ThrowableCodeErrorHandler implements ErrorHandler
 {
-    private ErrorHandler $decoratedErrorHandler;
-
-    public function __construct(?ErrorHandler $decoratedErrorHandler = null)
-    {
-        $this->decoratedErrorHandler = $decoratedErrorHandler ?? new NullErrorHandler();
+    public function __construct(
+        private readonly ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
+    ) {
     }
 
     public function handleError(string $item, Throwable $throwable, Logger $logger): int

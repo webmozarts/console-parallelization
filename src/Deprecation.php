@@ -25,7 +25,7 @@ final class Deprecation
      * @param string $message The message of the deprecation
      * @param mixed  ...$args Values to insert in the message using printf() formatting
      */
-    public static function trigger(string $message, ...$args): void
+    public static function trigger(string $message, mixed ...$args): void
     {
         trigger_deprecation(
             'webmozarts/console-parallelization',

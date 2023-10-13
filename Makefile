@@ -35,6 +35,9 @@ INFECTION_BIN = vendor/bin/infection
 INFECTION = $(INFECTION_BIN) --skip-initial-tests --coverage=$(COVERAGE_DIR) --only-covered --show-mutations --min-msi=$(TARGET_MSI) --min-covered-msi=$(TARGET_MSI) --ansi --threads=max
 INFECTION_WITH_INITIAL_TESTS = $(INFECTION_BIN) --only-covered --show-mutations --min-msi=$(TARGET_MSI) --min-covered-msi=$(TARGET_MSI) --ansi --threads=max
 
+RECTOR_BIN = vendor-bin/rector/vendor/bin/rector
+RECTOR = $(RECTOR_BIN)
+
 
 #
 # Commands
@@ -141,6 +144,14 @@ clear_coverage:	  ## Clears the coverage reports
 clear_coverage:
 	rm -rf $(COVERAGE_DIR) || true
 
+.PHONY: rector
+rector: $(RECTOR_BIN)
+	$(RECTOR)
+
+.PHONY: rector_lint
+rector_lint: $(RECTOR_BIN) dist
+	$(RECTOR) --dry-run
+
 
 #
 # Rules from files
@@ -175,4 +186,9 @@ $(COVERAGE_JUNIT): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
 	touch -c $(COVERAGE_XML)
 
 $(INFECTION_BIN): vendor
+	touch -c $@
+
+
+$(RECTOR_BIN): vendor
+	composer bin rector install
 	touch -c $@

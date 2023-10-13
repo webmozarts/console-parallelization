@@ -23,11 +23,8 @@ use function func_get_args;
  */
 abstract class DecoratorLogger implements Logger
 {
-    private Logger $decoratedLogger;
-
-    public function __construct(Logger $decoratedLogger)
+    public function __construct(private readonly Logger $decoratedLogger)
     {
-        $this->decoratedLogger = $decoratedLogger;
     }
 
     public function logConfiguration(

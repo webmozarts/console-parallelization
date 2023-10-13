@@ -32,7 +32,7 @@ use const JSON_THROW_ON_ERROR;
 
 final class ImportUnknownMoviesCountCommand extends ParallelCommand
 {
-    private TestLogger $logger;
+    private readonly TestLogger $logger;
 
     /**
      * @var array<string, string>

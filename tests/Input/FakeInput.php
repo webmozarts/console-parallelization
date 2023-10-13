@@ -13,11 +13,89 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
-use function class_alias;
-use const PHP_VERSION_ID;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputInterface;
+use Webmozarts\Console\Parallelization\UnexpectedCall;
 
-$sourceClass = PHP_VERSION_ID > 80_000
-    ? FakeInput81::class
-    : FakeInput74::class;
+final class FakeInput implements InputInterface
+{
+    public function __call($name, $arguments): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
 
-class_alias($sourceClass, \Webmozarts\Console\Parallelization\Input\FakeInput::class);
+    public function getFirstArgument(): ?string
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function hasParameterOption($values, bool $onlyParams = false): bool
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function getParameterOption(array|string $values, null|array|bool|float|int|string $default = false, bool $onlyParams = false): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function bind(InputDefinition $definition): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function validate(): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function getArguments(): array
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function getArgument(string $name): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function setArgument(string $name, $value): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function hasArgument(string $name): bool
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function getOptions(): array
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function getOption(string $name): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function setOption(string $name, $value): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function hasOption(string $name): bool
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function isInteractive(): bool
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+
+    public function setInteractive(bool $interactive): void
+    {
+        throw UnexpectedCall::forMethod(__METHOD__);
+    }
+}

@@ -47,7 +47,7 @@ final class CpuCoreCounter
 
         try {
             self::$count = (new FidryCpuCoreCounter())->getCount();
-        } catch (NumberOfCpuCoreNotFound $exception) {
+        } catch (NumberOfCpuCoreNotFound) {
             self::$count = 1;
         }
 

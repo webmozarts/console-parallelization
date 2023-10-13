@@ -65,21 +65,21 @@ final class RawInput extends Input
 
     /**
      * @codeCoverageIgnore
-     * @param mixed $values
-     * @param mixed $onlyParams
+     *
+     * @param mixed[]|string $values
      */
-    public function hasParameterOption($values, $onlyParams = false): bool
+    public function hasParameterOption(array|string $values, bool $onlyParams = false): bool
     {
         throw new DomainException('Not implemented.');
     }
 
     /**
      * @codeCoverageIgnore
-     * @param mixed $values
-     * @param mixed $default
-     * @param mixed $onlyParams
+     *
+     * @param mixed[]|string                     $values
+     * @param null|array|bool|mixed[]|int|string $default
      */
-    public function getParameterOption($values, $default = false, $onlyParams = false): void
+    public function getParameterOption(array|string $values, null|array|bool|float|int|string $default = false, bool $onlyParams = false): mixed
     {
         throw new DomainException('Not implemented.');
     }

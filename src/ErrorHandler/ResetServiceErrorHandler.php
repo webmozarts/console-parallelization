@@ -20,15 +20,10 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class ResetServiceErrorHandler implements ErrorHandler
 {
-    private ResetInterface $resettable;
-    private ErrorHandler $decoratedErrorHandler;
-
     public function __construct(
-        ResetInterface $resettable,
-        ?ErrorHandler $decoratedErrorHandler = null
+        private readonly ResetInterface $resettable,
+        private readonly ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
     ) {
-        $this->resettable = $resettable;
-        $this->decoratedErrorHandler = $decoratedErrorHandler ?? new NullErrorHandler();
     }
 
     public static function forContainer(?ContainerInterface $container): ErrorHandler

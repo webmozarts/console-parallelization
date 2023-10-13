@@ -35,7 +35,7 @@ final class ImportMoviesCommand extends Command
 {
     use Parallelization;
 
-    private TestLogger $logger;
+    private readonly TestLogger $logger;
 
     /**
      * @var array<string, string>

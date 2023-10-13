@@ -91,7 +91,7 @@ abstract class ParallelCommand extends Command
                 InputInterface $input,
                 OutputInterface $output
             ) => $this->runSingleCommand($item, $input, $output),
-            Closure::fromCallable([$this, 'getItemName']),
+            Closure::fromCallable($this->getItemName(...)),
             $commandName,
             $this->getDefinition(),
             $this->createErrorHandler($input, $output),

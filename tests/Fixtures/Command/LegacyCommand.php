@@ -53,7 +53,7 @@ final class LegacyCommand extends Command
 
     private const DRY_RUN_OPT = 'dry-run';
 
-    private ContainerInterface $container;
+    private readonly ContainerInterface $container;
 
     public function __construct()
     {
