@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-use Closure;
 use Symfony\Bundle\FrameworkBundle\Console\Application as FrameworkBundleApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -127,12 +126,8 @@ trait Parallelization
 
         $parallelExecutorFactory = $this->getParallelExecutableFactory(
             fn (InputInterface $input) => $this->fetchItems($input, $output),
-            fn (
-                string $item,
-                InputInterface $input,
-                OutputInterface $output
-            ) => $this->runSingleCommand($item, $input, $output),
-            fn (int $count) => $this->getItemName($count),
+            $this->runSingleCommand(...),
+            $this->getItemName(...),
             $this->getName(),
             $this->getDefinition(),
             $this->createErrorHandler($input, $output),
@@ -265,10 +260,10 @@ trait Parallelization
         }
 
         return $factory
-            ->withRunBeforeFirstCommand(Closure::fromCallable([$this, 'runBeforeFirstCommand']))
-            ->withRunAfterLastCommand(Closure::fromCallable([$this, 'runAfterLastCommand']))
-            ->withRunBeforeBatch(Closure::fromCallable([$this, 'runBeforeBatch']))
-            ->withRunAfterBatch(Closure::fromCallable([$this, 'runAfterBatch']));
+            ->withRunBeforeFirstCommand($this->runBeforeFirstCommand(...))
+            ->withRunAfterLastCommand($this->runAfterLastCommand(...))
+            ->withRunBeforeBatch($this->runBeforeBatch(...))
+            ->withRunAfterBatch($this->runAfterBatch(...));
     }
 
     /**

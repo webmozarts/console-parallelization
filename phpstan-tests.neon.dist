@@ -33,7 +33,7 @@ parameters:
           message: '#assertTrue\(\) with false will always evaluate to false\.#'
 
         - path: tests/ParallelExecutorFactoryTest.php
-          message: '#ParallelExecutorFactory::create\(\) expects callable#'
+          message: '#ParallelExecutorFactory::create\(\) expects Closure#'
 
         - path: tests/Fixtures/Command/LegacyCommand.php
           message: '#Static method .* is unused#'

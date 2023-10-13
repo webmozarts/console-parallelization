@@ -19,6 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
+use function get_debug_type;
 use function is_int;
 use function is_numeric;
 use function sprintf;
@@ -233,7 +234,6 @@ final class ParallelizationInput
             $item,
             sprintf(
                 'Invalid item type. Expected a string, got "%s".',
-                // TODO: use get_debug_type when dropping PHP 7.4 support
                 get_debug_type($item),
             ),
         );

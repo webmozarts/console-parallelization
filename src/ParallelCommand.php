@@ -91,7 +91,7 @@ abstract class ParallelCommand extends Command
                 InputInterface $input,
                 OutputInterface $output
             ) => $this->runSingleCommand($item, $input, $output),
-            Closure::fromCallable($this->getItemName(...)),
+            $this->getItemName(...),
             $commandName,
             $this->getDefinition(),
             $this->createErrorHandler($input, $output),
@@ -125,9 +125,9 @@ abstract class ParallelCommand extends Command
         ErrorHandler $errorHandler
     ): ParallelExecutorFactory {
         return ParallelExecutorFactory::create(
-            $fetchItems,
-            $runSingleCommand,
-            $getItemName,
+            Closure::fromCallable($fetchItems),
+            Closure::fromCallable($runSingleCommand),
+            Closure::fromCallable($getItemName),
             $commandName,
             $commandDefinition,
             $errorHandler,
