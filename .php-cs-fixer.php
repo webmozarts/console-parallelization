@@ -34,7 +34,7 @@ $config = new FidryConfig(
         file that was distributed with this source code.
         EOF,
     // The min PHP version supported (best to align with your composer.json)
-    74000,
+    81_000,
 );
 
 return $config->setFinder($finder);
