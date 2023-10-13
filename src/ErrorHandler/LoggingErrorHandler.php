@@ -18,11 +18,9 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class LoggingErrorHandler implements ErrorHandler
 {
-    private ErrorHandler $decoratedErrorHandler;
-
-    public function __construct(?ErrorHandler $decoratedErrorHandler = null)
-    {
-        $this->decoratedErrorHandler = $decoratedErrorHandler ?? new NullErrorHandler();
+    public function __construct(
+        private readonly ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
+    ) {
     }
 
     public function handleError(string $item, Throwable $throwable, Logger $logger): int

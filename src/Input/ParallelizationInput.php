@@ -19,10 +19,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
-use function gettype;
+use function get_debug_type;
 use function is_int;
 use function is_numeric;
-use function is_object;
 use function sprintf;
 
 final class ParallelizationInput
@@ -40,8 +39,6 @@ final class ParallelizationInput
         self::CHILD_OPTION,
     ];
 
-    private bool $mainProcess;
-
     /**
      * @var positive-int
      */
@@ -52,20 +49,6 @@ final class ParallelizationInput
      */
     private $findNumberOfProcesses;
 
-    private ?string $item;
-
-    private bool $childProcess;
-
-    /**
-     * @var positive-int|null
-     */
-    private ?int $batchSize;
-
-    /**
-     * @var positive-int|null
-     */
-    private ?int $segmentSize;
-
     /**
      * @internal Use the static factory methods instead.
      *
@@ -74,25 +57,18 @@ final class ParallelizationInput
      * @param positive-int|null                    $segmentSize
      */
     public function __construct(
-        bool $mainProcess,
+        private readonly bool $mainProcess,
         $numberOfOrFindNumberOfProcesses,
-        ?string $item,
-        bool $childProcess,
-        ?int $batchSize,
-        ?int $segmentSize
+        private readonly ?string $item,
+        private readonly bool $childProcess,
+        private readonly ?int $batchSize,
+        private readonly ?int $segmentSize
     ) {
-        $this->mainProcess = $mainProcess;
-        $this->item = $item;
-        $this->childProcess = $childProcess;
-
         if (is_int($numberOfOrFindNumberOfProcesses)) {
             $this->numberOfProcesses = $numberOfOrFindNumberOfProcesses;
         } else {
             $this->findNumberOfProcesses = $numberOfOrFindNumberOfProcesses;
         }
-
-        $this->batchSize = $batchSize;
-        $this->segmentSize = $segmentSize;
     }
 
     public static function fromInput(InputInterface $input): self
@@ -246,10 +222,7 @@ final class ParallelizationInput
         return $this->segmentSize;
     }
 
-    /**
-     * @param mixed $item
-     */
-    private static function validateItem($item): string
+    private static function validateItem(mixed $item): string
     {
         if (is_numeric($item)) {
             return (string) $item;
@@ -261,8 +234,7 @@ final class ParallelizationInput
             $item,
             sprintf(
                 'Invalid item type. Expected a string, got "%s".',
-                // TODO: use get_debug_type when dropping PHP 7.4 support
-                is_object($item) ? $item::class : gettype($item),
+                get_debug_type($item),
             ),
         );
 
@@ -282,12 +254,10 @@ final class ParallelizationInput
     }
 
     /**
-     * @param string|int|null $value
-     *
      * @return ($nullable is true ? positive-int|null : positive-int)
      */
     private static function coerceAndValidatePositiveInt(
-        $value,
+        null|int|string $value,
         string $name,
         bool $nullable
     ): ?int {

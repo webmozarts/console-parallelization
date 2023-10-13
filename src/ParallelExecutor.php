@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Closure;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,133 +32,45 @@ use function sprintf;
 final class ParallelExecutor
 {
     /**
-     * @var callable(InputInterface):iterable<string>
-     */
-    private $fetchItems;
-
-    /**
-     * @var callable(string, InputInterface, OutputInterface):void
-     */
-    private $runSingleCommand;
-
-    /**
-     * @var callable(positive-int|0|null): string
-     */
-    private $getItemName;
-
-    private ErrorHandler $errorHandler;
-
-    /**
-     * @var resource
-     */
-    private $childSourceStream;
-
-    /**
-     * @var positive-int
-     */
-    private int $batchSize;
-
-    /**
-     * @var positive-int
-     */
-    private int $segmentSize;
-
-    /**
-     * @var callable(InputInterface, OutputInterface):void
-     */
-    private $runBeforeFirstCommand;
-
-    /**
-     * @var callable(InputInterface, OutputInterface):void
-     */
-    private $runAfterLastCommand;
-
-    /**
-     * @var callable(InputInterface, OutputInterface, list<string>):void
-     */
-    private $runBeforeBatch;
-
-    /**
-     * @var callable(InputInterface, OutputInterface, list<string>):void
-     */
-    private $runAfterBatch;
-
-    private string $progressSymbol;
-
-    private ChildCommandFactory $childCommandFactory;
-
-    private string $workingDirectory;
-
-    /**
-     * @var array<string, string>|null
-     */
-    private ?array $extraEnvironmentVariables;
-
-    private ProcessLauncherFactory $processLauncherFactory;
-
-    /**
-     * @var callable(): void
-     */
-    private $processTick;
-
-    /**
      * @internal The ParallelExecutor should only be created via its factory
      *           ParallelExecutorFactory. This method signature is not subject
      *           to the BC policy.
      *
-     * @param callable(InputInterface):iterable<string>                    $fetchItems
-     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(positive-int|0|null):string                         $getItemName
-     * @param resource                                                     $childSourceStream
-     * @param positive-int                                                 $batchSize
-     * @param positive-int                                                 $segmentSize
-     * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
-     * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
-     * @param array<string, string>                                        $extraEnvironmentVariables
-     * @param callable(): void                                             $processTick
+     * @param Closure(InputInterface):iterable<string>                    $fetchItems
+     * @param Closure(string, InputInterface, OutputInterface):void       $runSingleCommand
+     * @param Closure(positive-int|0|null):string                         $getItemName
+     * @param resource                                                    $childSourceStream
+     * @param positive-int                                                $batchSize
+     * @param positive-int                                                $segmentSize
+     * @param Closure(InputInterface, OutputInterface):void               $runBeforeFirstCommand
+     * @param Closure(InputInterface, OutputInterface):void               $runAfterLastCommand
+     * @param Closure(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
+     * @param Closure(InputInterface, OutputInterface, list<string>):void $runAfterBatch
+     * @param array<string, string>                                       $extraEnvironmentVariables
+     * @param Closure(): void                                             $processTick
      */
     public function __construct(
-        callable $fetchItems,
-        callable $runSingleCommand,
-        callable $getItemName,
-        ErrorHandler $errorHandler,
-        $childSourceStream,
-        int $batchSize,
-        int $segmentSize,
-        callable $runBeforeFirstCommand,
-        callable $runAfterLastCommand,
-        callable $runBeforeBatch,
-        callable $runAfterBatch,
-        string $progressSymbol,
-        ChildCommandFactory $childCommandFactory,
-        string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        ProcessLauncherFactory $processLauncherFactory,
-        callable $processTick
+        private readonly Closure $fetchItems,
+        private readonly Closure $runSingleCommand,
+        private readonly Closure $getItemName,
+        private readonly ErrorHandler $errorHandler,
+        private $childSourceStream,
+        private readonly int $batchSize,
+        private readonly int $segmentSize,
+        private readonly Closure $runBeforeFirstCommand,
+        private readonly Closure $runAfterLastCommand,
+        private readonly Closure $runBeforeBatch,
+        private readonly Closure $runAfterBatch,
+        private readonly string $progressSymbol,
+        private readonly ChildCommandFactory $childCommandFactory,
+        private readonly string $workingDirectory,
+        private readonly ?array $extraEnvironmentVariables,
+        private readonly ProcessLauncherFactory $processLauncherFactory,
+        private readonly Closure $processTick
     ) {
         self::validateSegmentSize($segmentSize);
         self::validateBatchSize($batchSize);
         self::validateProgressSymbol($progressSymbol);
-
-        $this->fetchItems = $fetchItems;
-        $this->runSingleCommand = $runSingleCommand;
-        $this->getItemName = $getItemName;
-        $this->errorHandler = $errorHandler;
-        $this->childSourceStream = $childSourceStream;
-        $this->batchSize = $batchSize;
-        $this->segmentSize = $segmentSize;
-        $this->runBeforeFirstCommand = $runBeforeFirstCommand;
-        $this->runAfterLastCommand = $runAfterLastCommand;
-        $this->runBeforeBatch = $runBeforeBatch;
-        $this->runAfterBatch = $runAfterBatch;
-        $this->progressSymbol = $progressSymbol;
-        $this->childCommandFactory = $childCommandFactory;
-        $this->workingDirectory = $workingDirectory;
-        $this->extraEnvironmentVariables = $extraEnvironmentVariables;
-        $this->processLauncherFactory = $processLauncherFactory;
-        $this->processTick = $processTick;
     }
 
     /**

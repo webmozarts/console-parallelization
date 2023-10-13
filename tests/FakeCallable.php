@@ -21,7 +21,7 @@ final class FakeCallable
 
     public static function create(): callable
     {
-        return static function (): void {
+        return static function (): never {
             throw UnexpectedCall::forMethod(__METHOD__);
         };
     }

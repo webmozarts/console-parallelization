@@ -20,7 +20,7 @@ use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
 
 final class ResetCpuCounterListener implements AfterTestHook
 {
-    private static ?ReflectionProperty $countReflection;
+    private static ?ReflectionProperty $countReflection = null;
 
     public function executeAfterTest(string $test, float $time): void
     {

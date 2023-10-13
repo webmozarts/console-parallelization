@@ -25,10 +25,7 @@ use function sprintf;
  */
 final class MemorySizeFormatter
 {
-    /**
-     * @param float|int $size
-     */
-    public static function format($size, int $decimals = 2): string
+    public static function format(float|int $size, int $decimals = 2): string
     {
         if (-1 === $size) {
             return '-1';

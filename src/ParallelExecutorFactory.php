@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Closure;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,6 +25,7 @@ use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
 use function Safe\getcwd;
+use function str_starts_with;
 use const DIRECTORY_SEPARATOR;
 use const STDIN;
 
@@ -31,151 +33,55 @@ final class ParallelExecutorFactory
 {
     private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
 
-    /**
-     * @var callable(InputInterface):iterable<string>
-     */
-    private $fetchItems;
-
-    /**
-     * @var callable(string, InputInterface, OutputInterface):void
-     */
-    private $runSingleCommand;
-
-    /**
-     * @var callable(positive-int|0|null): string
-     */
-    private $getItemName;
-
-    private string $commandName;
-
-    private InputDefinition $commandDefinition;
-
-    private ErrorHandler $errorHandler;
-
-    /**
-     * @var resource
-     */
-    private $childSourceStream;
-
-    /**
-     * @var positive-int
-     */
-    private int $batchSize;
-
     private bool $useDefaultBatchSize = true;
 
     /**
-     * @var positive-int
-     */
-    private int $segmentSize;
-
-    /**
-     * @var callable(InputInterface, OutputInterface):void
-     */
-    private $runBeforeFirstCommand;
-
-    /**
-     * @var callable(InputInterface, OutputInterface):void
-     */
-    private $runAfterLastCommand;
-
-    /**
-     * @var callable(InputInterface, OutputInterface, list<string>):void
-     */
-    private $runBeforeBatch;
-
-    /**
-     * @var callable(InputInterface, OutputInterface, list<string>):void
-     */
-    private $runAfterBatch;
-
-    private string $phpExecutable;
-
-    private string $progressSymbol;
-
-    private string $scriptPath;
-
-    private string $workingDirectory;
-
-    /**
-     * @var array<string, string>|null
-     */
-    private ?array $extraEnvironmentVariables;
-
-    private ProcessLauncherFactory $processLauncherFactory;
-
-    /**
-     * @var callable(): void
-     */
-    private $processTick;
-
-    /**
-     * @param callable(InputInterface):iterable<string>                    $fetchItems
-     * @param callable(string, InputInterface, OutputInterface):void       $runSingleCommand
-     * @param callable(positive-int|0|null):string                         $getItemName
-     * @param resource                                                     $childSourceStream
-     * @param positive-int                                                 $batchSize
-     * @param positive-int                                                 $segmentSize
-     * @param callable(InputInterface, OutputInterface):void               $runBeforeFirstCommand
-     * @param callable(InputInterface, OutputInterface):void               $runAfterLastCommand
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
-     * @param array<string, string>                                        $extraEnvironmentVariables
-     * @param callable(): void                                             $processTick
+     * @param Closure(InputInterface):iterable<string>                    $fetchItems
+     * @param Closure(string, InputInterface, OutputInterface):void       $runSingleCommand
+     * @param Closure(positive-int|0|null):string                         $getItemName
+     * @param resource                                                    $childSourceStream
+     * @param positive-int                                                $batchSize
+     * @param positive-int                                                $segmentSize
+     * @param Closure(InputInterface, OutputInterface):void               $runBeforeFirstCommand
+     * @param Closure(InputInterface, OutputInterface):void               $runAfterLastCommand
+     * @param Closure(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
+     * @param Closure(InputInterface, OutputInterface, list<string>):void $runAfterBatch
+     * @param array<string, string>                                       $extraEnvironmentVariables
+     * @param Closure(): void                                             $processTick
      */
     private function __construct(
-        callable $fetchItems,
-        callable $runSingleCommand,
-        callable $getItemName,
-        string $commandName,
-        InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler,
-        $childSourceStream,
-        int $batchSize,
-        int $segmentSize,
-        callable $runBeforeFirstCommand,
-        callable $runAfterLastCommand,
-        callable $runBeforeBatch,
-        callable $runAfterBatch,
-        string $progressSymbol,
-        string $phpExecutable,
-        string $scriptPath,
-        string $workingDirectory,
-        ?array $extraEnvironmentVariables,
-        ProcessLauncherFactory $processLauncherFactory,
-        callable $processTick
+        private Closure $fetchItems,
+        private Closure $runSingleCommand,
+        private Closure $getItemName,
+        private string $commandName,
+        private InputDefinition $commandDefinition,
+        private ErrorHandler $errorHandler,
+        private $childSourceStream,
+        private int $batchSize,
+        private int $segmentSize,
+        private Closure $runBeforeFirstCommand,
+        private Closure $runAfterLastCommand,
+        private Closure $runBeforeBatch,
+        private Closure $runAfterBatch,
+        private string $progressSymbol,
+        private string $phpExecutable,
+        private string $scriptPath,
+        private string $workingDirectory,
+        private ?array $extraEnvironmentVariables,
+        private ProcessLauncherFactory $processLauncherFactory,
+        private Closure $processTick
     ) {
-        $this->fetchItems = $fetchItems;
-        $this->runSingleCommand = $runSingleCommand;
-        $this->getItemName = $getItemName;
-        $this->commandName = $commandName;
-        $this->commandDefinition = $commandDefinition;
-        $this->errorHandler = $errorHandler;
-        $this->childSourceStream = $childSourceStream;
-        $this->batchSize = $batchSize;
-        $this->segmentSize = $segmentSize;
-        $this->runBeforeFirstCommand = $runBeforeFirstCommand;
-        $this->runAfterLastCommand = $runAfterLastCommand;
-        $this->runBeforeBatch = $runBeforeBatch;
-        $this->runAfterBatch = $runAfterBatch;
-        $this->progressSymbol = $progressSymbol;
-        $this->phpExecutable = $phpExecutable;
-        $this->scriptPath = $scriptPath;
-        $this->workingDirectory = $workingDirectory;
-        $this->extraEnvironmentVariables = $extraEnvironmentVariables;
-        $this->processLauncherFactory = $processLauncherFactory;
-        $this->processTick = $processTick;
     }
 
     /**
-     * @param callable(InputInterface):iterable<string>              $fetchItems
-     * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
-     * @param callable(positive-int|0|null):string                   $getItemName
+     * @param Closure(InputInterface):iterable<string>              $fetchItems
+     * @param Closure(string, InputInterface, OutputInterface):void $runSingleCommand
+     * @param Closure(positive-int|0|null):string                   $getItemName
      */
     public static function create(
-        callable $fetchItems,
-        callable $runSingleCommand,
-        callable $getItemName,
+        Closure $fetchItems,
+        Closure $runSingleCommand,
+        Closure $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
         ErrorHandler $errorHandler
@@ -190,10 +96,10 @@ final class ParallelExecutorFactory
             STDIN,
             50,
             50,
-            self::getNoopCallable(),
-            self::getNoopCallable(),
-            self::getNoopCallable(),
-            self::getNoopCallable(),
+            self::getNoopClosure(),
+            self::getNoopClosure(),
+            self::getNoopClosure(),
+            self::getNoopClosure(),
             chr(254),
             PhpExecutableFinder::find(),
             self::getScriptPath(),
@@ -252,11 +158,11 @@ final class ParallelExecutorFactory
     }
 
     /**
-     * Callable executed at the very beginning of the main process.
+     * Closure executed at the very beginning of the main process.
      *
-     * @param callable(InputInterface, OutputInterface):void $runBeforeFirstCommand
+     * @param Closure(InputInterface, OutputInterface):void $runBeforeFirstCommand
      */
-    public function withRunBeforeFirstCommand(callable $runBeforeFirstCommand): self
+    public function withRunBeforeFirstCommand(Closure $runBeforeFirstCommand): self
     {
         $clone = clone $this;
         $clone->runBeforeFirstCommand = $runBeforeFirstCommand;
@@ -265,11 +171,11 @@ final class ParallelExecutorFactory
     }
 
     /**
-     * Callable executed at the very end of the main process.
+     * Closure executed at the very end of the main process.
      *
-     * @param callable(InputInterface, OutputInterface):void $runAfterLastCommand
+     * @param Closure(InputInterface, OutputInterface):void $runAfterLastCommand
      */
-    public function withRunAfterLastCommand(callable $runAfterLastCommand): self
+    public function withRunAfterLastCommand(Closure $runAfterLastCommand): self
     {
         $clone = clone $this;
         $clone->runAfterLastCommand = $runAfterLastCommand;
@@ -278,13 +184,13 @@ final class ParallelExecutorFactory
     }
 
     /**
-     * Callable executed before executing all the items of the current batch. It
+     * Closure executed before executing all the items of the current batch. It
      * is executed in either the main or child process depending on whether
      * child processes are spawned.
      *
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
+     * @param Closure(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      */
-    public function withRunBeforeBatch(callable $runBeforeBatch): self
+    public function withRunBeforeBatch(Closure $runBeforeBatch): self
     {
         $clone = clone $this;
         $clone->runBeforeBatch = $runBeforeBatch;
@@ -293,13 +199,13 @@ final class ParallelExecutorFactory
     }
 
     /**
-     * Callable executed after executing all the items of the current batch. It
+     * Closure executed after executing all the items of the current batch. It
      * is executed in either the main or child process depending on whether
      * child processes are spawned.
      *
-     * @param callable(InputInterface, OutputInterface, list<string>):void $runAfterBatch
+     * @param Closure(InputInterface, OutputInterface, list<string>):void $runAfterBatch
      */
-    public function withRunAfterBatch(callable $runAfterBatch): self
+    public function withRunAfterBatch(Closure $runAfterBatch): self
     {
         $clone = clone $this;
         $clone->runAfterBatch = $runAfterBatch;
@@ -378,9 +284,9 @@ final class ParallelExecutorFactory
     }
 
     /**
-     * @param callable(): void $processTick
+     * @param Closure(): void $processTick
      */
-    public function withProcessTick(callable $processTick): self
+    public function withProcessTick(Closure $processTick): self
     {
         $clone = clone $this;
         $clone->processTick = $processTick;
@@ -416,7 +322,7 @@ final class ParallelExecutorFactory
         );
     }
 
-    private static function getNoopCallable(): callable
+    private static function getNoopClosure(): Closure
     {
         static $noop;
 
@@ -434,7 +340,7 @@ final class ParallelExecutorFactory
         $pwd = $_SERVER['PWD'];
         $scriptName = $_SERVER['SCRIPT_NAME'];
 
-        return 0 === mb_strpos($scriptName, $pwd)
+        return str_starts_with($scriptName, $pwd)
             ? $scriptName
             : $pwd.DIRECTORY_SEPARATOR.$scriptName;
     }

@@ -35,23 +35,19 @@ use const STR_PAD_BOTH;
 
 final class StandardLogger implements Logger
 {
-    private SymfonyStyle $io;
-    private int $terminalWidth;
+    private readonly SymfonyStyle $io;
     private ProgressBar $progressBar;
-    private ProgressBarFactory $progressBarFactory;
     private float $startTime;
-    private ?string $lastCall;
-    private LoggerInterface $logger;
+    private ?string $lastCall = null;
+    private readonly LoggerInterface $logger;
 
     public function __construct(
         InputInterface $input,
         OutputInterface $output,
-        int $terminalWidth,
-        ProgressBarFactory $progressBarFactory
+        private readonly int $terminalWidth,
+        private readonly ProgressBarFactory $progressBarFactory
     ) {
         $this->io = new SymfonyStyle($input, $output);
-        $this->terminalWidth = $terminalWidth;
-        $this->progressBarFactory = $progressBarFactory;
         $this->logger = new ConsoleLogger($output);
     }
 

@@ -32,17 +32,8 @@ parameters:
         - path: tests/Input/ParallelizationInputTest.php
           message: '#assertTrue\(\) with false will always evaluate to false\.#'
 
-        - path: tests/Process/DummyProcessFactory.php
-          message: '#DummyProcess#'
-
-        - path: tests/Process/SymfonyProcessLauncherTest.php
-          message: '#DummyProcess#'
-
-        - path: tests/Input/RawInputTest.php
-          message: '#FakeInput#'
-
         - path: tests/ParallelExecutorFactoryTest.php
-          message: '#ParallelExecutorFactory::create\(\) expects callable#'
+          message: '#ParallelExecutorFactory::create\(\) expects Closure#'
 
         - path: tests/Fixtures/Command/LegacyCommand.php
           message: '#Static method .* is unused#'

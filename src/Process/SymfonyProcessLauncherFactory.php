@@ -17,11 +17,8 @@ use Webmozarts\Console\Parallelization\Logger\Logger;
 
 final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
 {
-    private SymfonyProcessFactory $processFactory;
-
-    public function __construct(SymfonyProcessFactory $processFactory)
+    public function __construct(private readonly SymfonyProcessFactory $processFactory)
     {
-        $this->processFactory = $processFactory;
     }
 
     /**
