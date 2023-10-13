@@ -36,13 +36,27 @@
         },
         "CloneRemoval": false,
         "DecrementInteger": {
+            ignore: [
+                // The segment size or batch size are not critical
+                "Webmozarts\\Console\\Parallelization\\ParallelExecutorFactory::create"
+            ],
             "ignoreSourceCodeByRegex": [
                 ".*\\$numberOfStreamedItems = .*",
                 ".*\\$numberOfItems \\?\\? 0.*",
                 ".*return min\\(\\$exitCode, 255\\);.*"
             ]
         },
+        "FalseValue": {
+            "ignore": [
+                // The input value cannot be null hence the boolean changed has no influence.
+                "Webmozarts\\Console\\Parallelization\\Input\\ParallelizationInput::coerceNumberOfProcesses"
+            ]
+        },
         "IncrementInteger": {
+            ignore: [
+                // The segment size or batch size are not critical
+                "Webmozarts\\Console\\Parallelization\\ParallelExecutorFactory::create"
+            ],
             "ignoreSourceCodeByRegex": [
                 ".*\\$numberOfItems \\?\\? 0.*",
                 ".*return min\\(\\$exitCode, 255\\);.*"
