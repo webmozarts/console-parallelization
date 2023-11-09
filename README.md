@@ -178,16 +178,36 @@ protected function runAfterBatch(InputInterface $input, OutputInterface $output,
 {
     // e.g. flush database changes and free resources
 }
+
+protected function getParallelExecutableFactory(
+      callable $fetchItems,
+      callable $runSingleCommand,
+      callable $getItemName,
+      string $commandName,
+      InputDefinition $commandDefinition,
+      ErrorHandler $errorHandler
+  ): ParallelExecutorFactory {
+      return ParallelExecutorFactory::create(...func_get_args())
+          ->withRunAfterBatch($this$this->runBeforeBatch(...))
+          ->withRunAfterBatch($this$this->runAfterBatch(...));
+  }
 ```
 
 You can customize the default batch size of 50 by overriding the `getBatchSize()`
 method:
 
 ```php
-protected function getBatchSize(): int
-{
-    return 150;
-}
+protected function getParallelExecutableFactory(
+      callable $fetchItems,
+      callable $runSingleCommand,
+      callable $getItemName,
+      string $commandName,
+      InputDefinition $commandDefinition,
+      ErrorHandler $errorHandler
+  ): ParallelExecutorFactory {
+      return ParallelExecutorFactory::create(...func_get_args())
+          ->withBatchSize(150);
+  }
 ```
 
 
@@ -197,7 +217,7 @@ The library offers a wide variety of configuration settings:
 
 - `::getParallelExecutableFactory()` allows you to completely configure the
   `ParallelExecutorFactory` factory which goes from fragment, batch sizes, which
-  PHP executable is used or any of the [process handling hooks](#hooks)
+  PHP executable is used or any of the [process handling hooks](#hooks).
 - `::configureParallelExecutableFactory()` is a different, lighter extension
   point to configure the `ParallelExecutorFactory` factory.
 - `::getContainer()` allows you to configure which container is used. By default,
