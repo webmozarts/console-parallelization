@@ -106,14 +106,14 @@ phpunit:	  ## Runs PHPUnit
 phpunit: $(PHPUNIT_BIN)
 	$(PHPUNIT)
 
-.PHONY: phpunit_coverage_infection
-phpunit_coverage_infection: ## Runs PHPUnit with code coverage for Infection
-phpunit_coverage_infection: $(PHPUNIT_BIN) vendor
+.PHONY: phpunit_infection
+phpunit_infection:## Runs PHPUnit with code coverage for Infection
+phpunit_infection: $(PHPUNIT_BIN) vendor
 	$(PHPUNIT_COVERAGE_INFECTION)
 
-.PHONY: phpunit_coverage_html
-phpunit_coverage_html:	    ## Runs PHPUnit with code coverage with HTML report
-phpunit_coverage_html: $(PHPUNIT_BIN) vendor
+.PHONY: phpunit_html
+phpunit_html:	  ## Runs PHPUnit with code coverage with HTML report
+phpunit_html: $(PHPUNIT_BIN) vendor
 	$(PHPUNIT_COVERAGE_HTML)
 	@echo "You can check the report by opening the file \"$(COVERAGE_HTML)/index.html\"."
 
@@ -184,12 +184,12 @@ $(PHPUNIT_BIN): vendor
 	touch -c $@
 
 $(COVERAGE_XML): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
-	$(MAKE) phpunit_coverage_infection
+	$(MAKE) phpunit_infection
 	touch -c $@
 	touch -c $(COVERAGE_JUNIT)
 
 $(COVERAGE_JUNIT): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
-	$(MAKE) phpunit_coverage_infection
+	$(MAKE) phpunit_infection
 	touch -c $@
 	touch -c $(COVERAGE_XML)
 
