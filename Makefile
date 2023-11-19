@@ -132,7 +132,7 @@ validate-package: vendor
 
 .PHONY: clean
 clean: 	  	  ## Removes various temporary artifacts
-clean: clear_cache clear_coverage
+clean: clear_cache clear_coverage clean_dist
 
 .PHONY: clear_cache
 clear_cache: 	  ## Clears the integration test app cache
@@ -143,6 +143,12 @@ clear_cache:
 clear_coverage:	  ## Clears the coverage reports
 clear_coverage:
 	rm -rf $(COVERAGE_DIR) || true
+
+.PHONY: clean_dist
+clean_dist:
+	rm -rf dist || true
+	mkdir -p dist
+	touch dist/.gitkeep
 
 .PHONY: rector
 rector: $(RECTOR_BIN)
