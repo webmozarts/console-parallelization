@@ -54,7 +54,7 @@ help:
 
 .PHONY: autoreview
 autoreview: 	## Runs the Auto-Review checks
-autoreview: cs validate-package phpstan rector_lint phpunit_autoreview
+autoreview: cs validate-package phpstan rector_lint phpunit_autoreview docs
 
 .PHONY: cs
 cs: 	 	## Fixes CS
@@ -158,6 +158,23 @@ rector: $(RECTOR_BIN)
 .PHONY: rector_lint
 rector_lint: $(RECTOR_BIN) dist
 	$(RECTOR) --dry-run
+
+.PHONY: docs
+docs:	## Runs the docs checks
+docs: markdownlint lychee
+
+.PHONY: markdownlint
+markdownlint:
+	@echo "$(CCYELLOW)Ensure you have the nodejs & npm installed. For more information, check:$(CCEND)"
+	@# To keep in sync with .github/workflows/docs.yaml#check-links
+	npx markdownlint-cli2 "*.md|docs/**/*.md"
+
+.PHONY: lychee
+lychee:
+	@echo "$(CCYELLOW)Ensure you have the lychee command installed. For more information, check:$(CCEND)"
+	@echo "https://github.com/lycheeverse/lychee"
+	@# To keep in sync with .github/workflows/docs.yaml#check-links
+	lychee --verbose --no-progress '*.md' 'docs/**/*.md' --timeout=2
 
 
 #
