@@ -119,7 +119,7 @@ phpunit_html: $(PHPUNIT_BIN) vendor
 
 .PHONY: infection
 infection: $(INFECTION_BIN) vendor
-	$(INFECTION_WITH_INITIAL_TESTS) --initial-tests-php-options='-d zend_extension=xdebug.so'
+	$(INFECTION_WITH_INITIAL_TESTS) --initial-tests-php-options='-dzend_extension=xdebug.so'
 
 .PHONY: _infection
 _infection: $(INFECTION_BIN) $(COVERAGE_XML) $(COVERAGE_JUNIT) vendor
