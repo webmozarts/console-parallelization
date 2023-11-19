@@ -38,6 +38,7 @@ final class MakefileTest extends BaseMakefileTestCase
             # Commands
             #---------------------------------------------------------------------------[0m
 
+            [33mcheck:[0m 		   Runs all the checks
             [33mcs:[0m 	 	   Fixes CS
             [33mcs_lint:[0m	   Lints CS
             [33mphp_cs_fixer:[0m 	   Runs PHP-CS-Fixer
