@@ -101,11 +101,11 @@ phpstan_tests: $(PHPSTAN_BIN) vendor
 
 .PHONY: phpunit
 phpunit: $(PHPUNIT_BIN)
-	$(PHPUNIT) --testsuite=Tests
+	$(PHPUNIT) --testsuite=Tests --colors=always
 
 .PHONY: phpunit_autoreview
 phpunit_autoreview: $(PHPUNIT_BIN)
-	$(PHPUNIT) --testsuite=AutoReview
+	$(PHPUNIT) --testsuite=AutoReview --colors=always
 
 .PHONY: phpunit_infection
 phpunit_infection: $(PHPUNIT_BIN) vendor
