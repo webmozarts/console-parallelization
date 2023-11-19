@@ -18,8 +18,12 @@
     </extensions>
 
     <testsuites>
-        <testsuite name="Test Suite">
+        <testsuite name="Tests">
             <directory>tests/</directory>
+            <exclude>tests/AutoReview</exclude>
+        </testsuite>
+        <testsuite name="AutoReview">
+            <directory>tests/AutoReview</directory>
         </testsuite>
     </testsuites>
 

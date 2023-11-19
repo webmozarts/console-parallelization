@@ -54,7 +54,7 @@ help:
 
 .PHONY: autoreview
 autoreview: 	## Runs the Auto-Review checks
-autoreview: cs validate-package phpstan
+autoreview: cs validate-package phpstan phpunit_autoreview
 
 .PHONY: cs
 cs: 	 	## Fixes CS
@@ -101,7 +101,11 @@ phpstan_tests: $(PHPSTAN_BIN) vendor
 
 .PHONY: phpunit
 phpunit: $(PHPUNIT_BIN)
-	$(PHPUNIT)
+	$(PHPUNIT) --testsuite=Tests
+
+.PHONY: phpunit_autoreview
+phpunit_autoreview: $(PHPUNIT_BIN)
+	$(PHPUNIT) --testsuite=AutoReview
 
 .PHONY: phpunit_infection
 phpunit_infection: $(PHPUNIT_BIN) vendor
