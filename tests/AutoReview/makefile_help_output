@@ -12,3 +12,4 @@
 [33mtest:[0m 	 	 Runs all the tests
 [33mphpunit_html:[0m	 Runs PHPUnit with code coverage with HTML report
 [33mclean:[0m 	  	 Removes various temporary artifacts
+[33mdocs:[0m		 Runs the docs checks

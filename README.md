@@ -1,6 +1,6 @@
 # Parallelization for the Symfony Console
 
-This library supports the parallelization of Symfony Console commands. 
+This library supports the parallelization of Symfony Console commands.
 
 - [How it works](#how-it-works)
 - [Installation](#installation)
@@ -34,14 +34,14 @@ performance of your command.
 
 Use [Composer] to install the package:
 
-```
-$ composer require webmozarts/console-parallelization
+```shell
+composer require webmozarts/console-parallelization
 ```
 
 
 ## Usage
 
-Add add parallelization capabilities to your project, you can either extend the
+Add parallelization capabilities to your project, you can either extend the
 `ParallelCommand` class or use the `Parallelization` trait:
 
 ```php
@@ -98,7 +98,7 @@ class ImportMoviesCommand extends ParallelCommand
 
 You can run this command like a regular Symfony Console command:
 
-```
+```shell
 $ bin/console import:movies --main-process
 Processing 2768 movies in segments of 2768, batches of 50, 1 round, 56 batches in 1 process
 
@@ -109,7 +109,7 @@ Processed 2768 movies.
 
 Or, if you want, you can run the command using parallelization:
 
-```
+```shell
 $ bin/console import:movies
 # or with a specific number of processes instead:
 $ bin/console import:movies --processes 2
@@ -129,14 +129,14 @@ The main process fetches all the items that need to be processed and passes
 them to the child processes through their Standard Input (STDIN). Hence, items must
 fulfill two requirements:
 
-* Items must be strings
-* Items must not contain newlines
+- Items must be strings
+- Items must not contain newlines
 
 Typically, you want to keep items small in order to offload processing from the
 main process to the child process. Some typical examples for items:
 
-* The main process reads a file and passes the lines to the child processes
-* The main processes fetches IDs of database rows that need to be updated and passes them to the child processes
+- The main process reads a file and passes the lines to the child processes
+- The main processes fetches IDs of database rows that need to be updated and passes them to the child processes
 
 
 ### Segments
@@ -145,9 +145,9 @@ When you run a command with multiprocessing enabled, the items returned by
 `fetchItems()` are split into segments of a fixed size. Each child processes
 process a single segment and kills itself after that.
 
-By default, the segment size is the same as the batch size (see below), but you 
+By default, the segment size is the same as the batch size (see below), but you
 can try to tweak the performance of your command by choosing a different segment
-size (ideally a multiple of the batch size). You can do so by overriding the 
+size (ideally a multiple of the batch size). You can do so by overriding the
 `getSegmentSize()` method:
 
 ```php
@@ -220,7 +220,7 @@ The library offers a wide variety of configuration settings:
   failure to avoid things such as a broken Doctrine entity manager.
   If you are not using a kernel (e.g. outside a Symfony application), no
   container will be returned by default.
-- `::createErrorHandler()` allows you to configure the error handler you want to use. 
+- `::createErrorHandler()` allows you to configure the error handler you want to use.
 - `::createLogger()` allows you to completely configure the logger you want.
 
 
@@ -241,8 +241,8 @@ The library supports several process hooks which can be configured via
 
 Contributions to the package are always welcome!
 
-* Report any bugs or issues you find on the [issue tracker].
-* You can grab the source code at the package's [Git repository].
+- Report any bugs or issues you find on the [issue tracker].
+- You can grab the source code at the package's [Git repository].
 
 To run the CS fixer and tests you can use the command `make`. More details
 available with `make help`.
@@ -252,12 +252,11 @@ available with `make help`.
 See the [upgrade guide](UPGRADE.md).
 
 
-Authors
--------
+## Authors
 
-* [Bernhard Schussek]
-* [Théo Fidry]
-* [The Community Contributors]
+- [Bernhard Schussek]
+- [Théo Fidry]
+- [The Community Contributors]
 
 
 ## License
@@ -271,4 +270,4 @@ All contents of this package are licensed under the [MIT license].
 [The Community Contributors]: https://github.com/webmozarts/console-parallelization/graphs/contributors
 [issue tracker]: https://github.com/webmozarts/console-parallelization/issues
 [Git repository]: https://github.com/webmozarts/console-parallelization
-[MIT license]: LICENSE.md_
+[MIT license]: LICENSE
