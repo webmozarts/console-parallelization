@@ -54,7 +54,7 @@ help:
 
 .PHONY: autoreview
 autoreview: 	## Runs the Auto-Review checks
-autoreview: cs validate-package phpstan phpunit_autoreview
+autoreview: cs validate-package phpstan rector_lint phpunit_autoreview
 
 .PHONY: cs
 cs: 	 	## Fixes CS

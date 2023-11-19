@@ -27,5 +27,11 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->skip([
         CountOnNullRector::class,
+        \Rector\Php81\Rector\FuncCall\NullToStrictStringFuncCallArgRector::class => [
+            __DIR__.'/src/ParallelExecutorFactory.php',
+            __DIR__.'/tests/Integration/OutputNormalizer.php',
+        ],
+
+        __DIR__.'/tests/Integration/var',
     ]);
 };
