@@ -132,6 +132,10 @@ validate-package: vendor
 .PHONY: clean
 clean: 	  	## Removes various temporary artifacts
 clean: clear_cache clear_coverage clear_dist
+	@# Silently clean up old files
+	@rm -rf .php-cs-fixer.cache \
+		.php_cs.cache \
+		.phpunit.result.cache
 
 .PHONY: clear_cache
 clear_cache:
