@@ -179,35 +179,29 @@ protected function runAfterBatch(InputInterface $input, OutputInterface $output,
     // e.g. flush database changes and free resources
 }
 
-protected function getParallelExecutableFactory(
-      callable $fetchItems,
-      callable $runSingleCommand,
-      callable $getItemName,
-      string $commandName,
-      InputDefinition $commandDefinition,
-      ErrorHandler $errorHandler
-  ): ParallelExecutorFactory {
-      return ParallelExecutorFactory::create(...func_get_args())
-          ->withRunAfterBatch($this$this->runBeforeBatch(...))
-          ->withRunAfterBatch($this$this->runAfterBatch(...));
-  }
+protected function configureParallelExecutableFactory(
+      ParallelExecutorFactory $parallelExecutorFactory,
+      InputInterface $input,
+      OutputInterface $output,
+): ParallelExecutorFactory {
+    return $parallelExecutorFactory
+        ->withRunAfterBatch($this$this->runBeforeBatch(...))
+        ->withRunAfterBatch($this$this->runAfterBatch(...));
+}
 ```
 
 You can customize the default batch size of 50 by overriding the `getBatchSize()`
 method:
 
 ```php
-protected function getParallelExecutableFactory(
-      callable $fetchItems,
-      callable $runSingleCommand,
-      callable $getItemName,
-      string $commandName,
-      InputDefinition $commandDefinition,
-      ErrorHandler $errorHandler
-  ): ParallelExecutorFactory {
-      return ParallelExecutorFactory::create(...func_get_args())
-          ->withBatchSize(150);
-  }
+protected function configureParallelExecutableFactory(
+      ParallelExecutorFactory $parallelExecutorFactory,
+      InputInterface $input,
+      OutputInterface $output,
+): ParallelExecutorFactory {
+    return $parallelExecutorFactory
+        ->withBatchSize(150);
+}
 ```
 
 
@@ -233,7 +227,7 @@ The library offers a wide variety of configuration settings:
 ### Hooks
 
 The library supports several process hooks which can be configured via
-`::getParallelExecutableFactory()`:
+`::configureParallelExecutableFactory()`:
 
 | Method                                    | Scope         | Description                                                                         |
 |-------------------------------------------|---------------|-------------------------------------------------------------------------------------|
