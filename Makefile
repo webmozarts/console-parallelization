@@ -43,8 +43,9 @@ RECTOR = $(RECTOR_BIN)
 # Commands
 #---------------------------------------------------------------------------
 
-.PHONY: all
-all: cs validate-package phpstan infection
+.PHONY: check
+check: 		  ## Runs all the checks
+check: cs validate-package phpstan infection
 
 .PHONY: help
 help:
