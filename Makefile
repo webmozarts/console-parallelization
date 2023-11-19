@@ -45,7 +45,7 @@ RECTOR = $(RECTOR_BIN)
 
 .PHONY: check
 check: 		## Runs all the checks
-check: autoreview infection
+check: autoreview docs infection
 
 .PHONY: help
 help:
@@ -54,7 +54,7 @@ help:
 
 .PHONY: autoreview
 autoreview: 	## Runs the Auto-Review checks
-autoreview: cs validate-package phpstan rector_lint phpunit_autoreview docs
+autoreview: cs validate-package phpstan rector_lint phpunit_autoreview
 
 .PHONY: cs
 cs: 	 	## Fixes CS
@@ -160,7 +160,7 @@ rector_lint: $(RECTOR_BIN) dist
 	$(RECTOR) --dry-run
 
 .PHONY: docs
-docs:	## Runs the docs checks
+docs:		## Runs the docs checks
 docs: markdownlint lychee
 
 .PHONY: markdownlint
