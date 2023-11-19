@@ -45,12 +45,16 @@ RECTOR = $(RECTOR_BIN)
 
 .PHONY: check
 check: 		  ## Runs all the checks
-check: cs validate-package phpstan infection
+check: autoreview infection
 
 .PHONY: help
 help:
 	@echo "\033[33mUsage:\033[0m\n  make TARGET\n\n\033[32m#\n# Commands\n#---------------------------------------------------------------------------\033[0m\n"
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//' | awk 'BEGIN {FS = ":"}; {printf "\033[33m%s:\033[0m%s\n", $$1, $$2}'
+
+.PHONY: autoreview
+autoreview: 	  ## Runs the Auto-Review checks
+autoreview: cs validate-package phpstan
 
 .PHONY: cs
 cs: 	 	  ## Fixes CS
