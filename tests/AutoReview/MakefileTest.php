@@ -49,8 +49,8 @@ final class MakefileTest extends BaseMakefileTestCase
             [33mtest:[0m 	 	   Runs all the tests
             [33mphpstan:[0m 	   Runs PHPStan
             [33mphpunit:[0m	   Runs PHPUnit
-            [33mphpunit_coverage_infection:[0m  Runs PHPUnit with code coverage for Infection
-            [33mphpunit_coverage_html:[0m	     Runs PHPUnit with code coverage with HTML report
+            [33mphpunit_infection:[0m Runs PHPUnit with code coverage for Infection
+            [33mphpunit_html:[0m	   Runs PHPUnit with code coverage with HTML report
             [33minfection:[0m	   Runs Infection
             [33mvalidate-package:[0m  Validates the Composer package
             [33mclean:[0m 	  	   Removes various temporary artifacts
