@@ -52,7 +52,7 @@ final class MakefileTest extends BaseMakefileTestCase
             [33mphpunit_coverage_html:[0m	     Runs PHPUnit with code coverage with HTML report
             [33minfection:[0m	   Runs Infection
             [33mvalidate-package:[0m  Validates the Composer package
-            [33mclear:[0m 	  	   Clears various artifacts
+            [33mclean:[0m 	  	   Removes various temporary artifacts
             [33mclear_cache:[0m 	   Clears the integration test app cache
             [33mclear_coverage:[0m	   Clears the coverage reports
 

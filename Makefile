@@ -130,9 +130,9 @@ validate-package: ## Validates the Composer package
 validate-package: vendor
 	composer validate --strict
 
-.PHONY: clear
-clear: 	  	  ## Clears various artifacts
-clear: clear_cache clear_coverage
+.PHONY: clean
+clean: 	  	  ## Removes various temporary artifacts
+clean: clear_cache clear_coverage
 
 .PHONY: clear_cache
 clear_cache: 	  ## Clears the integration test app cache
