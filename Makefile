@@ -3,7 +3,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := help
 
 
 # Global variables
