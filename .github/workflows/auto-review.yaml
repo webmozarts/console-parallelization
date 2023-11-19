@@ -43,13 +43,13 @@ jobs:
                 uses: "ramsey/composer-install@v2"
 
             -   name: "Install PHP-CS-Fixer dependencies"
-                if: "${{ matrix.name == 'PHPStan' }}"
+                if: "${{ matrix.name }} == 'PHPStan'"
                 uses: "ramsey/composer-install@v2"
                 with:
                     working-directory: vendor-bin/php-cs-fixer
 
             -   name: "Install Rector dependencies"
-                if: "${{ matrix.name == 'Rector' }}"
+                if: "${{ matrix.name }} == 'Rector'"
                 uses: "ramsey/composer-install@v2"
                 with:
                     working-directory: vendor-bin/rector
