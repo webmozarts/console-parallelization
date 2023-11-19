@@ -18,7 +18,6 @@ use function file_get_contents;
 
 /**
  * @coversNothing
- * @group autoreview
  *
  * @internal
  */
