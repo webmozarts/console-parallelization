@@ -54,8 +54,9 @@ final class MakefileTest extends BaseMakefileTestCase
             [33minfection:[0m	   Runs Infection
             [33mvalidate-package:[0m  Validates the Composer package
             [33mclean:[0m 	  	   Removes various temporary artifacts
-            [33mclear_cache:[0m 	   Clears the integration test app cache
-            [33mclear_coverage:[0m	   Clears the coverage reports
+            [33mclear_cache:[0m 	   Clears up the integration test app cache
+            [33mclear_coverage:[0m	   Clears up the coverage reports
+            [33mclear_dist:[0m	   Clears up dist directory
 
             EOF;
     }
