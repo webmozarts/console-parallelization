@@ -185,8 +185,8 @@ protected function configureParallelExecutableFactory(
       OutputInterface $output,
 ): ParallelExecutorFactory {
     return $parallelExecutorFactory
-        ->withRunAfterBatch($this$this->runBeforeBatch(...))
-        ->withRunAfterBatch($this$this->runAfterBatch(...));
+        ->withRunAfterBatch($this->runBeforeBatch(...))
+        ->withRunAfterBatch($this->runAfterBatch(...));
 }
 ```
 
