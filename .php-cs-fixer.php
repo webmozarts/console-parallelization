@@ -34,7 +34,8 @@ $config = new FidryConfig(
         file that was distributed with this source code.
         EOF,
     // The min PHP version supported (best to align with your composer.json)
-    74000,
+    81_000,
 );
+$config->setCacheFile(__DIR__.'/dist/.php-cs-fixer.cache');
 
 return $config->setFinder($finder);

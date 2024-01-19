@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         cacheResultFile="dist/.phpunit.result.cache"
          bootstrap="vendor/autoload.php"
          beStrictAboutChangesToGlobalState="true"
          beStrictAboutOutputDuringTests="true"
@@ -18,8 +19,12 @@
     </extensions>
 
     <testsuites>
-        <testsuite name="Test Suite">
+        <testsuite name="Tests">
             <directory>tests/</directory>
+            <exclude>tests/AutoReview</exclude>
+        </testsuite>
+        <testsuite name="AutoReview">
+            <directory>tests/AutoReview</directory>
         </testsuite>
     </testsuites>
 
