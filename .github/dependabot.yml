@@ -10,7 +10,7 @@ updates:
                     - "*"
 
     -   package-ecosystem: "composer"
-        directory: "requirement-checker"
+        directory: "vendor-bin"
         schedule:
             interval: "weekly"
         groups:
