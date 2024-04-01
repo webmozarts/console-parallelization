@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -28,10 +29,9 @@ use function spl_object_id;
 use function str_replace;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[CoversNothing]
 class ParallelizationIntegrationTest extends TestCase
 {
     private ImportMoviesCommand $importMoviesCommand;

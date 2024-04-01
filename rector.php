@@ -26,6 +26,9 @@ return RectorConfig::configure()
         removeUnusedImports: true,
     )
     ->withPhpSets(php81: true)
+    ->withAttributesSets(
+        phpunit: true,
+    )
     ->withSkip([
         NullToStrictStringFuncCallArgRector::class => [
             __DIR__.'/src/ParallelExecutorFactory.php',

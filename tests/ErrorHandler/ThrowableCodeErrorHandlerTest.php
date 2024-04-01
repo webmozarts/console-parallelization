@@ -15,20 +15,19 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Error;
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ErrorHandler\ThrowableCodeErrorHandler
- *
  * @internal
  */
+#[CoversClass(ThrowableCodeErrorHandler::class)]
 final class ThrowableCodeErrorHandlerTest extends TestCase
 {
-    /**
-     * @dataProvider throwableProvider
-     */
+    #[DataProvider('throwableProvider')]
     public function test_it_returns_the_code_of_the_throwable(
         Throwable $throwable,
         int $expectedExitCode

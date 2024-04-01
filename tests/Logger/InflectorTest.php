@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Logger;
 
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,9 +22,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class InflectorTest extends TestCase
 {
-    /**
-     * @dataProvider singularProvider
-     */
+    #[DataProvider('singularProvider')]
     public function test_it_can_pluralize_words(
         string $singular,
         int $count,

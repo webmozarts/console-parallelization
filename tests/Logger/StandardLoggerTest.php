@@ -15,6 +15,8 @@ namespace Webmozarts\Console\Parallelization\Logger;
 
 use Error;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -24,10 +26,9 @@ use Webmozarts\Console\Parallelization\Integration\OutputNormalizer;
 use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Logger\StandardLogger
- *
  * @internal
  */
+#[CoversClass(StandardLogger::class)]
 final class StandardLoggerTest extends TestCase
 {
     private const PROGRESS_CHARACTER = '▌';
@@ -48,9 +49,7 @@ final class StandardLoggerTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider configurationProvider
-     */
+    #[DataProvider('configurationProvider')]
     public function test_it_can_log_the_configuration(
         Configuration $configuration,
         int $batchSize,
@@ -436,9 +435,7 @@ final class StandardLoggerTest extends TestCase
         $this->logger->logFinish('tokens');
     }
 
-    /**
-     * @dataProvider unexpectedChildOutputProvider
-     */
+    #[DataProvider('unexpectedChildOutputProvider')]
     public function test_it_can_log_the_unexpected_output_of_a_child_process(
         int $index,
         ?int $pid,
@@ -720,10 +717,9 @@ final class StandardLoggerTest extends TestCase
     }
 
     /**
-     * @dataProvider startOfChildProcessProvider
-     *
      * @param OutputInterface::VERBOSITY_* $verbosity
      */
+    #[DataProvider('startOfChildProcessProvider')]
     public function test_it_can_log_the_start_of_child_process(
         int $index,
         int $pid,
@@ -814,10 +810,9 @@ final class StandardLoggerTest extends TestCase
     }
 
     /**
-     * @dataProvider endOfChildProcessProvider
-     *
      * @param OutputInterface::VERBOSITY_* $verbosity
      */
+    #[DataProvider('endOfChildProcessProvider')]
     public function test_it_can_log_the_end_of_child_process(
         int $index,
         int $verbosity,

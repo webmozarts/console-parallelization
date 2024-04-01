@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -28,10 +30,10 @@ use function sprintf;
 
 /**
  * @phpstan-import-type ProcessOutput from ProcessLauncherFactory
- * @covers \Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncher
  *
  * @internal
  */
+#[CoversClass(SymfonyProcessLauncher::class)]
 final class SymfonyProcessLauncherTest extends TestCase
 {
     use ProphecyTrait;
@@ -130,9 +132,7 @@ final class SymfonyProcessLauncherTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider inputProvider
-     */
+    #[DataProvider('inputProvider')]
     public function test_it_can_start_processes_to_process_all_items(
         int $numberOfProcesses,
         int $segmentSize,

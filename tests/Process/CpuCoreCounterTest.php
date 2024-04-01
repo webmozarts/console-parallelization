@@ -13,21 +13,19 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
+use PHPUnit\Framework\Attributes\BackupGlobals;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Webmozarts\Console\Parallelization\EnvironmentVariables;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Process\CpuCoreCounter
- *
  * @internal
  */
+#[CoversClass(CpuCoreCounter::class)]
 final class CpuCoreCounterTest extends TestCase
 {
     // Note that no teardown is necessary; we leverage the ResetCpuCounterSubscriber.
-
-    /**
-     * @backupGlobals
-     */
+    #[BackupGlobals(true)]
     public function test_can_get_the_number_of_cpu_cores(): void
     {
         unset($_ENV['WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT']);
