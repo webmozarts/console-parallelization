@@ -263,6 +263,21 @@ final class ParallelExecutorFactoryTest extends TestCase
             $expectedScriptPath,
             $workingDirectory,
         ];
+
+        // This can happen e.g. when executed with Docker.
+        // See https://github.com/webmozarts/console-parallelization/issues/204.
+        yield 'PWD is not set' => [
+            [
+                'PHP_BINARY' => $phpExecutable,
+                'PWD' => null,
+                'SCRIPT_NAME' => __DIR__.'/../bin/console',
+            ],
+            $workingDirectory,
+            $progressSymbol,
+            $phpExecutable,
+            $expectedScriptPath,
+            $workingDirectory,
+        ];
     }
 
     // See https://github.com/webmozarts/console-parallelization/issues/223
