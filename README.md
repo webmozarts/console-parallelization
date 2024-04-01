@@ -266,41 +266,6 @@ The library supports several process hooks which can be configured via
 *: When using the `Parallelization` trait, those hooks can be directly configured by overriding the corresponding method.
 
 
-## Subscribed Services
-
-You should be using [subscribed services] or proxies. Indeed, you may otherwise end up with the issue that the service
-initially injected in the command may end up being different than the one used by the container. This is because upon
-error, the `ResetServiceErrorHandler` error handler is used which resets the container when an item fails. As a result,
-if the service is not directly fetched from the container (to get a fresh instance if the container resets), you will
-end up using an obsolete service.
-
-A common symptom of this issue is to run into a closed entity manager issue.
-
-
-## Differences with other libraries
-
-If you came across this library and wonder what the differences are with [Amphp] or [ReactPHP] or other potential
-parallelization libraries, this section is to highlight a few differences. 
-
-The primary difference is the parallelization mechanism itself. Amphp or ReactPHP work by spawning a pool of workers and
-distributing the work to those. This library however, spawns a pool of processes. To be more specific, the differences
-lies in how the spawn processed are used:
-
-- An Amphp/ReactPHP worker can share state; with this library however you cannot easily do so.
-- A worker may handle multiple jobs, whereas with this library the process will be killed after each segment is
-  completed. To bring it to a similar level, it would be somewhat equivalent to consider the work of handling a
-  segment in this library as a Amphp/ReactPHP worker task, and that the worker is killed after handling a single task.
-
-The other difference is that this library works with a command as its central point. This offers the following advantages:
-
-- No additional context need to be provided: once in your child process, you are in your command as usual. No custom
-  bootstrap is necessary.
-- The command can be executed with and without parallelization seamlessly. It is also trivial to mimic the execution of
-  a child process as it is a matter of using the `--child` option and passing the child items via the STDIN.
-- It is easier to adapt the distribution of the load and memory leaks of the task by configuring the segment and batch
-  sizes.
-
-
 ## Contribute
 
 Contributions to the package are always welcome!
