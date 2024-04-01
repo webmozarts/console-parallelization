@@ -5,7 +5,6 @@
          bootstrap="vendor/autoload.php"
          beStrictAboutChangesToGlobalState="true"
          beStrictAboutOutputDuringTests="true"
-         beStrictAboutResourceUsageDuringSmallTests="true"
          colors="true"
          executionOrder="random">
 
@@ -14,8 +13,8 @@
     </php>
 
     <extensions>
-        <extension class="Webmozarts\Console\Parallelization\PHPUnit\ResetCpuCounterListener"/>
-        <extension class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
+        <bootstrap class="Webmozarts\Console\Parallelization\PHPUnit\PHPUnitExtension"/>
+        <bootstrap class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
     </extensions>
 
     <testsuites>
@@ -28,7 +27,7 @@
         </testsuite>
     </testsuites>
 
-    <coverage>
+    <source>
         <include>
             <directory>src</directory>
         </include>
@@ -44,6 +43,6 @@
             <file>src/Process/PhpExecutableFinder.php</file>
             <file>src/Process/SymfonyProcessLauncherFactory.php</file>
         </exclude>
-    </coverage>
+    </source>
 
 </phpunit>

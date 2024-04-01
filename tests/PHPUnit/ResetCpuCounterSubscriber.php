@@ -13,16 +13,17 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\PHPUnit;
 
-use PHPUnit\Runner\AfterTestHook;
+use PHPUnit\Event\Test\PreparationStarted;
+use PHPUnit\Event\Test\PreparationStartedSubscriber;
 use ReflectionClass;
 use ReflectionProperty;
 use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
 
-final class ResetCpuCounterListener implements AfterTestHook
+final class ResetCpuCounterSubscriber implements PreparationStartedSubscriber
 {
     private static ?ReflectionProperty $countReflection = null;
 
-    public function executeAfterTest(string $test, float $time): void
+    public function notify(PreparationStarted $event): void
     {
         self::resetCounter();
     }

@@ -34,7 +34,7 @@ final class FakeInput implements InputInterface
         throw UnexpectedCall::forMethod(__METHOD__);
     }
 
-    public function getParameterOption(array|string $values, null|array|bool|float|int|string $default = false, bool $onlyParams = false): void
+    public function getParameterOption(array|string $values, array|bool|float|int|string|null $default = false, bool $onlyParams = false): void
     {
         throw UnexpectedCall::forMethod(__METHOD__);
     }
