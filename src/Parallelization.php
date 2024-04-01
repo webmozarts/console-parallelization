@@ -148,6 +148,9 @@ trait Parallelization
     }
 
     /**
+     * Note that for configuring the ParallelExecutorFactory it is more likely simpler to use
+     *  `::configureParallelExecutableFactory()`.
+     *
      * @param callable(InputInterface):iterable<string>              $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
      * @param callable(positive-int|0|null):string                   $getItemName
@@ -160,13 +163,7 @@ trait Parallelization
         InputDefinition $commandDefinition,
         ErrorHandler $errorHandler
     ): ParallelExecutorFactory {
-        // If you are looking at this code to wonder if you should call it when
-        // overriding this method, it is highly recommended you don't and just
-        // call `ParallelExecutorFactory::create(...func_get_args())`.
-        //
-        // The only exception is if you need the whole BC layer with the API
-        // from 1.x.
-        $factory = ParallelExecutorFactory::create(
+        return ParallelExecutorFactory::create(
             $fetchItems,
             $runSingleCommand,
             $getItemName,
@@ -174,7 +171,23 @@ trait Parallelization
             $commandDefinition,
             $errorHandler,
         );
+    }
 
+    /**
+     * This is an alternative to overriding ::getParallelExecutableFactory() which
+     * is a bit less convenient due to the number of parameters.
+     */
+    protected function configureParallelExecutableFactory(
+        ParallelExecutorFactory $parallelExecutorFactory,
+        InputInterface $input,
+        OutputInterface $output
+    ): ParallelExecutorFactory {
+        // If you are looking at this code to wonder if you should call it when
+        // overriding this method, it is highly recommended you don't.
+        //
+        // The only exception is if you need the whole BC layer with the API
+        // from 1.x. It will otherwise never contain anything so it can be
+        // safely overridden.
         $container = $this->getContainer();
 
         $progressSymbol = $this->getProgressSymbol();
@@ -185,7 +198,7 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            $factory = $factory->withProgressSymbol($progressSymbol);
+            $parallelExecutorFactory = $parallelExecutorFactory->withProgressSymbol($progressSymbol);
         }
 
         $phpExecutable = $this->detectPhpExecutable();
@@ -196,7 +209,7 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            $factory = $factory->withPhpExecutable($phpExecutable);
+            $parallelExecutorFactory = $parallelExecutorFactory->withPhpExecutable($phpExecutable);
         }
 
         $workingDirectory = $this->getWorkingDirectory($container);
@@ -207,7 +220,7 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            $factory = $factory->withWorkingDirectory($workingDirectory);
+            $parallelExecutorFactory = $parallelExecutorFactory->withWorkingDirectory($workingDirectory);
         }
 
         $environmentVariables = $this->getEnvironmentVariables($container);
@@ -223,7 +236,7 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            $factory = $factory->withExtraEnvironmentVariables($environmentVariables);
+            $parallelExecutorFactory = $parallelExecutorFactory->withExtraEnvironmentVariables($environmentVariables);
         }
 
         $segmentSize = $this->getSegmentSize();
@@ -234,7 +247,7 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            $factory = $factory->withSegmentSize($segmentSize);
+            $parallelExecutorFactory = $parallelExecutorFactory->withSegmentSize($segmentSize);
         }
 
         $batchSize = $this->getBatchSize();
@@ -245,7 +258,7 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            $factory = $factory->withBatchSize($batchSize);
+            $parallelExecutorFactory = $parallelExecutorFactory->withBatchSize($batchSize);
         }
 
         $consolePath = $this->getConsolePath();
@@ -256,30 +269,14 @@ trait Parallelization
                 __FUNCTION__,
             );
 
-            $factory = $factory->withScriptPath($consolePath);
+            $parallelExecutorFactory = $parallelExecutorFactory->withScriptPath($consolePath);
         }
 
-        return $factory
+        return $parallelExecutorFactory
             ->withRunBeforeFirstCommand($this->runBeforeFirstCommand(...))
             ->withRunAfterLastCommand($this->runAfterLastCommand(...))
             ->withRunBeforeBatch($this->runBeforeBatch(...))
             ->withRunAfterBatch($this->runAfterBatch(...));
-    }
-
-    /**
-     * This is an alternative to overriding ::getParallelExecutableFactory() which
-     * is a bit less convenient due to the number of parameters.
-     */
-    protected function configureParallelExecutableFactory(
-        ParallelExecutorFactory $parallelExecutorFactory,
-        InputInterface $input,
-        OutputInterface $output
-    ): ParallelExecutorFactory {
-        // This method will safely never contain anything. It is only a
-        // placeholder for the user to override so omitting
-        // parent::configureParallelExecutableFactory() is perfectly safe.
-
-        return $parallelExecutorFactory;
     }
 
     protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler

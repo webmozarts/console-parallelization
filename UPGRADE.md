@@ -48,6 +48,8 @@
 - `::getItemName()` can now take `null` for an unknown number of items
 - Ensures that if an item is given, then the processing is done in the main
   process. An item also cannot be passed to a child process (via the argument).
+- The working directory changed from being the `kernel.project_dir` parameter for
+  child processes to be the same as the main process.
 
 
 ## New extension points
