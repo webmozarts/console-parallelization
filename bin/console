@@ -7,6 +7,7 @@ require __DIR__.'/../vendor/autoload.php';
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\DependencyInjection\Container;
+use Webmozarts\Console\Parallelization\Fixtures\Command\AbsoluteScriptPathCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
@@ -22,5 +23,6 @@ $application->add(new ImportMoviesCommand());
 $application->add(new ImportUnknownMoviesCountCommand());
 $application->add(new LegacyCommand());
 $application->add(new NoSubProcessCommand());
+$application->add(new AbsoluteScriptPathCommand());
 
 $application->run();
