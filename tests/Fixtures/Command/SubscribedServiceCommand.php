@@ -26,7 +26,6 @@ use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use function array_map;
 use function range;
-use function strval;
 
 final class SubscribedServiceCommand extends ParallelCommand
 {
