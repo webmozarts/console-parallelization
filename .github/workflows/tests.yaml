@@ -52,6 +52,9 @@ jobs:
                       conflict: "<6.4 || >=7.0"
                     - version_name: "7.x"
                       conflict: "<7.0 || >=8.0"
+                exclude:
+                    - version_name: "7.x"
+                      php: "8.1"
 
         steps:
             -   name: "Check out repository code"
