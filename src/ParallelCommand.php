@@ -116,9 +116,6 @@ abstract class ParallelCommand extends Command implements ServiceSubscriberInter
     }
 
     /**
-     * Note that for configuring the ParallelExecutorFactory it is more likely simpler to use
-     * `::configureParallelExecutableFactory()`.
-     *
      * @param callable(InputInterface):iterable<string>              $fetchItems
      * @param callable(string, InputInterface, OutputInterface):void $runSingleCommand
      * @param callable(positive-int|0|null):string                   $getItemName
