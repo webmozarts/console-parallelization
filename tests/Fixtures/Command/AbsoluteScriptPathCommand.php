@@ -21,11 +21,6 @@ use function range;
 
 final class AbsoluteScriptPathCommand extends ParallelCommand
 {
-    /**
-     * @var array<string, string>
-     */
-    private array $batchMovies;
-
     public function __construct()
     {
         parent::__construct('absolute-script-path');
@@ -44,8 +39,6 @@ final class AbsoluteScriptPathCommand extends ParallelCommand
         return $parallelExecutorFactory
             ->withBatchSize(2)
             ->withSegmentSize(2);
-        //        return $parallelExecutorFactory
-        //            ->withScriptPath(__DIR__.'/../../../bin/console');
     }
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
