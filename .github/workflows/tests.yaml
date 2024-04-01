@@ -37,17 +37,19 @@ jobs:
 
     symfony-version:
         runs-on: "ubuntu-latest"
-        name: "Tests (PHP ${{ matrix.config.php }}) with Symfony ${{ matrix.config.symfony_version }}"
+        name: "Tests (PHP ${{ matrix.php }}) with Symfony ${{ matrix.symfony.version_name }} (deps: ${{ matrix.dependency-versions }})"
         strategy:
             fail-fast: false
             matrix:
-                config:
-                    - php: "8.1"
-                      symfony_version: "6.x"
-                      symfony_conflict: "<6.0 || >=7.0"
-                    - php: "8.2"
-                      symfony_version: "6.x"
-                      symfony_conflict: "<6.0 || >=7.0"
+                dependency-versions:
+                    - "lowest"
+                    - "highest"
+                php:
+                    - "8.1"
+                    - "8.2"
+                symfony:
+                    - version_name: "6.x"
+                      conflict: "<6.0 || >=7.0"
 
         steps:
             -   name: "Check out repository code"
@@ -56,14 +58,16 @@ jobs:
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
                 with:
-                    php-version: "${{ matrix.config.php }}"
+                    php-version: "${{ matrix.php }}"
                     tools: "composer"
 
             -   name: "Fix the Symfony versions"
-                run: "bin/fix-symfony-versions \"${{ matrix.config.symfony_conflict }}\""
+                run: "bin/fix-symfony-versions \"${{ matrix.symfony.conflict }}\""
 
             -   name: "Install Composer dependencies"
                 uses: "ramsey/composer-install@v3"
+                with:
+                    dependency-versions: "${{ matrix.dependency-versions }}"
 
             -   name: "Run tests"
                 run: "make phpunit"
