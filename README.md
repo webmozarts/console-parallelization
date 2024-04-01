@@ -6,6 +6,7 @@ This library supports the parallelization of Symfony Console commands.
 - [Installation](#installation)
 - [Usage](#usage)
 - [The API](#the-api)
+  - [The ParallelCommand and the Parallelization trait](#the-parallelcommand-and-the-parallelization-trait)
   - [Items](#items)
   - [Segments](#segments)
   - [Batches](#batches)
@@ -123,6 +124,18 @@ Processed 2768 movies.
 
 ## The API
 
+### The ParallelCommand and the Parallelization trait
+
+This library offers a `ParallelCommand` base class and a `Parallelization` trait. If you are
+looking for a basic usage, the `ParallelCommand` should be simpler to use as it provides the
+strictly required methods as abstract methods. All other hooks can be configured by
+overriding the `::configureParallelExecutableFactory()` method.
+
+The `Parallelization` trait on the other hand implements all hooks by default, requiring a bit
+less manual task. It does require to call `ParallelizationInput::configureCommand()` to add the parallelization
+related input arguments and options.
+
+
 ### Items
 
 The main process fetches all the items that need to be processed and passes
@@ -151,9 +164,13 @@ size (ideally a multiple of the batch size). You can do so by overriding the
 `getSegmentSize()` method:
 
 ```php
-protected function getSegmentSize(): int
-{
-    return 250;
+protected function configureParallelExecutableFactory(
+      ParallelExecutorFactory $parallelExecutorFactory,
+      InputInterface $input,
+      OutputInterface $output
+): ParallelExecutorFactory {
+    return $parallelExecutorFactory
+        ->withSegmentSize(250);
 }
 ```
 
@@ -169,6 +186,7 @@ To run code before/after each batch, override the hooks `runBeforeBatch()` and
 `runAfterBatch()`:
 
 ```php
+// When using the ParallelCommand
 protected function runBeforeBatch(InputInterface $input, OutputInterface $output, array $items): void
 {
     // e.g. fetch needed resources collectively
@@ -187,6 +205,15 @@ protected function configureParallelExecutableFactory(
     return $parallelExecutorFactory
         ->withRunAfterBatch($this->runBeforeBatch(...))
         ->withRunAfterBatch($this->runAfterBatch(...));
+}
+
+// When using the Parallelization trait, this can be simplified a bit:
+protected function runBeforeBatch(
+    InputInterface $input,
+    OutputInterface $output,
+    array $items
+): void {
+    // ...
 }
 ```
 
@@ -229,12 +256,49 @@ The library offers a wide variety of configuration settings:
 The library supports several process hooks which can be configured via
 `::configureParallelExecutableFactory()`:
 
-| Method                                    | Scope         | Description                                                                         |
+| Method*                                   | Scope         | Description                                                                         |
 |-------------------------------------------|---------------|-------------------------------------------------------------------------------------|
 | `runBeforeFirstCommand($input, $output)`  | Main process  | Run before any child process is spawned                                             |
 | `runAfterLastCommand($input, $output)`    | Main process  | Run after all child processes have completed                                        |
 | `runBeforeBatch($input, $output, $items)` | Child process | Run before each batch in the child process (or main if no child process is spawned) |
 | `runAfterBatch($input, $output, $items)`  | Child process | Run after each batch in the child process (or main if no child process is spawned)  |
+
+*: When using the `Parallelization` trait, those hooks can be directly configured by overriding the corresponding method.
+
+
+## Subscribed Services
+
+You should be using [subscribed services] or proxies. Indeed, you may otherwise end up with the issue that the service
+initially injected in the command may end up being different than the one used by the container. This is because upon
+error, the `ResetServiceErrorHandler` error handler is used which resets the container when an item fails. As a result,
+if the service is not directly fetched from the container (to get a fresh instance if the container resets), you will
+end up using an obsolete service.
+
+A common symptom of this issue is to run into a closed entity manager issue.
+
+
+## Differences with other libraries
+
+If you came across this library and wonder what the differences are with [Amphp] or [ReactPHP] or other potential
+parallelization libraries, this section is to highlight a few differences. 
+
+The primary difference is the parallelization mechanism itself. Amphp or ReactPHP work by spawning a pool of workers and
+distributing the work to those. This library however, spawns a pool of processes. To be more specific, the differences
+lies in how the spawn processed are used:
+
+- An Amphp/ReactPHP worker can share state; with this library however you cannot easily do so.
+- A worker may handle multiple jobs, whereas with this library the process will be killed after each segment is
+  completed. To bring it to a similar level, it would be somewhat equivalent to consider the work of handling a
+  segment in this library as a Amphp/ReactPHP worker task, and that the worker is killed after handling a single task.
+
+The other difference is that this library works with a command as its central point. This offers the following advantages:
+
+- No additional context need to be provided: once in your child process, you are in your command as usual. No custom
+  bootstrap is necessary.
+- The command can be executed with and without parallelization seamlessly. It is also trivial to mimic the execution of
+  a child process as it is a matter of using the `--child` option and passing the child items via the STDIN.
+- It is easier to adapt the distribution of the load and memory leaks of the task by configuring the segment and batch
+  sizes.
 
 
 ## Contribute
