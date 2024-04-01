@@ -79,7 +79,7 @@ final class RawInput extends Input
      * @param mixed[]|string                     $values
      * @param null|array|bool|mixed[]|int|string $default
      */
-    public function getParameterOption(array|string $values, null|array|bool|float|int|string $default = false, bool $onlyParams = false): mixed
+    public function getParameterOption(array|string $values, array|bool|float|int|string|null $default = false, bool $onlyParams = false): mixed
     {
         throw new DomainException('Not implemented.');
     }
