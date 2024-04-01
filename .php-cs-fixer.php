@@ -37,5 +37,13 @@ $config = new FidryConfig(
     81_000,
 );
 $config->setCacheFile(__DIR__.'/dist/.php-cs-fixer.cache');
+$config->setRules(
+    array_merge(
+        $config->getRules(),
+        [
+            'mb_str_functions' => false,
+        ],
+    ),
+);
 
 return $config->setFinder($finder);

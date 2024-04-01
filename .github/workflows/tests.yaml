@@ -81,11 +81,11 @@ jobs:
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
                 with:
-                    php-version: "${{ matrix.config.php }}"
+                    php-version: "${{ matrix.php }}"
                     tools: "composer"
 
             -   name: "Fix the Symfony versions"
-                run: "bin/fix-symfony-versions \"${{ matrix.config.symfony_conflict }}\""
+                run: "bin/fix-symfony-versions \"${{ matrix.symfony.conflict }}\""
 
             -   name: "Install Composer dependencies"
                 uses: "ramsey/composer-install@v3"
