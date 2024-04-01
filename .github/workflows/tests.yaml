@@ -43,12 +43,6 @@ jobs:
             matrix:
                 config:
                     - php: "8.1"
-                      symfony_version: "5.4"
-                      symfony_conflict: "<=5.0 || >=6.0"
-                    - php: "8.2"
-                      symfony_version: "5.4"
-                      symfony_conflict: "<=5.0 || >=6.0"
-                    - php: "8.1"
                       symfony_version: "6.x"
                       symfony_conflict: "<6.0 || >=7.0"
                     - php: "8.2"
