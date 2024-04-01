@@ -9,8 +9,8 @@
   the main process instead of spawning child processes can be guaranteed by
   passing `--main-process`.
 - Child processes will always be spawned regardless of the number of items
-  (known or not), the number of processes defined (or not defined). Instead
-  the processing will occur only if the `--main-process` option is passed. 
+  (known or not), the number of processes defined (or not defined). Instead,
+  the processing will occur only if the `--main-process` option is passed.
 - `ParallelizationInput` should be created from the new factory `::fromInput()`
 - `ContainerAwareCommand` has been removed. `Parallelization` instead provides a
   `::getContainer()` method which by defaults returns the Symfony Application
@@ -45,7 +45,7 @@
     - `::runAfterBatch()`
 - The following methods have been removed from `Parallelization` and have no
   replacement (the existing and new extension points should be enough to cover
-  those): 
+  those):
    - `::executeMasterProcess()`
    - `::executeChildProcess()`
    - `::processChildOutput()`

@@ -3,7 +3,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := help
 
 
 # Global variables
@@ -43,53 +43,52 @@ RECTOR = $(RECTOR_BIN)
 # Commands
 #---------------------------------------------------------------------------
 
-.PHONY: all
-all: cs validate-package phpstan infection
+.PHONY: check
+check: 		## Runs all the checks
+check: autoreview docs infection
 
 .PHONY: help
 help:
 	@echo "\033[33mUsage:\033[0m\n  make TARGET\n\n\033[32m#\n# Commands\n#---------------------------------------------------------------------------\033[0m\n"
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//' | awk 'BEGIN {FS = ":"}; {printf "\033[33m%s:\033[0m%s\n", $$1, $$2}'
 
+.PHONY: autoreview
+autoreview: 	## Runs the Auto-Review checks
+autoreview: cs validate-package phpstan rector_lint phpunit_autoreview
+
 .PHONY: cs
-cs: 	 	  ## Fixes CS
+cs: 	 	## Fixes CS
 cs: php_cs_fixer gitignore_sort composer_normalize
 
 .PHONY: cs_lint
-cs_lint:	  ## Lints CS
+cs_lint:	## Lints CS
 cs_lint: php_cs_fixer_lint composer_normalize_lint
 
 .PHONY: php_cs_fixer
-php_cs_fixer: 	  ## Runs PHP-CS-Fixer
 php_cs_fixer: $(PHP_CS_FIXER_BIN)
 	$(PHP_CS_FIXER) fix
 
 .PHONY: php_cs_fixer_lint
-php_cs_fixer_lint:## Runs PHP-CS-Fixer lint
 php_cs_fixer_lint: $(PHP_CS_FIXER_BIN)
 	$(PHP_CS_FIXER) fix --dry-run
 
 .PHONY: gitignore_sort
-gitignore_sort:	     ## Sorts the .gitignore entries
 gitignore_sort:
 	LC_ALL=C sort -u .gitignore -o .gitignore
 
 .PHONY: composer_normalize
-composer_normalize:  ## Normalizes the composer.json
 composer_normalize:	vendor
 	composer normalize
 
 .PHONY: composer_normalize_lint
-composer_normalize_lint:  ## Lints the composer.json
 composer_normalize_lint:	vendor
 	composer normalize --dry-run
 
 .PHONY: test
-test: 	 	  ## Runs all the tests
+test: 	 	## Runs all the tests
 test: validate-package phpstan phpunit
 
 .PHONY: phpstan
-phpstan: 	  ## Runs PHPStan
 phpstan: phpstan_src phpstan_tests
 
 .PHONY: phpstan_src
@@ -101,48 +100,56 @@ phpstan_tests: $(PHPSTAN_BIN) vendor
 	$(PHPSTAN) analyze --configuration phpstan-tests.neon.dist
 
 .PHONY: phpunit
-phpunit:	  ## Runs PHPUnit
 phpunit: $(PHPUNIT_BIN)
-	$(PHPUNIT)
+	$(PHPUNIT) --testsuite=Tests --colors=always
 
-.PHONY: phpunit_coverage_infection
-phpunit_coverage_infection: ## Runs PHPUnit with code coverage for Infection
-phpunit_coverage_infection: $(PHPUNIT_BIN) vendor
+.PHONY: phpunit_autoreview
+phpunit_autoreview: $(PHPUNIT_BIN)
+	$(PHPUNIT) --testsuite=AutoReview --colors=always
+
+.PHONY: phpunit_infection
+phpunit_infection: $(PHPUNIT_BIN) vendor
 	$(PHPUNIT_COVERAGE_INFECTION)
 
-.PHONY: phpunit_coverage_html
-phpunit_coverage_html:	    ## Runs PHPUnit with code coverage with HTML report
-phpunit_coverage_html: $(PHPUNIT_BIN) vendor
+.PHONY: phpunit_html
+phpunit_html:	## Runs PHPUnit with code coverage with HTML report
+phpunit_html: $(PHPUNIT_BIN) vendor
 	$(PHPUNIT_COVERAGE_HTML)
 	@echo "You can check the report by opening the file \"$(COVERAGE_HTML)/index.html\"."
 
 .PHONY: infection
-infection:	  ## Runs Infection
 infection: $(INFECTION_BIN) vendor
-	$(INFECTION_WITH_INITIAL_TESTS) --initial-tests-php-options='-d zend_extension=xdebug.so'
+	$(INFECTION_WITH_INITIAL_TESTS) --initial-tests-php-options='-dzend_extension=xdebug.so'
 
 .PHONY: _infection
 _infection: $(INFECTION_BIN) $(COVERAGE_XML) $(COVERAGE_JUNIT) vendor
 	$(INFECTION)
 
 .PHONY: validate-package
-validate-package: ## Validates the Composer package
 validate-package: vendor
 	composer validate --strict
 
-.PHONY: clear
-clear: 	  	  ## Clears various artifacts
-clear: clear_cache clear_coverage
+.PHONY: clean
+clean: 	  	## Removes various temporary artifacts
+clean: clear_cache clear_coverage clear_dist
+	@# Silently clean up old files
+	@rm -rf .php-cs-fixer.cache \
+		.php_cs.cache \
+		.phpunit.result.cache
 
 .PHONY: clear_cache
-clear_cache: 	  ## Clears the integration test app cache
 clear_cache:
 	rm -rf tests/Integration/**/cache || true
 
 .PHONY: clear_coverage
-clear_coverage:	  ## Clears the coverage reports
 clear_coverage:
 	rm -rf $(COVERAGE_DIR) || true
+
+.PHONY: clear_dist
+clear_dist:
+	rm -rf dist || true
+	mkdir -p dist
+	touch dist/.gitkeep
 
 .PHONY: rector
 rector: $(RECTOR_BIN)
@@ -151,6 +158,23 @@ rector: $(RECTOR_BIN)
 .PHONY: rector_lint
 rector_lint: $(RECTOR_BIN) dist
 	$(RECTOR) --dry-run
+
+.PHONY: docs
+docs:		## Runs the docs checks
+docs: markdownlint lychee
+
+.PHONY: markdownlint
+markdownlint:
+	@echo "$(CCYELLOW)Ensure you have the nodejs & npm installed. For more information, check:$(CCEND)"
+	@# To keep in sync with .github/workflows/docs.yaml#check-links
+	npx markdownlint-cli2 "*.md|docs/**/*.md"
+
+.PHONY: lychee
+lychee:
+	@echo "$(CCYELLOW)Ensure you have the lychee command installed. For more information, check:$(CCEND)"
+	@echo "https://github.com/lycheeverse/lychee"
+	@# To keep in sync with .github/workflows/docs.yaml#check-links
+	lychee --verbose --no-progress '*.md' 'docs/**/*.md' --timeout=2
 
 
 #
@@ -176,18 +200,17 @@ $(PHPUNIT_BIN): vendor
 	touch -c $@
 
 $(COVERAGE_XML): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
-	$(MAKE) phpunit_coverage_infection
+	$(MAKE) phpunit_infection
 	touch -c $@
 	touch -c $(COVERAGE_JUNIT)
 
 $(COVERAGE_JUNIT): $(PHPUNIT_BIN) $(SRC_TESTS_FILES) phpunit.xml.dist
-	$(MAKE) phpunit_coverage_infection
+	$(MAKE) phpunit_infection
 	touch -c $@
 	touch -c $(COVERAGE_XML)
 
 $(INFECTION_BIN): vendor
 	touch -c $@
-
 
 $(RECTOR_BIN): vendor
 	composer bin rector install

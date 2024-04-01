@@ -23,6 +23,8 @@ use Webmozarts\Console\Parallelization\EnvironmentVariables;
  */
 final class CpuCoreCounterTest extends TestCase
 {
+    // Note that no teardown is necessary; we leverage the ResetCpuCounterSubscriber.
+
     /**
      * @backupGlobals
      */

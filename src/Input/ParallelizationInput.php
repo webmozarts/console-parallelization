@@ -257,7 +257,7 @@ final class ParallelizationInput
      * @return ($nullable is true ? positive-int|null : positive-int)
      */
     private static function coerceAndValidatePositiveInt(
-        null|int|string $value,
+        int|string|null $value,
         string $name,
         bool $nullable
     ): ?int {

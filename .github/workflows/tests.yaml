@@ -21,7 +21,7 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v4"
 
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
@@ -30,46 +30,45 @@ jobs:
                     tools: "composer"
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
 
             -   name: "Run tests"
                 run: "make phpunit"
 
     symfony-version:
         runs-on: "ubuntu-latest"
-        name: "Tests (PHP ${{ matrix.config.php }}) with Symfony ${{ matrix.config.symfony_version }}"
+        name: "Tests (PHP ${{ matrix.php }}) with Symfony ${{ matrix.symfony.version_name }} (deps: ${{ matrix.dependency-versions }})"
         strategy:
             fail-fast: false
             matrix:
-                config:
-                    - php: "8.1"
-                      symfony_version: "5.4"
-                      symfony_conflict: "<=5.0,>=6.0"
-                    - php: "8.2"
-                      symfony_version: "5.4"
-                      symfony_conflict: "<=5.0,>=6.0"
-                    - php: "8.1"
-                      symfony_version: "6.x"
-                      symfony_conflict: "<>6.0"
-                    - php: "8.2"
-                      symfony_version: "6.x"
-                      symfony_conflict: "<6.0"
+                dependency-versions:
+                    - "lowest"
+                    - "highest"
+                php:
+                    - "8.1"
+                    - "8.2"
+                    - "8.3"
+                symfony:
+                    - version_name: "6.4"
+                      conflict: "<6.4 || >=7.0"
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v4"
 
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
                 with:
-                    php-version: "${{ matrix.config.php }}"
+                    php-version: "${{ matrix.php }}"
                     tools: "composer"
 
             -   name: "Fix the Symfony versions"
-                run: "bin/fix-symfony-versions \"${{ matrix.config.symfony_conflict }}\""
+                run: "bin/fix-symfony-versions \"${{ matrix.symfony.conflict }}\""
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
+                with:
+                    dependency-versions: "${{ matrix.dependency-versions }}"
 
             -   name: "Run tests"
                 run: "make phpunit"
@@ -85,7 +84,7 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v4"
 
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
@@ -95,7 +94,7 @@ jobs:
                     coverage: "pcov"
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@v2"
+                uses: "ramsey/composer-install@v3"
 
             -   name: "Run tests with coverage and Infection"
                 run: "make infection"

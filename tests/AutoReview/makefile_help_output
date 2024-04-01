@@ -1,0 +1,15 @@
+[33mUsage:[0m
+  make TARGET
+
+[32m#
+# Commands
+#---------------------------------------------------------------------------[0m
+
+[33mcheck:[0m 		 Runs all the checks
+[33mautoreview:[0m 	 Runs the Auto-Review checks
+[33mcs:[0m 	 	 Fixes CS
+[33mcs_lint:[0m	 Lints CS
+[33mtest:[0m 	 	 Runs all the tests
+[33mphpunit_html:[0m	 Runs PHPUnit with code coverage with HTML report
+[33mclean:[0m 	  	 Removes various temporary artifacts
+[33mdocs:[0m		 Runs the docs checks

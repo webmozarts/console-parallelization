@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         cacheResultFile="dist/.phpunit.result.cache"
          bootstrap="vendor/autoload.php"
          beStrictAboutChangesToGlobalState="true"
          beStrictAboutOutputDuringTests="true"
-         beStrictAboutResourceUsageDuringSmallTests="true"
          colors="true"
          executionOrder="random">
 
@@ -13,17 +13,21 @@
     </php>
 
     <extensions>
-        <extension class="Webmozarts\Console\Parallelization\PHPUnit\ResetCpuCounterListener"/>
-        <extension class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
+        <bootstrap class="Webmozarts\Console\Parallelization\PHPUnit\PHPUnitExtension"/>
+        <bootstrap class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
     </extensions>
 
     <testsuites>
-        <testsuite name="Test Suite">
+        <testsuite name="Tests">
             <directory>tests/</directory>
+            <exclude>tests/AutoReview</exclude>
+        </testsuite>
+        <testsuite name="AutoReview">
+            <directory>tests/AutoReview</directory>
         </testsuite>
     </testsuites>
 
-    <coverage>
+    <source>
         <include>
             <directory>src</directory>
         </include>
@@ -39,6 +43,6 @@
             <file>src/Process/PhpExecutableFinder.php</file>
             <file>src/Process/SymfonyProcessLauncherFactory.php</file>
         </exclude>
-    </coverage>
+    </source>
 
 </phpunit>

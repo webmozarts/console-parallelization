@@ -23,16 +23,36 @@ jobs:
                     -   name: "CS"
                         command: "make cs_lint"
 
+                    -   name: "PHPUnit AutoReview"
+                        command: "make phpunit_autoreview"
+
+                    -   name: "Rector"
+                        command: "make rector_lint"
+
         steps:
             -   name: "Checkout"
-                uses: "actions/checkout@v2"
+                uses: "actions/checkout@v4"
 
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
                 with:
                     php-version: "${{ matrix.php }}"
                     tools: "composer"
-                    coverage: "none"
+
+            -   name: "Install Composer dependencies"
+                uses: "ramsey/composer-install@v3"
+
+            -   name: "Install PHP-CS-Fixer dependencies"
+                if: "${{ matrix.name == 'CS' }}"
+                uses: "ramsey/composer-install@v3"
+                with:
+                    working-directory: vendor-bin/php-cs-fixer
+
+            -   name: "Install Rector dependencies"
+                if: "${{ matrix.name }} == 'Rector'"
+                uses: "ramsey/composer-install@v3"
+                with:
+                    working-directory: vendor-bin/rector
 
             -   name: "Run ${{ matrix.check.name }}"
                 run: "${{ matrix.check.command }}"
