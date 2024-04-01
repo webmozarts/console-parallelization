@@ -15,12 +15,15 @@ namespace Webmozarts\Console\Parallelization;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 use function chr;
 use function getcwd;
 use function Safe\chdir;
+use function sys_get_temp_dir;
 
 /**
  * @covers \Webmozarts\Console\Parallelization\ParallelExecutorFactory
@@ -260,6 +263,31 @@ final class ParallelExecutorFactoryTest extends TestCase
             $expectedScriptPath,
             $workingDirectory,
         ];
+    }
+
+    // See https://github.com/webmozarts/console-parallelization/issues/223
+    public function test_it_can_execute_the_command_even_if_the_script_is_different(): void
+    {
+        $filesystem = new Filesystem();
+        $tmp = sys_get_temp_dir().'/WebmozartsConsoleParallelizationTest';
+
+        $filesystem->mkdir($tmp);
+
+        try {
+            $process = Process::fromShellCommandline(
+                'cd '.$tmp.'; '.__DIR__.'/../bin/console absolute-script-path --quiet',
+            );
+
+            $process->run();
+
+            self::assertSame(
+                0,
+                $process->getExitCode(),
+                $process->getOutput().$process->getErrorOutput(),
+            );
+        } finally {
+            $filesystem->remove($tmp);
+        }
     }
 
     /**

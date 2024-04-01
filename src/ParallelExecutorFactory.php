@@ -341,7 +341,8 @@ final class ParallelExecutorFactory
         $scriptName = $_SERVER['SCRIPT_NAME'];
 
         return (str_starts_with($scriptName, $pwd)
-                || str_starts_with($scriptName, DIRECTORY_SEPARATOR))
+                || str_starts_with($scriptName, DIRECTORY_SEPARATOR)
+        )
             ? $scriptName
             : $pwd.DIRECTORY_SEPARATOR.$scriptName;
     }
