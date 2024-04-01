@@ -334,7 +334,7 @@ All contents of this package are licensed under the [MIT license].
 [Composer]: https://getcomposer.org
 [Bernhard Schussek]: http://webmozarts.com
 [ReactPHP]: https://reactphp.org/
-[subscribed-services]: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#service-subscriber-trait
+[subscribed services]: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#service-subscriber-trait
 [Théo Fidry]: http://webmozarts.com
 [The Community Contributors]: https://github.com/webmozarts/console-parallelization/graphs/contributors
 [issue tracker]: https://github.com/webmozarts/console-parallelization/issues
