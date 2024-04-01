@@ -28,9 +28,13 @@ final class CpuCoreCounterTest extends TestCase
     #[BackupGlobals(true)]
     public function test_can_get_the_number_of_cpu_cores(): void
     {
-        unset($_ENV['WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT']);
+        $cleanUp = EnvironmentVariables::setVariables([
+            'WEBMOZARTS_CONSOLE_PARALLELIZATION_CPU_COUNT' => null,
+        ]);
 
         $cpuCoresCount = CpuCoreCounter::getNumberOfCpuCores();
+
+        $cleanUp();
 
         self::assertGreaterThan(0, $cpuCoresCount);
     }
