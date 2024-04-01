@@ -14,8 +14,8 @@
     </php>
 
     <extensions>
-        <extension class="Webmozarts\Console\Parallelization\PHPUnit\ResetCpuCounterListener"/>
-        <extension class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
+        <bootstrap class="Webmozarts\Console\Parallelization\PHPUnit\PHPUnitExtension"/>
+        <bootstrap class="Webmozarts\StrictPHPUnit\StrictPHPUnitExtension"/>
     </extensions>
 
     <testsuites>
