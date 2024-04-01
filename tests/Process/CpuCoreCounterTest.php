@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Process;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use Webmozarts\Console\Parallelization\EnvironmentVariables;
 
 /**
@@ -24,10 +23,7 @@ use Webmozarts\Console\Parallelization\EnvironmentVariables;
  */
 final class CpuCoreCounterTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        self::removeCachedCount();
-    }
+    // Note that no teardown is necessary; we leverage the ResetCpuCounterSubscriber.
 
     /**
      * @backupGlobals
@@ -52,13 +48,5 @@ final class CpuCoreCounterTest extends TestCase
         $cleanUp();
 
         self::assertSame(7, $cpuCoresCount);
-    }
-
-    private static function removeCachedCount(): void
-    {
-        $reflectionClass = new ReflectionClass(CpuCoreCounter::class);
-        $countReflection = $reflectionClass->getProperty('count');
-        $countReflection->setAccessible(true);
-        $countReflection->setValue(new CpuCoreCounter(), null);
     }
 }

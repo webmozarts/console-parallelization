@@ -11,7 +11,6 @@ parameters:
         - tests/Process/DummyProcess.php
         - tests/Process/DummyProcess74.php
         - tests/Process/DummyProcess81.php
-        - tests/PHPUnit/ResetCpuCounterListener.php
     ignoreErrors:
         - path: tests/Integration/TestLogger.php
           message: '#TestLogger::\$outputHandler#'
