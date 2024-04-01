@@ -6,6 +6,7 @@ This library supports the parallelization of Symfony Console commands.
 - [Installation](#installation)
 - [Usage](#usage)
 - [The API](#the-api)
+  - [The ParallelCommand and the Parallelization trait](#the-parallelcommand-and-the-parallelization-trait)
   - [Items](#items)
   - [Segments](#segments)
   - [Batches](#batches)
