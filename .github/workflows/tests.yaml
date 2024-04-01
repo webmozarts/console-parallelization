@@ -48,8 +48,8 @@ jobs:
                     - "8.1"
                     - "8.2"
                 symfony:
-                    - version_name: "6.x"
-                      conflict: "<6.0 || >=7.0"
+                    - version_name: "6.4"
+                      conflict: "<6.4 || >=7.0"
 
         steps:
             -   name: "Check out repository code"
