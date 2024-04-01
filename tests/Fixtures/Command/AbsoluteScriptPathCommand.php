@@ -17,7 +17,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
+use function array_map;
 use function range;
+use function strval;
 
 final class AbsoluteScriptPathCommand extends ParallelCommand
 {
@@ -31,7 +33,10 @@ final class AbsoluteScriptPathCommand extends ParallelCommand
      */
     protected function fetchItems(InputInterface $input, OutputInterface $output): array
     {
-        return range(0, 3);
+        return array_map(
+            strval(...),
+            range(0, 3),
+        );
     }
 
     protected function configureParallelExecutableFactory(ParallelExecutorFactory $parallelExecutorFactory, InputInterface $input, OutputInterface $output): ParallelExecutorFactory
