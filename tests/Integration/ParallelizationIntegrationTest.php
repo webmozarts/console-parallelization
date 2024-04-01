@@ -48,16 +48,16 @@ class ParallelizationIntegrationTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->importMoviesCommand = (new Application(new Kernel()))->add(new ImportMoviesCommand());
+        $this->importMoviesCommand = (new Application(new BareKernel()))->add(new ImportMoviesCommand());
         $this->importMoviesCommandTester = new CommandTester($this->importMoviesCommand);
 
-        $this->importUnknownMoviesCountCommand = (new Application(new Kernel()))->add(new ImportUnknownMoviesCountCommand());
+        $this->importUnknownMoviesCountCommand = (new Application(new BareKernel()))->add(new ImportUnknownMoviesCountCommand());
         $this->importUnknownMoviesCountCommandTester = new CommandTester($this->importUnknownMoviesCountCommand);
 
-        $this->noSubProcessCommand = (new Application(new Kernel()))->add(new NoSubProcessCommand());
+        $this->noSubProcessCommand = (new Application(new BareKernel()))->add(new NoSubProcessCommand());
         $this->noSubProcessCommandTester = new CommandTester($this->noSubProcessCommand);
 
-        $this->legacyCommand = (new Application(new Kernel()))->add(new LegacyCommand());
+        $this->legacyCommand = (new Application(new BareKernel()))->add(new LegacyCommand());
         $this->legacyCommandTester = new CommandTester($this->legacyCommand);
     }
 
