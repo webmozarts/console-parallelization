@@ -721,6 +721,8 @@ final class StandardLoggerTest extends TestCase
 
     /**
      * @dataProvider startOfChildProcessProvider
+     *
+     * @param OutputInterface::VERBOSITY_* $verbosity
      */
     public function test_it_can_log_the_start_of_child_process(
         int $index,
@@ -813,6 +815,8 @@ final class StandardLoggerTest extends TestCase
 
     /**
      * @dataProvider endOfChildProcessProvider
+     *
+     * @param OutputInterface::VERBOSITY_* $verbosity
      */
     public function test_it_can_log_the_end_of_child_process(
         int $index,
