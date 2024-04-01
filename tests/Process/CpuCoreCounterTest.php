@@ -59,6 +59,6 @@ final class CpuCoreCounterTest extends TestCase
         $reflectionClass = new ReflectionClass(CpuCoreCounter::class);
         $countReflection = $reflectionClass->getProperty('count');
         $countReflection->setAccessible(true);
-        $countReflection->setValue(CpuCoreCounter::class, null);
+        $countReflection->setValue(new CpuCoreCounter(), null);
     }
 }
