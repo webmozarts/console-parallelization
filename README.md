@@ -12,7 +12,8 @@ This library supports the parallelization of Symfony Console commands.
   - [Batches](#batches)
   - [Configuration](#configuration)
   - [Hooks](#hooks)
-- [Caveats](#caveats)
+- [Subscribed Services](#subscribed-services)
+- [Differences with Amphp/ReactPHP](#differences-with-amphpreactphp)
 - [Contribute](#contribute)
 - [Upgrade](#upgrade)
 - [Authors](#authors)
@@ -278,10 +279,10 @@ end up using an obsolete service.
 A common symptom of this issue is to run into a closed entity manager issue.
 
 
-## Differences with other libraries
+## Differences with Amphp/ReactPHP
 
 If you came across this library and wonder what the differences are with [Amphp] or [ReactPHP] or other potential
-parallelization libraries, this section is to highlight a few differences. 
+parallelization libraries, this section is to highlight a few differences.
 
 The primary difference is the parallelization mechanism itself. Amphp or ReactPHP work by spawning a pool of workers and
 distributing the work to those. This library however, spawns a pool of processes. To be more specific, the differences
@@ -333,7 +334,7 @@ All contents of this package are licensed under the [MIT license].
 [Composer]: https://getcomposer.org
 [Bernhard Schussek]: http://webmozarts.com
 [ReactPHP]: https://reactphp.org/
-[subscribed-services]: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#service-subscriber-trait
+[subscribed services]: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#service-subscriber-trait
 [Théo Fidry]: http://webmozarts.com
 [The Community Contributors]: https://github.com/webmozarts/console-parallelization/graphs/contributors
 [issue tracker]: https://github.com/webmozarts/console-parallelization/issues
