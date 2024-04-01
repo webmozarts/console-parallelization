@@ -69,7 +69,7 @@ final class InputOptionsSerializer
     private static function serializeOption(
         InputOption $option,
         string $name,
-        null|array|bool|float|int|string $value,
+        array|bool|float|int|string|null $value,
     ): string {
         // TODO: remove the method exists check once we drop support for Symfony 4.4
         if (method_exists(InputOption::class, 'isNegatable') && $option->isNegatable()) {
@@ -104,7 +104,7 @@ final class InputOptionsSerializer
 
     private static function serializeOptionWithValue(
         string $name,
-        null|bool|float|int|string $value
+        bool|float|int|string|null $value
     ): string {
         return sprintf(
             '--%s=%s',
@@ -117,7 +117,7 @@ final class InputOptionsSerializer
      * Ensure that an option value is quoted correctly before it is passed to a
      * child process.
      */
-    private static function quoteOptionValue(null|bool|float|int|string $value): null|bool|float|int|string
+    private static function quoteOptionValue(bool|float|int|string|null $value): bool|float|int|string|null
     {
         if (self::isValueRequiresQuoting($value)) {
             return sprintf(

@@ -29,7 +29,6 @@ use function memory_get_peak_usage;
 use function memory_get_usage;
 use function microtime;
 use function sprintf;
-use function str_pad;
 use function str_replace;
 use const STR_PAD_BOTH;
 
@@ -249,7 +248,7 @@ final class StandardLogger implements Logger
 
         $processSectionLine = sprintf(
             '<comment>%s</comment>',
-            str_pad(
+            mb_str_pad(
                 $sectionTitle,
                 $this->terminalWidth,
                 '=',
