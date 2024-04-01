@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use function fclose;
@@ -22,18 +24,16 @@ use function iter\toIter;
 use const PHP_EOL;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ChunkedItemsIterator
- *
  * @internal
  */
+#[CoversClass(ChunkedItemsIterator::class)]
 final class ChunkedItemsIteratorTest extends TestCase
 {
     /**
-     * @dataProvider valuesProvider
-     *
      * @param list<string>       $expectedItems
      * @param list<list<string>> $expectedItemChunks
      */
+    #[DataProvider('valuesProvider')]
     public function test_it_can_be_instantiated(
         iterable $items,
         int $batchSize,
@@ -52,11 +52,10 @@ final class ChunkedItemsIteratorTest extends TestCase
     }
 
     /**
-     * @dataProvider streamProvider
-     *
      * @param resource     $stream
      * @param list<string> $expectedItems
      */
+    #[DataProvider('streamProvider')]
     public function test_it_can_be_created_from_a_stream(
         $stream,
         array $expectedItems
@@ -69,11 +68,10 @@ final class ChunkedItemsIteratorTest extends TestCase
     }
 
     /**
-     * @dataProvider inputProvider
-     *
      * @param callable():list<string> $fetchItems
      * @param list<string>            $expectedItems
      */
+    #[DataProvider('inputProvider')]
     public function test_it_can_be_created_from_an_an_item_or_a_callable(
         ?string $item,
         callable $fetchItems,
@@ -138,9 +136,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         self::assertTrue($itemsFetched);
     }
 
-    /**
-     * @dataProvider invalidValuesProvider
-     */
+    #[DataProvider('invalidValuesProvider')]
     public function test_it_cannot_be_instantiated_with_invalid_data(
         ?string $item,
         iterable $items,

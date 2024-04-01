@@ -14,18 +14,17 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Configuration
- *
  * @internal
  */
+#[CoversClass(Configuration::class)]
 final class ConfigurationTest extends TestCase
 {
-    /**
-     * @dataProvider valuesProvider
-     */
+    #[DataProvider('valuesProvider')]
     public function test_it_can_be_instantiated(
         bool $shouldSpawnChildProcesses,
         ?int $numberOfItems,
@@ -305,9 +304,7 @@ final class ConfigurationTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider invalidValuesProvider
-     */
+    #[DataProvider('invalidValuesProvider')]
     public function test_it_cannot_be_instantiated_with_invalid_values(
         bool $shouldSpawnChildProcesses,
         ?int $numberOfItems,

@@ -21,7 +21,7 @@ use function Safe\putenv;
 final class EnvironmentVariables
 {
     /**
-     * @param array<string, string> $environmentVariables
+     * @param array<string, string|null> $environmentVariables
      *
      * @return callable():void Cleanup method: restores the previous state.
      */

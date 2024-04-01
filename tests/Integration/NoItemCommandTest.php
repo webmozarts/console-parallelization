@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -20,10 +21,9 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoItemCommand;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[CoversNothing]
 class NoItemCommandTest extends TestCase
 {
     private Command $command;

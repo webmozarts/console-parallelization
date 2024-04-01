@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Filesystem\Filesystem;
@@ -26,10 +28,9 @@ use function Safe\chdir;
 use function sys_get_temp_dir;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ParallelExecutorFactory
- *
  * @internal
  */
+#[CoversClass(ParallelExecutorFactory::class)]
 final class ParallelExecutorFactoryTest extends TestCase
 {
     private const FILE_1 = __DIR__;
@@ -188,9 +189,7 @@ final class ParallelExecutorFactoryTest extends TestCase
         self::assertEquals($expected, $executor);
     }
 
-    /**
-     * @dataProvider defaultValuesProvider
-     */
+    #[DataProvider('defaultValuesProvider')]
     public function test_it_can_create_an_executor_with_default_values(
         array $environmentVariables,
         string $workingDirectory,

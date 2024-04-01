@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
+use PHPUnit\Framework\Attributes\DataProvider;
+
 require_once __DIR__.'/../bin/set-composer-conflicts.php';
 
 use PHPUnit\Framework\TestCase;
@@ -21,18 +24,16 @@ use function is_array;
 use function Webmozarts\Console\Parallelization\CI\set_composer_conflicts;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[CoversNothing]
 final class SetComposerConflictsTest extends TestCase
 {
     /**
-     * @dataProvider conflictProvider
-     *
      * @param list<non-empty-string> $packageNames
      * @param non-empty-string|null  $conflict
      */
+    #[DataProvider('conflictProvider')]
     public function test_it_can_the_desired_packages_to_the_composer_conflict_section(
         stdClass $decodedComposerJson,
         array $packageNames,

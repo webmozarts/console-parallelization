@@ -13,20 +13,19 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Webmozarts\Console\Parallelization\EnvironmentVariables;
 use function Safe\getcwd;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Integration\OutputNormalizer
- *
  * @internal
  */
+#[CoversClass(OutputNormalizer::class)]
 final class OutputNormalizerTest extends TestCase
 {
-    /**
-     * @dataProvider memoryUsageProvider
-     */
+    #[DataProvider('memoryUsageProvider')]
     public function test_it_can_normalize_the_memory_usage(string $output, string $expected): void
     {
         $actual = OutputNormalizer::normalizeMemoryUsage($output);
@@ -72,9 +71,7 @@ final class OutputNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider progressBarTimeTakenProvider
-     */
+    #[DataProvider('progressBarTimeTakenProvider')]
     public function test_it_can_normalize_the_time_taken_for_a_progress_bar(
         string $output,
         string $expected
@@ -127,9 +124,7 @@ final class OutputNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider phpExecutableProvider
-     */
+    #[DataProvider('phpExecutableProvider')]
     public function test_it_can_normalize_the_php_executable_path(
         string $output,
         array $environmentVariables,
@@ -168,9 +163,7 @@ final class OutputNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider normalizePathProvider
-     */
+    #[DataProvider('normalizePathProvider')]
     public function test_it_can_normalize_the_project_path(
         string $output,
         string $expected
@@ -200,9 +193,7 @@ final class OutputNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider lineReturnsProvider
-     */
+    #[DataProvider('lineReturnsProvider')]
     public function test_it_can_normalize_line_returns(
         string $output,
         string $expected
@@ -225,9 +216,7 @@ final class OutputNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider fixedSizedProgressBarsProvider
-     */
+    #[DataProvider('fixedSizedProgressBarsProvider')]
     public function test_it_can_normalize_fixed_sized_progress_bars(
         string $output,
         string $expected
@@ -292,9 +281,7 @@ final class OutputNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider nonFixedSizedProgressBarsProvider
-     */
+    #[DataProvider('nonFixedSizedProgressBarsProvider')]
     public function test_it_can_normalize_non_fixed_sized_progress_bars(
         string $output,
         int $numberOfItems,
@@ -424,9 +411,7 @@ final class OutputNormalizerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider outputProvider
-     */
+    #[DataProvider('outputProvider')]
     public function test_it_can_normalize_output(string $output, string $expected): void
     {
         $actual = OutputNormalizer::normalize($output);
