@@ -337,7 +337,7 @@ final class ParallelExecutorFactory
 
     private static function getScriptPath(): string
     {
-        $pwd = $_SERVER['PWD'] ?? '';
+        $pwd = $_SERVER['PWD'] ?? getcwd();
         $scriptName = $_SERVER['SCRIPT_NAME'];
 
         return str_starts_with($scriptName, $pwd)
