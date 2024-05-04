@@ -21,6 +21,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Symfony\Contracts\Service\ServiceSubscriberTrait;
 use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
@@ -31,8 +33,10 @@ use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 
-abstract class ParallelCommand extends Command
+abstract class ParallelCommand extends Command implements ServiceSubscriberInterface
 {
+    use ServiceSubscriberTrait;
+
     // TODO: simply add the Parallelization trait for 3.x where all the BC
     //  layer of the trait is removed.
 
