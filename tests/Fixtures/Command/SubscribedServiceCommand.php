@@ -17,8 +17,8 @@ use LogicException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\Service\Attribute\SubscribedService;
+use Symfony\Contracts\Service\ServiceMethodsSubscriberTrait;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
-use Symfony\Contracts\Service\ServiceSubscriberTrait;
 use UnexpectedValueException;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
@@ -32,7 +32,7 @@ use function strval;
 
 final class SubscribedServiceCommand extends ParallelCommand implements ServiceSubscriberInterface
 {
-    use ServiceSubscriberTrait;
+    use ServiceMethodsSubscriberTrait;
 
     private bool $threwOnce = false;
 
