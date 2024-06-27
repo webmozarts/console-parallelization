@@ -372,24 +372,12 @@ trait Parallelization
         ];
     }
 
-    /**
-     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
-     *             ::getParallelExecutableFactory() to register your own callable. Note that having
-     *             a method with the same name is still fine, but it needs to be registered to the
-     *             factory and not extend the original one.
-     */
     protected function runBeforeFirstCommand(
         InputInterface $input,
         OutputInterface $output
     ): void {
     }
 
-    /**
-     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
-     *             ::getParallelExecutableFactory() to register your own callable. Note that having
-     *             a method with the same name is still fine, but it needs to be registered to the
-     *             factory and not extend the original one.
-     */
     protected function runAfterLastCommand(
         InputInterface $input,
         OutputInterface $output
@@ -397,11 +385,6 @@ trait Parallelization
     }
 
     /**
-     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
-     *             ::getParallelExecutableFactory() to register your own callable. Note that having
-     *             a method with the same name is still fine, but it needs to be registered to the
-     *             factory and not extend the original one.
-     *
      * @param list<string> $items
      */
     protected function runBeforeBatch(
@@ -412,11 +395,6 @@ trait Parallelization
     }
 
     /**
-     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
-     *             ::getParallelExecutableFactory() to register your own callable. Note that having
-     *             a method with the same name is still fine, but it needs to be registered to the
-     *             factory and not extend the original one.
-     *
      * @param list<string> $items
      */
     protected function runAfterBatch(

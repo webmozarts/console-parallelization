@@ -14,13 +14,13 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\AutoReview;
 
 use Fidry\Makefile\Test\BaseMakefileTestCase;
+use PHPUnit\Framework\Attributes\CoversNothing;
 use function file_get_contents;
 
 /**
- * @coversNothing
- *
  * @internal
  */
+#[CoversNothing]
 final class MakefileTest extends BaseMakefileTestCase
 {
     private const EXPECTED_OUTPUT_FILE_PATH = __DIR__.'/makefile_help_output';

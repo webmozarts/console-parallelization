@@ -13,14 +13,14 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Process;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\InputStream;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory
- *
  * @internal
  */
+#[CoversClass(StandardSymfonyProcessFactory::class)]
 final class StandardSymfonyProcessFactoryTest extends TestCase
 {
     public function test_it_can_create_a_configured_process(): void

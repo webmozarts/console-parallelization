@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -26,15 +28,12 @@ use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
 use Webmozarts\Console\Parallelization\SymfonyVersion;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Input\InputOptionsSerializer
- *
  * @internal
  */
+#[CoversClass(InputOptionsSerializer::class)]
 final class InputOptionsSerializerTest extends TestCase
 {
-    /**
-     * @dataProvider optionsProvider
-     */
+    #[DataProvider('optionsProvider')]
     public function test_it_can_reverse_the_options_parsing(
         InputDefinition $commandDefinition,
         InputInterface $input,

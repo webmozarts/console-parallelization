@@ -141,7 +141,6 @@ final class ChunkedItemsIterator
             $items,
             sprintf(
                 'Expected the fetched items to be a list or an iterable of strings. Got "%s".',
-                // TODO: use get_debug_type when dropping PHP 7.4 support
                 get_debug_type($items),
             ),
         );
@@ -164,7 +163,6 @@ final class ChunkedItemsIterator
             $item,
             sprintf(
                 'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
-                // TODO: use get_debug_type when dropping PHP 7.4 support
                 get_debug_type($item),
                 $index,
             ),

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,15 +24,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Webmozarts\Console\Parallelization\SymfonyVersion;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Input\RawInput
- *
  * @internal
  */
+#[CoversClass(RawInput::class)]
 final class RawInputTest extends TestCase
 {
-    /**
-     * @dataProvider inputArgumentProvider
-     */
+    #[DataProvider('inputArgumentProvider')]
     public function test_it_can_get_an_input_arguments(
         InputInterface $input,
         array $expected
@@ -130,9 +129,7 @@ final class RawInputTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider inputOptionProvider
-     */
+    #[DataProvider('inputOptionProvider')]
     public function test_it_can_get_an_input_options(
         InputInterface $input,
         array $expected

@@ -1,4 +1,9 @@
 {
+    "config": {
+        "platform": {
+            "php": "8.2"
+        }
+    },
     "require": {
         "friendsofphp/php-cs-fixer": "^v3.0"
     },

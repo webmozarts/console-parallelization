@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Input;
 
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,15 +25,12 @@ use Symfony\Component\Console\Input\InputOption;
 use function Safe\getcwd;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Input\ChildCommandFactory
- *
  * @internal
  */
+#[CoversClass(ChildCommandFactory::class)]
 final class ChildCommandFactoryTest extends TestCase
 {
-    /**
-     * @dataProvider childProvider
-     */
+    #[DataProvider('childProvider')]
     public function test_it_can_launch_configured_child_processes(
         string $phpExecutable,
         string $scriptPath,

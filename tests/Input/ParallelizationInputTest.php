@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Input;
 
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Console\Command\Command;
@@ -23,10 +25,9 @@ use Symfony\Component\Console\Input\StringInput;
 use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\Input\ParallelizationInput
- *
  * @internal
  */
+#[CoversClass(ParallelizationInput::class)]
 final class ParallelizationInputTest extends TestCase
 {
     public function test_it_can_configure_a_command(): void
@@ -98,9 +99,7 @@ final class ParallelizationInputTest extends TestCase
         self::assertTrue($closureEvaluated);
     }
 
-    /**
-     * @dataProvider inputProvider
-     */
+    #[DataProvider('inputProvider')]
     public function test_it_can_be_instantiated_from_an_input(
         InputInterface $input,
         ParallelizationInput $expected
@@ -139,9 +138,7 @@ final class ParallelizationInputTest extends TestCase
         ParallelizationInput::fromInput($input);
     }
 
-    /**
-     * @dataProvider invalidInputProvider
-     */
+    #[DataProvider('invalidInputProvider')]
     public function test_it_cannot_pass_an_invalid_input(
         InputInterface $input,
         string $expectedErrorMessage

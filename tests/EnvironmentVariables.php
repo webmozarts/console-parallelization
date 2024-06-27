@@ -21,7 +21,7 @@ use function Safe\putenv;
 final class EnvironmentVariables
 {
     /**
-     * @param array<string, string> $environmentVariables
+     * @param array<string, string|null> $environmentVariables
      *
      * @return callable():void Cleanup method: restores the previous state.
      */
@@ -42,7 +42,7 @@ final class EnvironmentVariables
     /**
      * @return callable():void
      */
-    private static function setVariable(string $name, string $value): callable
+    private static function setVariable(string $name, ?string $value): callable
     {
         if (array_key_exists($name, $_SERVER)) {
             $previousValue = $_SERVER[$name];

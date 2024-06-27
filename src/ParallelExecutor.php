@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Closure;
-use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;

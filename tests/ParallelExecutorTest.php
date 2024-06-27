@@ -15,6 +15,8 @@ namespace Webmozarts\Console\Parallelization;
 
 use Error;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -45,17 +47,14 @@ use function str_repeat;
 use const PHP_EOL;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ParallelExecutor
- *
  * @internal
  */
+#[CoversClass(ParallelExecutor::class)]
 final class ParallelExecutorTest extends TestCase
 {
     use ProphecyTrait;
 
-    /**
-     * @dataProvider childProcessProvider
-     */
+    #[DataProvider('childProcessProvider')]
     public function test_it_can_execute_a_child_process(
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
@@ -588,9 +587,7 @@ final class ParallelExecutorTest extends TestCase
             ->shouldHaveBeenCalledTimes(1);
     }
 
-    /**
-     * @dataProvider childProcessSpawnerProvider
-     */
+    #[DataProvider('childProcessSpawnerProvider')]
     public function test_it_can_can_launch_child_processes_or_process_within_the_main_process(
         ParallelizationInput $parallelizationInput,
         int $segmentSize,
@@ -656,9 +653,7 @@ final class ParallelExecutorTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider mainProcessProvider
-     */
+    #[DataProvider('mainProcessProvider')]
     public function test_it_can_execute_a_main_process(
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
@@ -872,9 +867,7 @@ final class ParallelExecutorTest extends TestCase
         self::assertSame($expectedExitCode, $exitCode);
     }
 
-    /**
-     * @dataProvider invalidExecutorProvider
-     */
+    #[DataProvider('invalidExecutorProvider')]
     public function test_it_cannot_create_an_executor_with_an_invalid_value(
         ParallelExecutorFactory $factory,
         string $expectedExceptionMessage

@@ -34,15 +34,6 @@
     - `::getSegmentSize()`
     - `::getBatchSize()`
     - `::getConsolePath()`
-- As part of the previous point, the following methods will no longer be declared
-  in the `Parallelization` trait in 3.0. It is perfectly fine to still have a
-  method with those names, but you need to register them to the factory (it will
-  no longer be done automatically in 3.0) and you should not extend the current
-  ones. The following methods are affected:
-    - `::runBeforeFirstCommand()`
-    - `::runAfterLastCommand()`
-    - `::runBeforeBatch()`
-    - `::runAfterBatch()`
 - The following methods have been removed from `Parallelization` and have no
   replacement (the existing and new extension points should be enough to cover
   those):

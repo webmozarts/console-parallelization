@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler\Container;
 
 use Error;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Webmozarts\Console\Parallelization\ErrorHandler\DummyErrorHandler;
@@ -23,15 +25,12 @@ use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
 use Webmozarts\Console\Parallelization\Logger\FakeLogger;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler
- *
  * @internal
  */
+#[CoversClass(ResetServiceErrorHandler::class)]
 final class ResetServiceErrorHandlerTest extends TestCase
 {
-    /**
-     * @dataProvider containerProvider
-     */
+    #[DataProvider('containerProvider')]
     public function test_it_creates_an_instance_only_if_the_container_is_resettable(
         ?ContainerInterface $container,
         bool $expectInstance

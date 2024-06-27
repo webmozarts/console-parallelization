@@ -14,16 +14,16 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\ErrorHandler;
 
 use Error;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Webmozarts\Console\Parallelization\Logger\DummyLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler
- *
  * @internal
  */
+#[CoversClass(LoggingErrorHandler::class)]
 final class LoggingErrorHandlerTest extends TestCase
 {
     use ProphecyTrait;

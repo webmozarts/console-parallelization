@@ -13,20 +13,24 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 use Webmozarts\Console\Parallelization\ErrorHandler\FakeErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\FakeProcessLauncherFactory;
 use function chr;
 use function getcwd;
 use function Safe\chdir;
+use function sys_get_temp_dir;
 
 /**
- * @covers \Webmozarts\Console\Parallelization\ParallelExecutorFactory
- *
  * @internal
  */
+#[CoversClass(ParallelExecutorFactory::class)]
 final class ParallelExecutorFactoryTest extends TestCase
 {
     private const FILE_1 = __DIR__;
@@ -185,9 +189,7 @@ final class ParallelExecutorFactoryTest extends TestCase
         self::assertEquals($expected, $executor);
     }
 
-    /**
-     * @dataProvider defaultValuesProvider
-     */
+    #[DataProvider('defaultValuesProvider')]
     public function test_it_can_create_an_executor_with_default_values(
         array $environmentVariables,
         string $workingDirectory,
@@ -260,6 +262,46 @@ final class ParallelExecutorFactoryTest extends TestCase
             $expectedScriptPath,
             $workingDirectory,
         ];
+
+        // This can happen e.g. when executed with Docker.
+        // See https://github.com/webmozarts/console-parallelization/issues/204.
+        yield 'PWD is not set' => [
+            [
+                'PHP_BINARY' => $phpExecutable,
+                'PWD' => null,
+                'SCRIPT_NAME' => __DIR__.'/../bin/console',
+            ],
+            $workingDirectory,
+            $progressSymbol,
+            $phpExecutable,
+            $expectedScriptPath,
+            $workingDirectory,
+        ];
+    }
+
+    // See https://github.com/webmozarts/console-parallelization/issues/223
+    public function test_it_can_execute_the_command_even_if_the_script_is_different(): void
+    {
+        $filesystem = new Filesystem();
+        $tmp = sys_get_temp_dir().'/WebmozartsConsoleParallelizationTest';
+
+        $filesystem->mkdir($tmp);
+
+        try {
+            $process = Process::fromShellCommandline(
+                'cd '.$tmp.'; '.__DIR__.'/../bin/console absolute-script-path --quiet',
+            );
+
+            $process->run();
+
+            self::assertSame(
+                0,
+                $process->getExitCode(),
+                $process->getOutput().$process->getErrorOutput(),
+            );
+        } finally {
+            $filesystem->remove($tmp);
+        }
     }
 
     /**
