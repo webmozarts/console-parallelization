@@ -271,7 +271,7 @@ The library supports several process hooks which can be configured via
 ## Subscribed Services
 
 You should be using [subscribed services] or proxies. Indeed, you may otherwise end up with the issue that the service
-initially injected in the command may end up being different than the one used by the container. This is because upon
+initially injected in the command may end up being different from the one used by the container. This is because upon
 error, the `ResetServiceErrorHandler` error handler is used which resets the container when an item fails. As a result,
 if the service is not directly fetched from the container (to get a fresh instance if the container resets), you will
 end up using an obsolete service.
