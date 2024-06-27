@@ -13,12 +13,15 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
+use Composer\InstalledVersions;
+use Composer\Semver\VersionParser;
 use LogicException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\Service\Attribute\SubscribedService;
 use Symfony\Contracts\Service\ServiceMethodsSubscriberTrait;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Symfony\Contracts\Service\ServiceSubscriberTrait;
 use UnexpectedValueException;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
@@ -27,8 +30,21 @@ use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use function array_map;
+use function class_alias;
 use function range;
-use function strval;
+
+$is350OrHigher = InstalledVersions::satisfies(
+    new VersionParser(),
+    'symfony/service-contracts',
+    '^3.5.0',
+);
+
+if (!$is350OrHigher) {
+    class_alias(
+        ServiceSubscriberTrait::class,
+        ServiceMethodsSubscriberTrait::class,
+    );
+}
 
 final class SubscribedServiceCommand extends ParallelCommand implements ServiceSubscriberInterface
 {
