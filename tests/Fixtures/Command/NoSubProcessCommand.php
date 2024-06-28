@@ -32,9 +32,12 @@ final class NoSubProcessCommand extends Command
 {
     use Parallelization;
 
-    protected static $defaultName = 'test:no-subprocess';
-
     private bool $mainProcess = false;
+
+    public function __construct()
+    {
+        parent::__construct('test:no-subprocess');
+    }
 
     protected function configure(): void
     {
