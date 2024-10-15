@@ -13,89 +13,19 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputInterface;
-use Webmozarts\Console\Parallelization\UnexpectedCall;
+use Composer\InstalledVersions;
+use Composer\Semver\VersionParser;
+use function class_alias;
 
-final class FakeInput implements InputInterface
-{
-    public function __call($name, $arguments): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
+$isSfConsole7OrHigher = InstalledVersions::satisfies(
+    new VersionParser(),
+    'symfony/console',
+    '^7.0',
+);
 
-    public function getFirstArgument(): ?string
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function hasParameterOption($values, bool $onlyParams = false): bool
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function getParameterOption(array|string $values, array|bool|float|int|string|null $default = false, bool $onlyParams = false): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function bind(InputDefinition $definition): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function validate(): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function getArguments(): array
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function getArgument(string $name): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function setArgument(string $name, $value): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function hasArgument(string $name): bool
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function getOptions(): array
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function getOption(string $name): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function setOption(string $name, $value): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function hasOption(string $name): bool
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function isInteractive(): bool
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-
-    public function setInteractive(bool $interactive): void
-    {
-        throw UnexpectedCall::forMethod(__METHOD__);
-    }
-}
+class_alias(
+    $isSfConsole7OrHigher
+        ? FakeSymfony7Input::class
+        : FakeSymfony6Input::class,
+    FakeInput::class,
+);

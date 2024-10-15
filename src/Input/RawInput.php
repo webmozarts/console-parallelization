@@ -91,4 +91,9 @@ final class RawInput extends Input
     {
         throw new DomainException('Not implemented.');
     }
+
+    public function __toString(): string
+    {
+        return 'RawInput';
+    }
 }
