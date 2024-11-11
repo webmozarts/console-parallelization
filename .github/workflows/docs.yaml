@@ -38,7 +38,7 @@ jobs:
                     restore-keys: cache-lychee-
 
             -   name: "Run Lychee"
-                uses: "lycheeverse/lychee-action@v2.0.2"
+                uses: "lycheeverse/lychee-action@v2.1.0"
                 with:
                     # To keep in sync with Makefile#lychee
                     args: "--verbose --no-progress '*.md' 'docs/**/*.md' --cache --max-cache-age 1d ."
