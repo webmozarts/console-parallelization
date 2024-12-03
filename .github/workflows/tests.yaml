@@ -52,11 +52,11 @@ jobs:
                 symfony:
                     - version_name: "6.4"
                       conflict: "<6.4 || >=7.0"
-                    - version_name: "7.x"
+                    - version_name: "7.2"
                           conflict: "<7.0 || >=8.0"
                     exclude:
                         - symfony:
-                              version_name: "7.x"
+                              version_name: "7.2"
                           php: "8.1"
 
         steps:
