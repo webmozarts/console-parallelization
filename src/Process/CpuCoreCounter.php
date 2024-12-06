@@ -46,7 +46,7 @@ final class CpuCoreCounter
         }
 
         try {
-            self::$count = (new FidryCpuCoreCounter())->getCount();
+            self::$count = (new FidryCpuCoreCounter())->getAvailableForParallelisation()->availableCpus;
         } catch (NumberOfCpuCoreNotFound) {
             self::$count = 1;
         }
