@@ -121,7 +121,7 @@ final class OutputNormalizer
     public static function removeIntermediateFixedProgressBars(string $output): string
     {
         $output = preg_replace(
-            '# \d+\/\d+ \[=[=>-]+\-] .+?MiB\\n#',
+            '# \d+\/\d+ \[=[=>-]+\-] .+?MiB\n#',
             '',
             $output,
         );
@@ -148,7 +148,7 @@ final class OutputNormalizer
 
         // Remove intermediate lines
         $output = preg_replace(
-            '#\s+\d+ \[[->]+?\] .+?MiB\\n#',
+            '#\s+\d+ \[[->]+?\] .+?MiB\n#',
             '',
             $output,
         );
@@ -176,7 +176,7 @@ final class OutputNormalizer
         int $itemNumber
     ): callable {
         $lineFound = 1 === preg_match(
-            '#(?<line> '.$itemNumber.' \[[->]+] .+?MiB.*?\\n?)#',
+            '#(?<line> '.$itemNumber.' \[[->]+] .+?MiB.*?\n?)#',
             $output,
             $matches,
         );
