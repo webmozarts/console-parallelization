@@ -19,6 +19,7 @@ jobs:
                     - "8.1"
                     - "8.2"
                     - "8.3"
+                    - "8.4"
 
         steps:
             -   name: "Check out repository code"
@@ -55,10 +56,10 @@ jobs:
                       conflict: "<6.4 || >=7.0"
                     - version_name: "7.2"
                       conflict: "<7.2 || >=8.0"
-                      exclude:
-                        - symfony:
-                              version_name: "7.2"
-                          php: "8.1"
+                exclude:
+                  - symfony:
+                        version_name: "7.2"
+                    php: "8.1"
 
         steps:
             -   name: "Check out repository code"
