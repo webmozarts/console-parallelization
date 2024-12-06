@@ -23,7 +23,7 @@ return static function (ContainerConfigurator $container): void {
 
     $services
         ->load(
-            'Webmozarts\\Console\\Parallelization\\Fixtures\\Command\\',
+            'Webmozarts\Console\Parallelization\Fixtures\Command\\',
             __DIR__.'/../Fixtures/Command',
         )
         ->set(Counter::class);
