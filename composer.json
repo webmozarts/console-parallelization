@@ -44,12 +44,6 @@
         "symfony/framework-bundle": "^6.4.10",
         "webmozarts/strict-phpunit": "^7.3"
     },
-    "conflict": {
-        "symfony/config": "<6.4.16",
-        "symfony/error-handler": "<6.4.14",
-        "symfony/event-dispatcher": "<6.4.16",
-        "symfony/http-kernel": "<6.4.16"
-    },
     "autoload": {
         "psr-4": {
             "Webmozarts\\Console\\Parallelization\\": "src/"
