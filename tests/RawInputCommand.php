@@ -23,8 +23,8 @@ use Symfony\Component\Console\Input\InputArgument;
 )]
 final class RawInputCommand extends Command
 {
-    private const ARG_NAME_1 = 'arg1';
-    private const ARG_NAME_2 = 'arg1';
+    private const string ARG_NAME_1 = 'arg1';
+    private const string ARG_NAME_2 = 'arg1';
 
     public function configure(): void
     {

@@ -31,8 +31,8 @@ use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
 #[CoversClass(StandardLogger::class)]
 final class StandardLoggerTest extends TestCase
 {
-    private const PROGRESS_CHARACTER = '▌';
-    private const TERMINAL_WIDTH = 50;
+    private const string PROGRESS_CHARACTER = '▌';
+    private const int TERMINAL_WIDTH = 50;
 
     private BufferedOutput $output;
     private StandardLogger $logger;

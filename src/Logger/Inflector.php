@@ -20,7 +20,7 @@ use Webmozart\Assert\Assert;
  */
 final class Inflector
 {
-    private const PLURAL_MAP = [
+    private const array PLURAL_MAP = [
         'batch' => 'batches',
         'round' => 'rounds',
         'child process' => 'parallel child processes',
