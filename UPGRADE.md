@@ -1,3 +1,25 @@
+## From 2.x to 3.x
+
+- Removed the deprecated `PhpExecutableFinder::tryToFind()` method. Use the `::find()` method instead.
+- Removed the following deprecations from the `Parallelization` trait:
+    - `#logError: bool` property: override the `::createErrorHandler()` method instead.
+    - `::configureParallelization()`: use ParallelizationInput::configureCommand()
+    - `::getProgressSymbol()`: Override `::configureParallelExecutableFactory()` and use `::withProgressSymbol()` of the
+      factory.
+    - `::detectPhpExecutable()`: Override `::configureParallelExecutableFactory()` and use `::withPhpExecutable()` of the
+      factory.
+    - `::getWorkingDirectory()`: Override `::configureParallelExecutableFactory()` and use `::withWorkingDirectory()` of
+      the factory.
+    - `::getEnvironmentVariables()`: Override `::configureParallelExecutableFactory()` and use
+      `::withExtraEnvironmentVariables()` of the factory.
+    - `::getSegmentSize()`: Override `::configureParallelExecutableFactory()` and use `::withSegmentSize()` of the
+      factory.
+    - `::getBatchSize()`: Override `::configureParallelExecutableFactory()` and use `::withBatchSize()` of the
+      factory.
+    - `::getConsolePath()`: Override `::configureParallelExecutableFactory()` and use `::withScriptPath()` of the
+      factory.
+
+
 ## From 1.x to 2.x
 
 - `Parallelization::fetchItems()` now requires `OutputInterface` as a second parameter
