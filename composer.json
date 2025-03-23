@@ -40,7 +40,7 @@
         "phpstan/phpstan-phpunit": "^1.1",
         "phpstan/phpstan-symfony": "^1.2",
         "phpstan/phpstan-webmozart-assert": "^1.2",
-        "phpunit/phpunit": "^10.5.38 || ^11.0",
+        "phpunit/phpunit": "^10.5.38 || ^11.0 || ^12.0",
         "symfony/framework-bundle": "^6.4.10 || ^7.2",
         "webmozarts/strict-phpunit": "^7.3"
     },
