@@ -16,10 +16,10 @@ namespace Webmozarts\Console\Parallelization\ErrorHandler;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
-final class LoggingErrorHandler implements ErrorHandler
+final readonly class LoggingErrorHandler implements ErrorHandler
 {
     public function __construct(
-        private readonly ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
+        private ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
     ) {
     }
 

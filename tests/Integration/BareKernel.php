@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
+use Override;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -40,11 +41,13 @@ final class BareKernel extends HttpKernel
     {
     }
 
+    #[Override]
     public function getCacheDir(): string
     {
         return __DIR__.'/var/cache/BareKernel';
     }
 
+    #[Override]
     public function getLogDir(): string
     {
         return __DIR__.'/var/log/BareKernel';

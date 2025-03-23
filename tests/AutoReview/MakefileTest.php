@@ -23,7 +23,7 @@ use function file_get_contents;
 #[CoversNothing]
 final class MakefileTest extends BaseMakefileTestCase
 {
-    private const EXPECTED_OUTPUT_FILE_PATH = __DIR__.'/makefile_help_output';
+    private const string EXPECTED_OUTPUT_FILE_PATH = __DIR__.'/makefile_help_output';
 
     protected static function getMakefilePath(): string
     {

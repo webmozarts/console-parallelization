@@ -31,17 +31,17 @@ use function str_contains;
 use function str_replace;
 use const PHP_EOL;
 
-final class ChunkedItemsIterator
+final readonly class ChunkedItemsIterator
 {
     /**
      * @var Iterator<list<string>>
      */
-    private readonly Iterator $itemsChunks;
+    private Iterator $itemsChunks;
 
     /**
      * @var 0|positive-int|null
      */
-    private readonly ?int $numberOfItems;
+    private ?int $numberOfItems;
 
     /**
      * @internal Use the static factory methods instead.
@@ -50,7 +50,7 @@ final class ChunkedItemsIterator
      * @param positive-int                  $batchSize
      */
     public function __construct(
-        private readonly iterable $items,
+        private iterable $items,
         int $batchSize,
     ) {
         $this->itemsChunks = chunk($items, $batchSize);

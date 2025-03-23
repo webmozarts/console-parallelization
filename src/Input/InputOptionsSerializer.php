@@ -31,7 +31,7 @@ use function str_replace;
  */
 final class InputOptionsSerializer
 {
-    private const ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
+    private const string ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
 
     private function __construct()
     {

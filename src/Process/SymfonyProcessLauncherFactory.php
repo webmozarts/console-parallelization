@@ -15,9 +15,9 @@ namespace Webmozarts\Console\Parallelization\Process;
 
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
-final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
+final readonly class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
 {
-    public function __construct(private readonly SymfonyProcessFactory $processFactory)
+    public function __construct(private SymfonyProcessFactory $processFactory)
     {
     }
 

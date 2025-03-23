@@ -18,11 +18,11 @@ use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 
-final class ResetServiceErrorHandler implements ErrorHandler
+final readonly class ResetServiceErrorHandler implements ErrorHandler
 {
     public function __construct(
-        private readonly ResetInterface $resettable,
-        private readonly ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
+        private ResetInterface $resettable,
+        private ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
     ) {
     }
 
