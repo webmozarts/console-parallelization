@@ -147,7 +147,11 @@ trait Parallelization
         //
         // Configuring the factory is recommended to be done in
         // ::configureParallelExecutableFactory() instead.
-        return ParallelExecutorFactory::create(...func_get_args());
+        return ParallelExecutorFactory::create(...func_get_args())
+            ->withRunBeforeFirstCommand($this->runBeforeFirstCommand(...))
+            ->withRunAfterLastCommand($this->runAfterLastCommand(...))
+            ->withRunBeforeBatch($this->runBeforeBatch(...))
+            ->withRunAfterBatch($this->runAfterBatch(...));
     }
 
     /**
@@ -199,5 +203,37 @@ trait Parallelization
         }
 
         return null;
+    }
+
+    protected function runBeforeFirstCommand(
+        InputInterface $input,
+        OutputInterface $output
+    ): void {
+    }
+
+    protected function runAfterLastCommand(
+        InputInterface $input,
+        OutputInterface $output
+    ): void {
+    }
+
+    /**
+     * @param list<string> $items
+     */
+    protected function runBeforeBatch(
+        InputInterface $input,
+        OutputInterface $output,
+        array $items
+    ): void {
+    }
+
+    /**
+     * @param list<string> $items
+     */
+    protected function runAfterBatch(
+        InputInterface $input,
+        OutputInterface $output,
+        array $items
+    ): void {
     }
 }
