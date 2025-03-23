@@ -29,7 +29,8 @@ final class Inflector
     /**
      * @param positive-int|0 $count
      */
-    public static function pluralize(string $singular, int $count): ?string
+    // TODO: extract that change
+    public static function pluralize(string $singular, int $count): string
     {
         Assert::keyExists(
             self::PLURAL_MAP,

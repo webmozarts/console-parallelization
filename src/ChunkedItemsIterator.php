@@ -168,7 +168,8 @@ final readonly class ChunkedItemsIterator
             ),
         );
         Assert::false(
-            '' !== PHP_EOL && str_contains($item, PHP_EOL),
+            // TODO: legit bug
+            '' !== $item && str_contains($item, PHP_EOL),
             sprintf(
                 'An item cannot contain a line return. Got one for "%s" for the item "%s".',
                 str_replace(PHP_EOL, '<lineReturn>', $item),
