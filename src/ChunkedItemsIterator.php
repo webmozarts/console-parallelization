@@ -153,7 +153,7 @@ final class ChunkedItemsIterator
         );
     }
 
-    private static function normalizeItem(mixed $item, int|string $index): string
+    private static function normalizeItem(mixed $item, mixed $index): string
     {
         if (is_numeric($item)) {
             return (string) $item;

@@ -17,6 +17,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use SplObjectStorage;
 use stdClass;
 use function fclose;
 use function iter\toArrayWithKeys;
@@ -353,6 +354,18 @@ final class ChunkedItemsIteratorTest extends TestCase
         yield 'an item with a line return (iterable)' => [
             null,
             toIter(['item0', 'it'.PHP_EOL.'em', 'item1']),
+            1,
+            'An item cannot contain a line return. Got one for "it<lineReturn>em" for the item "1".',
+        ];
+
+        yield 'iterable with unorthodox keys' => [
+            null,
+            (static function () {
+                $storage = new SplObjectStorage();
+                $storage[new stdClass()] = 'it'.PHP_EOL.'em';
+
+                return $storage;
+            })(),
             1,
             'An item cannot contain a line return. Got one for "it<lineReturn>em" for the item "1".',
         ];
