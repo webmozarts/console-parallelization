@@ -266,6 +266,7 @@ final class ParallelExecutor
         Logger $logger
     ): ProcessLauncher {
         return $this->processLauncherFactory->create(
+            $this->childCommandFactory->phpExecutable,
             $this->childCommandFactory->createChildCommand($input),
             $this->workingDirectory,
             $this->extraEnvironmentVariables,

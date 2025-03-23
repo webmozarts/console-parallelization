@@ -28,7 +28,7 @@ use function sprintf;
 final class ChildCommandFactory
 {
     public function __construct(
-        private readonly string $phpExecutable,
+        public readonly string $phpExecutable,
         private readonly string $scriptPath,
         private readonly string $commandName,
         private readonly InputDefinition $commandDefinition,
@@ -51,7 +51,6 @@ final class ChildCommandFactory
         InputInterface $input
     ): array {
         return array_filter([
-            ...$this->getEscapedPhpExecutable(),
             $this->scriptPath,
             $this->commandName,
             ...array_map(strval(...), self::getArguments($input)),
@@ -72,14 +71,6 @@ final class ChildCommandFactory
             $input,
             ParallelizationInput::OPTIONS,
         );
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function getEscapedPhpExecutable(): array
-    {
-        return explode(' ', $this->phpExecutable);
     }
 
     /**

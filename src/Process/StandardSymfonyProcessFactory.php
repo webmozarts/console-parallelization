@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Process;
 
 use Symfony\Component\Process\InputStream;
+use Symfony\Component\Process\PhpSubprocess;
 use Symfony\Component\Process\Process;
 
 final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
@@ -26,12 +27,10 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
         ?array $environmentVariables,
         callable $processOutput
     ): Process {
-        $process = new Process(
+        $process = new PhpSubprocess(
             $command,
             $workingDirectory,
             $environmentVariables,
-            null,
-            null,
         );
 
         $process->setInput($inputStream);
