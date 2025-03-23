@@ -19,7 +19,7 @@ use function max;
 use function min;
 use function sprintf;
 
-final class Configuration
+final readonly class Configuration
 {
     /**
      * @internal Use the static factory methods instead.
@@ -30,10 +30,10 @@ final class Configuration
      * @param positive-int|0|null $totalNumberOfBatches
      */
     public function __construct(
-        private readonly int $numberOfProcesses,
-        private readonly int $segmentSize,
-        private readonly ?int $numberOfSegments,
-        private readonly ?int $totalNumberOfBatches,
+        private int $numberOfProcesses,
+        private int $segmentSize,
+        private ?int $numberOfSegments,
+        private ?int $totalNumberOfBatches,
     ) {
     }
 

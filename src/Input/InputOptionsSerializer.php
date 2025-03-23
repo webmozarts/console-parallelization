@@ -22,7 +22,6 @@ use function array_keys;
 use function array_map;
 use function implode;
 use function is_string;
-use function method_exists;
 use function preg_match;
 use function sprintf;
 use function str_replace;
@@ -32,7 +31,7 @@ use function str_replace;
  */
 final class InputOptionsSerializer
 {
-    private const ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
+    private const string ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
 
     private function __construct()
     {
@@ -71,8 +70,7 @@ final class InputOptionsSerializer
         string $name,
         array|bool|float|int|string|null $value,
     ): string {
-        // TODO: remove the method exists check once we drop support for Symfony 4.4
-        if (method_exists(InputOption::class, 'isNegatable') && $option->isNegatable()) {
+        if ($option->isNegatable()) {
             return sprintf(
                 '--%s%s',
                 $value ? '' : 'no-',

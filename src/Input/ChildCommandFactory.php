@@ -25,13 +25,13 @@ use function sprintf;
 /**
  * @internal
  */
-final class ChildCommandFactory
+final readonly class ChildCommandFactory
 {
     public function __construct(
-        private readonly string $phpExecutable,
-        private readonly string $scriptPath,
-        private readonly string $commandName,
-        private readonly InputDefinition $commandDefinition,
+        private string $phpExecutable,
+        private string $scriptPath,
+        private string $commandName,
+        private InputDefinition $commandDefinition,
     ) {
         self::validateScriptPath($scriptPath);
     }

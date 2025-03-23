@@ -31,17 +31,17 @@ use function str_contains;
 use function str_replace;
 use const PHP_EOL;
 
-final class ChunkedItemsIterator
+final readonly class ChunkedItemsIterator
 {
     /**
      * @var Iterator<list<string>>
      */
-    private readonly Iterator $itemsChunks;
+    private Iterator $itemsChunks;
 
     /**
      * @var 0|positive-int|null
      */
-    private readonly ?int $numberOfItems;
+    private ?int $numberOfItems;
 
     /**
      * @internal Use the static factory methods instead.
@@ -50,7 +50,7 @@ final class ChunkedItemsIterator
      * @param positive-int                  $batchSize
      */
     public function __construct(
-        private readonly iterable $items,
+        private iterable $items,
         int $batchSize,
     ) {
         $this->itemsChunks = chunk($items, $batchSize);
@@ -141,7 +141,6 @@ final class ChunkedItemsIterator
             $items,
             sprintf(
                 'Expected the fetched items to be a list or an iterable of strings. Got "%s".',
-                // TODO: use get_debug_type when dropping PHP 7.4 support
                 get_debug_type($items),
             ),
         );
@@ -164,7 +163,6 @@ final class ChunkedItemsIterator
             $item,
             sprintf(
                 'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "%s" for the item "%s".',
-                // TODO: use get_debug_type when dropping PHP 7.4 support
                 get_debug_type($item),
                 $index,
             ),

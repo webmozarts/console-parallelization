@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use LogicException;
+use Override;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\Service\Attribute\SubscribedService;
@@ -60,6 +61,7 @@ final class SubscribedServiceCommand extends ParallelCommand
         return 1 === $count ? 'item' : 'items';
     }
 
+    #[Override]
     protected function configureParallelExecutableFactory(
         ParallelExecutorFactory $parallelExecutorFactory,
         InputInterface $input,
@@ -99,6 +101,7 @@ final class SubscribedServiceCommand extends ParallelCommand
         return $this->container->get(__METHOD__);
     }
 
+    #[Override]
     protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler
     {
         return ResetServiceErrorHandler::forContainer($this->getContainer());

@@ -1,5 +1,8 @@
 name: AutoReview
 
+env:
+    PHP_CS_FIXER_IGNORE_ENV: 1
+
 on:
     push:
         branches: [ "main" ]
@@ -15,7 +18,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [ "8.2" ]
+                php: [ "8.4" ]
                 check:
                     -   name: "PHPStan"
                         command: "make phpstan"

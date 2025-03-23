@@ -26,14 +26,14 @@ use function sprintf;
 
 final class ParallelizationInput
 {
-    public const ITEM_ARGUMENT = 'item';
-    public const PROCESSES_OPTION = 'processes';
-    public const MAIN_PROCESS_OPTION = 'main-process';
-    public const CHILD_OPTION = 'child';
-    public const BATCH_SIZE = 'batch-size';
-    public const SEGMENT_SIZE = 'segment-size';
+    public const string ITEM_ARGUMENT = 'item';
+    public const string PROCESSES_OPTION = 'processes';
+    public const string MAIN_PROCESS_OPTION = 'main-process';
+    public const string CHILD_OPTION = 'child';
+    public const string BATCH_SIZE = 'batch-size';
+    public const string SEGMENT_SIZE = 'segment-size';
 
-    public const OPTIONS = [
+    public const array OPTIONS = [
         self::PROCESSES_OPTION,
         self::MAIN_PROCESS_OPTION,
         self::CHILD_OPTION,

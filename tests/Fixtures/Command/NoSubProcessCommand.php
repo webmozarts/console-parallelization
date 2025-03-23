@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
 use DomainException;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,11 +29,10 @@ use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
 use function realpath;
 
+#[AsCommand(name: 'test:no-subprocess')]
 final class NoSubProcessCommand extends Command
 {
     use Parallelization;
-
-    protected static $defaultName = 'test:no-subprocess';
 
     private bool $mainProcess = false;
 

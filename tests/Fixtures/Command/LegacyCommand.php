@@ -51,7 +51,7 @@ final class LegacyCommand extends Command
      */
     public static array $calls = [];
 
-    private const DRY_RUN_OPT = 'dry-run';
+    private const string DRY_RUN_OPT = 'dry-run';
 
     private readonly ContainerInterface $container;
 
