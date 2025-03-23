@@ -30,7 +30,6 @@ use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
-use function func_get_args;
 
 abstract class ParallelCommand extends Command
 {
