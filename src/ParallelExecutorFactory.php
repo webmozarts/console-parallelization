@@ -31,7 +31,7 @@ use const STDIN;
 
 final class ParallelExecutorFactory
 {
-    private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
+    private const int CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
 
     private bool $useDefaultBatchSize = true;
 

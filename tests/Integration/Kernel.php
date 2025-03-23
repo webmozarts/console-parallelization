@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Integration;
 
+use Override;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
@@ -40,11 +41,13 @@ final class Kernel extends HttpKernel
         $loader->load(__DIR__.'/services.php');
     }
 
+    #[Override]
     public function getCacheDir(): string
     {
         return __DIR__.'/var/cache/Kernel';
     }
 
+    #[Override]
     public function getLogDir(): string
     {
         return __DIR__.'/var/log/Kernel';
