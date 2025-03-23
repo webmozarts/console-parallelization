@@ -32,7 +32,7 @@ final class ChildCommandFactoryTest extends TestCase
 {
     #[DataProvider('childProvider')]
     public function test_it_can_launch_configured_child_processes(
-        string $phpExecutable,
+        array $phpExecutable,
         string $scriptPath,
         string $commandName,
         InputDefinition $commandDefinition,
@@ -53,7 +53,7 @@ final class ChildCommandFactoryTest extends TestCase
 
     public static function childProvider(): iterable
     {
-        $phpExecutable = __FILE__;
+        $phpExecutable = [__FILE__];
         $scriptPath = __DIR__.'/../../bin/console';
         $commandName = 'import:something';
 
@@ -110,7 +110,7 @@ final class ChildCommandFactoryTest extends TestCase
                 $commandDefinition,
                 $input,
                 [
-                    $phpExecutable,
+                    $phpExecutable[0],
                     $scriptPath,
                     $commandName,
                     'group2',
@@ -166,7 +166,7 @@ final class ChildCommandFactoryTest extends TestCase
                 $commandDefinition,
                 $input,
                 [
-                    $phpExecutable,
+                    $phpExecutable[0],
                     $scriptPath,
                     $commandName,
                     'group2',
@@ -214,7 +214,7 @@ final class ChildCommandFactoryTest extends TestCase
                 $commandDefinition,
                 $input,
                 [
-                    $phpExecutable,
+                    $phpExecutable[0],
                     $scriptPath,
                     $commandName,
                     '--child',
@@ -232,7 +232,7 @@ final class ChildCommandFactoryTest extends TestCase
             );
 
             return [
-                '',
+                [],
                 $scriptPath,
                 $commandName,
                 $commandDefinition,
@@ -255,7 +255,7 @@ final class ChildCommandFactoryTest extends TestCase
             );
 
             return [
-                '/path/to/php -dmemory_limit=1',
+                ['/path/to/php', '-dmemory_limit=1'],
                 $scriptPath,
                 $commandName,
                 $commandDefinition,
@@ -279,7 +279,7 @@ final class ChildCommandFactoryTest extends TestCase
             );
 
             return [
-                '',
+                [],
                 $scriptPath,
                 '',
                 $commandDefinition,
@@ -300,7 +300,7 @@ final class ChildCommandFactoryTest extends TestCase
         $this->expectExceptionMessage('The script file could not be found at the path "path/to/unknown" (working directory: '.$cwd.')');
 
         new ChildCommandFactory(
-            __FILE__,
+            [__FILE__],
             'path/to/unknown',
             'import:something',
             new InputDefinition(),

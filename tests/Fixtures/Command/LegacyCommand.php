@@ -160,11 +160,14 @@ final class LegacyCommand extends Command
         return chr(200);
     }
 
-    private static function detectPhpExecutable(): string
+    private static function detectPhpExecutable(): array
     {
         self::$calls['static'][] = [__FUNCTION__, func_get_args()];
 
-        return PhpExecutableFinder::find().' -d memory_limit=-1';
+        return [
+            ...PhpExecutableFinder::find(),
+            '-d memory_limit=-1',
+        ];
     }
 
     private static function getWorkingDirectory(ContainerInterface $container): string

@@ -24,6 +24,7 @@ use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
+use function is_string;
 use function Safe\getcwd;
 use function str_starts_with;
 use const DIRECTORY_SEPARATOR;
@@ -46,6 +47,7 @@ final class ParallelExecutorFactory
      * @param Closure(InputInterface, OutputInterface):void               $runAfterLastCommand
      * @param Closure(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      * @param Closure(InputInterface, OutputInterface, list<string>):void $runAfterBatch
+     * @param list<string>                                                $phpExecutable
      * @param array<string, string>                                       $extraEnvironmentVariables
      * @param Closure(): void                                             $processTick
      */
@@ -64,7 +66,7 @@ final class ParallelExecutorFactory
         private Closure $runBeforeBatch,
         private Closure $runAfterBatch,
         private string $progressSymbol,
-        private string $phpExecutable,
+        private array $phpExecutable,
         private string $scriptPath,
         private string $workingDirectory,
         private ?array $extraEnvironmentVariables,
@@ -228,11 +230,17 @@ final class ParallelExecutorFactory
     /**
      * The path of the PHP executable. It is the executable that will be used
      * to spawn the child process(es).
+     *
+     * @param string|list<string> $phpExecutable
      */
-    public function withPhpExecutable(string $phpExecutable): self
+    public function withPhpExecutable(string|array $phpExecutable): self
     {
+        $normalizedExecutable = is_string($phpExecutable)
+            ? [$phpExecutable]
+            : $phpExecutable;
+
         $clone = clone $this;
-        $clone->phpExecutable = $phpExecutable;
+        $clone->phpExecutable = $normalizedExecutable;
 
         return $clone;
     }

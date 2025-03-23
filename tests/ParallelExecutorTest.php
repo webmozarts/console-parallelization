@@ -561,7 +561,7 @@ final class ParallelExecutorTest extends TestCase
             $noop,
             'ø',
             new ChildCommandFactory(
-                $phpExecutable,
+                [$phpExecutable],
                 $scriptPath,
                 $commandName,
                 $commandDefinition,
@@ -1188,7 +1188,7 @@ final class ParallelExecutorTest extends TestCase
             $runAfterBatch,
             $progressSymbol,
             new ChildCommandFactory(
-                __FILE__,
+                [__FILE__],
                 __FILE__,
                 '',
                 new InputDefinition(),
@@ -1237,7 +1237,7 @@ final class ParallelExecutorTest extends TestCase
             $runAfterBatch,
             $progressSymbol,
             new ChildCommandFactory(
-                __FILE__,
+                [__FILE__],
                 __FILE__,
                 'import:something',
                 new InputDefinition([

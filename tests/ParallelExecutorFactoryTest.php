@@ -97,7 +97,7 @@ final class ParallelExecutorFactoryTest extends TestCase
             $callable6,
             $progressSymbol,
             new ChildCommandFactory(
-                self::FILE_1,
+                [self::FILE_1],
                 self::FILE_2,
                 $commandName,
                 $definition,
