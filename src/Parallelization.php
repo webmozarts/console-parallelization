@@ -146,7 +146,9 @@ trait Parallelization
         // call `ParallelExecutorFactory::create(...func_get_args())`.
         //
         // Configuring the factory is recommended to be done in
-        // ::configureParallelExecutableFactory() instead.
+        // ::configureParallelExecutableFactory() instead which is
+        // simpler to override, unless you _really_ need one of the
+        // parameters passed to this method.
         return ParallelExecutorFactory::create(...func_get_args())
             ->withRunBeforeFirstCommand($this->runBeforeFirstCommand(...))
             ->withRunAfterLastCommand($this->runAfterLastCommand(...))
@@ -172,11 +174,11 @@ trait Parallelization
 
     protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler
     {
-        $errorHandler = new ThrowableCodeErrorHandler(
-            ResetServiceErrorHandler::forContainer($this->getContainer()),
+        return new LoggingErrorHandler(
+            new ThrowableCodeErrorHandler(
+                ResetServiceErrorHandler::forContainer($this->getContainer()),
+            ),
         );
-
-        return new LoggingErrorHandler($errorHandler);
     }
 
     protected function createLogger(InputInterface $input, OutputInterface $output): Logger
