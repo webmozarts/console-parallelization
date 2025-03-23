@@ -35,16 +35,23 @@ final class PhpExecutableFinder
         return false === $phpExecutable ? null : $phpExecutable;
     }
 
-    public static function find(): string
+    /**
+     * @return list<string>
+     */
+    public static function find(): array
     {
-        $phpExecutable = self::getFinder()->find();
+        $finder = self::getFinder();
+        $phpExecutable = $finder->find(false);
 
         Assert::notFalse(
             $phpExecutable,
             'Could not find the PHP executable.',
         );
 
-        return $phpExecutable;
+        return array_merge(
+            [$phpExecutable],
+            $finder->findArguments(),
+        );
     }
 
     private static function getFinder(): SymfonyPhpExecutableFinder
