@@ -24,6 +24,7 @@ use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
+use function explode;
 use function is_string;
 use function Safe\getcwd;
 use function str_starts_with;
@@ -236,7 +237,7 @@ final class ParallelExecutorFactory
     public function withPhpExecutable(string|array $phpExecutable): self
     {
         $normalizedExecutable = is_string($phpExecutable)
-            ? [$phpExecutable]
+            ? explode(' ', $phpExecutable)
             : $phpExecutable;
 
         $clone = clone $this;
