@@ -32,6 +32,7 @@ final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
      * @param callable(): void                                         $tick
      */
     public function create(
+        string $phpExecutable,
         array $command,
         string $workingDirectory,
         ?array $extraEnvironmentVariables,
@@ -42,6 +43,7 @@ final class SymfonyProcessLauncherFactory implements ProcessLauncherFactory
         callable $tick
     ): ProcessLauncher {
         return new SymfonyProcessLauncher(
+            $phpExecutable,
             $command,
             $workingDirectory,
             $extraEnvironmentVariables,

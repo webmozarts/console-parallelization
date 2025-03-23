@@ -43,14 +43,26 @@ class PhpProcessSettingsTest extends TestCase
     public function test_it_can_run_the_command_without_sub_processes(): void
     {
         $commandProcess = Process::fromShellCommandline(
-            'php -dmemory_limit=768 bin/console test:php-settings',
+            'php -dmemory_limit="256M" bin/console test:php-settings',
             __DIR__.'/../..',
         );
         $commandProcess->run();
 
-        $expected = '768';
-        $actual = file_get_contents(PhpSettingsCommand::OUTPUT_DIR);
+        $expectedMainProcessMemoryLimit = '256M';
+        $actualMainProcessMemoryLimit = file_get_contents(PhpSettingsCommand::OUTPUT_DIR.'_main_process');
 
-        self::assertSame($expected, $actual);
+        $expectedChildProcessMemoryLimit = '256M';
+        $actualChildProcessMemoryLimit = file_get_contents(PhpSettingsCommand::OUTPUT_DIR);
+
+        self::assertSame(
+            [
+                $expectedMainProcessMemoryLimit,
+                $expectedChildProcessMemoryLimit,
+            ],
+            [
+                $actualMainProcessMemoryLimit,
+                $actualChildProcessMemoryLimit,
+            ],
+        );
     }
 }

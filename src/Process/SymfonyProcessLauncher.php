@@ -60,6 +60,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
      * @param callable(): void           $tick
      */
     public function __construct(
+        private readonly string $phpExecutable,
         private readonly array $command,
         private readonly string $workingDirectory,
         private readonly ?array $environmentVariables,
@@ -135,6 +136,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         $process = $this->processFactory->startProcess(
             $index,
             $inputStream,
+            $this->phpExecutable,
             $this->command,
             $this->workingDirectory,
             $this->environmentVariables,

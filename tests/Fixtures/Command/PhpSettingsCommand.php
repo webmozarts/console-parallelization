@@ -24,6 +24,7 @@ use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Integration\TestDebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Integration\TestLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
+use Webmozarts\Console\Parallelization\Logger\NullLogger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
@@ -74,7 +75,16 @@ final class PhpSettingsCommand extends Command
             $commandDefinition,
             $errorHandler,
         )
+            ->withRunBeforeFirstCommand(self::runBeforeFirstCommand(...))
             ->withScriptPath(realpath(__DIR__.'/../../../bin/console'));
+    }
+
+    private function runBeforeFirstCommand(): void
+    {
+        $this->filesystem->dumpFile(
+            self::OUTPUT_DIR.'_main_process',
+            ini_get('memory_limit'),
+        );
     }
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
@@ -88,5 +98,10 @@ final class PhpSettingsCommand extends Command
     protected function getItemName(?int $count): string
     {
         return 1 === $count ? 'item' : 'items';
+    }
+
+    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
+    {
+        return new NullLogger();
     }
 }
