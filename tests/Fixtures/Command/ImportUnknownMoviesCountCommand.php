@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
+use Override;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -57,6 +58,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
         ];
     }
 
+    #[Override]
     protected function getParallelExecutableFactory(
         callable $fetchItems,
         callable $runSingleCommand,
@@ -70,6 +72,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
             ->withSegmentSize(2);
     }
 
+    #[Override]
     protected function configureParallelExecutableFactory(
         ParallelExecutorFactory $parallelExecutorFactory,
         InputInterface $input,
@@ -104,6 +107,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
         return 1 === $count ? 'movie' : 'movies';
     }
 
+    #[Override]
     protected function createLogger(
         InputInterface $input,
         OutputInterface $output

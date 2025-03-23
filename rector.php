@@ -25,7 +25,7 @@ return RectorConfig::configure()
     ->withImportNames(
         removeUnusedImports: true,
     )
-    ->withPhpSets(php81: true)
+    ->withPhpSets(php83: true)
     ->withAttributesSets(
         phpunit: true,
     )

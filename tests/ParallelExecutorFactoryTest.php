@@ -34,8 +34,8 @@ use function sys_get_temp_dir;
 final class ParallelExecutorFactoryTest extends TestCase
 {
     private const FILE_1 = __DIR__;
-    private const FILE_2 = __DIR__.'/Logger/FakeLogger.php';
-    private const FILE_3 = __DIR__.'/ErrorHandler/FakeErrorHandler.php';
+    private const string FILE_2 = __DIR__.'/Logger/FakeLogger.php';
+    private const string FILE_3 = __DIR__.'/ErrorHandler/FakeErrorHandler.php';
 
     public function test_it_can_create_a_configured_executor(): void
     {

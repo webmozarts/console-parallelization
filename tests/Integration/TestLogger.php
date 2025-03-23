@@ -23,7 +23,7 @@ use const PHP_EOL;
 
 final class TestLogger
 {
-    private const FILE_NAME = __DIR__.'/output';
+    private const string FILE_NAME = __DIR__.'/output';
 
     /**
      * @var resource

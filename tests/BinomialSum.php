@@ -17,7 +17,7 @@ namespace Webmozarts\Console\Parallelization;
 // See https://mathworld.wolfram.com/BinomialSums.html
 final class BinomialSum
 {
-    public const A000079 = [
+    public const array A000079 = [
         1,
         2,
         4,
