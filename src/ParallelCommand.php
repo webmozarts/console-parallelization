@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
+use Closure;
 use Symfony\Bundle\FrameworkBundle\Console\Application as FrameworkBundleApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputDefinition;
@@ -129,7 +130,14 @@ abstract class ParallelCommand extends Command
         // ::configureParallelExecutableFactory() instead which is
         // simpler to override, unless you _really_ need one of the
         // parameters passed to this method.
-        return ParallelExecutorFactory::create(...func_get_args());
+        return ParallelExecutorFactory::create(
+            Closure::fromCallable($fetchItems),
+            Closure::fromCallable($runSingleCommand),
+            Closure::fromCallable($getItemName),
+            $commandName,
+            $commandDefinition,
+            $errorHandler,
+        );
     }
 
     /**
