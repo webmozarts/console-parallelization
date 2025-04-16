@@ -21,7 +21,7 @@ return RectorConfig::configure()
         __DIR__.'/src',
         __DIR__.'/tests',
     ])
-    ->withSkipPath(__DIR__.'/tests/Integration/var')
+    ->withSkipPath(__DIR__.'/tests/Integration/App/var')
     ->withImportNames(
         removeUnusedImports: true,
     )
