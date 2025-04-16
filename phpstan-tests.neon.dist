@@ -4,7 +4,7 @@ parameters:
         - bin/set-composer-conflicts.php
         - tests
     excludePaths:
-        - tests/Integration/var
+        - tests/Integration/App/var
         - tests/Input/FakeInput.php
         - tests/Input/FakeInput74.php
         - tests/Input/FakeInput81.php

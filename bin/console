@@ -1,17 +1,20 @@
 #!/usr/bin/env php
 <?php
 
+/*
+ * This file is part of the Webmozarts Console Parallelization package.
+ *
+ * (c) Webmozarts GmbH <office@webmozarts.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 declare(strict_types=1);
 
 require __DIR__.'/../vendor/autoload.php';
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\DependencyInjection\Container;
-use Webmozarts\Console\Parallelization\Fixtures\Command\AbsoluteScriptPathCommand;
-use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
-use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
-use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
-use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use Webmozarts\Console\Parallelization\Integration\App\Kernel;
 use function Safe\ini_set;
 

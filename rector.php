@@ -35,5 +35,5 @@ return RectorConfig::configure()
             __DIR__.'/tests/Integration/OutputNormalizer.php',
         ],
 
-        __DIR__.'/tests/Integration/var',
+        __DIR__.'/tests/Integration/App/var',
     ]);
