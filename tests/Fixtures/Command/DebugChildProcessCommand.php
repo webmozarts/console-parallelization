@@ -16,6 +16,8 @@ namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozarts\Console\Parallelization\Logger\DummyLogger;
+use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use function file_put_contents;
@@ -26,9 +28,10 @@ final class DebugChildProcessCommand extends ParallelCommand
 {
     public const string OUTPUT_FILE = __DIR__.'/../../../dist/debug-child-input.txt';
 
-    private const OPT_VALUE = 'optValue';
+    private const string OPT_VALUE = 'optValue';
 
     private string $item = 'item';
+    private ?Logger $logger = null;
 
     public function __construct()
     {
@@ -63,6 +66,18 @@ final class DebugChildProcessCommand extends ParallelCommand
     ): ParallelExecutorFactory {
         return parent::configureParallelExecutableFactory(...func_get_args())
             ->withScriptPath(__DIR__.'/../../../bin/console');
+    }
+
+    public function setLogger(?Logger $logger): void
+    {
+        $this->logger = $logger;
+    }
+
+    protected function createLogger(
+        InputInterface $input,
+        OutputInterface $output,
+    ): Logger {
+        return $this->logger ?? parent::createLogger($input, $output);
     }
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void

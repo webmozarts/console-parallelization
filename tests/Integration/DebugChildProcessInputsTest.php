@@ -21,6 +21,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozarts\Console\Parallelization\Fixtures\Command\DebugChildProcessCommand;
 use Webmozarts\Console\Parallelization\Integration\App\BareKernel;
+use Webmozarts\Console\Parallelization\Logger\DummyLogger;
+use function array_column;
 use function file_get_contents;
 
 /**
@@ -49,7 +51,10 @@ class DebugChildProcessInputsTest extends TestCase
         ?string $option,
         string $expected,
     ): void {
+        $logger = new DummyLogger();
+
         $this->command->setItem($item);
+        $this->command->setLogger($logger);
 
         $this->commandTester->execute(
             [
@@ -59,6 +64,11 @@ class DebugChildProcessInputsTest extends TestCase
             ],
             ['interactive' => true],
         );
+
+        // TODO: for another test
+        $commandLine = array_column($logger->records, null, 0)['logChildProcessStarted'][1][2];
+
+        dump($commandLine);
 
         $output = $this->commandTester->getDisplay();
         $actual = file_get_contents(DebugChildProcessCommand::OUTPUT_FILE);
