@@ -23,7 +23,7 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
-use Webmozarts\Console\Parallelization\Integration\Kernel;
+use Webmozarts\Console\Parallelization\Integration\App\Kernel;
 use Webmozarts\Console\Parallelization\PHPUnitProviderUtil;
 use Webmozarts\Console\Parallelization\SymfonyVersion;
 

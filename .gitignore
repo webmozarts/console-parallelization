@@ -8,6 +8,6 @@
 /dist/
 /phpunit.xml
 /tests/Integration/output
-/tests/Integration/var/
+/tests/Integration/App/var/
 /vendor-bin/*/vendor/
 /vendor/

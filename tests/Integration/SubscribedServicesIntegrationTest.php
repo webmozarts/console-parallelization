@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Webmozarts\Console\Parallelization\Integration\App\Kernel;
 
 /**
  * @internal
