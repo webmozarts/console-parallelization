@@ -12,7 +12,7 @@ use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
-use Webmozarts\Console\Parallelization\Integration\Kernel;
+use Webmozarts\Console\Parallelization\Integration\App\Kernel;
 use function Safe\ini_set;
 
 error_reporting(E_ALL);

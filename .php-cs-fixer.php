@@ -20,7 +20,7 @@ $finder = Finder::create()
     ])
     ->exclude([
         'dist',
-        'tests/Integration/var',
+        'tests/Integration/App/var',
     ]);
 
 $config = new FidryConfig(

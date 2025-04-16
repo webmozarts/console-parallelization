@@ -21,6 +21,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
+use Webmozarts\Console\Parallelization\Integration\App\BareKernel;
 use function preg_replace;
 use function str_replace;
 
