@@ -46,7 +46,7 @@ final class InputOptionsSerializer
     public static function serialize(
         InputDefinition $commandDefinition,
         InputInterface $input,
-        array $excludedOptionNames
+        array $excludedOptionNames,
     ): array {
         $filteredOptions = array_diff_key(
             RawInput::getRawOptions($input),
@@ -78,36 +78,32 @@ final class InputOptionsSerializer
         string $name,
         array|bool|float|int|string|null $value,
     ): string|array {
-        if ($option->isNegatable()) {
-            return sprintf(
-                '--%s%s',
-                $value ? '' : 'no-',
-                $name,
-            );
-        }
-
-        if (!$option->acceptValue()) {
-            return sprintf(
-                '--%s',
-                $name,
-            );
-        }
-
-        if ($option->isArray()) {
-            /** @var array<string|bool|int|float|null> $value */
-            return array_map(
+        return match (true) {
+            $option->isNegatable() => sprintf('--%s%s', $value ? '' : 'no-', $name),
+            !$option->acceptValue() => sprintf('--%s', $name),
+            self::isArray($option, $value) => array_map(
                 static fn ($item) => self::serializeOptionWithValue($name, $item),
                 $value,
-            );
-        }
+            ),
+            default => self::serializeOptionWithValue($name, $value),
+        };
+    }
 
-        /** @var string|bool|int|float|null $value */
-        return self::serializeOptionWithValue($name, $value);
+    /**
+     * @param string|bool|int|float|null|array<string|bool|int|float|null> $value
+     *
+     * @phpstan-assert-if-true array<string|bool|int|float|null> $value
+     */
+    private static function isArray(
+        InputOption $option,
+        array|bool|float|int|string|null $value,
+    ): bool {
+        return $option->isArray();
     }
 
     private static function serializeOptionWithValue(
         string $name,
-        bool|float|int|string|null $value
+        bool|float|int|string|null $value,
     ): string {
         return sprintf(
             '--%s=%s',
