@@ -74,17 +74,16 @@ class DebugChildProcessInputsTest extends TestCase
 
     public static function inputProvider(): iterable
     {
-        // This test fails...
-        // yield 'default' => [
-        //     'item',
-        //     null,
-        //     [],
-        //     DebugChildProcessCommand::createContent(
-        //         'item',
-        //         '',
-        //         [],
-        //     ),
-        // ];
+        yield 'default' => [
+            'item',
+            null,
+            [],
+            DebugChildProcessCommand::createContent(
+                'item',
+                '',
+                [],
+            ),
+        ];
 
         yield 'with values' => [
             'item',
@@ -93,7 +92,7 @@ class DebugChildProcessInputsTest extends TestCase
             DebugChildProcessCommand::createContent(
                 'item',
                 'option',
-                ['option1--array-option=option2'],
+                ['option1', 'option2'],
             ),
         ];
 
@@ -104,7 +103,7 @@ class DebugChildProcessInputsTest extends TestCase
             DebugChildProcessCommand::createContent(
                 '"foo"',
                 '"\"bar\""',
-                ['"\"option1\""--array-option="\"option2\""'],
+                ['"\"option1\""', '"\"option2\""'],
             ),
         ];
 
@@ -115,7 +114,7 @@ class DebugChildProcessInputsTest extends TestCase
             DebugChildProcessCommand::createContent(
                 '"o_id in(\'20\')"',
                 '"\"p_id in(\'22\')\""',
-                ['"\"option in(\'1\')\""--array-option="\"option in(\'2\')\""'],
+                ['"\"option in(\'1\')\""', '"\"option in(\'2\')\""'],
             ),
         ];
 
@@ -126,7 +125,7 @@ class DebugChildProcessInputsTest extends TestCase
             DebugChildProcessCommand::createContent(
                 'a b c d',
                 '"d c b a"',
-                ['"option 1"--array-option="option 2"'],
+                ['"option 1"', '"option 2"'],
             ),
         ];
     }

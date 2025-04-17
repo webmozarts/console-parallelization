@@ -20,7 +20,8 @@ use function array_diff_key;
 use function array_fill_keys;
 use function array_keys;
 use function array_map;
-use function implode;
+use function array_merge;
+use function is_array;
 use function is_string;
 use function preg_match;
 use function sprintf;
@@ -52,24 +53,31 @@ final class InputOptionsSerializer
             array_fill_keys($excludedOptionNames, ''),
         );
 
-        return array_map(
-            static fn (string $name) => self::serializeOption(
+        $serializedOptionsList = [];
+
+        foreach (array_keys($filteredOptions) as $name) {
+            $serializedOption = self::serializeOption(
                 $commandDefinition->getOption($name),
                 $name,
                 $filteredOptions[$name],
-            ),
-            array_keys($filteredOptions),
-        );
+            );
+
+            $serializedOptionsList[] = is_array($serializedOption) ? $serializedOption : [$serializedOption];
+        }
+
+        return array_merge(...$serializedOptionsList);
     }
 
     /**
      * @param string|bool|int|float|null|array<string|bool|int|float|null> $value
+     *
+     * @return string|list<string>
      */
     private static function serializeOption(
         InputOption $option,
         string $name,
         array|bool|float|int|string|null $value,
-    ): string {
+    ): string|array {
         if ($option->isNegatable()) {
             return sprintf(
                 '--%s%s',
@@ -87,12 +95,9 @@ final class InputOptionsSerializer
 
         if ($option->isArray()) {
             /** @var array<string|bool|int|float|null> $value */
-            return implode(
-                '',
-                array_map(
-                    static fn ($item) => self::serializeOptionWithValue($name, $item),
-                    $value,
-                ),
+            return array_map(
+                static fn ($item) => self::serializeOptionWithValue($name, $item),
+                $value,
             );
         }
 

@@ -255,7 +255,7 @@ final class InputOptionsSerializerTest extends TestCase
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
             ),
             ['--opt' => ['v1', 'v2', 'v3']],
-            ['--opt=v1--opt=v2--opt=v3'],
+            ['--opt=v1', '--opt=v2', '--opt=v3'],
         );
 
         if (!$isSymfony4) {
