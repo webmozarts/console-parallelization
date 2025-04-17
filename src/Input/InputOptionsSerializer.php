@@ -21,7 +21,8 @@ use function array_fill_keys;
 use function array_keys;
 use function array_map;
 use function array_merge;
-use function implode;
+use function array_merge;
+use function is_array;
 use function is_array;
 use function is_string;
 use function preg_match;
@@ -52,19 +53,19 @@ final class InputOptionsSerializer
             array_fill_keys($excludedOptionNames, ''),
         );
 
-        $serializedOptions = [];
+        $serializedOptionsList = [];
 
-        foreach (array_keys($filteredOptions) as $optionName) {
+        foreach (array_keys($filteredOptions) as $name) {
             $serializedOption = self::serializeOption(
-                $commandDefinition->getOption($optionName),
-                $optionName,
-                $filteredOptions[$optionName],
+                $commandDefinition->getOption($name),
+                $name,
+                $filteredOptions[$name],
             );
 
-            $serializedOptions[] = is_array($serializedOption) ? $serializedOption : [$serializedOption];
+            $serializedOptionsList[] = is_array($serializedOption) ? $serializedOption : [$serializedOption];
         }
 
-        return array_merge(...$serializedOptions);
+        return array_merge(...$serializedOptionsList);
     }
 
     /**
