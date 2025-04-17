@@ -22,13 +22,15 @@ use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use function file_put_contents;
 use function func_get_args;
+use function implode;
 use const LOCK_EX;
 
 final class DebugChildProcessCommand extends ParallelCommand
 {
     public const string OUTPUT_FILE = __DIR__.'/../../../dist/debug-child-input.txt';
 
-    private const string OPT_VALUE = 'optValue';
+    private const string SIMPLE_OPTION = 'simple-option';
+    private const string ARRAY_OPTION = 'array-option';
 
     private string $item = 'item';
     private ?Logger $logger = null;
@@ -44,9 +46,14 @@ final class DebugChildProcessCommand extends ParallelCommand
         parent::configure();
 
         $this->addOption(
-            self::OPT_VALUE,
+            self::SIMPLE_OPTION,
             null,
             InputOption::VALUE_OPTIONAL,
+        );
+        $this->addOption(
+            self::ARRAY_OPTION,
+            null,
+            InputOption::VALUE_OPTIONAL + InputOption::VALUE_IS_ARRAY,
         );
     }
 
@@ -89,7 +96,8 @@ final class DebugChildProcessCommand extends ParallelCommand
             self::OUTPUT_FILE,
             self::createContent(
                 $item,
-                $input->getOption(self::OPT_VALUE),
+                $input->getOption(self::SIMPLE_OPTION),
+                $input->getOption(self::ARRAY_OPTION),
             ),
             flags: LOCK_EX,
         );
@@ -102,11 +110,23 @@ final class DebugChildProcessCommand extends ParallelCommand
 
     public static function createContent(
         string $item,
-        ?string $option,
+        ?string $simpleOption,
+        array $arrayOption,
     ): string {
+        $normalizedArrayOption = implode(
+            "\n",
+            array_map(
+                static fn (string $option): string => "  - {$option}",
+                $arrayOption,
+            ),
+        );
+
         return <<<EOF
             Item: {$item}
-            Option: {$option}
+            Simple Option: {$simpleOption}
+            Array Option:
+            {$normalizedArrayOption}
+
             EOF;
     }
 }

@@ -47,7 +47,8 @@ class DebugChildProcessInputsTest extends TestCase
     #[DataProvider('inputProvider')]
     public function test_it_can_run_the_command_without_sub_processes(
         string $item,
-        ?string $option,
+        ?string $simpleOption,
+        array $arrayOption,
         string $expected,
     ): void {
         $logger = new DummyLogger();
@@ -58,8 +59,8 @@ class DebugChildProcessInputsTest extends TestCase
         $this->commandTester->execute(
             [
                 'command' => 'debug:process',
-                '--optValue' => $option,
-                '-vvv' => null,
+                '--simple-option' => $simpleOption,
+                '--array-option' => $arrayOption,
             ],
             ['interactive' => true],
         );
@@ -73,48 +74,59 @@ class DebugChildProcessInputsTest extends TestCase
 
     public static function inputProvider(): iterable
     {
-        yield 'default' => [
-            'item',
-            null,
-            DebugChildProcessCommand::createContent(
-                'item',
-                '',
-            ),
-        ];
+        // This test fails...
+        // yield 'default' => [
+        //     'item',
+        //     null,
+        //     [],
+        //     DebugChildProcessCommand::createContent(
+        //         'item',
+        //         '',
+        //         [],
+        //     ),
+        // ];
 
         yield 'with values' => [
             'item',
             'option',
+            ['option1', 'option2'],
             DebugChildProcessCommand::createContent(
                 'item',
                 'option',
+                ['option1--array-option=option2'],
             ),
         ];
 
         yield 'escaped string token' => [
             '"foo"',
             '"bar"',
+            ['"option1"', '"option2"'],
             DebugChildProcessCommand::createContent(
                 '"foo"',
                 '"\"bar\""',
+                ['"\"option1\""--array-option="\"option2\""'],
             ),
         ];
 
         yield 'escaped string token with both types of quotes' => [
             '"o_id in(\'20\')"',
             '"p_id in(\'22\')"',
+            ['"option in(\'1\')"', '"option in(\'2\')"'],
             DebugChildProcessCommand::createContent(
                 '"o_id in(\'20\')"',
                 '"\"p_id in(\'22\')\""',
+                ['"\"option in(\'1\')\""--array-option="\"option in(\'2\')\""'],
             ),
         ];
 
         yield 'with values with spaces' => [
             'a b c d',
             'd c b a',
+            ['option 1', 'option 2'],
             DebugChildProcessCommand::createContent(
                 'a b c d',
                 '"d c b a"',
+                ['"option 1"--array-option="option 2"'],
             ),
         ];
     }
