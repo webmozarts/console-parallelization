@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Fixtures\Command;
 
+use Override;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,6 +38,7 @@ final class DebugChildProcessCommand extends ParallelCommand
         parent::__construct('debug:process');
     }
 
+    #[Override]
     protected function configure(): void
     {
         parent::configure();
@@ -58,6 +60,7 @@ final class DebugChildProcessCommand extends ParallelCommand
         return [$this->item];
     }
 
+    #[Override]
     protected function configureParallelExecutableFactory(
         ParallelExecutorFactory $parallelExecutorFactory,
         InputInterface $input,
@@ -72,6 +75,7 @@ final class DebugChildProcessCommand extends ParallelCommand
         $this->logger = $logger;
     }
 
+    #[Override]
     protected function createLogger(
         InputInterface $input,
         OutputInterface $output,
