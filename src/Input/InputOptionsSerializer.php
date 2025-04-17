@@ -21,13 +21,8 @@ use function array_fill_keys;
 use function array_keys;
 use function array_map;
 use function array_merge;
-use function array_merge;
 use function is_array;
-use function is_array;
-use function is_string;
-use function preg_match;
 use function sprintf;
-use function str_replace;
 
 /**
  * @internal
@@ -81,7 +76,7 @@ final class InputOptionsSerializer
         return match (true) {
             $option->isNegatable() => sprintf('--%s%s', $value ? '' : 'no-', $name),
             !$option->acceptValue() => sprintf('--%s', $name),
-            self::isArray($option, $value) => array_map(fn ($item) => self::serializeOptionWithValue($name, $item), $value),
+            self::isArray($option, $value) => array_map(static fn ($item) => self::serializeOptionWithValue($name, $item), $value),
             default => self::serializeOptionWithValue($name, $value),
         };
     }
