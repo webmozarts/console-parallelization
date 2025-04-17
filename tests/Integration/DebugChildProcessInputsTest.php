@@ -49,12 +49,18 @@ class DebugChildProcessInputsTest extends TestCase
         string $item,
         ?string $simpleOption,
         array $arrayOption,
-        string $expected,
+        ?string $expected = null,
     ): void {
         $logger = new DummyLogger();
 
         $this->command->setItem($item);
         $this->command->setLogger($logger);
+
+        $expected ??= DebugChildProcessCommand::createContent(
+            $item,
+            $simpleOption,
+            $arrayOption,
+        );
 
         $this->commandTester->execute(
             [
@@ -78,55 +84,30 @@ class DebugChildProcessInputsTest extends TestCase
             'item',
             null,
             [],
-            DebugChildProcessCommand::createContent(
-                'item',
-                '',
-                [],
-            ),
         ];
 
         yield 'with values' => [
             'item',
             'option',
             ['option1', 'option2'],
-            DebugChildProcessCommand::createContent(
-                'item',
-                'option',
-                ['option1', 'option2'],
-            ),
         ];
 
         yield 'escaped string token' => [
             '"foo"',
             '"bar"',
             ['"option1"', '"option2"'],
-            DebugChildProcessCommand::createContent(
-                '"foo"',
-                '"\"bar\""',
-                ['"\"option1\""', '"\"option2\""'],
-            ),
         ];
 
         yield 'escaped string token with both types of quotes' => [
             '"o_id in(\'20\')"',
             '"p_id in(\'22\')"',
             ['"option in(\'1\')"', '"option in(\'2\')"'],
-            DebugChildProcessCommand::createContent(
-                '"o_id in(\'20\')"',
-                '"\"p_id in(\'22\')\""',
-                ['"\"option in(\'1\')\""', '"\"option in(\'2\')\""'],
-            ),
         ];
 
         yield 'with values with spaces' => [
             'a b c d',
             'd c b a',
             ['option 1', 'option 2'],
-            DebugChildProcessCommand::createContent(
-                'a b c d',
-                '"d c b a"',
-                ['"option 1"', '"option 2"'],
-            ),
         ];
     }
 }

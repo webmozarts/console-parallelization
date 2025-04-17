@@ -255,7 +255,11 @@ final class InputOptionsSerializerTest extends TestCase
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
             ),
             ['--opt' => ['v1', 'v2', 'v3']],
-            ['--opt=v1', '--opt=v2', '--opt=v3'],
+            [
+                '--opt=v1',
+                '--opt=v2',
+                '--opt=v3',
+            ],
         );
 
         if (!$isSymfony4) {
@@ -315,22 +319,22 @@ final class InputOptionsSerializerTest extends TestCase
 
         yield $createSet(
             '"foo"',
-            '"\"foo\""',
+            '"foo"',
         );
 
         yield $createSet(
             '"o_id in(\'20\')"',
-            '"\"o_id in(\'20\')\""',
+            '"o_id in(\'20\')"',
         );
 
         yield $createSet(
             'a b c d',
-            '"a b c d"',
+            'a b c d',
         );
 
         yield $createSet(
             "A\nB'C",
-            "\"A\nB'C\"",
+            "A\nB'C",
         );
     }
 

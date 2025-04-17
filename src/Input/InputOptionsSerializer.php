@@ -22,18 +22,13 @@ use function array_keys;
 use function array_map;
 use function array_merge;
 use function is_array;
-use function is_string;
-use function preg_match;
 use function sprintf;
-use function str_replace;
 
 /**
  * @internal
  */
 final class InputOptionsSerializer
 {
-    private const string ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
-
     private function __construct()
     {
     }
@@ -81,10 +76,7 @@ final class InputOptionsSerializer
         return match (true) {
             $option->isNegatable() => sprintf('--%s%s', $value ? '' : 'no-', $name),
             !$option->acceptValue() => sprintf('--%s', $name),
-            self::isArray($option, $value) => array_map(
-                static fn ($item) => self::serializeOptionWithValue($name, $item),
-                $value,
-            ),
+            self::isArray($option, $value) => array_map(static fn ($item) => self::serializeOptionWithValue($name, $item), $value),
             default => self::serializeOptionWithValue($name, $value),
         };
     }
@@ -105,34 +97,6 @@ final class InputOptionsSerializer
         string $name,
         bool|float|int|string|null $value,
     ): string {
-        return sprintf(
-            '--%s=%s',
-            $name,
-            self::quoteOptionValue($value),
-        );
-    }
-
-    /**
-     * Ensure that an option value is quoted correctly before it is passed to a
-     * child process.
-     */
-    private static function quoteOptionValue(bool|float|int|string|null $value): bool|float|int|string|null
-    {
-        if (self::isValueRequiresQuoting($value)) {
-            return sprintf(
-                '"%s"',
-                str_replace('"', '\"', (string) $value),
-            );
-        }
-
-        return $value;
-    }
-
-    /**
-     * Validate whether a command option requires quoting.
-     */
-    private static function isValueRequiresQuoting(mixed $value): bool
-    {
-        return is_string($value) && 0 < preg_match(self::ESCAPE_TOKEN_PATTERN, $value);
+        return sprintf('--%s=%s', $name, $value);
     }
 }
