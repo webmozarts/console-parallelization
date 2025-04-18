@@ -16,6 +16,7 @@ namespace Webmozarts\Console\Parallelization;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
@@ -111,8 +112,11 @@ final class ParallelExecutorFactoryTest extends TestCase
         self::assertEquals($expected, $executor);
     }
 
-    public function test_it_escapes_the_php_executable_when_necessary(): void
-    {
+    #[DataProvider('phpExecutableProvider')]
+    public function test_it_escapes_the_php_executable_when_necessary(
+        string|array $phpExecutable,
+        array $expected,
+    ): void {
         $commandName = 'import:items';
         $definition = new InputDefinition();
         $errorHandler = new FakeErrorHandler();
@@ -121,7 +125,7 @@ final class ParallelExecutorFactoryTest extends TestCase
         $callable1 = self::createCallable(1);
         $callable2 = self::createCallable(2);
 
-        $executorWithStringPhpExecutable = ParallelExecutorFactory::create(
+        $factory = ParallelExecutorFactory::create(
             $callable0,
             $callable1,
             $callable2,
@@ -129,24 +133,52 @@ final class ParallelExecutorFactoryTest extends TestCase
             $definition,
             $errorHandler,
         )
-            ->withPhpExecutable('/path/to/php -dmemory_limit=128M')
-            ->build();
+            ->withPhpExecutable($phpExecutable);
 
-        $executorWithArrayPhpExecutable = ParallelExecutorFactory::create(
-            $callable0,
-            $callable1,
-            $callable2,
-            $commandName,
-            $definition,
-            $errorHandler,
-        )
-            ->withPhpExecutable([
-                '/path/to/php',
-                '-dmemory_limit=128M',
-            ])
-            ->build();
+        $phpExecutableReflection = (new ReflectionClass($factory::class))->getProperty('phpExecutable');
+        $phpExecutableReflection->setAccessible(true);
 
-        self::assertEquals($executorWithArrayPhpExecutable, $executorWithStringPhpExecutable);
+        $actual = $phpExecutableReflection->getValue($factory);
+
+        self::assertSame($expected, $actual);
+    }
+
+    public static function phpExecutableProvider(): iterable
+    {
+        yield 'simple path' => [
+            '/path/to/php',
+            ['/path/to/php'],
+        ];
+
+        yield 'path with space' => [
+            '/path/to/my php',
+            ['/path/to/my php'],
+        ];
+
+        yield 'path with space (array)' => [
+            ['/path/to/my php'],
+            ['/path/to/my php'],
+        ];
+
+        yield 'path with php setting (incorrect)' => [
+            '/path/to/php -dmemory_limit=128M',
+            ['/path/to/php -dmemory_limit=128M'],
+        ];
+
+        yield 'path with php setting (array)' => [
+            ['/path/to/php', '-dmemory_limit=128M'],
+            ['/path/to/php', '-dmemory_limit=128M'],
+        ];
+
+        yield 'path with space and with php setting (incorrect)' => [
+            '/path/to/my php -dmemory_limit=128M',
+            ['/path/to/my php -dmemory_limit=128M'],
+        ];
+
+        yield 'path with space and with php setting (array)' => [
+            ['/path/to/my php', '-dmemory_limit=128M'],
+            ['/path/to/my php', '-dmemory_limit=128M'],
+        ];
     }
 
     public function test_it_sets_the_batch_size_to_the_segment_size_by_default(): void
@@ -234,7 +266,7 @@ final class ParallelExecutorFactoryTest extends TestCase
         string $expectedSymbol,
         string $expectedPhpExecutable,
         string $expectedScriptPath,
-        string $expectedWorkingDirectory
+        string $expectedWorkingDirectory,
     ): void {
         $cleanUpWorkingDirectory = self::moveToWorkingDirectory($workingDirectory);
         $cleanUpEnvironmentVariables = EnvironmentVariables::setVariables($environmentVariables);
