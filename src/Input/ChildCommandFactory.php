@@ -16,8 +16,11 @@ namespace Webmozarts\Console\Parallelization\Input;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Webmozart\Assert\Assert;
+use function array_diff;
 use function array_filter;
+use function array_keys;
 use function array_map;
+use function count;
 use function Safe\getcwd;
 use function sprintf;
 
@@ -69,11 +72,14 @@ final readonly class ChildCommandFactory
         // Forward all the options except for "processes" to the children
         // this way the children can inherit the options such as env
         // or no-debug.
-        return InputOptionsSerializer::serialize(
-            $this->commandDefinition,
-            $input,
+        $forwardedOptionNames = array_diff(
+            array_keys($input->getRawOptions()),
             ParallelizationInput::OPTIONS,
         );
+
+        return count($forwardedOptionNames) === 0
+            ? []
+            : $input->unparse($forwardedOptionNames);
     }
 
     /**
@@ -81,7 +87,7 @@ final readonly class ChildCommandFactory
      */
     private static function getArguments(InputInterface $input): array
     {
-        $arguments = RawInput::getRawArguments($input);
+        $arguments = $input->getRawArguments();
 
         // Remove the item: we do not want it to be passed to child processes
         // ever.
