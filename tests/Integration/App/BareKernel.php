@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Webmozarts\Console\Parallelization\Integration;
+namespace Webmozarts\Console\Parallelization\Integration\App;
 
 use Override;
 use Symfony\Component\Config\Loader\LoaderInterface;

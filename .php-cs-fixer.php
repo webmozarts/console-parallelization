@@ -13,14 +13,11 @@ use Fidry\PhpCsFixerConfig\FidryConfig;
 use PhpCsFixer\Finder;
 
 $finder = Finder::create()
+    ->files()
     ->in(__DIR__)
-    ->append([
-        '.github/fix-symfony-versions',
-        'set-composer-conflicts.php',
-    ])
     ->exclude([
         'dist',
-        'tests/Integration/var',
+        'tests/Integration/App/var',
     ]);
 
 $config = new FidryConfig(

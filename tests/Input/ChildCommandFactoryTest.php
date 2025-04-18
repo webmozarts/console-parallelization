@@ -270,6 +270,31 @@ final class ChildCommandFactoryTest extends TestCase
             ];
         })();
 
+        yield 'enriched PHP executable with space (array case)' => (static function () use (
+            $scriptPath,
+            $commandName
+        ) {
+            [$input, $commandDefinition] = self::createInput(
+                [],
+                [],
+            );
+
+            return [
+                ['/path/to/my php', '-dmemory_limit=1'],
+                $scriptPath,
+                $commandName,
+                $commandDefinition,
+                $input,
+                [
+                    '/path/to/my php',
+                    '-dmemory_limit=1',
+                    $scriptPath,
+                    $commandName,
+                    '--child',
+                ],
+            ];
+        })();
+
         yield 'no PHP executable or command' => (static function () use (
             $scriptPath
         ) {

@@ -4,7 +4,7 @@ parameters:
         - bin/set-composer-conflicts.php
         - tests
     excludePaths:
-        - tests/Integration/var
+        - tests/Integration/App/var
         - tests/Input/FakeInput.php
         - tests/Input/FakeSymfony6Input.php
         - tests/Process/DummyProcess.php
@@ -18,6 +18,8 @@ parameters:
           message: '#ParallelizationIntegrationTest::\$importUnknownMoviesCountCommand#'
         - path: tests/Integration/ParallelizationIntegrationTest.php
           message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
+        - path: tests/Integration/DebugChildProcessInputsTest.php
+          message: '#DebugChildProcessInputsTest::\$command#'
 
         - path: tests/ChunkedItemsIteratorTest.php
           message: '#Parameter \#2 \$fetchItems of static method .+ChunkedItemsIterator::fromItemOrCallable\(\) expects callable\(\)#'

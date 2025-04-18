@@ -25,7 +25,6 @@ use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
-use function explode;
 use function is_string;
 use function Safe\getcwd;
 use function str_starts_with;
@@ -233,16 +232,12 @@ final class ParallelExecutorFactory
      * The path of the PHP executable. It is the executable that will be used
      * to spawn the child process(es).
      *
-     * @param string|list<string> $phpExecutable
+     * @param string|list<string> $phpExecutable e.g. ['/path/to/php', '-dmemory_limit=512M']
      */
     public function withPhpExecutable(string|array $phpExecutable): self
     {
-        $normalizedExecutable = is_string($phpExecutable)
-            ? explode(' ', $phpExecutable)
-            : $phpExecutable;
-
         $clone = clone $this;
-        $clone->phpExecutable = $normalizedExecutable;
+        $clone->phpExecutable = is_string($phpExecutable) ? [$phpExecutable] : $phpExecutable;
 
         return $clone;
     }
