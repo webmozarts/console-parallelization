@@ -19,23 +19,58 @@ use function array_key_exists;
 use function count;
 
 /**
+ * The goal of this iterator is to make a non-rewindable iterable rewindable. This
+ * is achieved by caching the values as the source iterator is iterated over.
+ *
+ * The values of the source iterator are not all loaded at once for being more performance
+ * friendly.
+ *
+ * Note that as a side effect, the keys of the source iterator are not preserved.
+ *
  * @internal
+ *
+ * @template TValue
+ * @template-implements Iterator<int, TValue>
  */
 final class LazyRewindableIterator implements Iterator
 {
-    private iterable $source;
+    /**
+     * @var list<TValue>
+     */
     private array $cache = [];
-    private int $position = 0;
-    private bool $sourceExhausted = false;
-    private ?Generator $generator = null;
 
-    public function __construct(iterable $source)
+    /**
+     * @var positive-int|0
+     */
+    private int $position = 0;
+
+    private bool $sourceExhausted = false;
+
+    /**
+     * @param Generator<mixed, TValue> $source
+     */
+    private function __construct(private readonly Generator $source)
     {
-        $this->source = $source;
-        $this->generator = $this->getGenerator($source);
     }
 
-    private function getGenerator(iterable $iterable): Generator
+    /**
+     * @param iterable<mixed, TValue> $source
+     *
+     * @return LazyRewindableIterator<TValue>
+     */
+    public static function create(iterable $source): self
+    {
+        return new self(
+            self::createGenerator($source),
+        );
+    }
+
+    /**
+     * @param iterable<mixed, TValue> $iterable
+     *
+     * @return Generator<mixed, TValue>
+     */
+    private static function createGenerator(iterable $iterable): Generator
     {
         yield from $iterable;
     }
@@ -45,9 +80,12 @@ final class LazyRewindableIterator implements Iterator
         $this->position = 0;
     }
 
+    /**
+     * @return TValue|null
+     */
     public function current(): mixed
     {
-        $this->fetchUntil($this->position);
+        $this->fetchUntilPositionReached($this->position);
 
         return $this->cache[$this->position] ?? null;
     }
@@ -64,25 +102,25 @@ final class LazyRewindableIterator implements Iterator
 
     public function valid(): bool
     {
-        $this->fetchUntil($this->position);
+        $this->fetchUntilPositionReached($this->position);
 
         return array_key_exists($this->position, $this->cache);
     }
 
-    private function fetchUntil(int $index): void
+    private function fetchUntilPositionReached(int $index): void
     {
         if ($this->sourceExhausted) {
             return;
         }
 
         while (count($this->cache) <= $index) {
-            if (!$this->generator->valid()) {
+            if (!$this->source->valid()) {
                 $this->sourceExhausted = true;
                 break;
             }
 
-            $this->cache[] = $this->generator->current();
-            $this->generator->next();
+            $this->cache[] = $this->source->current();
+            $this->source->next();
         }
     }
 }

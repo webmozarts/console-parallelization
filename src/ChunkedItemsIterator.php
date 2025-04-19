@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Iterator;
+use Stringable;
 use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_keys;
@@ -22,8 +23,8 @@ use function array_values;
 use function count;
 use function explode;
 use function is_array;
+use function is_int;
 use function is_numeric;
-use function iter\makeRewindable;
 use function iter\mapWithKeys;
 use function iter\rewindable\chunk;
 use function iter\values;
@@ -36,9 +37,9 @@ use const PHP_EOL;
 final readonly class ChunkedItemsIterator
 {
     /**
-     * @var list<string>|Iterator<int, list<string>>
+     * @var list<string>|LazyRewindableIterator<string>
      */
-    private array|Iterator $items;
+    private array|LazyRewindableIterator $items;
 
     /**
      * @var Iterator<int, list<string>>
@@ -53,7 +54,7 @@ final readonly class ChunkedItemsIterator
     /**
      * @internal Use the static factory methods instead.
      *
-     * @param list<string>|Iterator<string> $items
+     * @param list<string>|iterable<string> $items
      * @param positive-int                  $batchSize
      */
     public function __construct(
@@ -64,22 +65,12 @@ final readonly class ChunkedItemsIterator
             $this->items = array_values($items);
             $this->numberOfItems = count($items);
         } else {
-            $this->items = self::rewindableValues($items);
+            // @phpstan-ignore-next-line assign.propertyType
+            $this->items = LazyRewindableIterator::create($items);
             $this->numberOfItems = null;
         }
 
         $this->itemsChunks = chunk($this->items, $batchSize);
-    }
-
-    private static function rewindableValues(iterable $items): Iterator
-    {
-        return makeRewindable(
-            static function () use ($items) {
-                foreach ($items as $item) {
-                    yield $item;
-                }
-            }
-        )();
     }
 
     /**
@@ -102,8 +93,8 @@ final readonly class ChunkedItemsIterator
     }
 
     /**
-     * @param callable():iterable<string> $fetchItems
-     * @param positive-int                $batchSize
+     * @param callable():iterable<mixed, string> $fetchItems
+     * @param positive-int                       $batchSize
      */
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
@@ -121,10 +112,11 @@ final readonly class ChunkedItemsIterator
     }
 
     /**
-     * @return list<string>|Iterator<string>
+     * @return list<string>|LazyRewindableIterator<string>
      */
-    public function getItems(): array|Iterator
+    public function getItems(): array|LazyRewindableIterator
     {
+        // @phpstan-ignore-next-line return.type
         return $this->items;
     }
 
@@ -158,7 +150,7 @@ final readonly class ChunkedItemsIterator
     }
 
     /**
-     * @return Iterator<string>
+     * @return Iterator<int, string>
      */
     private static function normalizeItemStream(mixed $items): Iterator
     {
@@ -170,6 +162,7 @@ final readonly class ChunkedItemsIterator
             ),
         );
 
+        /** @phpstan-ignore-next-line return.typ */
         return values(
             mapWithKeys(
                 static fn ($item, $index) => self::normalizeItem($item, $index),
@@ -182,6 +175,10 @@ final readonly class ChunkedItemsIterator
     {
         if (is_numeric($item)) {
             return (string) $item;
+        }
+
+        if (!is_int($index) && !is_string($index) && !($index instanceof Stringable)) {
+            $index = '<NonStringableKey>';
         }
 
         Assert::string(
