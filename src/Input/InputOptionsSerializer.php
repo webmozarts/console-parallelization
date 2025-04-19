@@ -21,7 +21,6 @@ use function array_fill_keys;
 use function array_keys;
 use function array_map;
 use function array_merge;
-use function is_array;
 use function sprintf;
 
 /**
@@ -51,13 +50,11 @@ final class InputOptionsSerializer
         $serializedOptionsList = [];
 
         foreach (array_keys($filteredOptions) as $name) {
-            $serializedOption = self::serializeOption(
+            $serializedOptionsList[] = self::serializeOption(
                 $commandDefinition->getOption($name),
                 $name,
                 $filteredOptions[$name],
             );
-
-            $serializedOptionsList[] = is_array($serializedOption) ? $serializedOption : [$serializedOption];
         }
 
         return array_merge(...$serializedOptionsList);
@@ -66,31 +63,23 @@ final class InputOptionsSerializer
     /**
      * @param string|bool|int|float|null|array<string|bool|int|float|null> $value
      *
-     * @return string|list<string>
+     * @return list<string>
      */
     private static function serializeOption(
         InputOption $option,
         string $name,
         array|bool|float|int|string|null $value,
-    ): string|array {
+    ): array {
         return match (true) {
-            $option->isNegatable() => sprintf('--%s%s', $value ? '' : 'no-', $name),
-            !$option->acceptValue() => sprintf('--%s', $name),
-            self::isArray($option, $value) => array_map(static fn ($item) => self::serializeOptionWithValue($name, $item), $value),
-            default => self::serializeOptionWithValue($name, $value),
+            $option->isNegatable() => [sprintf('--%s%s', $value ? '' : 'no-', $name)],
+            !$option->acceptValue() => [sprintf('--%s', $name)],
+            /** @var list<string|bool|int|float|null> $value */
+            // @phpstan-ignore-next-line argument.type
+            $option->isArray() => array_map(static fn ($item) => self::serializeOptionWithValue($name, $item), $value),
+            /** @var string|int|float|null $value */
+            // @phpstan-ignore-next-line argument.type
+            default => [self::serializeOptionWithValue($name, $value)],
         };
-    }
-
-    /**
-     * @param string|bool|int|float|null|array<string|bool|int|float|null> $value
-     *
-     * @phpstan-assert-if-true array<string|bool|int|float|null> $value
-     */
-    private static function isArray(
-        InputOption $option,
-        array|bool|float|int|string|null $value,
-    ): bool {
-        return $option->isArray();
     }
 
     private static function serializeOptionWithValue(
