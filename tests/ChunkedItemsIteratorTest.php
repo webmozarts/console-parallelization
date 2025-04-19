@@ -14,14 +14,14 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use InvalidArgumentException;
+use Iterator;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SplObjectStorage;
 use stdClass;
-use TypeError;
 use function fclose;
-use function iter\enumerate;
+use function iter\callRewindable;
 use function iter\toArrayWithKeys;
 use function iter\toIter;
 use const PHP_EOL;
@@ -216,8 +216,24 @@ final class ChunkedItemsIteratorTest extends TestCase
             ],
         ];
 
+        yield 'non-rewindable generator' => [
+            (static function () {
+                yield 'item0';
+                yield 'item1';
+                yield 'item2';
+                yield 'item3';
+            })(),
+            2,
+            ['item0', 'item1', 'item2', 'item3'],
+            null,
+            [
+                ['item0', 'item1'],
+                ['item2', 'item3'],
+            ],
+        ];
+
         yield 'iterator with a stringeable key' => [
-            (function () {
+            (static function () {
                 yield new CustomIteratorKey('a') => 'item0';
                 yield new CustomIteratorKey('b') => 'item1';
                 yield new CustomIteratorKey('c') => 'item2';
@@ -408,7 +424,7 @@ final class ChunkedItemsIteratorTest extends TestCase
 
         yield 'iterator with a stringeable key' => [
             null,
-            (function () {
+            (static function () {
                 yield new CustomIteratorKey('a') => new stdClass();
             })(),
             1,
@@ -422,12 +438,30 @@ final class ChunkedItemsIteratorTest extends TestCase
         ?int $expectedNumberOfItems,
         array $expectedItemChunks
     ): void {
-        try {
-            self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
-        } catch (TypeError) {
-            self::assertEquals($expectedItems, toArrayWithKeys(enumerate($iterator->getItems())));
-        }
+        self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
+        self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
+        self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
         self::assertSame($expectedItemChunks, toArrayWithKeys($iterator->getItemChunks()));
+    }
+
+    public function test_rewind(): void
+    {
+        $generator = (static function () {
+            yield 'item0';
+            yield 'item1';
+            yield 'item2';
+            yield 'item3';
+        })();
+
+        $rewindable = self::rewindableValues($generator);
+
+        toArrayWithKeys($rewindable);
+        toArrayWithKeys($rewindable);
+    }
+
+    private static function rewindableValues(iterable $items): Iterator
+    {
+        return new LazyRewindableIterator($items);
     }
 }

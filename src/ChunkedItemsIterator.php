@@ -23,9 +23,9 @@ use function count;
 use function explode;
 use function is_array;
 use function is_numeric;
-use function iter\chunk;
+use function iter\makeRewindable;
 use function iter\mapWithKeys;
-use function iter\rewindable\values as rewindableValues;
+use function iter\rewindable\chunk;
 use function iter\values;
 use function Safe\stream_get_contents;
 use function sprintf;
@@ -64,11 +64,22 @@ final readonly class ChunkedItemsIterator
             $this->items = array_values($items);
             $this->numberOfItems = count($items);
         } else {
-            $this->items = rewindableValues($items);
+            $this->items = self::rewindableValues($items);
             $this->numberOfItems = null;
         }
 
         $this->itemsChunks = chunk($this->items, $batchSize);
+    }
+
+    private static function rewindableValues(iterable $items): Iterator
+    {
+        return makeRewindable(
+            static function () use ($items) {
+                foreach ($items as $item) {
+                    yield $item;
+                }
+            }
+        )();
     }
 
     /**
@@ -110,9 +121,9 @@ final readonly class ChunkedItemsIterator
     }
 
     /**
-     * @return list<string>|iterable<string>
+     * @return list<string>|Iterator<string>
      */
-    public function getItems(): iterable
+    public function getItems(): array|Iterator
     {
         return $this->items;
     }
