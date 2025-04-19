@@ -18,12 +18,14 @@ use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_keys;
 use function array_map;
+use function array_values;
 use function count;
 use function explode;
 use function is_array;
 use function is_numeric;
 use function iter\chunk;
 use function iter\mapWithKeys;
+use function iter\rewindable\values as rewindableValues;
 use function iter\values;
 use function Safe\stream_get_contents;
 use function sprintf;
@@ -34,7 +36,12 @@ use const PHP_EOL;
 final readonly class ChunkedItemsIterator
 {
     /**
-     * @var Iterator<list<string>>
+     * @var list<string>|Iterator<int, list<string>>
+     */
+    private array|Iterator $items;
+
+    /**
+     * @var Iterator<int, list<string>>
      */
     private Iterator $itemsChunks;
 
@@ -50,11 +57,18 @@ final readonly class ChunkedItemsIterator
      * @param positive-int                  $batchSize
      */
     public function __construct(
-        private iterable $items,
+        iterable $items,
         int $batchSize,
     ) {
-        $this->itemsChunks = chunk($items, $batchSize);
-        $this->numberOfItems = is_array($items) ? count($items) : null;
+        if (is_array($items)) {
+            $this->items = array_values($items);
+            $this->numberOfItems = count($items);
+        } else {
+            $this->items = rewindableValues($items);
+            $this->numberOfItems = null;
+        }
+
+        $this->itemsChunks = chunk($this->items, $batchSize);
     }
 
     /**
@@ -96,7 +110,7 @@ final readonly class ChunkedItemsIterator
     }
 
     /**
-     * @return list<string>|Iterator<string>
+     * @return list<string>|iterable<string>
      */
     public function getItems(): iterable
     {
@@ -104,7 +118,7 @@ final readonly class ChunkedItemsIterator
     }
 
     /**
-     * @return Iterator<list<string>>
+     * @return Iterator<int, list<string>>
      */
     public function getItemChunks(): Iterator
     {

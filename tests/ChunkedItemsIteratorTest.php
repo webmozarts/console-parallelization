@@ -19,7 +19,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SplObjectStorage;
 use stdClass;
+use TypeError;
 use function fclose;
+use function iter\enumerate;
 use function iter\toArrayWithKeys;
 use function iter\toIter;
 use const PHP_EOL;
@@ -213,6 +215,39 @@ final class ChunkedItemsIteratorTest extends TestCase
                 ['item3', 'item4'],
             ],
         ];
+
+        yield 'iterator with a stringeable key' => [
+            (function () {
+                yield new CustomIteratorKey('a') => 'item0';
+                yield new CustomIteratorKey('b') => 'item1';
+                yield new CustomIteratorKey('c') => 'item2';
+                yield new CustomIteratorKey('d') => 'item3';
+            })(),
+            2,
+            [
+                // This is a bit of a weird case, but we are not interested in fixing it as
+                // extremely unorthodox.
+                // The following is in the key cannot be an array key
+                [new CustomIteratorKey('a'), 'item0'],
+                [new CustomIteratorKey('b'), 'item1'],
+                [new CustomIteratorKey('c'), 'item2'],
+                [new CustomIteratorKey('d'), 'item3'],
+            ],
+            null,
+            [
+                // This is a bit of a weird case, but we are not interested in fixing it as
+                // extremely unorthodox.
+                // The following is in the key cannot be an array key
+                [
+                    [new CustomIteratorKey('a'), 'item0'],
+                    [new CustomIteratorKey('b'), 'item1'],
+                ],
+                [
+                    [new CustomIteratorKey('c'), 'item2'],
+                    [new CustomIteratorKey('d'), 'item3'],
+                ],
+            ],
+        ];
     }
 
     public static function streamProvider(): iterable
@@ -370,6 +405,15 @@ final class ChunkedItemsIteratorTest extends TestCase
             1,
             'An item cannot contain a line return. Got one for "it<lineReturn>em" for the item "1".',
         ];
+
+        yield 'iterator with a stringeable key' => [
+            null,
+            (function () {
+                yield new CustomIteratorKey('a') => new stdClass();
+            })(),
+            1,
+            'foo',
+        ];
     }
 
     private static function assertStateIs(
@@ -378,7 +422,11 @@ final class ChunkedItemsIteratorTest extends TestCase
         ?int $expectedNumberOfItems,
         array $expectedItemChunks
     ): void {
-        self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
+        try {
+            self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
+        } catch (TypeError) {
+            self::assertEquals($expectedItems, toArrayWithKeys(enumerate($iterator->getItems())));
+        }
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());
         self::assertSame($expectedItemChunks, toArrayWithKeys($iterator->getItemChunks()));
     }
