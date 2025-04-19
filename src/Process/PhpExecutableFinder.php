@@ -49,6 +49,7 @@ final class PhpExecutableFinder
             'Could not find the PHP executable.',
         );
 
+        /** @phpstan-ignore return.type */
         return array_values([
             $phpExecutable,
             ...$finder->findArguments(),

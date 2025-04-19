@@ -70,6 +70,7 @@ final class InputOptionsSerializer
         string $name,
         array|bool|float|int|string|null $value,
     ): array {
+        // @phpstan-ignore-next-line return.type argument.type
         return match (true) {
             $option->isNegatable() => [sprintf('--%s%s', $value ? '' : 'no-', $name)],
             !$option->acceptValue() => [sprintf('--%s', $name)],

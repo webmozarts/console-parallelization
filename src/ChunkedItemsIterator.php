@@ -70,6 +70,7 @@ final readonly class ChunkedItemsIterator
             $this->numberOfItems = null;
         }
 
+        /** @phpstan-ignore assign.propertyType */
         $this->itemsChunks = chunk($this->items, $batchSize);
     }
 
@@ -116,6 +117,7 @@ final readonly class ChunkedItemsIterator
      */
     public function getItems(): array|LazyRewindableIterator
     {
+        // @phpstan-ignore-next-line return.type
         return $this->items;
     }
 
@@ -189,7 +191,6 @@ final readonly class ChunkedItemsIterator
             ),
         );
         Assert::false(
-            // TODO: legit bug
             '' !== $item && str_contains($item, PHP_EOL),
             sprintf(
                 'An item cannot contain a line return. Got one for "%s" for the item "%s".',

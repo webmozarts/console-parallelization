@@ -6,12 +6,8 @@ parameters:
     excludePaths:
         - tests/Integration/App/var
         - tests/Input/FakeInput.php
-        - tests/Input/FakeInput74.php
-        - tests/Input/FakeInput81.php
         - tests/Input/FakeSymfony6Input.php
         - tests/Process/DummyProcess.php
-        - tests/Process/DummyProcess74.php
-        - tests/Process/DummyProcess81.php
     ignoreErrors:
         - path: tests/Integration/TestLogger.php
           message: '#TestLogger::\$outputHandler#'
@@ -39,5 +35,7 @@ parameters:
         - path: tests/Input/RawInputTest.php
           message: '#Webmozarts\\Console\\Parallelization\\Input\\FakeInput#'
 
+        - path: tests/LazyRewindableIteratorTest.php
+          identifier: staticMethod.alreadyNarrowedType
         - path: tests/LazyRewindableIteratorTest.php
           identifier: staticMethod.impossibleType

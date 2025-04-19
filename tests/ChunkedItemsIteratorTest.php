@@ -131,6 +131,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         self::assertFalse($itemsFetched);
 
         self::assertNull($iterator->getNumberOfItems());
+        // @phpstan-ignore staticMethod.alreadyNarrowedType
         self::assertFalse($itemsFetched);
 
         self::assertSame(['item1', 'item2'], toArrayWithKeys($iterator->getItems()));

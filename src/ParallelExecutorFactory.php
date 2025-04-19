@@ -17,6 +17,7 @@ use Closure;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
@@ -336,6 +337,7 @@ final class ParallelExecutorFactory
         }
         // @codeCoverageIgnoreEnd
 
+        /** @phpstan-ignore return.type */
         return $noop;
     }
 
@@ -343,6 +345,9 @@ final class ParallelExecutorFactory
     {
         $pwd = $_SERVER['PWD'] ?? getcwd();
         $scriptName = $_SERVER['SCRIPT_NAME'];
+
+        Assert::string($pwd);
+        Assert::string($scriptName);
 
         return (str_starts_with($scriptName, $pwd)
                 || str_starts_with($scriptName, DIRECTORY_SEPARATOR)
