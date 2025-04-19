@@ -14,16 +14,19 @@ declare(strict_types=1);
 namespace Webmozarts\Console\Parallelization;
 
 use Iterator;
+use Stringable;
 use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_keys;
 use function array_map;
+use function array_values;
 use function count;
 use function explode;
 use function is_array;
+use function is_int;
 use function is_numeric;
-use function iter\chunk;
 use function iter\mapWithKeys;
+use function iter\rewindable\chunk;
 use function iter\values;
 use function Safe\stream_get_contents;
 use function sprintf;
@@ -31,30 +34,44 @@ use function str_contains;
 use function str_replace;
 use const PHP_EOL;
 
-final class ChunkedItemsIterator
+final readonly class ChunkedItemsIterator
 {
     /**
-     * @var Iterator<list<string>>
+     * @var list<string>|LazyRewindableIterator<string>
      */
-    private readonly Iterator $itemsChunks;
+    private array|LazyRewindableIterator $items;
+
+    /**
+     * @var Iterator<int, list<string>>
+     */
+    private Iterator $itemsChunks;
 
     /**
      * @var 0|positive-int|null
      */
-    private readonly ?int $numberOfItems;
+    private ?int $numberOfItems;
 
     /**
      * @internal Use the static factory methods instead.
      *
-     * @param list<string>|Iterator<string> $items
+     * @param list<string>|iterable<string> $items
      * @param positive-int                  $batchSize
      */
     public function __construct(
-        private readonly iterable $items,
+        iterable $items,
         int $batchSize,
     ) {
-        $this->itemsChunks = chunk($items, $batchSize);
-        $this->numberOfItems = is_array($items) ? count($items) : null;
+        if (is_array($items)) {
+            $this->items = array_values($items);
+            $this->numberOfItems = count($items);
+        } else {
+            // @phpstan-ignore-next-line assign.propertyType
+            $this->items = LazyRewindableIterator::create($items);
+            $this->numberOfItems = null;
+        }
+
+        /** @phpstan-ignore assign.propertyType */
+        $this->itemsChunks = chunk($this->items, $batchSize);
     }
 
     /**
@@ -77,8 +94,8 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @param callable():iterable<string> $fetchItems
-     * @param positive-int                $batchSize
+     * @param callable():iterable<mixed, string> $fetchItems
+     * @param positive-int                       $batchSize
      */
     public static function fromItemOrCallable(?string $item, callable $fetchItems, int $batchSize): self
     {
@@ -96,15 +113,16 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @return list<string>|Iterator<string>
+     * @return list<string>|LazyRewindableIterator<string>
      */
-    public function getItems(): iterable
+    public function getItems(): array|LazyRewindableIterator
     {
+        // @phpstan-ignore-next-line return.type
         return $this->items;
     }
 
     /**
-     * @return Iterator<list<string>>
+     * @return Iterator<int, list<string>>
      */
     public function getItemChunks(): Iterator
     {
@@ -133,7 +151,7 @@ final class ChunkedItemsIterator
     }
 
     /**
-     * @return Iterator<string>
+     * @return Iterator<int, string>
      */
     private static function normalizeItemStream(mixed $items): Iterator
     {
@@ -145,6 +163,7 @@ final class ChunkedItemsIterator
             ),
         );
 
+        /** @phpstan-ignore-next-line return.typ */
         return values(
             mapWithKeys(
                 static fn ($item, $index) => self::normalizeItem($item, $index),
@@ -153,10 +172,14 @@ final class ChunkedItemsIterator
         );
     }
 
-    private static function normalizeItem(mixed $item, int|string $index): string
+    private static function normalizeItem(mixed $item, mixed $index): string
     {
         if (is_numeric($item)) {
             return (string) $item;
+        }
+
+        if (!is_int($index) && !is_string($index) && !($index instanceof Stringable)) {
+            $index = '<NonStringableKey>';
         }
 
         Assert::string(
@@ -168,7 +191,7 @@ final class ChunkedItemsIterator
             ),
         );
         Assert::false(
-            '' !== PHP_EOL && str_contains($item, PHP_EOL),
+            '' !== $item && str_contains($item, PHP_EOL),
             sprintf(
                 'An item cannot contain a line return. Got one for "%s" for the item "%s".',
                 str_replace(PHP_EOL, '<lineReturn>', $item),

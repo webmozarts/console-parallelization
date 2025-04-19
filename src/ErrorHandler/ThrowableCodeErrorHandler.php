@@ -18,10 +18,10 @@ use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use function max;
 
-final class ThrowableCodeErrorHandler implements ErrorHandler
+final readonly class ThrowableCodeErrorHandler implements ErrorHandler
 {
     public function __construct(
-        private readonly ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
+        private ErrorHandler $decoratedErrorHandler = new NullErrorHandler(),
     ) {
     }
 

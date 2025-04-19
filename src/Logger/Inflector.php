@@ -20,7 +20,7 @@ use Webmozart\Assert\Assert;
  */
 final class Inflector
 {
-    private const PLURAL_MAP = [
+    private const array PLURAL_MAP = [
         'batch' => 'batches',
         'round' => 'rounds',
         'child process' => 'parallel child processes',
@@ -29,7 +29,7 @@ final class Inflector
     /**
      * @param positive-int|0 $count
      */
-    public static function pluralize(string $singular, int $count): ?string
+    public static function pluralize(string $singular, int $count): string
     {
         Assert::keyExists(
             self::PLURAL_MAP,

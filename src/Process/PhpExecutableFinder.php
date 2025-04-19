@@ -15,6 +15,7 @@ namespace Webmozarts\Console\Parallelization\Process;
 
 use Symfony\Component\Process\PhpExecutableFinder as SymfonyPhpExecutableFinder;
 use Webmozart\Assert\Assert;
+use function array_values;
 
 final class PhpExecutableFinder
 {
@@ -35,16 +36,24 @@ final class PhpExecutableFinder
         return false === $phpExecutable ? null : $phpExecutable;
     }
 
-    public static function find(): string
+    /**
+     * @return non-empty-list<string>
+     */
+    public static function find(): array
     {
-        $phpExecutable = self::getFinder()->find();
+        $finder = self::getFinder();
+        $phpExecutable = $finder->find(false);
 
         Assert::notFalse(
             $phpExecutable,
             'Could not find the PHP executable.',
         );
 
-        return $phpExecutable;
+        /** @phpstan-ignore return.type */
+        return array_values([
+            $phpExecutable,
+            ...$finder->findArguments(),
+        ]);
     }
 
     private static function getFinder(): SymfonyPhpExecutableFinder

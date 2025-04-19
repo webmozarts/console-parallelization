@@ -17,6 +17,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use SplObjectStorage;
 use stdClass;
 use function fclose;
 use function iter\toArrayWithKeys;
@@ -130,6 +131,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         self::assertFalse($itemsFetched);
 
         self::assertNull($iterator->getNumberOfItems());
+        // @phpstan-ignore staticMethod.alreadyNarrowedType
         self::assertFalse($itemsFetched);
 
         self::assertSame(['item1', 'item2'], toArrayWithKeys($iterator->getItems()));
@@ -209,6 +211,54 @@ final class ChunkedItemsIteratorTest extends TestCase
             [
                 ['item0', 'item1'],
                 ['item3', 'item4'],
+            ],
+        ];
+
+        yield 'non-rewindable generator' => [
+            (static function () {
+                yield 'item0';
+                yield 'item1';
+                yield 'item2';
+                yield 'item3';
+            })(),
+            2,
+            ['item0', 'item1', 'item2', 'item3'],
+            null,
+            [
+                ['item0', 'item1'],
+                ['item2', 'item3'],
+            ],
+        ];
+
+        yield 'iterator with a stringeable key' => [
+            (static function () {
+                yield new CustomIteratorKey('a') => 'item0';
+                yield new CustomIteratorKey('b') => 'item1';
+                yield new CustomIteratorKey('c') => 'item2';
+                yield new CustomIteratorKey('d') => 'item3';
+            })(),
+            2,
+            ['item0', 'item1', 'item2', 'item3'],
+            null,
+            [
+                ['item0', 'item1'],
+                ['item2', 'item3'],
+            ],
+        ];
+
+        yield 'iterator with a non-stringeable key' => [
+            (static function () {
+                yield (object) ['α' => 'alpha'] => 'item0';
+                yield (object) ['β' => 'beta'] => 'item1';
+                yield (object) ['γ' => 'gamma'] => 'item2';
+                yield (object) ['δ' => 'detla'] => 'item3';
+            })(),
+            2,
+            ['item0', 'item1', 'item2', 'item3'],
+            null,
+            [
+                ['item0', 'item1'],
+                ['item2', 'item3'],
             ],
         ];
     }
@@ -311,6 +361,28 @@ final class ChunkedItemsIteratorTest extends TestCase
             static fn () => toIter(['i0' => 'item0', 'i1' => 'item1']),
             ['item0', 'item1'],
         ];
+
+        yield 'iterator with a stringeable key' => [
+            null,
+            static function () {
+                yield new CustomIteratorKey('a') => 'item0';
+                yield new CustomIteratorKey('b') => 'item1';
+                yield new CustomIteratorKey('c') => 'item2';
+                yield new CustomIteratorKey('d') => 'item3';
+            },
+            ['item0', 'item1', 'item2', 'item3'],
+        ];
+
+        yield 'iterator with a non-stringeable key' => [
+            null,
+            static function () {
+                yield (object) ['α' => 'alpha'] => 'item0';
+                yield (object) ['β' => 'beta'] => 'item1';
+                yield (object) ['γ' => 'gamma'] => 'item2';
+                yield (object) ['δ' => 'detla'] => 'item3';
+            },
+            ['item0', 'item1', 'item2', 'item3'],
+        ];
     }
 
     public static function invalidValuesProvider(): iterable
@@ -355,6 +427,36 @@ final class ChunkedItemsIteratorTest extends TestCase
             toIter(['item0', 'it'.PHP_EOL.'em', 'item1']),
             1,
             'An item cannot contain a line return. Got one for "it<lineReturn>em" for the item "1".',
+        ];
+
+        yield 'iterable with unorthodox keys' => [
+            null,
+            (static function () {
+                $storage = new SplObjectStorage();
+                $storage[new stdClass()] = 'it'.PHP_EOL.'em';
+
+                return $storage;
+            })(),
+            1,
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass" for the item "0".',
+        ];
+
+        yield 'iterator with a stringeable key' => [
+            null,
+            (static function () {
+                yield new CustomIteratorKey('a') => new stdClass();
+            })(),
+            1,
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass" for the item "a".',
+        ];
+
+        yield 'iterator with a non-stringeable key' => [
+            null,
+            (static function () {
+                yield (object) ['a' => 'alpha'] => new stdClass();
+            })(),
+            1,
+            'The items are potentially passed to the child processes via the STDIN. For this reason they are expected to be string values. Got "stdClass" for the item "<NonStringableKey>".',
         ];
     }
 

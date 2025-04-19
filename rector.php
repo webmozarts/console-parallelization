@@ -21,11 +21,11 @@ return RectorConfig::configure()
         __DIR__.'/src',
         __DIR__.'/tests',
     ])
-    ->withSkipPath(__DIR__.'/tests/Integration/var')
+    ->withSkipPath(__DIR__.'/tests/Integration/App/var')
     ->withImportNames(
         removeUnusedImports: true,
     )
-    ->withPhpSets(php81: true)
+    ->withPhpSets(php83: true)
     ->withAttributesSets(
         phpunit: true,
     )
@@ -35,5 +35,5 @@ return RectorConfig::configure()
             __DIR__.'/tests/Integration/OutputNormalizer.php',
         ],
 
-        __DIR__.'/tests/Integration/var',
+        __DIR__.'/tests/Integration/App/var',
     ]);

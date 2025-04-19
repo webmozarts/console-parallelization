@@ -7,7 +7,7 @@
 /composer.lock
 /dist/
 /phpunit.xml
+/tests/Integration/App/var/
 /tests/Integration/output
-/tests/Integration/var/
 /vendor-bin/*/vendor/
 /vendor/

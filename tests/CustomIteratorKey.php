@@ -13,18 +13,16 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization;
 
-// See https://math.pugetsound.edu/~mspivey/CombSum.pdf
-// See https://mathworld.wolfram.com/BinomialSums.html
-final class BinomialSum
+use Stringable;
+
+final readonly class CustomIteratorKey implements Stringable
 {
-    public const array A000079 = [
-        1,
-        2,
-        4,
-        8,
-        16,
-        32,
-        64,
-        128,
-    ];
+    public function __construct(public string $value)
+    {
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
 }

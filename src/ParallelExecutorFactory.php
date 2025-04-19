@@ -17,6 +17,7 @@ use Closure;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\Input\ChildCommandFactory;
 use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
@@ -24,6 +25,7 @@ use Webmozarts\Console\Parallelization\Process\ProcessLauncherFactory;
 use Webmozarts\Console\Parallelization\Process\StandardSymfonyProcessFactory;
 use Webmozarts\Console\Parallelization\Process\SymfonyProcessLauncherFactory;
 use function chr;
+use function is_string;
 use function Safe\getcwd;
 use function str_starts_with;
 use const DIRECTORY_SEPARATOR;
@@ -31,7 +33,7 @@ use const STDIN;
 
 final class ParallelExecutorFactory
 {
-    private const CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
+    private const int CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
 
     private bool $useDefaultBatchSize = true;
 
@@ -46,6 +48,7 @@ final class ParallelExecutorFactory
      * @param Closure(InputInterface, OutputInterface):void               $runAfterLastCommand
      * @param Closure(InputInterface, OutputInterface, list<string>):void $runBeforeBatch
      * @param Closure(InputInterface, OutputInterface, list<string>):void $runAfterBatch
+     * @param list<string>                                                $phpExecutable
      * @param array<string, string>                                       $extraEnvironmentVariables
      * @param Closure(): void                                             $processTick
      */
@@ -64,7 +67,7 @@ final class ParallelExecutorFactory
         private Closure $runBeforeBatch,
         private Closure $runAfterBatch,
         private string $progressSymbol,
-        private string $phpExecutable,
+        private array $phpExecutable,
         private string $scriptPath,
         private string $workingDirectory,
         private ?array $extraEnvironmentVariables,
@@ -228,11 +231,13 @@ final class ParallelExecutorFactory
     /**
      * The path of the PHP executable. It is the executable that will be used
      * to spawn the child process(es).
+     *
+     * @param string|list<string> $phpExecutable e.g. ['/path/to/php', '-dmemory_limit=512M']
      */
-    public function withPhpExecutable(string $phpExecutable): self
+    public function withPhpExecutable(string|array $phpExecutable): self
     {
         $clone = clone $this;
-        $clone->phpExecutable = $phpExecutable;
+        $clone->phpExecutable = is_string($phpExecutable) ? [$phpExecutable] : $phpExecutable;
 
         return $clone;
     }
@@ -332,6 +337,7 @@ final class ParallelExecutorFactory
         }
         // @codeCoverageIgnoreEnd
 
+        /** @phpstan-ignore return.type */
         return $noop;
     }
 
@@ -339,6 +345,9 @@ final class ParallelExecutorFactory
     {
         $pwd = $_SERVER['PWD'] ?? getcwd();
         $scriptName = $_SERVER['SCRIPT_NAME'];
+
+        Assert::string($pwd);
+        Assert::string($scriptName);
 
         return (str_starts_with($scriptName, $pwd)
                 || str_starts_with($scriptName, DIRECTORY_SEPARATOR)

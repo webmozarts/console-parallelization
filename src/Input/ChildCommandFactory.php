@@ -18,20 +18,22 @@ use Symfony\Component\Console\Input\InputInterface;
 use Webmozart\Assert\Assert;
 use function array_filter;
 use function array_map;
-use function explode;
 use function Safe\getcwd;
 use function sprintf;
 
 /**
  * @internal
  */
-final class ChildCommandFactory
+final readonly class ChildCommandFactory
 {
+    /**
+     * @param list<string> $phpExecutable
+     */
     public function __construct(
-        public readonly string $phpExecutable,
-        private readonly string $scriptPath,
-        private readonly string $commandName,
-        private readonly InputDefinition $commandDefinition,
+        private array $phpExecutable,
+        private string $scriptPath,
+        private string $commandName,
+        private InputDefinition $commandDefinition,
     ) {
         self::validateScriptPath($scriptPath);
     }
@@ -51,6 +53,7 @@ final class ChildCommandFactory
         InputInterface $input
     ): array {
         return array_filter([
+            ...$this->phpExecutable,
             $this->scriptPath,
             $this->commandName,
             ...array_map(strval(...), self::getArguments($input)),
@@ -71,6 +74,14 @@ final class ChildCommandFactory
             $input,
             ParallelizationInput::OPTIONS,
         );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getEscapedPhpExecutable(): array
+    {
+        return explode(' ', $this->phpExecutable);
     }
 
     /**
