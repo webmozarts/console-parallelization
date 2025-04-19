@@ -38,3 +38,6 @@ parameters:
 
         - path: tests/Input/RawInputTest.php
           message: '#Webmozarts\\Console\\Parallelization\\Input\\FakeInput#'
+
+        - path: tests/LazyRewindableIteratorTest.php
+          identifier: staticMethod.impossibleType
