@@ -26,29 +26,27 @@ use Webmozarts\Console\Parallelization\Integration\TestLogger;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\NullLogger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\ParallelCommand;
 use Webmozarts\Console\Parallelization\ParallelExecutorFactory;
 use Webmozarts\Console\Parallelization\Parallelization;
+use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
 use function file_get_contents;
 use function ini_get;
 use function json_decode;
 use function realpath;
+use function sprintf;
+use function xdebug_break;
 use const JSON_THROW_ON_ERROR;
 
-final class PhpSettingsCommand extends Command
+final class PhpSettingsCommand extends ParallelCommand
 {
-    use Parallelization;
-
-    public const OUTPUT_DIR = __DIR__.'/../../../dist/php-settings';
+    public const string MAIN_PROCESS_OUTPUT_DIR = __DIR__.'/../../../dist/php-settings_main-process';
+    public const string CHILD_PROCESS_OUTPUT_DIR = __DIR__.'/../../../dist/php-settings_child-process';
 
     public function __construct(
         private Filesystem $filesystem,
     ) {
         parent::__construct('test:php-settings');
-    }
-
-    protected function configure(): void
-    {
-        ParallelizationInput::configureCommand($this);
     }
 
     /**
@@ -76,32 +74,48 @@ final class PhpSettingsCommand extends Command
             $errorHandler,
         )
             ->withRunBeforeFirstCommand(self::runBeforeFirstCommand(...))
+            ->withPhpExecutable([
+                ...PhpExecutableFinder::find(),
+                '-dmax_input_time=30',
+            ])
             ->withScriptPath(realpath(__DIR__.'/../../../bin/console'));
     }
 
     private function runBeforeFirstCommand(): void
     {
-        $this->filesystem->dumpFile(
-            self::OUTPUT_DIR.'_main_process',
-            ini_get('memory_limit'),
-        );
+        $this->dumpMemoryLimit(self::MAIN_PROCESS_OUTPUT_DIR);
     }
 
     protected function runSingleCommand(string $item, InputInterface $input, OutputInterface $output): void
     {
+        $this->dumpMemoryLimit(self::CHILD_PROCESS_OUTPUT_DIR);
+    }
+
+    private function dumpMemoryLimit(string $filePath): void
+    {
         $this->filesystem->dumpFile(
-            self::OUTPUT_DIR,
-            ini_get('memory_limit'),
+            $filePath,
+            sprintf(
+                'memory_limit=%s%smax_input_time=%s',
+                ini_get('memory_limit'),
+                "\n",
+                ini_get('max_input_time'),
+            ),
+        );
+    }
+
+    public static function createSettingsOutput(string $memoryLimit, string $maxInputTime): string
+    {
+        return sprintf(
+            'memory_limit=%s%smax_input_time=%s',
+            $memoryLimit,
+            "\n",
+            $maxInputTime,
         );
     }
 
     protected function getItemName(?int $count): string
     {
         return 1 === $count ? 'item' : 'items';
-    }
-
-    protected function createLogger(InputInterface $input, OutputInterface $output): Logger
-    {
-        return new NullLogger();
     }
 }

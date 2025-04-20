@@ -35,7 +35,7 @@ interface SymfonyProcessFactory
     public function startProcess(
         int $index,
         InputStream $inputStream,
-        string $phpExecutable,
+        array $phpExecutable,
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,

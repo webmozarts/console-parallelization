@@ -32,7 +32,7 @@ final readonly class SymfonyProcessLauncherFactory implements ProcessLauncherFac
      * @param callable(): void                                         $tick
      */
     public function create(
-        string $phpExecutable,
+        array $phpExecutable,
         array $command,
         string $workingDirectory,
         ?array $extraEnvironmentVariables,

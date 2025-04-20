@@ -22,6 +22,7 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
     public function startProcess(
         int $index,
         InputStream $inputStream,
+        array $phpExecutable,
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
@@ -31,6 +32,7 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
             $command,
             $workingDirectory,
             $environmentVariables,
+            php: $phpExecutable,
         );
 
         $process->setInput($inputStream);
