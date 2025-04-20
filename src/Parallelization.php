@@ -277,7 +277,7 @@ trait Parallelization
         InputInterface $input,
         OutputInterface $output
     ): ParallelExecutorFactory {
-        // This method will safely never contain anything. It is only a
+        // This method will safely NEVER contain anything. It is only a
         // placeholder for the user to override so omitting
         // parent::configureParallelExecutableFactory() is perfectly safe.
 
@@ -318,7 +318,7 @@ trait Parallelization
         // The container is required to reset the container upon failure to
         // avoid things such as a broken UoW or entity manager.
         //
-        // If no such behaviour is desired, ::createItemErrorHandler() can be
+        // If no such behaviour is desired, `::createErrorHandler()` can be
         // overridden to provide a different error handler.
         $application = $this->getApplication();
 
