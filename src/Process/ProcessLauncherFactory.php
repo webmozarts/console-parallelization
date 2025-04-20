@@ -31,6 +31,7 @@ interface ProcessLauncherFactory
      * @param callable(): void           $tick
      */
     public function create(
+        array $phpExecutable,
         array $command,
         string $workingDirectory,
         ?array $extraEnvironmentVariables,

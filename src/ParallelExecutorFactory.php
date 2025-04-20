@@ -232,7 +232,24 @@ final class ParallelExecutorFactory
      * The path of the PHP executable. It is the executable that will be used
      * to spawn the child process(es).
      *
-     * @param string|list<string> $phpExecutable e.g. ['/path/to/php', '-dmemory_limit=512M']
+     * It can be a string (the path of the PHP executable), or an array
+     * to set some PHP settings or others, for example:
+     *
+     * ```
+     * ['/path/to/php', '-dmemory_limit=512M']
+     * ```
+     *
+     * However, beware that those settings will take precedence over the
+     * inherited settings from the main process. As a result, if you execute:
+     *
+     * ```
+     * $ php -dmemory_limit=1024M bin/console my:command
+     * ```
+     *
+     * Then the memory limit of the main process will be 1024M, but the memory
+     * limit of the child processes will remain 512M.
+     *
+     * @param string|list<string> $phpExecutable
      */
     public function withPhpExecutable(string|array $phpExecutable): self
     {
