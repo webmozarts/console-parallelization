@@ -198,7 +198,7 @@ trait Parallelization
         // The container is required to reset the container upon failure to
         // avoid things such as a broken UoW or entity manager.
         //
-        // If no such behaviour is desired, ::createErrorHandler() can be
+        // If no such behaviour is desired, `::createErrorHandler()` can be
         // overridden to provide a different error handler.
         $application = $this->getApplication();
 
