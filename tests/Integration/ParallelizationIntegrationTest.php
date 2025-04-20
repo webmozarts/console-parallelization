@@ -20,13 +20,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
-use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
 use Webmozarts\Console\Parallelization\Integration\App\BareKernel;
-use function array_column;
-use function array_map;
 use function preg_replace;
-use function spl_object_id;
 use function str_replace;
 
 /**
@@ -44,9 +40,6 @@ class ParallelizationIntegrationTest extends TestCase
     private NoSubProcessCommand $noSubProcessCommand;
     private CommandTester $noSubProcessCommandTester;
 
-    private LegacyCommand $legacyCommand;
-    private CommandTester $legacyCommandTester;
-
     protected function setUp(): void
     {
         $this->importMoviesCommand = (new Application(new BareKernel()))->add(new ImportMoviesCommand());
@@ -57,14 +50,10 @@ class ParallelizationIntegrationTest extends TestCase
 
         $this->noSubProcessCommand = (new Application(new BareKernel()))->add(new NoSubProcessCommand());
         $this->noSubProcessCommandTester = new CommandTester($this->noSubProcessCommand);
-
-        $this->legacyCommand = (new Application(new BareKernel()))->add(new LegacyCommand());
-        $this->legacyCommandTester = new CommandTester($this->legacyCommand);
     }
 
     protected function tearDown(): void
     {
-        LegacyCommand::$calls = [];
         TestLogger::clearLogfile();
     }
 
@@ -270,130 +259,6 @@ class ParallelizationIntegrationTest extends TestCase
         self::assertSame($expectedWithNoDebugMode, $outputWithoutExtraDebugInfo, $outputWithoutExtraDebugInfo);
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandStartedLine));
         self::assertSame($expectedChildProcessesCount, mb_substr_count($actual, $expectedCommandFinishedLine));
-    }
-
-    public function test_it_can_run_the_command_a_command_with_the_legacy_api_in_the_main_process(): void
-    {
-        $commandTester = $this->legacyCommandTester;
-
-        $commandTester->execute(
-            [
-                'command' => 'legacy:command',
-                '--main-process' => true,
-            ],
-            ['interactive' => true],
-        );
-
-        $expected = <<<'EOF'
-            Processing 20 legacy items, batches of 50, 1 batch, in the current process.
-
-              0/20 [>---------------------------]   0% 10 secs/10 secs 10.0 MiB
-             20/20 [============================] 100% 10 secs/10 secs 10.0 MiB
-
-             // Memory usage: 10.0 MB (peak: 10.0 MB), time: 10 secs
-
-            Processed 20 legacy items.
-            You may need to run this command again.
-
-            EOF;
-
-        $expectedCalls = [
-            'static' => [
-                'configureParallelization',
-                'getProgressSymbol',
-                'detectPhpExecutable',
-                'getWorkingDirectory',
-            ],
-            spl_object_id($this->legacyCommand) => [
-                'execute',
-                'getEnvironmentVariables',
-                'getSegmentSize',
-                'getBatchSize',
-                'getSegmentSize',
-                'getConsolePath',
-                'runBeforeFirstCommand',
-                'runBeforeBatch',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runSingleCommand',
-                'runAfterBatch',
-                'runAfterLastCommand',
-            ],
-        ];
-
-        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
-            $this->getOutput($commandTester),
-        );
-
-        self::assertSame($expected, $actual, $actual);
-
-        self::assertSame(
-            $expectedCalls,
-            array_map(
-                static fn (array $calls) => array_column($calls, 0),
-                LegacyCommand::$calls,
-            ),
-        );
-    }
-
-    public function test_it_can_run_the_command_a_command_with_the_legacy_api_in_a_different_mode(): void
-    {
-        $commandTester = $this->legacyCommandTester;
-
-        $commandTester->execute(
-            [
-                'command' => 'legacy:command',
-                '--dry-run' => null,
-            ],
-            ['interactive' => true],
-        );
-
-        $expected = <<<'EOF'
-            Processed in dry run item #i0: item0
-            Processed in dry run item #i1: item1
-            Processed in dry run item #i2: item2
-            Processed in dry run item #i3: item3
-            Processed in dry run item #i4: item4
-            Processed in dry run item #i5: item5
-            Processed in dry run item #i6: item6
-            Processed in dry run item #i7: item7
-            Processed in dry run item #i8: item8
-            Processed in dry run item #i9: item9
-            Processed in dry run item #i10: item10
-            Processed in dry run item #i11: item11
-            Processed in dry run item #i12: item12
-            Processed in dry run item #i13: item13
-            Processed in dry run item #i14: item14
-            Processed in dry run item #i15: item15
-            Processed in dry run item #i16: item16
-            Processed in dry run item #i17: item17
-            Processed in dry run item #i18: item18
-            Processed in dry run item #i19: item19
-
-            EOF;
-
-        $actual = OutputNormalizer::removeIntermediateFixedProgressBars(
-            $this->getOutput($commandTester),
-        );
-
-        self::assertSame($expected, $actual, $actual);
     }
 
     private function getOutput(CommandTester $commandTester): string
