@@ -28,6 +28,12 @@ use Webmozarts\Console\Parallelization\Input\ParallelizationInput;
 use Webmozarts\Console\Parallelization\Logger\DebugProgressBarFactory;
 use Webmozarts\Console\Parallelization\Logger\Logger;
 use Webmozarts\Console\Parallelization\Logger\StandardLogger;
+use Webmozarts\Console\Parallelization\Process\PhpExecutableFinder;
+use function chr;
+use function dirname;
+use function getcwd;
+use function getenv;
+use function realpath;
 
 /**
  * Adds parallelization capabilities to console commands.
@@ -61,11 +67,24 @@ use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 trait Parallelization
 {
     /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override the method ::createErrorHandler() instead.
+     */
+    private bool $logError = true;
+
+    /**
      * Provided by Symfony Command class.
      *
      * @return string The command name
      */
     abstract public function getName();
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Use ParallelizationInput::configureCommand() instead.
+     */
+    protected static function configureParallelization(Command $command): void
+    {
+        ParallelizationInput::configureCommand($command);
+    }
 
     /**
      * Fetches the items that should be processed.
@@ -147,11 +166,102 @@ trait Parallelization
         // overriding this method, it is highly recommended you don't and just
         // call `ParallelExecutorFactory::create(...func_get_args())`.
         //
-        // Configuring the factory is recommended to be done in
-        // ::configureParallelExecutableFactory() instead which is
-        // simpler to override, unless you _really_ need one of the
-        // parameters passed to this method.
-        return ParallelExecutorFactory::create(...func_get_args())
+        // The only exception is if you need the whole BC layer with the API
+        // from 1.x.
+        $factory = ParallelExecutorFactory::create(
+            $fetchItems,
+            $runSingleCommand,
+            $getItemName,
+            $commandName,
+            $commandDefinition,
+            $errorHandler,
+        );
+
+        $container = $this->getContainer();
+
+        $progressSymbol = $this->getProgressSymbol();
+        $legacyDefaultProgressSymbol = chr(254);
+        if ($legacyDefaultProgressSymbol !== $progressSymbol) {
+            Deprecation::trigger(
+                'The method ::getProgressSymbol() is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to register your progress symbol to the factory.',
+                __FUNCTION__,
+            );
+
+            $factory = $factory->withProgressSymbol($progressSymbol);
+        }
+
+        $phpExecutable = $this->detectPhpExecutable();
+        $legacyDefaultPhpExecutable = PhpExecutableFinder::tryToFind();
+        if ($phpExecutable !== $legacyDefaultPhpExecutable) {
+            Deprecation::trigger(
+                'The method ::detectPhpExecutable() is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to register your PHP executable path to the factory.',
+                __FUNCTION__,
+            );
+
+            $factory = $factory->withPhpExecutable($phpExecutable);
+        }
+
+        $workingDirectory = $this->getWorkingDirectory($container);
+        $legacyDefaultWorkingDirectory = dirname($container->getParameter('kernel.project_dir'));
+        if ($workingDirectory !== $legacyDefaultWorkingDirectory) {
+            Deprecation::trigger(
+                'The method ::getWorkingDirectory() is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to register your working directory path to the factory.',
+                __FUNCTION__,
+            );
+
+            $factory = $factory->withWorkingDirectory($workingDirectory);
+        }
+
+        $environmentVariables = $this->getEnvironmentVariables($container);
+        $legacyDefaultEnvironmentVariables = [
+            'PATH' => getenv('PATH'),
+            'HOME' => getenv('HOME'),
+            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
+            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
+        ];
+        if ($environmentVariables !== $legacyDefaultEnvironmentVariables) {
+            Deprecation::trigger(
+                'The method ::getEnvironmentVariables() is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to register your extra environment variables to the factory.',
+                __FUNCTION__,
+            );
+
+            $factory = $factory->withExtraEnvironmentVariables($environmentVariables);
+        }
+
+        $segmentSize = $this->getSegmentSize();
+        $legacyDefaultSegmentSize = 50;
+        if ($segmentSize !== $legacyDefaultSegmentSize) {
+            Deprecation::trigger(
+                'The method ::getSegmentSize() is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to register your segment size to the factory.',
+                __FUNCTION__,
+            );
+
+            $factory = $factory->withSegmentSize($segmentSize);
+        }
+
+        $batchSize = $this->getBatchSize();
+        $legacyDefaultBatchSize = $segmentSize;
+        if ($batchSize !== $legacyDefaultBatchSize) {
+            Deprecation::trigger(
+                'The method ::getBatchSize() is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to register your batch size to the factory.',
+                __FUNCTION__,
+            );
+
+            $factory = $factory->withBatchSize($batchSize);
+        }
+
+        $consolePath = $this->getConsolePath();
+        $legacyDefaultConsolePath = realpath(getcwd().'/bin/console');
+        if ($consolePath !== $legacyDefaultConsolePath) {
+            Deprecation::trigger(
+                'The method ::getConsolePath() is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to register your script path to the factory.',
+                __FUNCTION__,
+            );
+
+            $factory = $factory->withScriptPath($consolePath);
+        }
+
+        return $factory
             ->withRunBeforeFirstCommand($this->runBeforeFirstCommand(...))
             ->withRunAfterLastCommand($this->runAfterLastCommand(...))
             ->withRunBeforeBatch($this->runBeforeBatch(...))
@@ -176,11 +286,21 @@ trait Parallelization
 
     protected function createErrorHandler(InputInterface $input, OutputInterface $output): ErrorHandler
     {
-        return new LoggingErrorHandler(
-            new ThrowableCodeErrorHandler(
-                ResetServiceErrorHandler::forContainer($this->getContainer()),
-            ),
+        $errorHandler = new ThrowableCodeErrorHandler(
+            ResetServiceErrorHandler::forContainer($this->getContainer()),
         );
+
+        if (!$this->logError) {
+            Deprecation::trigger(
+                'The %s#logError property is deprecated and will be removed in 3.0.0. Override the ::%s() method instead to produce the desired error handler.',
+                self::class,
+                __FUNCTION__,
+            );
+
+            return $errorHandler;
+        }
+
+        return new LoggingErrorHandler($errorHandler);
     }
 
     protected function createLogger(InputInterface $input, OutputInterface $output): Logger
@@ -198,7 +318,7 @@ trait Parallelization
         // The container is required to reset the container upon failure to
         // avoid things such as a broken UoW or entity manager.
         //
-        // If no such behaviour is desired, ::createErrorHandler() can be
+        // If no such behaviour is desired, `::createErrorHandler()` can be
         // overridden to provide a different error handler.
         $application = $this->getApplication();
 
@@ -207,6 +327,51 @@ trait Parallelization
         }
 
         return null;
+    }
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
+     *             ::getParallelExecutableFactory() to register the progress symbol to the factory
+     *             instead.
+     */
+    private static function getProgressSymbol(): string
+    {
+        return chr(254);
+    }
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
+     *             ::getParallelExecutableFactory() to register the PHP executable path to the
+     *             factory instead.
+     */
+    private static function detectPhpExecutable(): string
+    {
+        return PhpExecutableFinder::find();
+    }
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
+     *             ::getParallelExecutableFactory() to register the working directory path to the
+     *             factory instead.
+     */
+    private static function getWorkingDirectory(ContainerInterface $container): string
+    {
+        return dirname($container->getParameter('kernel.project_dir'));
+    }
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
+     *             ::getParallelExecutableFactory() to register the working directory path to the
+     *             factory instead.
+     */
+    protected function getEnvironmentVariables(ContainerInterface $container): array
+    {
+        return [
+            'PATH' => getenv('PATH'),
+            'HOME' => getenv('HOME'),
+            'SYMFONY_DEBUG' => $container->getParameter('kernel.debug'),
+            'SYMFONY_ENV' => $container->getParameter('kernel.environment'),
+        ];
     }
 
     protected function runBeforeFirstCommand(
@@ -239,5 +404,35 @@ trait Parallelization
         OutputInterface $output,
         array $items
     ): void {
+    }
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
+     *             ::getParallelExecutableFactory() to register your segment size
+     *             to the factory instead.
+     */
+    protected function getSegmentSize(): int
+    {
+        return 50;
+    }
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
+     *             ::getParallelExecutableFactory() to register your batch size
+     *             to the factory instead.
+     */
+    protected function getBatchSize(): int
+    {
+        return $this->getSegmentSize();
+    }
+
+    /**
+     * @deprecated Deprecated since 2.0.0 and will be removed in 3.0.0. Override
+     *             ::getParallelExecutableFactory() to register your console path
+     *             to the factory instead.
+     */
+    protected function getConsolePath(): string
+    {
+        return realpath(getcwd().'/bin/console');
     }
 }

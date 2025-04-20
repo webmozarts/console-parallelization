@@ -33,6 +33,9 @@ use Webmozarts\Console\Parallelization\Logger\StandardLogger;
 
 abstract class ParallelCommand extends Command
 {
+    // TODO: simply add the Parallelization trait for 3.x where all the BC
+    //  layer of the trait is removed.
+
     protected function configure(): void
     {
         ParallelizationInput::configureCommand($this);
