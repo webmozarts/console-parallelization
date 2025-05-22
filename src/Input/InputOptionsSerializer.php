@@ -20,19 +20,14 @@ use function array_diff_key;
 use function array_fill_keys;
 use function array_keys;
 use function array_map;
-use function implode;
-use function is_string;
-use function preg_match;
+use function array_merge;
 use function sprintf;
-use function str_replace;
 
 /**
  * @internal
  */
 final class InputOptionsSerializer
 {
-    private const string ESCAPE_TOKEN_PATTERN = '/[\s\W]/';
-
     private function __construct()
     {
     }
@@ -45,93 +40,53 @@ final class InputOptionsSerializer
     public static function serialize(
         InputDefinition $commandDefinition,
         InputInterface $input,
-        array $excludedOptionNames
+        array $excludedOptionNames,
     ): array {
         $filteredOptions = array_diff_key(
             RawInput::getRawOptions($input),
             array_fill_keys($excludedOptionNames, ''),
         );
 
-        return array_map(
-            static fn (string $name) => self::serializeOption(
+        $serializedOptionsList = [];
+
+        foreach (array_keys($filteredOptions) as $name) {
+            $serializedOptionsList[] = self::serializeOption(
                 $commandDefinition->getOption($name),
                 $name,
                 $filteredOptions[$name],
-            ),
-            array_keys($filteredOptions),
-        );
+            );
+        }
+
+        return array_merge(...$serializedOptionsList);
     }
 
     /**
      * @param string|bool|int|float|null|array<string|bool|int|float|null> $value
+     *
+     * @return list<string>
      */
     private static function serializeOption(
         InputOption $option,
         string $name,
         array|bool|float|int|string|null $value,
-    ): string {
-        if ($option->isNegatable()) {
-            return sprintf(
-                '--%s%s',
-                $value ? '' : 'no-',
-                $name,
-            );
-        }
-
-        if (!$option->acceptValue()) {
-            return sprintf(
-                '--%s',
-                $name,
-            );
-        }
-
-        if ($option->isArray()) {
-            /** @var array<string|bool|int|float|null> $value */
-            return implode(
-                '',
-                array_map(
-                    static fn ($item) => self::serializeOptionWithValue($name, $item),
-                    $value,
-                ),
-            );
-        }
-
-        /** @var string|bool|int|float|null $value */
-        return self::serializeOptionWithValue($name, $value);
+    ): array {
+        // @phpstan-ignore-next-line return.type argument.type
+        return match (true) {
+            $option->isNegatable() => [sprintf('--%s%s', $value ? '' : 'no-', $name)],
+            !$option->acceptValue() => [sprintf('--%s', $name)],
+            /** @var list<string|bool|int|float|null> $value */
+            // @phpstan-ignore-next-line argument.type
+            $option->isArray() => array_map(static fn ($item) => self::serializeOptionWithValue($name, $item), $value),
+            /** @var string|int|float|null $value */
+            // @phpstan-ignore-next-line argument.type
+            default => [self::serializeOptionWithValue($name, $value)],
+        };
     }
 
     private static function serializeOptionWithValue(
         string $name,
-        bool|float|int|string|null $value
+        bool|float|int|string|null $value,
     ): string {
-        return sprintf(
-            '--%s=%s',
-            $name,
-            self::quoteOptionValue($value),
-        );
-    }
-
-    /**
-     * Ensure that an option value is quoted correctly before it is passed to a
-     * child process.
-     */
-    private static function quoteOptionValue(bool|float|int|string|null $value): bool|float|int|string|null
-    {
-        if (self::isValueRequiresQuoting($value)) {
-            return sprintf(
-                '"%s"',
-                str_replace('"', '\"', (string) $value),
-            );
-        }
-
-        return $value;
-    }
-
-    /**
-     * Validate whether a command option requires quoting.
-     */
-    private static function isValueRequiresQuoting(mixed $value): bool
-    {
-        return is_string($value) && 0 < preg_match(self::ESCAPE_TOKEN_PATTERN, $value);
+        return sprintf('--%s=%s', $name, $value);
     }
 }

@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -12,12 +11,18 @@
 
 declare(strict_types=1);
 
-require __DIR__.'/../vendor/autoload.php';
+namespace Webmozarts\Console\Parallelization;
 
-use Symfony\Component\Console\Application;
-use Webmozarts\Console\Parallelization\Fixtures\Command\FrameworkLessCommand;
+use Stringable;
 
-$application = new Application();
-$application->add(new FrameworkLessCommand());
+final readonly class CustomIteratorKey implements Stringable
+{
+    public function __construct(public string $value)
+    {
+    }
 
-$application->run();
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}

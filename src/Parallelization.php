@@ -42,25 +42,27 @@ use function realpath;
  *
  * You must implement the following methods in your command:
  *
- *  * fetchItems(): Returns all the items that you want to process as
+ *  - `::fetchItems()`: Returns all the items that you want to process as
  *    strings. Typically, you will return IDs of database objects here.
- *  * runSingleCommand(): Executes the command for a single item.
- *  * getItemName(): Returns a human readable name of the processed items.
+ *  - `::runSingleCommand()`: Executes the command for a single item.
+ *  - `::getItemName()`: Returns a human-readable name of the processed items.
  *
  * You can improve the performance of your command by making use of batching.
  * Batching allows you to process multiple items together, for example to
  * persist them in a batch to reduce the number of I/O operations.
  *
- * To enable batching, you will typically implement runAfterBatch() and persist
- * the changes done in multiple calls of runSingleCommand().
+ * To enable batching, you will typically implement `::runAfterBatch()` and persist
+ * the changes done in multiple calls of `::runSingleCommand()`.
  *
- * The batch size is determined by getBatchSize() and defaults to the segment
+ * The batch size is determined by the batch size and defaults to the segment
  * size. The segment size is the number of items a worker (child) process
  * consumes before it dies. This means that, by default, a child process will
  * process all its items, persist them in a batch and then die. If you want
- * to improve the performance of your command, try to tweak getSegmentSize()
- * first. Optionally, you can tweak getBatchSize() to process multiple batches
+ * to improve the performance of your command, try to tweak the segment size
+ * first. Optionally, you can tweak batch size to process multiple batches
  * in each child process.
+ *
+ * @phpstan-require-extends Command
  */
 trait Parallelization
 {
@@ -275,7 +277,7 @@ trait Parallelization
         InputInterface $input,
         OutputInterface $output
     ): ParallelExecutorFactory {
-        // This method will safely never contain anything. It is only a
+        // This method will safely NEVER contain anything. It is only a
         // placeholder for the user to override so omitting
         // parent::configureParallelExecutableFactory() is perfectly safe.
 
@@ -316,7 +318,7 @@ trait Parallelization
         // The container is required to reset the container upon failure to
         // avoid things such as a broken UoW or entity manager.
         //
-        // If no such behaviour is desired, ::createItemErrorHandler() can be
+        // If no such behaviour is desired, `::createErrorHandler()` can be
         // overridden to provide a different error handler.
         $application = $this->getApplication();
 

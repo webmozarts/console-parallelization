@@ -22,6 +22,7 @@ use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\NoSubProcessCommand;
+use Webmozarts\Console\Parallelization\Integration\App\BareKernel;
 use function array_column;
 use function array_map;
 use function preg_replace;

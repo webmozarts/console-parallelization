@@ -124,6 +124,14 @@ abstract class ParallelCommand extends Command
         InputDefinition $commandDefinition,
         ErrorHandler $errorHandler
     ): ParallelExecutorFactory {
+        // If you are looking at this code to wonder if you should call it when
+        // overriding this method, it is highly recommended you don't and just
+        // call `ParallelExecutorFactory::create(...func_get_args())`.
+        //
+        // Configuring the factory is recommended to be done in
+        // ::configureParallelExecutableFactory() instead which is
+        // simpler to override, unless you _really_ need one of the
+        // parameters passed to this method.
         return ParallelExecutorFactory::create(
             Closure::fromCallable($fetchItems),
             Closure::fromCallable($runSingleCommand),
