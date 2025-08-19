@@ -32,7 +32,7 @@
         "composer/semver": "^3.4.3",
         "ergebnis/composer-normalize": "^2.45",
         "fidry/makefile": "^1.1.1",
-        "infection/infection": "^0.29.14",
+        "infection/infection": "^0.29.14 || ^0.31.0",
         "jangregor/phpstan-prophecy": "^2.1.1",
         "phpspec/prophecy-phpunit": "^2.3",
         "phpstan/extension-installer": "^1.1",
