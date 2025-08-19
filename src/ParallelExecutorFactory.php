@@ -28,12 +28,18 @@ use function chr;
 use function is_string;
 use function Safe\getcwd;
 use function str_starts_with;
+use function usleep;
 use const DIRECTORY_SEPARATOR;
 use const STDIN;
 
 final class ParallelExecutorFactory
 {
     private const int CHILD_POLLING_IN_MICRO_SECONDS = 1000;    // 1ms
+
+    /**
+     * @var Closure(): void
+     */
+    private static Closure $pollingClosure;
 
     private bool $useDefaultBatchSize = true;
 
@@ -111,7 +117,7 @@ final class ParallelExecutorFactory
             new SymfonyProcessLauncherFactory(
                 new StandardSymfonyProcessFactory(),
             ),
-            static fn () => usleep(self::CHILD_POLLING_IN_MICRO_SECONDS),
+            self::getPollingClosure(),
         );
     }
 
@@ -354,5 +360,17 @@ final class ParallelExecutorFactory
         )
             ? $scriptName
             : $pwd.DIRECTORY_SEPARATOR.$scriptName;
+    }
+
+    /**
+     * @return Closure(): void
+     */
+    private static function getPollingClosure(): Closure
+    {
+        if (!isset(self::$pollingClosure)) {
+            self::$pollingClosure = static fn () => usleep(self::CHILD_POLLING_IN_MICRO_SECONDS);
+        }
+
+        return self::$pollingClosure;
     }
 }
