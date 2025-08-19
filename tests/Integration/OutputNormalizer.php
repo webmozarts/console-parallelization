@@ -46,7 +46,9 @@ final class OutputNormalizer
         // depending on the overall result
         $replaceMap = [
             '%  10 secs' => '% 10 secs',
+            '%    10 secs' => '% 10 secs',
             'secs  10.0 MiB' => 'secs 10.0 MiB',
+            'secs    10.0 MiB' => 'secs 10.0 MiB',
             ']  10 secs' => '] 10 secs',
             ']    10 secs' => '] 10 secs',
         ];
