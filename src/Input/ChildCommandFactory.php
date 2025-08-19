@@ -47,11 +47,12 @@ final readonly class ChildCommandFactory
     }
 
     /**
-     * @return array<int, string>
+     * @return array<int<0, max>, string>
      */
     private function createBaseCommand(
         InputInterface $input
     ): array {
+        // @phpstan-ignore return.type
         return array_filter([
             ...$this->phpExecutable,
             $this->scriptPath,
