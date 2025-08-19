@@ -30,7 +30,6 @@ final class OutputNormalizer
 {
     public static function normalize(string $output): string
     {
-        // dd($output);
         $output = self::removeTrailingSpaces(
             self::normalizeProgressBarTimeTaken(
                 self::normalizeMemoryUsage(
