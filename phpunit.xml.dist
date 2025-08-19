@@ -2,7 +2,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          cacheDirectory="dist/phpunit-cache"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          beStrictAboutChangesToGlobalState="true"
          beStrictAboutOutputDuringTests="true"
          colors="true"
@@ -22,6 +22,7 @@
             <directory>tests/</directory>
             <exclude>tests/AutoReview</exclude>
         </testsuite>
+
         <testsuite name="AutoReview">
             <directory>tests/AutoReview</directory>
         </testsuite>
