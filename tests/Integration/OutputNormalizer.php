@@ -30,6 +30,7 @@ final class OutputNormalizer
 {
     public static function normalize(string $output): string
     {
+        // dd($output);
         $output = self::removeTrailingSpaces(
             self::normalizeProgressBarTimeTaken(
                 self::normalizeMemoryUsage(
@@ -69,13 +70,13 @@ final class OutputNormalizer
     public static function normalizeProgressBarTimeTaken(string $output): string
     {
         $output = str_replace(
-            '< 1 sec',
-            '10 secs',
+            ['< 1 sec', '< 1 ms'],
+            ['10 secs', '10 secs'],
             $output,
         );
 
         return preg_replace(
-            '/\d+ secs?/',
+            '/\d+ (secs?|ms|s)/',
             '10 secs',
             $output,
         );
