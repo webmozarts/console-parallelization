@@ -31,6 +31,7 @@
     <source>
         <include>
             <directory>src</directory>
+            <file>tests/Integration/OutputNormalizer.php</file>
         </include>
         <exclude>
             <file>src/CpuCoreCounter.php</file>
