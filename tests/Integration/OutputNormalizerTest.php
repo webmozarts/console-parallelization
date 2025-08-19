@@ -88,6 +88,16 @@ final class OutputNormalizerTest extends TestCase
             ' 10 secs ',
         ];
 
+        yield '[non-fixed size bar] millisecond' => [
+            ' 243 ms ',
+            ' 10 secs ',
+        ];
+
+        yield '[non-fixed size bar] second' => [
+            ' 1 s ',
+            ' 10 secs ',
+        ];
+
         yield '[non-fixed size bar] single digit' => [
             ' 7 secs ',
             ' 10 secs ',
@@ -100,6 +110,11 @@ final class OutputNormalizerTest extends TestCase
 
         yield '[fixed size bar] less than a second' => [
             ' < 1 sec/< 1 sec',
+            ' 10 secs/10 secs',
+        ];
+
+        yield '[fixed size bar] less than a millisecond' => [
+            ' < 1 ms/< 1 ms',
             ' 10 secs/10 secs',
         ];
 
@@ -423,6 +438,11 @@ final class OutputNormalizerTest extends TestCase
     {
         yield 'standard non-fixed sized progress bar line' => [
             ' 4 [--->------------------------] < 1 sec 8.0 MiB',
+            ' 4 [--->------------------------] 10 secs 10.0 MiB',
+        ];
+
+        yield 'standard non-fixed sized progress bar line with ms' => [
+            ' 4 [--->------------------------] < 1 ms 8.0 MiB',
             ' 4 [--->------------------------] 10 secs 10.0 MiB',
         ];
 
