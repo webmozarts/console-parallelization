@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Webmozarts\Console\Parallelization\Input;
 
+use Closure;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,6 +39,11 @@ final class ParallelizationInput
         self::MAIN_PROCESS_OPTION,
         self::CHILD_OPTION,
     ];
+
+    /**
+     * @var Closure():positive-int
+     */
+    private static Closure $defaultValidatedNumberOfProcessesClosure;
 
     /**
      * @var positive-int
@@ -100,7 +106,7 @@ final class ParallelizationInput
         } else {
             $validatedNumberOfProcesses = null !== $numberOfProcesses
                 ? self::coerceNumberOfProcesses($numberOfProcesses)
-                : static fn () => CpuCoreCounter::getNumberOfCpuCores();
+                : self::getDefaultValidatedNumberOfProcessesClosure();
         }
 
         if ($isChild) {
@@ -177,6 +183,18 @@ final class ParallelizationInput
                 InputOption::VALUE_REQUIRED,
                 'Set the segment size.',
             );
+    }
+
+    /**
+     * @return Closure():positive-int
+     */
+    public static function getDefaultValidatedNumberOfProcessesClosure(): Closure
+    {
+        if (!isset(self::$defaultValidatedNumberOfProcessesClosure)) {
+            self::$defaultValidatedNumberOfProcessesClosure = static fn () => CpuCoreCounter::getNumberOfCpuCores();
+        }
+
+        return self::$defaultValidatedNumberOfProcessesClosure;
     }
 
     public function shouldBeProcessedInMainProcess(): bool

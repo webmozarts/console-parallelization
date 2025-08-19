@@ -271,10 +271,14 @@ final class ParallelExecutorFactoryTest extends TestCase
         $cleanUpWorkingDirectory = self::moveToWorkingDirectory($workingDirectory);
         $cleanUpEnvironmentVariables = EnvironmentVariables::setVariables($environmentVariables);
 
+        $fetchItems = static fn () => ['item1', 'item2'];
+        $runSingleCommand = static fn () => '';
+        $getItemName = static fn () => 'item';
+
         $expected = ParallelExecutorFactory::create(
-            static fn () => ['item1', 'item2'],
-            static fn () => '',
-            static fn () => 'item',
+            $fetchItems,
+            $runSingleCommand,
+            $getItemName,
             'import:movies',
             new InputDefinition(),
             new FakeErrorHandler(),
@@ -286,9 +290,9 @@ final class ParallelExecutorFactoryTest extends TestCase
             ->build();
 
         $actual = ParallelExecutorFactory::create(
-            static fn () => ['item1', 'item2'],
-            static fn () => '',
-            static fn () => 'item',
+            $fetchItems,
+            $runSingleCommand,
+            $getItemName,
             'import:movies',
             new InputDefinition(),
             new FakeErrorHandler(),

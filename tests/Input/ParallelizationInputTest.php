@@ -22,7 +22,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\StringInput;
-use Webmozarts\Console\Parallelization\Process\CpuCoreCounter;
 
 /**
  * @internal
@@ -153,13 +152,11 @@ final class ParallelizationInputTest extends TestCase
 
     public static function inputProvider(): iterable
     {
-        $findNumberOfProcesses = static fn () => CpuCoreCounter::getNumberOfCpuCores();
-
         yield 'empty input' => [
             new StringInput(''),
             new ParallelizationInput(
                 false,
-                $findNumberOfProcesses,
+                ParallelizationInput::getDefaultValidatedNumberOfProcessesClosure(),
                 null,
                 false,
                 null,
@@ -231,7 +228,7 @@ final class ParallelizationInputTest extends TestCase
             new StringInput('--child'),
             new ParallelizationInput(
                 false,
-                $findNumberOfProcesses,
+                ParallelizationInput::getDefaultValidatedNumberOfProcessesClosure(),
                 null,
                 true,
                 null,
@@ -267,7 +264,7 @@ final class ParallelizationInputTest extends TestCase
             new StringInput('--batch-size=10'),
             new ParallelizationInput(
                 false,
-                $findNumberOfProcesses,
+                ParallelizationInput::getDefaultValidatedNumberOfProcessesClosure(),
                 null,
                 false,
                 10,
@@ -279,7 +276,7 @@ final class ParallelizationInputTest extends TestCase
             new StringInput('--segment-size=10'),
             new ParallelizationInput(
                 false,
-                $findNumberOfProcesses,
+                ParallelizationInput::getDefaultValidatedNumberOfProcessesClosure(),
                 null,
                 false,
                 null,
