@@ -168,7 +168,6 @@ final class ParallelExecutorTest extends TestCase
                         [$input, $output, [$items[2]]],
                     ],
                 ],
-                [],
             ];
         })();
 
@@ -209,7 +208,6 @@ final class ParallelExecutorTest extends TestCase
                         [$input, $output, ['item1']],
                     ],
                 ],
-                [],
             ];
         })();
 
@@ -236,7 +234,6 @@ final class ParallelExecutorTest extends TestCase
                 $progressSymbol,
                 $createExpectedOutput(0),
                 0,
-                [],
                 [],
             ];
         })();
@@ -308,7 +305,6 @@ final class ParallelExecutorTest extends TestCase
                         [$input, $output, [$items[2]]],
                     ],
                 ],
-                [],
             ];
         })();
     }
