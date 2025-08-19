@@ -48,6 +48,7 @@ final class OutputNormalizer
             '%  10 secs' => '% 10 secs',
             'secs  10.0 MiB' => 'secs 10.0 MiB',
             ']  10 secs' => '] 10 secs',
+            ']    10 secs' => '] 10 secs',
         ];
 
         return str_replace(
