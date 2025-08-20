@@ -75,6 +75,12 @@
             "ignoreSourceCodeByRegex": [
                 ".*ResettableContainerInterface.*"
             ]
+        },
+        "TrueValue": {
+            "ignoreSourceCodeByRegex": [
+                // This flag is for performance optimisation.
+                ".*sourceExhausted = true.*",
+            ]
         }
     }
 }
