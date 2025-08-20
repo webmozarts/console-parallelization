@@ -172,6 +172,17 @@ final class ChunkedItemsIteratorTest extends TestCase
             ],
         ];
 
+        yield 'items with keys' => [
+            ['key0' => 'item0', 'key1' => 'item1', 'key3' => 'item3', 'key4' => 'item4'],
+            2,
+            ['item0', 'item1', 'item3', 'item4'],
+            4,
+            [
+                ['item0', 'item1'],
+                ['item3', 'item4'],
+            ],
+        ];
+
         yield 'less items than batch size' => [
             ['item0', 'item1', 'item3'],
             4,

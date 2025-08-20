@@ -181,4 +181,17 @@ final class LazyRewindableIteratorTest extends TestCase
         self::assertSame(1, $breakpoint2);
         self::assertSame(1, $breakpoint3);
     }
+
+    public function test_iterator_api_can_be_directly_consumed(): void
+    {
+        $input = (static function () {
+            yield 'first';
+            yield 'second';
+            yield 'third';
+        })();
+
+        $iterator = LazyRewindableIterator::create($input);
+
+        self::assertSame('first', $iterator->current());
+    }
 }
