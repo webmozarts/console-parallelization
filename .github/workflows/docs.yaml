@@ -15,7 +15,7 @@ jobs:
         timeout-minutes: 1
         steps:
             -   name: "Checkout repository"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v5"
 
             -   name: "Check Markdown formatting"
                 uses: "DavidAnson/markdownlint-cli2-action@v20.0.0"
@@ -28,7 +28,7 @@ jobs:
         timeout-minutes: 1
         steps:
             -   name: "Checkout repository"
-                uses: "actions/checkout@v4"
+                uses: "actions/checkout@v5"
 
             -   name: "Restore lychee cache"
                 uses: "actions/cache@v4"
@@ -38,7 +38,7 @@ jobs:
                     restore-keys: cache-lychee-
 
             -   name: "Run Lychee"
-                uses: "lycheeverse/lychee-action@v2.4.1"
+                uses: "lycheeverse/lychee-action@v2.5.0"
                 with:
                     # To keep in sync with Makefile#lychee
                     args: "--verbose --no-progress '*.md' 'docs/**/*.md' --cache --max-cache-age 1d ."
