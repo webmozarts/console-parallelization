@@ -76,10 +76,16 @@
                 ".*ResettableContainerInterface.*"
             ]
         },
+        "ReturnRemoval": {
+            "ignoreSourceCodeByRegex": [
+                // This flag is for performance optimisation.
+                ".*return;.*",
+            ]
+        },
         "TrueValue": {
             "ignoreSourceCodeByRegex": [
                 // This flag is for performance optimisation.
-                ".*sourceExhausted = true.*",
+                ".*sourceExhausted = true.*"
             ]
         }
     }
