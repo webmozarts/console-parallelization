@@ -20,6 +20,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Webmozart\Assert\Assert;
 use Webmozarts\Console\Parallelization\ErrorHandler\ErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\LoggingErrorHandler;
 use Webmozarts\Console\Parallelization\ErrorHandler\ResetServiceErrorHandler;
@@ -346,7 +347,14 @@ trait Parallelization
      */
     private static function detectPhpExecutable(): string
     {
-        return PhpExecutableFinder::find();
+        $phpExecutable = PhpExecutableFinder::tryToFind();
+
+        Assert::notNull(
+            $phpExecutable,
+            'Could not find the PHP executable.',
+        );
+
+        return $phpExecutable;
     }
 
     /**

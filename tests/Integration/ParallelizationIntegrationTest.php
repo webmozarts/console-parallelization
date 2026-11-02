@@ -18,6 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use Webmozarts\Console\Parallelization\Fixtures\Command\DefaultLegacyCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportMoviesCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\ImportUnknownMoviesCountCommand;
 use Webmozarts\Console\Parallelization\Fixtures\Command\LegacyCommand;
@@ -351,6 +352,24 @@ class ParallelizationIntegrationTest extends TestCase
                 LegacyCommand::$calls,
             ),
         );
+    }
+
+    public function test_it_can_run_a_command_relying_on_the_legacy_api_defaults(): void
+    {
+        $commandTester = new CommandTester(
+            (new Application(new BareKernel()))->add(new DefaultLegacyCommand()),
+        );
+
+        $commandTester->execute(
+            [
+                'command' => 'default-legacy:command',
+                '--main-process' => true,
+            ],
+            ['interactive' => true],
+        );
+
+        $commandTester->assertCommandIsSuccessful();
+        self::assertStringContainsString('Processed 2 items.', $commandTester->getDisplay());
     }
 
     public function test_it_can_run_the_command_a_command_with_the_legacy_api_in_a_different_mode(): void
