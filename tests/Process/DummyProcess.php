@@ -108,6 +108,9 @@ final class DummyProcess extends Process
         return $this;
     }
 
+    /**
+     * @param (callable(positive-int|0, int|null, string, string): void)|null $callback
+     */
     #[Override]
     public function start(?callable $callback = null, array $env = []): void
     {

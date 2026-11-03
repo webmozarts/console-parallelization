@@ -163,7 +163,6 @@ final readonly class ChunkedItemsIterator
             ),
         );
 
-        /** @phpstan-ignore-next-line return.typ */
         return values(
             mapWithKeys(
                 static fn ($item, $index) => self::normalizeItem($item, $index),

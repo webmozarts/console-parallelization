@@ -34,9 +34,6 @@ parameters:
         - path: tests/ParallelExecutorFactoryTest.php
           message: '#ParallelExecutorFactory::create\(\) expects Closure#'
 
-        - path: tests/Fixtures/Command/LegacyCommand.php
-          message: '#Static method .* is unused#'
-
         - path: tests/Input/RawInputTest.php
           message: '#Webmozarts\\Console\\Parallelization\\Input\\FakeInput#'
 
