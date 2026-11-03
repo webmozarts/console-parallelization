@@ -25,6 +25,8 @@ jobs:
         steps:
             -   name: "Check out repository code"
                 uses: "actions/checkout@v5"
+                with:
+                    persist-credentials: false
 
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
@@ -59,6 +61,8 @@ jobs:
         steps:
             -   name: "Check out repository code"
                 uses: "actions/checkout@v5"
+                with:
+                    persist-credentials: false
 
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
@@ -89,6 +93,8 @@ jobs:
         steps:
             -   name: "Check out repository code"
                 uses: "actions/checkout@v5"
+                with:
+                    persist-credentials: false
 
             -   name: "Setup PHP"
                 uses: "shivammathur/setup-php@v2"
