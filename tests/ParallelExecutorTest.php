@@ -874,6 +874,24 @@ final class ParallelExecutorTest extends TestCase
         $factory->build();
     }
 
+    public function test_it_can_create_an_executor_with_the_minimum_batch_and_segment_size(): void
+    {
+        $factory = ParallelExecutorFactory::create(
+            FakeCallable::create(),
+            FakeCallable::create(),
+            FakeCallable::create(),
+            'test:command',
+            new InputDefinition(),
+            new FakeErrorHandler(),
+        )
+            ->withBatchSize(1)
+            ->withSegmentSize(1);
+
+        $this->expectNotToPerformAssertions();
+
+        $factory->build();
+    }
+
     public static function invalidExecutorProvider(): iterable
     {
         $createFactory = static fn () => ParallelExecutorFactory::create(
