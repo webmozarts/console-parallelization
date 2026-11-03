@@ -136,7 +136,6 @@ final class ParallelExecutorFactoryTest extends TestCase
             ->withPhpExecutable($phpExecutable);
 
         $phpExecutableReflection = (new ReflectionClass($factory::class))->getProperty('phpExecutable');
-        $phpExecutableReflection->setAccessible(true);
 
         $actual = $phpExecutableReflection->getValue($factory);
 
