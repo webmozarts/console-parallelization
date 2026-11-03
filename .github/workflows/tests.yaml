@@ -24,18 +24,18 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@v5"
+                uses: "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09" # v5.1.0
                 with:
                     persist-credentials: false
 
             -   name: "Setup PHP"
-                uses: "shivammathur/setup-php@v2"
+                uses: "shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962" # 2.40.0
                 with:
                     php-version: "${{ matrix.php }}"
                     tools: "composer"
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
 
             -   name: "Run tests"
                 run: "make phpunit"
@@ -60,12 +60,12 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@v5"
+                uses: "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09" # v5.1.0
                 with:
                     persist-credentials: false
 
             -   name: "Setup PHP"
-                uses: "shivammathur/setup-php@v2"
+                uses: "shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962" # 2.40.0
                 with:
                     php-version: "${{ matrix.php }}"
                     tools: "composer"
@@ -76,7 +76,7 @@ jobs:
                 run: "bin/fix-symfony-versions \"${SYMFONY_CONFLICT}\""
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
                 with:
                     dependency-versions: "${{ matrix.dependency-versions }}"
 
@@ -94,19 +94,19 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@v5"
+                uses: "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09" # v5.1.0
                 with:
                     persist-credentials: false
 
             -   name: "Setup PHP"
-                uses: "shivammathur/setup-php@v2"
+                uses: "shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962" # 2.40.0
                 with:
                     php-version: "${{ matrix.php }}"
                     tools: "composer"
                     coverage: "pcov"
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@v3"
+                uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
 
             -   name: "Run tests with coverage and Infection"
                 run: "make infection"
