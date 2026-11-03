@@ -38,6 +38,10 @@ INFECTION_WITH_INITIAL_TESTS = $(INFECTION_BIN) --show-mutations --min-msi=$(TAR
 RECTOR_BIN = vendor-bin/rector/vendor/bin/rector
 RECTOR = $(RECTOR_BIN)
 
+SANDBOX_AGENT = claude
+SANDBOX_NAME = $(SANDBOX_AGENT)-$(notdir $(CURDIR))
+SANDBOX_LOCAL_KIT = .sbx/project-local/spec.yaml
+
 
 #
 # Commands
@@ -176,6 +180,16 @@ lychee:
 	@# To keep in sync with .github/workflows/docs.yaml#check-links
 	lychee --verbose --no-progress '*.md' 'docs/**/*.md' --timeout=2
 
+.PHONY: sbx_create
+sbx_create:	## Creates the Docker Sandbox with the project kits
+sbx_create: $(SANDBOX_LOCAL_KIT)
+	@# Every directory under .sbx/ is a kit. A kit is applied only when the sandbox is
+	@# created: after a kit change, run `sbx rm $(SANDBOX_NAME)` and then this again.
+	sbx create \
+		--name=$(SANDBOX_NAME) \
+		$(foreach kit,$(sort $(dir $(wildcard .sbx/*/spec.yaml))),--kit=$(kit:/=)) \
+		$(SANDBOX_AGENT) .
+
 
 #
 # Rules from files
@@ -215,3 +229,16 @@ $(INFECTION_BIN): vendor
 $(RECTOR_BIN): vendor
 	composer bin rector install
 	touch -c $@
+
+# The developer-local kit is gitignored, so only its empty skeleton is created here.
+$(SANDBOX_LOCAL_KIT):
+	@mkdir -p $(dir $@)
+	@printf '%s\n' \
+		'---' \
+		'schemaVersion: "2"' \
+		'kind: mixin' \
+		'name: console-parallelization-local' \
+		'displayName: Console Parallelization (local)' \
+		'description: Uncommitted, developer-local sandbox customisation. Add an environment block (or any other kit section) to enrich your own sandbox; this file is gitignored.' \
+		> $@
+	@echo "Created the local kit skeleton $@."
