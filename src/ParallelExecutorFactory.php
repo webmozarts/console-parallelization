@@ -337,11 +337,7 @@ final class ParallelExecutorFactory
     {
         static $noop;
 
-        // @codeCoverageIgnoreStart
-        if (!isset($noop)) {
-            $noop = static function (): void {};
-        }
-        // @codeCoverageIgnoreEnd
+        $noop ??= static function (): void {};
 
         /** @phpstan-ignore return.type */
         return $noop;

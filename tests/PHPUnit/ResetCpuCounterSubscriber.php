@@ -30,9 +30,7 @@ final class ResetCpuCounterSubscriber implements PreparationStartedSubscriber
 
     private static function getCountReflection(): ReflectionProperty
     {
-        if (!isset(self::$countReflection)) {
-            self::$countReflection = (new ReflectionClass(CpuCoreCounter::class))->getProperty('count');
-        }
+        self::$countReflection ??= (new ReflectionClass(CpuCoreCounter::class))->getProperty('count');
 
         return self::$countReflection;
     }
