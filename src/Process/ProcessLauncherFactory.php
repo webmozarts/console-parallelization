@@ -38,6 +38,6 @@ interface ProcessLauncherFactory
         int $segmentSize,
         Logger $logger,
         callable $processOutput,
-        callable $tick
+        callable $tick,
     ): ProcessLauncher;
 }

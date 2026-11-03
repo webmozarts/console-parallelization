@@ -32,7 +32,7 @@ final class FrameworkLessCommand extends ParallelCommand
     protected function runSingleCommand(
         string $item,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void {
     }
 

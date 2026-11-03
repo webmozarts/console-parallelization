@@ -70,7 +70,7 @@ final class DefaultLegacyCommand extends Command
     protected function runSingleCommand(
         string $item,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void {
     }
 }

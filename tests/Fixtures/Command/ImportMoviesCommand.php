@@ -74,7 +74,7 @@ final class ImportMoviesCommand extends Command
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
     ): ParallelExecutorFactory {
         return ParallelExecutorFactory::create(
             $fetchItems,
@@ -116,7 +116,7 @@ final class ImportMoviesCommand extends Command
 
     protected function createLogger(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): Logger {
         return new StandardLogger(
             $input,
@@ -127,7 +127,7 @@ final class ImportMoviesCommand extends Command
     }
 
     private function runBeforeBatch(
-        array $movieFileNames
+        array $movieFileNames,
     ): void {
         $this->logger->recordBeforeBatch();
 

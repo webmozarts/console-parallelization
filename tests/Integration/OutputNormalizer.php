@@ -138,7 +138,7 @@ final class OutputNormalizer
 
     public static function removeIntermediateNonFixedProgressBars(
         string $output,
-        int $itemsCount
+        int $itemsCount,
     ): string {
         $restoreFirstLine = self::excludeNonFixedSizedProgressBarLine(
             $output,
@@ -176,7 +176,7 @@ final class OutputNormalizer
      */
     private static function excludeNonFixedSizedProgressBarLine(
         string &$output,
-        int $itemNumber
+        int $itemNumber,
     ): callable {
         $lineFound = 1 === preg_match(
             '#(?<line> '.$itemNumber.' \[[->]+] .+?MiB.*?\n?)#',

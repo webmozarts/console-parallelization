@@ -30,7 +30,7 @@ final class ThrowableCodeErrorHandlerTest extends TestCase
     #[DataProvider('throwableProvider')]
     public function test_it_returns_the_code_of_the_throwable(
         Throwable $throwable,
-        int $expectedExitCode
+        int $expectedExitCode,
     ): void {
         $errorHandler = new ThrowableCodeErrorHandler();
 

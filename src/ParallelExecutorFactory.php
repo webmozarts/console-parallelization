@@ -78,7 +78,7 @@ final class ParallelExecutorFactory
         private string $workingDirectory,
         private ?array $extraEnvironmentVariables,
         private ProcessLauncherFactory $processLauncherFactory,
-        private Closure $processTick
+        private Closure $processTick,
     ) {
     }
 
@@ -93,7 +93,7 @@ final class ParallelExecutorFactory
         Closure $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
     ): self {
         return new self(
             $fetchItems,

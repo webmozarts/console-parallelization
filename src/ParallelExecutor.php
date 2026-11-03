@@ -65,7 +65,7 @@ final class ParallelExecutor
         private readonly string $workingDirectory,
         private readonly ?array $extraEnvironmentVariables,
         private readonly ProcessLauncherFactory $processLauncherFactory,
-        private readonly Closure $processTick
+        private readonly Closure $processTick,
     ) {
         self::validateSegmentSize($segmentSize);
         self::validateBatchSize($batchSize);
@@ -79,7 +79,7 @@ final class ParallelExecutor
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
         OutputInterface $output,
-        Logger $logger
+        Logger $logger,
     ): int {
         if ($parallelizationInput->isChildProcess()) {
             return $this->executeChildProcess(
@@ -112,7 +112,7 @@ final class ParallelExecutor
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
         OutputInterface $output,
-        Logger $logger
+        Logger $logger,
     ): int {
         ($this->runBeforeFirstCommand)($input, $output);
 
@@ -190,7 +190,7 @@ final class ParallelExecutor
         ParallelizationInput $parallelizationInput,
         InputInterface $input,
         OutputInterface $output,
-        Logger $logger
+        Logger $logger,
     ): int {
         $itemIterator = ChunkedItemsIterator::fromStream(
             $this->childSourceStream,
@@ -218,7 +218,7 @@ final class ParallelExecutor
         InputInterface $input,
         OutputInterface $output,
         Logger $logger,
-        callable $advance
+        callable $advance,
     ): int {
         $exitCode = 0;
 
@@ -244,7 +244,7 @@ final class ParallelExecutor
         string $item,
         InputInterface $input,
         OutputInterface $output,
-        Logger $logger
+        Logger $logger,
     ): int {
         try {
             ($this->runSingleCommand)($item, $input, $output);
@@ -263,7 +263,7 @@ final class ParallelExecutor
         int $segmentSize,
         int $numberOfProcesses,
         InputInterface $input,
-        Logger $logger
+        Logger $logger,
     ): ProcessLauncher {
         return $this->processLauncherFactory->create(
             $this->childCommandFactory->createChildCommand($input),
@@ -297,7 +297,7 @@ final class ParallelExecutor
         ?int $pid,
         string $type,
         string $buffer,
-        Logger $logger
+        Logger $logger,
     ): void {
         $progressSymbol = $this->progressSymbol;
         $charactersCount = mb_substr_count($buffer, $progressSymbol);

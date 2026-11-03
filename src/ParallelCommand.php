@@ -59,7 +59,7 @@ abstract class ParallelCommand extends Command
     abstract protected function runSingleCommand(
         string $item,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void;
 
     /**
@@ -89,7 +89,7 @@ abstract class ParallelCommand extends Command
             fn (
                 string $item,
                 InputInterface $input,
-                OutputInterface $output
+                OutputInterface $output,
             ) => $this->runSingleCommand($item, $input, $output),
             $this->getItemName(...),
             $commandName,
@@ -122,7 +122,7 @@ abstract class ParallelCommand extends Command
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
     ): ParallelExecutorFactory {
         // If you are looking at this code to wonder if you should call it when
         // overriding this method, it is highly recommended you don't and just
@@ -149,7 +149,7 @@ abstract class ParallelCommand extends Command
     protected function configureParallelExecutableFactory(
         ParallelExecutorFactory $parallelExecutorFactory,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): ParallelExecutorFactory {
         // This method will safely never contain anything. It is only a
         // placeholder for the user to override so omitting

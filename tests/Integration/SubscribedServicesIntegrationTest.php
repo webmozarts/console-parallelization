@@ -30,7 +30,7 @@ class SubscribedServicesIntegrationTest extends TestCase
     protected function setUp(): void
     {
         $this->subscribedServiceCommandTester = new CommandTester(
-            (new Application(new Kernel()))->get('subscribed-service')
+            (new Application(new Kernel()))->get('subscribed-service'),
         );
     }
 

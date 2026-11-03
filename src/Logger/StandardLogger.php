@@ -45,7 +45,7 @@ final class StandardLogger implements Logger
         InputInterface $input,
         OutputInterface $output,
         private readonly int $terminalWidth,
-        private readonly ProgressBarFactory $progressBarFactory
+        private readonly ProgressBarFactory $progressBarFactory,
     ) {
         $this->io = new SymfonyStyle($input, $output);
         $this->logger = new ConsoleLogger($output);
@@ -56,7 +56,7 @@ final class StandardLogger implements Logger
         int $batchSize,
         ?int $numberOfItems,
         string $itemName,
-        bool $shouldSpawnChildProcesses
+        bool $shouldSpawnChildProcesses,
     ): void {
         $numberOfItems ??= '???';
         $segmentSize = $configuration->getSegmentSize();
@@ -210,7 +210,7 @@ final class StandardLogger implements Logger
         ?int $pid,
         string $type,
         string $buffer,
-        string $progressSymbol
+        string $progressSymbol,
     ): void {
         $error = 'err' === $type;
         $message = str_replace($progressSymbol, '', $buffer);
@@ -275,7 +275,7 @@ final class StandardLogger implements Logger
      */
     private static function enunciate(
         string $singular,
-        ?int $count
+        ?int $count,
     ): ?string {
         return null === $count
             ? null
@@ -288,7 +288,7 @@ final class StandardLogger implements Logger
 
     private static function formatBuffer(
         string $buffer,
-        bool $error
+        bool $error,
     ): string {
         if ($error) {
             $message = '<bg=red;fg=white> ERR </> ';

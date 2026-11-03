@@ -56,7 +56,7 @@ final class StandardLoggerTest extends TestCase
         ?int $numberOfItems,
         string $itemName,
         bool $shouldSpawnChildProcesses,
-        string $expected
+        string $expected,
     ): void {
         $this->logger->logConfiguration(
             $configuration,
@@ -443,7 +443,7 @@ final class StandardLoggerTest extends TestCase
         string $buffer,
         bool $alreadyLoggingChildOutput,
         bool $previousChildOutputIsSameProcess,
-        string $expected
+        string $expected,
     ): void {
         // Setup
         $this->logger->logStart(10);
@@ -725,7 +725,7 @@ final class StandardLoggerTest extends TestCase
         int $pid,
         int $verbosity,
         bool $previousCallIsLogAdvance,
-        string $expected
+        string $expected,
     ): void {
         // Setup start
         $this->logger->logStart(null);
@@ -817,7 +817,7 @@ final class StandardLoggerTest extends TestCase
         int $index,
         int $verbosity,
         bool $previousCallIsLogAdvance,
-        string $expected
+        string $expected,
     ): void {
         // Setup start
         $this->logger->logStart(null);

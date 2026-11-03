@@ -34,7 +34,7 @@ final class DummyProcessFactory implements SymfonyProcessFactory
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $processOutput
+        callable $processOutput,
     ): Process {
         $pid = $this->pidSequence;
         ++$this->pidSequence;

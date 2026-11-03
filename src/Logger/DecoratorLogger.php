@@ -32,7 +32,7 @@ abstract class DecoratorLogger implements Logger
         int $batchSize,
         ?int $numberOfItems,
         string $itemName,
-        bool $shouldSpawnChildProcesses
+        bool $shouldSpawnChildProcesses,
     ): void {
         $this->decoratedLogger->logConfiguration(...func_get_args());
     }
@@ -72,7 +72,7 @@ abstract class DecoratorLogger implements Logger
         ?int $pid,
         string $type,
         string $buffer,
-        string $progressSymbol
+        string $progressSymbol,
     ): void {
         $this->decoratedLogger->logUnexpectedChildProcessOutput(...func_get_args());
     }

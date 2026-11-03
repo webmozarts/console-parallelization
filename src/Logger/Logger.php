@@ -31,7 +31,7 @@ interface Logger
         int $batchSize,
         ?int $numberOfItems,
         string $itemName,
-        bool $shouldSpawnChildProcesses
+        bool $shouldSpawnChildProcesses,
     ): void;
 
     /**
@@ -80,6 +80,6 @@ interface Logger
         ?int $pid,
         string $type,
         string $buffer,
-        string $progressSymbol
+        string $progressSymbol,
     ): void;
 }

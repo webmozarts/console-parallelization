@@ -26,7 +26,7 @@ final class InflectorTest extends TestCase
     public function test_it_can_pluralize_words(
         string $singular,
         int $count,
-        ?string $expected
+        ?string $expected,
     ): void {
         $actual = Inflector::pluralize($singular, $count);
 

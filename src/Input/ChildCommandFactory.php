@@ -50,7 +50,7 @@ final readonly class ChildCommandFactory
      * @return array<int<0, max>, string>
      */
     private function createBaseCommand(
-        InputInterface $input
+        InputInterface $input,
     ): array {
         // @phpstan-ignore return.type
         return array_filter([

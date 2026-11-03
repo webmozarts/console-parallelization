@@ -64,7 +64,7 @@ final class ParallelExecutorTest extends TestCase
         string $progressSymbol,
         string $expectedOutput,
         int $expectedExitCode,
-        array $expectedCalls
+        array $expectedCalls,
     ): void {
         $calls = [];
         $errorHandler = new FakeErrorHandler();
@@ -588,7 +588,7 @@ final class ParallelExecutorTest extends TestCase
         ParallelizationInput $parallelizationInput,
         int $segmentSize,
         array $items,
-        bool $expected
+        bool $expected,
     ): void {
         $noop = static function (): void {};
 
@@ -625,7 +625,7 @@ final class ParallelExecutorTest extends TestCase
             bool $mainProcess,
             int $segmentSize,
             int $numberOfProcesses,
-            bool $expectedChildProcessesSpawned
+            bool $expectedChildProcessesSpawned,
         ) => [
             new ParallelizationInput(
                 false,
@@ -662,7 +662,7 @@ final class ParallelExecutorTest extends TestCase
         int $expectedExitCode,
         array $expectedCalls,
         array $expectedLogRecords,
-        bool $expectedChildProcessesSpawned
+        bool $expectedChildProcessesSpawned,
     ): void {
         $calls = [];
         $errorHandler = new BinomialSumErrorHandler();
@@ -866,7 +866,7 @@ final class ParallelExecutorTest extends TestCase
     #[DataProvider('invalidExecutorProvider')]
     public function test_it_cannot_create_an_executor_with_an_invalid_value(
         ParallelExecutorFactory $factory,
-        string $expectedExceptionMessage
+        string $expectedExceptionMessage,
     ): void {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedExceptionMessage);
@@ -1186,7 +1186,7 @@ final class ParallelExecutorTest extends TestCase
         callable $runAfterLastCommand,
         callable $runBeforeBatch,
         callable $runAfterBatch,
-        string $progressSymbol
+        string $progressSymbol,
     ): ParallelExecutor {
         return new ParallelExecutor(
             FakeCallable::create(),
@@ -1235,7 +1235,7 @@ final class ParallelExecutorTest extends TestCase
         callable $runBeforeBatch,
         callable $runAfterBatch,
         string $progressSymbol,
-        ProcessLauncherFactory $processLauncherFactory
+        ProcessLauncherFactory $processLauncherFactory,
     ): ParallelExecutor {
         return new ParallelExecutor(
             static fn () => $items,

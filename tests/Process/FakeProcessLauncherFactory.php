@@ -26,7 +26,7 @@ final class FakeProcessLauncherFactory implements ProcessLauncherFactory
         int $segmentSize,
         Logger $logger,
         callable $processOutput,
-        callable $tick
+        callable $tick,
     ): ProcessLauncher {
         throw UnexpectedCall::forMethod(__METHOD__);
     }
