@@ -21,6 +21,8 @@ permissions:
             - "symfony.com:443"
             - "tech.davis-hansson.com:443"
             - "www.contributor-covenant.org:443"
+            - "www.conventionalcommits.org:443"
+            - "www.gnu.org:443"
             # No port, so both 80 and 443 are allowed: the link uses plain HTTP.
             - "webmozarts.com"
 
