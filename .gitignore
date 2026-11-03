@@ -1,10 +1,12 @@
 !/dist/.gitkeep
 !/tests/Integration/var/.gitkeep
+/.claude/settings.local.json
 /.idea
 /.php-cs-fixer.cache
 /.php_cs.cache
 /.phpunit.result.cache
 /.sbx/project-local/
+/CLAUDE.local.md
 /composer.lock
 /dist/
 /phpunit.xml
