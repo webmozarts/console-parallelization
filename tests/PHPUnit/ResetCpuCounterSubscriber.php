@@ -32,7 +32,6 @@ final class ResetCpuCounterSubscriber implements PreparationStartedSubscriber
     {
         if (!isset(self::$countReflection)) {
             self::$countReflection = (new ReflectionClass(CpuCoreCounter::class))->getProperty('count');
-            self::$countReflection->setAccessible(true);
         }
 
         return self::$countReflection;
