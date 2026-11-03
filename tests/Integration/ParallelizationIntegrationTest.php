@@ -50,6 +50,8 @@ class ParallelizationIntegrationTest extends TestCase
 
     protected function setUp(): void
     {
+        LegacyCommand::$calls = [];
+
         $this->importMoviesCommand = (new Application(new BareKernel()))->add(new ImportMoviesCommand());
         $this->importMoviesCommandTester = new CommandTester($this->importMoviesCommand);
 
