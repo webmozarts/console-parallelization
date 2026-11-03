@@ -40,7 +40,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         int $batchSize,
         array $expectedItems,
         ?int $expectedNumberOfItems,
-        array $expectedItemChunks
+        array $expectedItemChunks,
     ): void {
         $iterator = new ChunkedItemsIterator($items, $batchSize);
 
@@ -59,7 +59,7 @@ final class ChunkedItemsIteratorTest extends TestCase
     #[DataProvider('streamProvider')]
     public function test_it_can_be_created_from_a_stream(
         $stream,
-        array $expectedItems
+        array $expectedItems,
     ): void {
         $iterator = ChunkedItemsIterator::fromStream($stream, 10);
 
@@ -76,7 +76,7 @@ final class ChunkedItemsIteratorTest extends TestCase
     public function test_it_can_be_created_from_an_an_item_or_a_callable(
         ?string $item,
         callable $fetchItems,
-        array $expectedItems
+        array $expectedItems,
     ): void {
         $iterator = ChunkedItemsIterator::fromItemOrCallable($item, $fetchItems, 10);
 
@@ -143,7 +143,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         ?string $item,
         iterable $items,
         int $batchSize,
-        string $expectedErrorMessage
+        string $expectedErrorMessage,
     ): void {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);
@@ -475,7 +475,7 @@ final class ChunkedItemsIteratorTest extends TestCase
         ChunkedItemsIterator $iterator,
         array $expectedItems,
         ?int $expectedNumberOfItems,
-        array $expectedItemChunks
+        array $expectedItemChunks,
     ): void {
         self::assertSame($expectedItems, toArrayWithKeys($iterator->getItems()));
         self::assertSame($expectedNumberOfItems, $iterator->getNumberOfItems());

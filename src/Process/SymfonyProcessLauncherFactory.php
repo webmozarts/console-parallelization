@@ -39,7 +39,7 @@ final readonly class SymfonyProcessLauncherFactory implements ProcessLauncherFac
         int $segmentSize,
         Logger $logger,
         callable $processOutput,
-        callable $tick
+        callable $tick,
     ): ProcessLauncher {
         return new SymfonyProcessLauncher(
             $command,

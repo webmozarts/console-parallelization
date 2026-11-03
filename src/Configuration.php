@@ -121,7 +121,7 @@ final readonly class Configuration
      */
     private static function createForInMainProcesses(
         ?int $numberOfItems,
-        int $batchSize
+        int $batchSize,
     ): self {
         // The segments are what define the sizes of the sub-processes. When
         // executing only the main process, then there is no use for
@@ -151,7 +151,7 @@ final readonly class Configuration
         ?int $numberOfItems,
         int $numberOfProcesses,
         int $segmentSize,
-        int $batchSize
+        int $batchSize,
     ): self {
         if (null === $numberOfItems) {
             return new self(
@@ -196,7 +196,7 @@ final readonly class Configuration
         int $numberOfItems,
         int $segmentSize,
         int $batchSize,
-        int $numberOfSegments
+        int $numberOfSegments,
     ): int {
         if ($numberOfSegments >= 2) {
             // It "should" be `$numberOfSegments - 1`. However, it actually does

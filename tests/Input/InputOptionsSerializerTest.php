@@ -38,7 +38,7 @@ final class InputOptionsSerializerTest extends TestCase
         InputDefinition $commandDefinition,
         InputInterface $input,
         array $excludedParameters,
-        array $expected
+        array $expected,
     ): void {
         $input->bind($commandDefinition);
 
@@ -180,7 +180,7 @@ final class InputOptionsSerializerTest extends TestCase
         $createSet = static fn (
             InputOption $option,
             array $input,
-            array $expected
+            array $expected,
         ) => [
             new InputDefinition([$option]),
             new ArrayInput($input),
@@ -294,7 +294,7 @@ final class InputOptionsSerializerTest extends TestCase
     {
         $createSet = static fn (
             string $optionValue,
-            ?string $expected
+            ?string $expected,
         ) => [
             new InputDefinition([
                 new InputOption(

@@ -31,7 +31,7 @@ final class ConfigurationTest extends TestCase
         int $numberOfProcesses,
         int $segmentSize,
         int $batchSize,
-        Configuration $expected
+        Configuration $expected,
     ): void {
         $actual = Configuration::create(
             $shouldSpawnChildProcesses,
@@ -63,7 +63,7 @@ final class ConfigurationTest extends TestCase
             ?int $numberOfItems,
             int $numberOfProcesses,
             int $batchSize,
-            ?int $expectedTotalNumberOfBatches
+            ?int $expectedTotalNumberOfBatches,
         ) => [
             false,
             $numberOfItems,
@@ -144,7 +144,7 @@ final class ConfigurationTest extends TestCase
             int $batchSize,
             int $expectedNumberOfProcesses,
             ?int $expectedNumberOfSegments,
-            ?int $expectedTotalNumberOfBatches
+            ?int $expectedTotalNumberOfBatches,
         ) => [
             true,
             $numberOfItems,
@@ -311,7 +311,7 @@ final class ConfigurationTest extends TestCase
         int $numberOfProcesses,
         int $segmentSize,
         int $batchSize,
-        string $expectedErrorMessage
+        string $expectedErrorMessage,
     ): void {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedErrorMessage);

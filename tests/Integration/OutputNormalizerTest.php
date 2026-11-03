@@ -74,7 +74,7 @@ final class OutputNormalizerTest extends TestCase
     #[DataProvider('progressBarTimeTakenProvider')]
     public function test_it_can_normalize_the_time_taken_for_a_progress_bar(
         string $output,
-        string $expected
+        string $expected,
     ): void {
         $actual = OutputNormalizer::normalizeProgressBarTimeTaken($output);
 
@@ -143,7 +143,7 @@ final class OutputNormalizerTest extends TestCase
     public function test_it_can_normalize_the_php_executable_path(
         string $output,
         array $environmentVariables,
-        string $expected
+        string $expected,
     ): void {
         $cleanup = EnvironmentVariables::setVariables($environmentVariables);
 
@@ -181,7 +181,7 @@ final class OutputNormalizerTest extends TestCase
     #[DataProvider('normalizePathProvider')]
     public function test_it_can_normalize_the_project_path(
         string $output,
-        string $expected
+        string $expected,
     ): void {
         $actual = OutputNormalizer::normalizeProjectPath($output);
 
@@ -211,7 +211,7 @@ final class OutputNormalizerTest extends TestCase
     #[DataProvider('lineReturnsProvider')]
     public function test_it_can_normalize_line_returns(
         string $output,
-        string $expected
+        string $expected,
     ): void {
         $actual = OutputNormalizer::normalizeLineReturns($output);
 
@@ -234,7 +234,7 @@ final class OutputNormalizerTest extends TestCase
     #[DataProvider('fixedSizedProgressBarsProvider')]
     public function test_it_can_normalize_fixed_sized_progress_bars(
         string $output,
-        string $expected
+        string $expected,
     ): void {
         $actual = OutputNormalizer::removeIntermediateFixedProgressBars($output);
 
@@ -300,7 +300,7 @@ final class OutputNormalizerTest extends TestCase
     public function test_it_can_normalize_non_fixed_sized_progress_bars(
         string $output,
         int $numberOfItems,
-        string $expected
+        string $expected,
     ): void {
         $actual = OutputNormalizer::removeIntermediateNonFixedProgressBars(
             $output,

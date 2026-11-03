@@ -24,7 +24,7 @@ final class FakeLogger implements Logger
         int $batchSize,
         ?int $numberOfItems,
         string $itemName,
-        bool $shouldSpawnChildProcesses
+        bool $shouldSpawnChildProcesses,
     ): void {
         throw UnexpectedCall::forMethod(__METHOD__);
     }
@@ -64,7 +64,7 @@ final class FakeLogger implements Logger
         ?int $pid,
         string $type,
         string $buffer,
-        string $progressSymbol
+        string $progressSymbol,
     ): void {
         throw UnexpectedCall::forMethod(__METHOD__);
     }

@@ -20,7 +20,7 @@ final class DebugProgressBarFactory implements ProgressBarFactory
 {
     public function create(
         OutputInterface $output,
-        int $numberOfItems
+        int $numberOfItems,
     ): ProgressBar {
         $progressBar = new ProgressBar($output, $numberOfItems);
         $progressBar->setFormat(ProgressBar::FORMAT_DEBUG);

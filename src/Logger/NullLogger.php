@@ -23,7 +23,7 @@ final class NullLogger implements Logger
         int $batchSize,
         ?int $numberOfItems,
         string $itemName,
-        bool $shouldSpawnChildProcesses
+        bool $shouldSpawnChildProcesses,
     ): void {
         // Do nothing.
     }
@@ -63,7 +63,7 @@ final class NullLogger implements Logger
         ?int $pid,
         string $type,
         string $buffer,
-        string $progressSymbol
+        string $progressSymbol,
     ): void {
         // Do nothing.
     }

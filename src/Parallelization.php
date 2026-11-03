@@ -105,7 +105,7 @@ trait Parallelization
     abstract protected function runSingleCommand(
         string $item,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void;
 
     /**
@@ -161,7 +161,7 @@ trait Parallelization
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
     ): ParallelExecutorFactory {
         // If you are looking at this code to wonder if you should call it when
         // overriding this method, it is highly recommended you don't and just
@@ -276,7 +276,7 @@ trait Parallelization
     protected function configureParallelExecutableFactory(
         ParallelExecutorFactory $parallelExecutorFactory,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): ParallelExecutorFactory {
         // This method will safely NEVER contain anything. It is only a
         // placeholder for the user to override so omitting
@@ -384,13 +384,13 @@ trait Parallelization
 
     protected function runBeforeFirstCommand(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void {
     }
 
     protected function runAfterLastCommand(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void {
     }
 
@@ -400,7 +400,7 @@ trait Parallelization
     protected function runBeforeBatch(
         InputInterface $input,
         OutputInterface $output,
-        array $items
+        array $items,
     ): void {
     }
 
@@ -410,7 +410,7 @@ trait Parallelization
     protected function runAfterBatch(
         InputInterface $input,
         OutputInterface $output,
-        array $items
+        array $items,
     ): void {
     }
 

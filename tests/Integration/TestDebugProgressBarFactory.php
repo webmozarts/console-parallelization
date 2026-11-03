@@ -22,7 +22,7 @@ final class TestDebugProgressBarFactory implements ProgressBarFactory
 {
     public function create(
         OutputInterface $output,
-        int $numberOfItems
+        int $numberOfItems,
     ): ProgressBar {
         // Put the lowest time between redraws to ensure they see all elements
         // of progress.

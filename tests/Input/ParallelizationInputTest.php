@@ -101,7 +101,7 @@ final class ParallelizationInputTest extends TestCase
     #[DataProvider('inputProvider')]
     public function test_it_can_be_instantiated_from_an_input(
         InputInterface $input,
-        ParallelizationInput $expected
+        ParallelizationInput $expected,
     ): void {
         self::bindInput($input);
 
@@ -140,7 +140,7 @@ final class ParallelizationInputTest extends TestCase
     #[DataProvider('invalidInputProvider')]
     public function test_it_cannot_pass_an_invalid_input(
         InputInterface $input,
-        string $expectedErrorMessage
+        string $expectedErrorMessage,
     ): void {
         self::bindInput($input);
 

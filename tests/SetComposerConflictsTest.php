@@ -38,7 +38,7 @@ final class SetComposerConflictsTest extends TestCase
         stdClass $decodedComposerJson,
         array $packageNames,
         ?string $conflict,
-        stdClass $expected
+        stdClass $expected,
     ): void {
         set_composer_conflicts($decodedComposerJson, $packageNames, $conflict);
 

@@ -23,7 +23,7 @@ use function count;
 function set_composer_conflicts(
     stdClass $decodedComposerJson,
     array $packageNames,
-    ?string $conflict
+    ?string $conflict,
 ): void {
     if (0 === count($packageNames)) {
         return;

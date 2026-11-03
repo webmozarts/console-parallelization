@@ -68,7 +68,7 @@ final class SymfonyProcessLauncher implements ProcessLauncher
         private readonly Logger $logger,
         callable $processOutput,
         callable $tick,
-        private readonly SymfonyProcessFactory $processFactory
+        private readonly SymfonyProcessFactory $processFactory,
     ) {
         $this->processOutput = $processOutput;
         $this->tick = $tick;

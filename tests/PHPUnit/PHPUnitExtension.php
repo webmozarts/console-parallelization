@@ -23,7 +23,7 @@ final class PHPUnitExtension implements Extension
     public function bootstrap(
         Configuration $configuration,
         Facade $facade,
-        ParameterCollection $parameters
+        ParameterCollection $parameters,
     ): void {
         $facade->registerSubscriber(new ResetCpuCounterSubscriber());
     }

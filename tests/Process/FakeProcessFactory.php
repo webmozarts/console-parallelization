@@ -25,7 +25,7 @@ final class FakeProcessFactory implements SymfonyProcessFactory
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $processOutput
+        callable $processOutput,
     ): Process {
         throw UnexpectedCall::forMethod(__METHOD__);
     }

@@ -32,7 +32,7 @@ final class RawInputTest extends TestCase
     #[DataProvider('inputArgumentProvider')]
     public function test_it_can_get_an_input_arguments(
         InputInterface $input,
-        array $expected
+        array $expected,
     ): void {
         $actual = RawInput::getRawArguments($input);
 
@@ -132,7 +132,7 @@ final class RawInputTest extends TestCase
     #[DataProvider('inputOptionProvider')]
     public function test_it_can_get_an_input_options(
         InputInterface $input,
-        array $expected
+        array $expected,
     ): void {
         $actual = RawInput::getRawOptions($input);
 

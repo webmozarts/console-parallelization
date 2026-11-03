@@ -126,7 +126,7 @@ final class LegacyCommand extends Command
     protected function runSingleCommand(
         string $item,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void {
         self::$calls[spl_object_id($this)][] = [__FUNCTION__, func_get_args()];
     }
@@ -193,14 +193,14 @@ final class LegacyCommand extends Command
 
     protected function runBeforeFirstCommand(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void {
         self::$calls[spl_object_id($this)][] = [__FUNCTION__, func_get_args()];
     }
 
     protected function runAfterLastCommand(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): void {
         self::$calls[spl_object_id($this)][] = [__FUNCTION__, func_get_args()];
     }
@@ -208,7 +208,7 @@ final class LegacyCommand extends Command
     protected function runBeforeBatch(
         InputInterface $input,
         OutputInterface $output,
-        array $items
+        array $items,
     ): void {
         self::$calls[spl_object_id($this)][] = [__FUNCTION__, func_get_args()];
     }
@@ -216,7 +216,7 @@ final class LegacyCommand extends Command
     protected function runAfterBatch(
         InputInterface $input,
         OutputInterface $output,
-        array $items
+        array $items,
     ): void {
         self::$calls[spl_object_id($this)][] = [__FUNCTION__, func_get_args()];
     }

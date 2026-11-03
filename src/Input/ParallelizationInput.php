@@ -68,7 +68,7 @@ final class ParallelizationInput
         private readonly ?string $item,
         private readonly bool $childProcess,
         private readonly ?int $batchSize,
-        private readonly ?int $segmentSize
+        private readonly ?int $segmentSize,
     ) {
         if (is_int($numberOfOrFindNumberOfProcesses)) {
             $this->numberOfProcesses = $numberOfOrFindNumberOfProcesses;
@@ -277,7 +277,7 @@ final class ParallelizationInput
     private static function coerceAndValidatePositiveInt(
         int|string|null $value,
         string $name,
-        bool $nullable
+        bool $nullable,
     ): ?int {
         if ($nullable && null === $value) {
             return null;
