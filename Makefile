@@ -70,11 +70,11 @@ cs_lint: php_cs_fixer_lint composer_normalize_lint
 
 .PHONY: php_cs_fixer
 php_cs_fixer: $(PHP_CS_FIXER_BIN)
-	$(PHP_CS_FIXER) fix
+	$(PHP_CS_FIXER) fix --verbose
 
 .PHONY: php_cs_fixer_lint
 php_cs_fixer_lint: $(PHP_CS_FIXER_BIN)
-	$(PHP_CS_FIXER) fix --dry-run
+	$(PHP_CS_FIXER) fix --dry-run --verbose
 
 .PHONY: gitignore_sort
 gitignore_sort:
