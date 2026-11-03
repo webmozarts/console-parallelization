@@ -1,0 +1,34 @@
+---
+schemaVersion: "2"
+kind: mixin
+name: console-parallelization-links
+displayName: Console Parallelization Links
+description: Web pages the Composer package `webmozarts/console-parallelization` refers to — links in its docs, code and pipelines, and the docs of the tools it uses.
+
+permissions:
+    network:
+        allow:
+            # Do not add hosts the baseline kit already allows, e.g. github.com
+            # or docs.github.com.
+
+            # Links in the tracked files. The Markdown ones are checked by
+            # Makefile#lychee.
+            - "amphp.org:443"
+            - "getcomposer.org:443"
+            - "math.pugetsound.edu:443"
+            - "mathworld.wolfram.com:443"
+            - "reactphp.org:443"
+            - "symfony.com:443"
+            - "tech.davis-hansson.com:443"
+            - "www.contributor-covenant.org:443"
+            # No port, so both 80 and 443 are allowed: the link uses plain HTTP.
+            - "webmozarts.com"
+
+            # Docs of the tools run by the Makefile and the CI pipelines.
+            - "cs.symfony.com:443"
+            - "docs.phpunit.de:443"
+            - "docs.zizmor.sh:443"
+            - "getrector.com:443"
+            - "infection.github.io:443"
+            - "lychee.cli.rs:443"
+            - "phpstan.org:443"
