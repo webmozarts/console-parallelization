@@ -52,7 +52,7 @@ jobs:
                     working-directory: vendor-bin/php-cs-fixer
 
             -   name: "Install Rector dependencies"
-                if: "${{ matrix.name }} == 'Rector'"
+                if: "${{ matrix.check.name == 'Rector' }}"
                 uses: "ramsey/composer-install@v3"
                 with:
                     working-directory: vendor-bin/rector
