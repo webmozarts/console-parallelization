@@ -61,7 +61,7 @@ final class NoSubProcessCommand extends Command
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
     ): ParallelExecutorFactory {
         return ParallelExecutorFactory::create(
             $fetchItems,
@@ -95,7 +95,7 @@ final class NoSubProcessCommand extends Command
 
     protected function createLogger(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): Logger {
         return new StandardLogger(
             $input,

@@ -140,7 +140,7 @@ final class SymfonyProcessLauncherTest extends TestCase
         string $expectedOutput,
         array $expectedProcessedItemsPerProcess,
         int $expectedNumberOfTicks,
-        int $expectedExitCode
+        int $expectedExitCode,
     ): void {
         $output = new BufferedOutput();
 

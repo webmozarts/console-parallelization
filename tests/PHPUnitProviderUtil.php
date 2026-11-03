@@ -21,7 +21,7 @@ final class PHPUnitProviderUtil
 
     public static function prefixWithLabel(
         string $label,
-        iterable $provider
+        iterable $provider,
     ): iterable {
         foreach ($provider as $key => $value) {
             yield $label.$key => $value;

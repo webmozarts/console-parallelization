@@ -65,7 +65,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
         callable $getItemName,
         string $commandName,
         InputDefinition $commandDefinition,
-        ErrorHandler $errorHandler
+        ErrorHandler $errorHandler,
     ): ParallelExecutorFactory {
         return parent::getParallelExecutableFactory(...func_get_args())
             ->withBatchSize(2)
@@ -76,7 +76,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
     protected function configureParallelExecutableFactory(
         ParallelExecutorFactory $parallelExecutorFactory,
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): ParallelExecutorFactory {
         return $parallelExecutorFactory
             ->withRunBeforeFirstCommand(
@@ -110,7 +110,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
     #[Override]
     protected function createLogger(
         InputInterface $input,
-        OutputInterface $output
+        OutputInterface $output,
     ): Logger {
         return new StandardLogger(
             $input,
@@ -121,7 +121,7 @@ final class ImportUnknownMoviesCountCommand extends ParallelCommand
     }
 
     private function runBeforeBatch(
-        array $movieFileNames
+        array $movieFileNames,
     ): void {
         $this->logger->recordBeforeBatch();
 

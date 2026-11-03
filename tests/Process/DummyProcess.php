@@ -59,7 +59,7 @@ final class DummyProcess extends Process
         ?string $cwd = null,
         ?array $env = null,
         $input = null,
-        ?float $timeout = 60
+        ?float $timeout = 60,
     ) {
         parent::__construct($command, $cwd, $env, $input, $timeout);
         $this->command = $command;

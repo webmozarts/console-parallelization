@@ -26,7 +26,7 @@ final class DummyLogger implements Logger
         int $batchSize,
         ?int $numberOfItems,
         string $itemName,
-        bool $shouldSpawnChildProcesses
+        bool $shouldSpawnChildProcesses,
     ): void {
         $this->records[] = [
             __FUNCTION__,
@@ -87,7 +87,7 @@ final class DummyLogger implements Logger
         ?int $pid,
         string $type,
         string $buffer,
-        string $progressSymbol
+        string $progressSymbol,
     ): void {
         $this->records[] = [
             __FUNCTION__,

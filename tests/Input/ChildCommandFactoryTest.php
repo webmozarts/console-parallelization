@@ -37,7 +37,7 @@ final class ChildCommandFactoryTest extends TestCase
         string $commandName,
         InputDefinition $commandDefinition,
         InputInterface $input,
-        array $expected
+        array $expected,
     ): void {
         $factory = new ChildCommandFactory(
             $phpExecutable,
@@ -334,7 +334,7 @@ final class ChildCommandFactoryTest extends TestCase
 
     private static function createInput(
         array $input,
-        array $definition
+        array $definition,
     ): array {
         $input = new ArrayInput($input);
         $inputDefinition = new InputDefinition($definition);

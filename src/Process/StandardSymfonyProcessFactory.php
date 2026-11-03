@@ -24,7 +24,7 @@ final class StandardSymfonyProcessFactory implements SymfonyProcessFactory
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $processOutput
+        callable $processOutput,
     ): Process {
         $process = new Process(
             $command,

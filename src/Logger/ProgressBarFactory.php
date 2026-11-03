@@ -25,6 +25,6 @@ interface ProgressBarFactory
      */
     public function create(
         OutputInterface $output,
-        int $numberOfItems
+        int $numberOfItems,
     ): ProgressBar;
 }

@@ -38,6 +38,6 @@ interface SymfonyProcessFactory
         array $command,
         string $workingDirectory,
         ?array $environmentVariables,
-        callable $processOutput
+        callable $processOutput,
     ): Process;
 }

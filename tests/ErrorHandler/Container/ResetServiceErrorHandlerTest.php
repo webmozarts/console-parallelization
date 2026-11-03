@@ -33,7 +33,7 @@ final class ResetServiceErrorHandlerTest extends TestCase
     #[DataProvider('containerProvider')]
     public function test_it_creates_an_instance_only_if_the_container_is_resettable(
         ?ContainerInterface $container,
-        bool $expectInstance
+        bool $expectInstance,
     ): void {
         $errorHandler = ResetServiceErrorHandler::forContainer($container);
 
