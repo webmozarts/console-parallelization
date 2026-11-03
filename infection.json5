@@ -15,6 +15,13 @@
             "Assert::.*"
         ],
         "@default": true,
+        "AssignCoalesce": {
+            "ignore": [
+                // Memoizes the no-op closure: assigning a new closure on each call
+                // is not observable.
+                "Webmozarts\\Console\\Parallelization\\ParallelExecutorFactory::getNoopClosure"
+            ]
+        },
         "Assignment": {
             "ignore": [
                 // This is a perfectly valid case but too hard to test.
