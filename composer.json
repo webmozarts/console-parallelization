@@ -41,7 +41,14 @@
         "phpstan/phpstan-symfony": "^2.0.3",
         "phpstan/phpstan-webmozart-assert": "^2.0",
         "phpunit/phpunit": "^12.0",
+        "symfony/cache-contracts": "^2.5.3 || ^3.4.2",
+        "symfony/config": "^6.4.3 || ^7.2",
+        "symfony/error-handler": "^6.4.10 || ^7.2",
+        "symfony/event-dispatcher": "^6.4.3 || ^7.2",
+        "symfony/event-dispatcher-contracts": "^2.5.3 || ^3.4.2",
         "symfony/framework-bundle": "^6.4.19 || ^7.2.4",
+        "symfony/http-kernel": "^6.4.3 || ^7.2",
+        "symfony/var-exporter": "^6.4.3 || ^7.2",
         "webmozarts/strict-phpunit": "^7.13.1"
     },
     "autoload": {
