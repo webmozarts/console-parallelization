@@ -24,7 +24,7 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09" # v5.1.0
+                uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
                 with:
                     persist-credentials: false
 
@@ -35,7 +35,7 @@ jobs:
                     tools: "composer"
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
+                uses: "ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda" # 4.0.0
 
             -   name: "Run tests"
                 run: "make phpunit"
@@ -60,7 +60,7 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09" # v5.1.0
+                uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
                 with:
                     persist-credentials: false
 
@@ -76,7 +76,7 @@ jobs:
                 run: "bin/fix-symfony-versions \"${SYMFONY_CONFLICT}\""
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
+                uses: "ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda" # 4.0.0
                 with:
                     dependency-versions: "${{ matrix.dependency-versions }}"
 
@@ -94,7 +94,7 @@ jobs:
 
         steps:
             -   name: "Check out repository code"
-                uses: "actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09" # v5.1.0
+                uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
                 with:
                     persist-credentials: false
 
@@ -106,7 +106,7 @@ jobs:
                     coverage: "pcov"
 
             -   name: "Install Composer dependencies"
-                uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
+                uses: "ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda" # 4.0.0
 
             -   name: "Run tests with coverage and Infection"
                 run: "make infection"
