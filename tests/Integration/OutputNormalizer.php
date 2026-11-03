@@ -117,7 +117,7 @@ final class OutputNormalizer
 
         return implode(
             "\n",
-            array_map('rtrim', $lines),
+            array_map(rtrim(...), $lines),
         );
     }
 
