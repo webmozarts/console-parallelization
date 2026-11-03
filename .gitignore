@@ -4,6 +4,7 @@
 /.php-cs-fixer.cache
 /.php_cs.cache
 /.phpunit.result.cache
+/.sbx/project-local/
 /composer.lock
 /dist/
 /phpunit.xml
