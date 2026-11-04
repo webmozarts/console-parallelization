@@ -1,0 +1,41 @@
+---
+schemaVersion: "2"
+kind: mixin
+name: console-parallelization-sbx
+displayName: Console Parallelization sbx
+description: The Docker Sandboxes `sbx` CLI, so the agent can read its help and check the `.sbx/` kits with `sbx kit validate --offline`. It cannot run sandboxes from inside one.
+
+permissions:
+    network:
+        allow:
+            # The base image ships the Docker and GitHub CLI apt sources. If
+            # either is blocked, `apt-get update` fails and the install stops.
+            - "download.docker.com:443"
+            - "cli.github.com:443"
+            - "ports.ubuntu.com"
+            - "archive.ubuntu.com"
+            - "security.ubuntu.com"
+
+setup:
+    install:
+        - command: |
+              set -e
+              export DEBIAN_FRONTEND=noninteractive
+
+              # The claude kit runs its own `apt-get update` on first boot, so this
+              # step can start while the apt lock is held. Retry until the lock frees
+              # up (or ~5 minutes pass).
+              apt_retry() {
+                  i=0
+                  until "$@"; do
+                      i=$((i + 1))
+                      [ "$i" -ge 60 ] && return 1
+                      sleep 5
+                  done
+              }
+
+              apt_retry apt-get update
+              apt_retry apt-get install -y --no-install-recommends docker-sbx
+              sbx version
+          user: "0"
+          description: Install the sbx CLI.
