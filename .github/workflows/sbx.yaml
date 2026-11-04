@@ -1,0 +1,76 @@
+name: "Docker Sandbox"
+
+on:
+    push:
+        branches: ["main"]
+    pull_request: null
+    schedule:
+        # Do not make it the first of the month and/or midnight since it is a very busy time
+        - cron: "0 10 5 * *"
+
+permissions:
+    contents: read
+
+jobs:
+    # Never runs. It only holds the sbx version in a `uses:` reference, which
+    # is the form Dependabot updates. The validate-kits job reads it from here.
+    # Keep the tag, not a SHA: every sbx-releases tag points to the same commit.
+    sbx-version:
+        name: "sbx version"
+        if: false
+        runs-on: "ubuntu-latest"
+        steps:
+            -   uses: "docker/sbx-releases@v0.51.0" # zizmor: ignore[unpinned-uses]
+
+    validate-kits:
+        name: "Validate the sandbox kits"
+        runs-on: "ubuntu-latest"
+        timeout-minutes: 5
+        steps:
+            -   name: "Checkout repository"
+                uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+                with:
+                    persist-credentials: false
+
+            -   name: "Read the sbx version"
+                id: "sbx-version"
+                run: |
+                    version=$(sed -n 's|.*uses: "docker/sbx-releases@\(v[^"]*\)".*|\1|p' .github/workflows/sbx.yaml)
+                    if [ -z "${version}" ]; then
+                        echo "::error::No docker/sbx-releases version found in .github/workflows/sbx.yaml."
+                        exit 1
+                    fi
+                    echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+            -   name: "Restore the sbx cache"
+                id: "sbx-cache"
+                uses: "actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9" # v6.1.0
+                with:
+                    path: "${{ runner.temp }}/sbx"
+                    key: "sbx-${{ runner.os }}-${{ runner.arch }}-${{ steps.sbx-version.outputs.version }}"
+
+            -   name: "Download sbx"
+                if: "${{ steps.sbx-cache.outputs.cache-hit != 'true' }}"
+                env:
+                    GH_TOKEN: "${{ github.token }}"
+                    SBX_DIR: "${{ runner.temp }}/sbx"
+                    SBX_VERSION: "${{ steps.sbx-version.outputs.version }}"
+                run: |
+                    mkdir -p "${SBX_DIR}"
+                    gh release download "${SBX_VERSION}" \
+                        --repo docker/sbx-releases \
+                        --pattern DockerSandboxes-linux-amd64.tar.gz \
+                        --output - \
+                        | tar -xzf - -C "${SBX_DIR}" --strip-components=1 docker-sbx/sbx
+
+            -   name: "Validate the kits"
+                env:
+                    SBX_DIR: "${{ runner.temp }}/sbx"
+                run: |
+                    "${SBX_DIR}/sbx" version
+
+                    status=0
+                    for kit in .sbx/*/; do
+                        "${SBX_DIR}/sbx" kit validate --offline "${kit}" || status=1
+                    done
+                    exit "${status}"
