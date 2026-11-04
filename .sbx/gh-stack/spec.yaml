@@ -1,0 +1,38 @@
+---
+schemaVersion: "2"
+kind: mixin
+name: console-parallelization-gh-stack
+displayName: Console Parallelization gh-stack
+description: The `gh stack` CLI and its Claude Code skill, to work with stacked pull requests.
+
+permissions:
+    network:
+        allow:
+            # Release lookup and binary download for the gh-stack extension.
+            - "api.github.com:443"
+            - "release-assets.githubusercontent.com:443"
+
+setup:
+    install:
+        - command: |
+              set -e
+              gh extension install github/gh-stack
+              gh stack --version
+          user: "1000"
+          description: Install the gh-stack extension.
+
+    # Keep this in startup, not install: it writes to the workspace, which is
+    # not mounted yet when install runs.
+    # Each start re-installs the latest release of the skill. A failed download
+    # only warns, so it does not stop the startup commands after it.
+    startup:
+        - command:
+              - sh
+              - -c
+              - |
+                cd "${WORKSPACE_DIR:?}" || exit 1
+                gh skill install github/gh-stack gh-stack \
+                    --agent claude-code --scope project --force \
+                    || echo "warning: could not install the gh-stack skill" >&2
+          user: "1000"
+          description: Install the gh-stack skill into the workspace.
