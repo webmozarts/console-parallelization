@@ -1,0 +1,23 @@
+---
+schemaVersion: "2"
+kind: mixin
+name: console-parallelization-docker-skills
+displayName: Console Parallelization Docker skills
+description: Docker's Claude Code skills (docker/skills), for Docker Sandboxes, Dockerfiles, Compose and Docker Agent.
+
+setup:
+    # Keep this in startup, not install: it writes to the workspace, which is
+    # not mounted yet when install runs.
+    # Each start re-installs the latest release of the skills. A failed
+    # download only warns, so it does not stop the startup commands after it.
+    startup:
+        - command:
+              - sh
+              - -c
+              - |
+                cd "${WORKSPACE_DIR:?}" || exit 1
+                gh skill install docker/skills --all \
+                    --agent claude-code --scope project --force \
+                    || echo "warning: could not install the docker/skills skills" >&2
+          user: "1000"
+          description: Install Docker's skills (docker/skills) into the workspace.
