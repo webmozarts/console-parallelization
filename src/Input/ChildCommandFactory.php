@@ -82,7 +82,7 @@ final readonly class ChildCommandFactory
      */
     private static function getArguments(InputInterface $input): array
     {
-        $arguments = RawInput::getRawArguments($input);
+        $arguments = RawInput::extractRawArguments($input);
 
         // Remove the item: we do not want it to be passed to child processes
         // ever.

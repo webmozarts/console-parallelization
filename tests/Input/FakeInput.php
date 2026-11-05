@@ -20,7 +20,7 @@ use function class_alias;
 $isSfConsole7OrHigher = InstalledVersions::satisfies(
     new VersionParser(),
     'symfony/console',
-    '^7.0',
+    '>=7.0',
 );
 
 class_alias(

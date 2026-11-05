@@ -36,7 +36,7 @@ final class RawInput extends Input
      *
      * @return array<string|bool|int|float|null|array<string|bool|int|float|null>>
      */
-    public static function getRawArguments(InputInterface $input): array
+    public static function extractRawArguments(InputInterface $input): array
     {
         return $input instanceof Input
             ? $input->arguments
@@ -48,7 +48,7 @@ final class RawInput extends Input
      *
      * @return array<string|bool|int|float|null|array<string|bool|int|float|null>>
      */
-    public static function getRawOptions(InputInterface $input): array
+    public static function extractRawOptions(InputInterface $input): array
     {
         return $input instanceof Input
             ? $input->options

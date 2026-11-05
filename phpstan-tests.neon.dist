@@ -12,17 +12,6 @@ parameters:
         - path: tests/Integration/TestLogger.php
           message: '#TestLogger::\$outputHandler#'
 
-        - path: tests/Integration/ParallelizationIntegrationTest.php
-          message: '#ParallelizationIntegrationTest::\$importMoviesCommand#'
-        - path: tests/Integration/ParallelizationIntegrationTest.php
-          message: '#ParallelizationIntegrationTest::\$importUnknownMoviesCountCommand#'
-        - path: tests/Integration/ParallelizationIntegrationTest.php
-          message: '#ParallelizationIntegrationTest::\$noSubProcessCommand#'
-        - path: tests/Integration/ParallelizationIntegrationTest.php
-          message: '#ParallelizationIntegrationTest::\$legacyCommand#'
-        - path: tests/Integration/DebugChildProcessInputsTest.php
-          message: '#DebugChildProcessInputsTest::\$command#'
-
         - path: tests/ChunkedItemsIteratorTest.php
           message: '#Parameter \#2 \$fetchItems of static method .+ChunkedItemsIterator::fromItemOrCallable\(\) expects callable\(\)#'
         - path: tests/ChunkedItemsIteratorTest.php
