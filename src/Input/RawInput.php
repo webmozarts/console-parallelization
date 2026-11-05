@@ -22,7 +22,7 @@ use function method_exists;
 /**
  * @internal
  *
- * TODO: remove this class once the minimum symfony/console version is 8.1 and
+ * TODO: remove this class once the minimum symfony/console version is 8.1+ and
  *       call Input::getRawArguments() and Input::getRawOptions() directly.
  */
 final class RawInput extends Input
