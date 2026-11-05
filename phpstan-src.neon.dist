@@ -17,5 +17,10 @@ parameters:
         - path: src/Input/RawInput.php
           identifier: return.type
 
+        # Only reported with symfony/console 8.1+. Remove with the TODO in RawInput.
+        - path: src/Input/RawInput.php
+          identifier: function.alreadyNarrowedType
+          reportUnmatched: false
+
         - path: src/Parallelization.php
           identifier: trait.unused
