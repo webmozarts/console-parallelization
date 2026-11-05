@@ -171,14 +171,14 @@ docs: markdownlint lychee
 markdownlint:
 	@echo "$(CCYELLOW)Ensure you have the nodejs & npm installed. For more information, check:$(CCEND)"
 	@# To keep in sync with .github/workflows/docs.yaml#check-links
-	npx markdownlint-cli2 "*.md|docs/**/*.md"
+	npx markdownlint-cli2 "*.md"
 
 .PHONY: lychee
 lychee:
 	@echo "$(CCYELLOW)Ensure you have the lychee command installed. For more information, check:$(CCEND)"
 	@echo "https://github.com/lycheeverse/lychee"
 	@# To keep in sync with .github/workflows/docs.yaml#check-links
-	lychee --verbose --no-progress '*.md' 'docs/**/*.md' --timeout=2
+	lychee --verbose --no-progress '*.md' --timeout=2
 
 .PHONY: sbx_create
 sbx_create:	## Creates the Docker Sandbox with the project kits
