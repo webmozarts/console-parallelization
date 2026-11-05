@@ -17,9 +17,13 @@ use DomainException;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use function method_exists;
 
 /**
  * @internal
+ *
+ * TODO: remove this class once the minimum symfony/console version is 8.1+ and
+ *       call Input::getRawArguments() and Input::getRawOptions() directly.
  */
 final class RawInput extends Input
 {
@@ -36,11 +40,15 @@ final class RawInput extends Input
      *
      * @return array<string|bool|int|float|null|array<string|bool|int|float|null>>
      */
-    public static function getRawArguments(InputInterface $input): array
+    public static function extractRawArguments(InputInterface $input): array
     {
-        return $input instanceof Input
-            ? $input->arguments
-            : [];
+        if (!$input instanceof Input) {
+            return [];
+        }
+
+        return method_exists($input, 'getRawArguments')
+            ? $input->getRawArguments()
+            : $input->arguments;
     }
 
     /**
@@ -48,11 +56,15 @@ final class RawInput extends Input
      *
      * @return array<string|bool|int|float|null|array<string|bool|int|float|null>>
      */
-    public static function getRawOptions(InputInterface $input): array
+    public static function extractRawOptions(InputInterface $input): array
     {
-        return $input instanceof Input
-            ? $input->options
-            : [];
+        if (!$input instanceof Input) {
+            return [];
+        }
+
+        return method_exists($input, 'getRawOptions')
+            ? $input->getRawOptions()
+            : $input->options;
     }
 
     /**

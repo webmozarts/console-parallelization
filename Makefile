@@ -178,7 +178,7 @@ lychee:
 	@echo "$(CCYELLOW)Ensure you have the lychee command installed. For more information, check:$(CCEND)"
 	@echo "https://github.com/lycheeverse/lychee"
 	@# To keep in sync with .github/workflows/docs.yaml#check-links
-	lychee --verbose --no-progress '*.md' --timeout=2
+	lychee --verbose --no-progress --accept '100..=103,200..=299,429' '*.md' --timeout=2
 
 .PHONY: sbx_create
 sbx_create:	## Creates the Docker Sandbox with the project kits

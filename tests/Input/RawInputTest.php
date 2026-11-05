@@ -34,7 +34,7 @@ final class RawInputTest extends TestCase
         InputInterface $input,
         array $expected,
     ): void {
-        $actual = RawInput::getRawArguments($input);
+        $actual = RawInput::extractRawArguments($input);
 
         self::assertSame($expected, $actual);
     }
@@ -134,7 +134,7 @@ final class RawInputTest extends TestCase
         InputInterface $input,
         array $expected,
     ): void {
-        $actual = RawInput::getRawOptions($input);
+        $actual = RawInput::extractRawOptions($input);
 
         self::assertSame($expected, $actual);
     }

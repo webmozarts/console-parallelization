@@ -52,16 +52,20 @@ class ParallelizationIntegrationTest extends TestCase
     {
         LegacyCommand::$calls = [];
 
-        $this->importMoviesCommand = (new Application(new BareKernel()))->add(new ImportMoviesCommand());
+        $this->importMoviesCommand = new ImportMoviesCommand();
+        (new Application(new BareKernel()))->addCommands([$this->importMoviesCommand]);
         $this->importMoviesCommandTester = new CommandTester($this->importMoviesCommand);
 
-        $this->importUnknownMoviesCountCommand = (new Application(new BareKernel()))->add(new ImportUnknownMoviesCountCommand());
+        $this->importUnknownMoviesCountCommand = new ImportUnknownMoviesCountCommand();
+        (new Application(new BareKernel()))->addCommands([$this->importUnknownMoviesCountCommand]);
         $this->importUnknownMoviesCountCommandTester = new CommandTester($this->importUnknownMoviesCountCommand);
 
-        $this->noSubProcessCommand = (new Application(new BareKernel()))->add(new NoSubProcessCommand());
+        $this->noSubProcessCommand = new NoSubProcessCommand();
+        (new Application(new BareKernel()))->addCommands([$this->noSubProcessCommand]);
         $this->noSubProcessCommandTester = new CommandTester($this->noSubProcessCommand);
 
-        $this->legacyCommand = (new Application(new BareKernel()))->add(new LegacyCommand());
+        $this->legacyCommand = new LegacyCommand();
+        (new Application(new BareKernel()))->addCommands([$this->legacyCommand]);
         $this->legacyCommandTester = new CommandTester($this->legacyCommand);
     }
 
@@ -358,9 +362,10 @@ class ParallelizationIntegrationTest extends TestCase
 
     public function test_it_can_run_a_command_relying_on_the_legacy_api_defaults(): void
     {
-        $commandTester = new CommandTester(
-            (new Application(new BareKernel()))->add(new DefaultLegacyCommand()),
-        );
+        $command = new DefaultLegacyCommand();
+        (new Application(new BareKernel()))->addCommands([$command]);
+
+        $commandTester = new CommandTester($command);
 
         $commandTester->execute(
             [
