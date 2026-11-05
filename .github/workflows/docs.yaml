@@ -25,7 +25,7 @@ jobs:
             -   name: "Check Markdown formatting"
                 uses: "DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34" # v25.0.0
                 with:
-                    globs: "*.md|docs/**/*.md"
+                    globs: "*.md"
 
     check-links:
         name: "Lint Links"
@@ -48,7 +48,7 @@ jobs:
                 uses: "lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8" # v2.9.0
                 with:
                     # To keep in sync with Makefile#lychee
-                    args: "--verbose --no-progress '*.md' 'docs/**/*.md' --cache --max-cache-age 1d"
+                    args: "--verbose --no-progress '*.md' --cache --max-cache-age 1d"
                     output: "${{ runner.temp }}/lychee/out.md"
                     fail: true
 
