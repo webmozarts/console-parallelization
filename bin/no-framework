@@ -18,6 +18,6 @@ use Symfony\Component\Console\Application;
 use Webmozarts\Console\Parallelization\Fixtures\Command\FrameworkLessCommand;
 
 $application = new Application();
-$application->add(new FrameworkLessCommand());
+$application->addCommands([new FrameworkLessCommand()]);
 
 $application->run();

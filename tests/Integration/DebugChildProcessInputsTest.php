@@ -35,7 +35,8 @@ class DebugChildProcessInputsTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->command = (new Application(new BareKernel()))->add(new DebugChildProcessCommand());
+        $this->command = new DebugChildProcessCommand();
+        (new Application(new BareKernel()))->addCommands([$this->command]);
         $this->commandTester = new CommandTester($this->command);
     }
 

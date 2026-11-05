@@ -59,6 +59,13 @@ jobs:
                       conflict: "<6.4 || >=7.0"
                     - version_name: "7.4"
                       conflict: "<7.4 || >=8.0"
+                    - version_name: "8.1"
+                      conflict: "<8.1 || >=9.0"
+                exclude:
+                    -   php: "8.3"
+                        symfony:
+                            version_name: "8.1"
+                            conflict: "<8.1 || >=9.0"
 
         steps:
             -   name: "Check out repository code"

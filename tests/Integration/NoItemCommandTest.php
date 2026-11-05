@@ -31,7 +31,8 @@ class NoItemCommandTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->command = (new Application())->add(new NoItemCommand());
+        $this->command = new NoItemCommand();
+        (new Application())->addCommands([$this->command]);
         $this->commandTester = new CommandTester($this->command);
     }
 
