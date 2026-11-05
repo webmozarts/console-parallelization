@@ -57,8 +57,8 @@ jobs:
                 symfony:
                     - version_name: "6.4"
                       conflict: "<6.4 || >=7.0"
-                    - version_name: "7.2"
-                      conflict: "<7.2 || >=8.0"
+                    - version_name: "7.4"
+                      conflict: "<7.4 || >=8.0"
 
         steps:
             -   name: "Check out repository code"
@@ -76,12 +76,6 @@ jobs:
                 env:
                     SYMFONY_CONFLICT: "${{ matrix.symfony.conflict }}"
                 run: "bin/fix-symfony-versions \"${SYMFONY_CONFLICT}\""
-
-            # Infection needs symfony/console >=7.4, so keeping it here would
-            # prevent the lowest dependencies from installing Symfony 7.2.
-            # Infection runs in its own job.
-            -   name: "Remove Infection"
-                run: "composer remove --dev --no-update infection/infection"
 
             -   name: "Install Composer dependencies"
                 uses: "ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda" # 4.0.0
