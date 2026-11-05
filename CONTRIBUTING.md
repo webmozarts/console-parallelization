@@ -49,7 +49,9 @@ as turning `>` into `>=`. When one survives, add or tighten a test so it
 fails on that mutant.
 
 The CI also runs the tests against the lowest and highest supported versions
-of each dependency, for Symfony 6.4 and 7.2.
+of each dependency, once for each supported Symfony version. The list of
+Symfony versions lives in the `symfony-version` job of
+[`.github/workflows/tests.yaml`](.github/workflows/tests.yaml).
 
 
 ## Tooling
