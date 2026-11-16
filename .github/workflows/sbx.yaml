@@ -20,7 +20,7 @@ jobs:
         if: false
         runs-on: "ubuntu-latest"
         steps:
-            -   uses: "docker/sbx-releases@v0.51.0" # zizmor: ignore[unpinned-uses]
+            -   uses: "docker/sbx-releases@v0.54.0" # zizmor: ignore[unpinned-uses]
 
     validate-kits:
         name: "Validate the sandbox kits"
